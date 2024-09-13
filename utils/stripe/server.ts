@@ -54,6 +54,7 @@ export async function checkoutWithStripe(
       customer_update: {
         address: 'auto'
       },
+      mode: 'subscription',
       line_items: [
         {
           price: price.id,
