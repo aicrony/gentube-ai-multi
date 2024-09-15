@@ -38,10 +38,14 @@ export default function CustomerPortalForm({ subscription }: Props) {
     }).format((subscription?.prices?.unit_amount || 0) / 100);
 
   const handleStripePortalRequest = async () => {
-    setIsSubmitting(true);
-    const redirectUrl = await createStripePortal(currentPath);
-    setIsSubmitting(false);
-    return router.push(redirectUrl);
+    if (currentPath) {
+      // Ensure currentPath is not null
+      setIsSubmitting(true);
+      const redirectUrl = await createStripePortal(currentPath);
+      setIsSubmitting(false);
+      return router.push(redirectUrl);
+    }
+    // Handle the case where currentPath is null, if necessary
   };
 
   return (

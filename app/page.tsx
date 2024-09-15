@@ -5,14 +5,12 @@
 
 'use client';
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/Button';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 // import { callVideoApi } from "@/services/generateVideo";
-import VideoList from '@/components/dynamic/embedded-video-display';
+// import VideoList from '@/components/dynamic/embedded-video-display';
 // import YouTubeVideoList from "@/components/dynamic/embedded-video-display";
 import Image from 'next/image';
 
