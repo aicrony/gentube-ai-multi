@@ -59,7 +59,7 @@ export default function Home() {
               </Label>
               <Input
                 as="textarea"
-                className="min-h-[100px]"
+                className="min-h-[100px] text-xl"
                 id="prompt"
                 placeholder="Enter a description of your video to create the initial image"
                 value={prompt}

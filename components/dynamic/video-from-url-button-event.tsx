@@ -48,7 +48,7 @@ export function VideoFromUrlDynamicButton() {
           id="imageUrl"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          className="min-h-[25px]"
+          className="min-h-[25px] text-xl"
           placeholder="Enter image URL"
         />
       </div>
