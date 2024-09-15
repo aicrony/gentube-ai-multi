@@ -7,8 +7,10 @@ import Button from '@/components/ui/Button';
 export function VideoFromUrlDynamicButton() {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGenerateVideo = async () => {
+    setIsSubmitting(true); // Disable the button while the request is being handled
     console.log('Video Generation from URL button clicked');
     console.log(imageUrl);
     setVideoData(null); // clear the videoData state
@@ -17,16 +19,19 @@ export function VideoFromUrlDynamicButton() {
         '/api/video?url=' + encodeURIComponent(imageUrl)
       );
       if (!response.ok) {
+        setIsSubmitting(false); // Response is received, enable the button
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       let data = {};
       if (response.headers) {
+        setIsSubmitting(false); // Response is received, enable the button
         data = await response.text();
       }
       console.log('FrontEnd Video ID Received');
       console.log('DATA RECEIVED:' + data);
       setVideoData(data); // set the state with the received data
     } catch (error) {
+      setIsSubmitting(false); // Response is received, enable the button
       console.log(error);
       console.error('There was an error with the fetch operation: ', error);
     }
@@ -48,7 +53,13 @@ export function VideoFromUrlDynamicButton() {
         />
       </div>
       <div className={'pt-4'}>
-        <Button className={'margin-right-4'} onClick={handleGenerateVideo}>
+        <Button
+          variant="slim"
+          type="submit"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={handleGenerateVideo}
+        >
           Generate Video from Image URL
         </Button>
       </div>
