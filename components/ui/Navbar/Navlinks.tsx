@@ -22,12 +22,12 @@ export default function Navlinks({ user }: NavlinksProps) {
         {/*  <Logo />*/}
         {/*</Link>*/}
         <nav className="ml-6 space-x-2 lg:block">
-            <Link href="https://gentube.ai" target='_parent' className={s.link}>
-                Home
-            </Link>
-            <Link href="/" className={s.link}>
-                Pricing
-            </Link>
+          <Link href="/" target="_parent" className={s.link}>
+            Home
+          </Link>
+          <Link href="/pricing" className={s.link}>
+            Pricing
+          </Link>
           {user && (
             <Link href="/account" className={s.link}>
               Account
