@@ -35,7 +35,7 @@ async function uploadVideoToGCS(videoData: Buffer, fileName: string): Promise<st
     return `https://storage.googleapis.com/${bucketName}/${fileName}`;
 }
 
-export default async function getVideoResult(generationId: string): Promise<string> {
+export default async function getStabilityVideoResult(generationId: string): Promise<string> {
     try {
         const response = await axios.request({
             url: `${process.env.STABILITY_API_ENDPOINT}/result/${generationId}`,
@@ -50,7 +50,7 @@ export default async function getVideoResult(generationId: string): Promise<stri
         if (response.status === 202) {
             console.log("Generation in-progress, trying again in 10 seconds.");
             await new Promise(resolve => setTimeout(resolve, 10000));
-            return getVideoResult(generationId);
+            return getStabilityVideoResult(generationId);
         } else if (response.status === 200) {
             console.log("Generation complete!");
             const videoFileName = `${generationId}.mp4`;

@@ -55,13 +55,13 @@ export default function Home() {
             {/*<form className="grid gap-4">*/}
             <div className="grid gap-2">
               <Label htmlFor="prompt">
-                Enter a prompt to generate an image to start your video.
+                Describe an image to start your video.
               </Label>
               <Input
                 as="textarea"
                 className="min-h-[100px] text-xl"
                 id="prompt"
-                placeholder="Enter a description of your video to create the initial image"
+                placeholder="Enter a description of your video."
                 value={prompt}
                 onChange={handleInputChange}
               />
