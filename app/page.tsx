@@ -61,7 +61,7 @@ export default function Home() {
                 as="textarea"
                 className="min-h-[100px] text-xl"
                 id="prompt"
-                placeholder="Enter a description of your video."
+                placeholder="Enter a description of your image."
                 value={prompt}
                 onChange={handleInputChange}
               />

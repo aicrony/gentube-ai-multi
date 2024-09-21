@@ -8,6 +8,7 @@ export function VideoFromUrlDynamicButton() {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [videoDescription, setVideoDescription] = useState<string>('');
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -16,7 +17,10 @@ export function VideoFromUrlDynamicButton() {
     setVideoData(null); // clear the videoData state
     try {
       const response = await fetch(
-        '/api/video?url=' + encodeURIComponent(imageUrl)
+        '/api/video?url=' +
+          encodeURIComponent(imageUrl) +
+          '&description=' +
+          encodeURIComponent(videoDescription)
       );
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
@@ -50,6 +54,14 @@ export function VideoFromUrlDynamicButton() {
           onChange={(e) => setImageUrl(e.target.value)}
           className="min-h-[25px] text-xl"
           placeholder="Enter image URL"
+        />
+      </div>
+      <div className={'pt-4'}>
+        <Input
+          type="text"
+          placeholder={'What will happen in the video?'}
+          className="min-h-[25px] text-xl"
+          onChange={(e) => setVideoDescription(e.target.value)}
         />
       </div>
       <div className={'pt-4'}>

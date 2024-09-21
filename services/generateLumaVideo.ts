@@ -13,10 +13,13 @@ require('dotenv').config();
 const apiKey = process.env.LUMA_API_KEY;
 const apiEndpoint = process.env.LUMA_API_ENDPOINT;
 
-export default async function generateLumaVideo(url: string) {
+export default async function generateLumaVideo(
+  url: string,
+  description: string
+) {
   try {
     const data = {
-      prompt: 'Create natural movement for the image',
+      prompt: description,
       keyframes: {
         frame0: {
           type: 'image',
