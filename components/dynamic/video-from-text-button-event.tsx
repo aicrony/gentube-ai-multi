@@ -61,9 +61,20 @@ export function VideoFromTextDynamicButton() {
       {videoData && (
         <div className={'padding-top-4'}>
           <p>Video Generation Complete</p>
-          <a href={videoData} target={'_blank'} className={'textUnderline'}>
-            {videoData}
-          </a>
+          {/*<a href={videoData} target={'_blank'} className={'textUnderline'}>*/}
+          {/*  {videoData}*/}
+          {/*</a>*/}
+          <div>
+            <video width="600" controls>
+              <source src={videoData} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div>
+            <a href={videoData} download={videoData}>
+              Download Video
+            </a>
+          </div>
         </div>
       )}
     </div>
