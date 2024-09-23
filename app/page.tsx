@@ -13,6 +13,7 @@ import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 // import VideoList from '@/components/dynamic/embedded-video-display';
 // import YouTubeVideoList from "@/components/dynamic/embedded-video-display";
 import Image from 'next/image';
+import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 
 export default function Home() {
   const [prompt, setPrompt] = useState('');
@@ -70,6 +71,8 @@ export default function Home() {
             <ImageDynamicButton prompt={prompt} />
 
             <VideoFromUrlDynamicButton />
+
+            <VideoFromTextDynamicButton />
 
             {/*<div className="grid gap-2">*/}
             {/*  <Label htmlFor="upload">Upload video or image</Label>*/}

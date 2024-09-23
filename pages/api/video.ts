@@ -13,22 +13,26 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const imageUrl = req.query.url as string;
     const videoDescription = req.query.description as string;
+    if (req.query.url !== undefined) {
+      const imageUrl = req.query.url as string;
+      console.log('Image URL: ' + imageUrl);
+      console.log('Video Description: ' + videoDescription);
+      const result = await callVideoApi(imageUrl, videoDescription);
+      console.log('RESULT: ' + result);
+      res.status(200).send(result);
+    } else {
+      console.log('Video Description: ' + videoDescription);
+      const result = await callVideoApi('none', videoDescription);
+      console.log('RESULT: ' + result);
+      res.status(200).send(result);
+    }
 
     // TODO: We need to get the URL of the image
-    console.log('Image URL: ' + imageUrl);
     console.log('Video Description: ' + videoDescription);
 
     // Upload the image to Google Cloud Storage
     // const uploadedImageUrl = uploadImageToGCSFromUrl(imageUrl);
-
-    // const result = await callVideoApi(await uploadedImageUrl);
-    const result = await callVideoApi(imageUrl, videoDescription);
-    // https://storage.googleapis.com/gen-image-storage/ZHaFG4T_M4zQxj2JwY6ig.png
-
-    console.log('RESULT: ' + result);
-    res.status(200).send(result);
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
