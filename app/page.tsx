@@ -15,6 +15,7 @@ import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import Image from 'next/image';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import Downloader from '@/components/dynamic/downloader';
+import Uploader from '@/components/dynamic/uploader';
 
 export default function Home() {
   const [prompt, setPrompt] = useState('');
@@ -76,6 +77,8 @@ export default function Home() {
             <VideoFromTextDynamicButton />
 
             <Downloader />
+
+            <Uploader />
 
             {/*<div className="grid gap-2">*/}
             {/*  <Label htmlFor="upload">Upload video or image</Label>*/}
