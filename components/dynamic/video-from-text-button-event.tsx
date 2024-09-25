@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
+import Downloader from '@/components/dynamic/downloader';
 
 export function VideoFromTextDynamicButton() {
   const [videoData, setVideoData] = useState<any>(null);
@@ -61,9 +62,6 @@ export function VideoFromTextDynamicButton() {
       {videoData && (
         <div className={'padding-top-4'}>
           <p>Video Generation Complete</p>
-          {/*<a href={videoData} target={'_blank'} className={'textUnderline'}>*/}
-          {/*  {videoData}*/}
-          {/*</a>*/}
           <div>
             <video width="600" controls>
               <source src={videoData} type="video/mp4" />
@@ -71,9 +69,7 @@ export function VideoFromTextDynamicButton() {
             </video>
           </div>
           <div>
-            <a href={videoData} download={videoData}>
-              Download Video
-            </a>
+            <Downloader fileUrl={videoData} />
           </div>
         </div>
       )}

@@ -1,7 +1,9 @@
 // pages/api/video.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
-import uploadImageToGCSFromUrl from '@/functions/uploadImage'; // adjust the path according to your project structure
+import uploadImageToGCSFromUrl from '@/functions/uploadImage';
+import Downloader from '@/components/dynamic/downloader';
+import React from 'react'; // adjust the path according to your project structure
 
 // This function can run for a maximum of 5 seconds
 export const config = {

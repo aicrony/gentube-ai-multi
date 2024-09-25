@@ -76,8 +76,6 @@ export default function Home() {
 
             <VideoFromTextDynamicButton />
 
-            <Downloader />
-
             <Uploader />
 
             {/*<div className="grid gap-2">*/}
