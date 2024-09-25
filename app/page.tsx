@@ -5,25 +5,13 @@
 
 'use client';
 import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
-// import { callVideoApi } from "@/services/generateVideo";
-// import VideoList from '@/components/dynamic/embedded-video-display';
-// import YouTubeVideoList from "@/components/dynamic/embedded-video-display";
+// import { VideoFromUploadedImageDynamicButton } from '@/components/dynamic/video-from-uploaded-image';
 import Image from 'next/image';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
-import Downloader from '@/components/dynamic/downloader';
-import Uploader from '@/components/dynamic/uploader';
 
 export default function Home() {
-  const [prompt, setPrompt] = useState('');
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPrompt(event.target.value);
-  };
-
   const videos = {
     // "1": "./generated_videos/2b03e7198c241c9cc304feda700452490ad2305ac22df7929817862b391d597e.mp4",
     // "2": "./generated_videos/5f3aeb4f6e7f430bee6c93b79e9dda62462cccfc579ce650bf594c7d905123be.mp4",
@@ -57,66 +45,21 @@ export default function Home() {
           <div className="grid gap-4">
             {/*<form className="grid gap-4">*/}
             <div className="grid gap-2">
-              <Label htmlFor="prompt">
-                Describe an image to start your video.
-              </Label>
-              <Input
-                as="textarea"
-                className="min-h-[100px] text-xl"
-                id="prompt"
-                placeholder="Enter a description of your image."
-                value={prompt}
-                onChange={handleInputChange}
-              />
+              <ImageDynamicButton />
+
+              {/*<VideoFromUploadedImageDynamicButton />*/}
+
+              <VideoFromUrlDynamicButton />
+
+              <VideoFromTextDynamicButton />
             </div>
-
-            <ImageDynamicButton prompt={prompt} />
-
-            <VideoFromUrlDynamicButton />
-
-            <VideoFromTextDynamicButton />
-
-            <Uploader />
-
-            {/*<div className="grid gap-2">*/}
-            {/*  <Label htmlFor="upload">Upload video or image</Label>*/}
-            {/*  <Input id="upload" type="file" />*/}
-            {/*</div>*/}
-
-            {/*</form>*/}
-            {/*<div className="border border-gray-200 rounded-lg p-4 grid gap-4 text-center dark:border-gray-800">*/}
-            {/*  <span className="w-full aspect-video object-cover rounded-md bg-muted" />*/}
-            {/*  <div className="grid gap-2">*/}
-            {/*    <Button>Download Video</Button>*/}
-            {/*    <Button variant="outline">Share on Twitter</Button>*/}
-            {/*  </div>*/}
-            {/*</div>*/}
+          </div>
+          <div className="ml-auto flex items-center gap-4 pt-10">
+            {/*<VideoList videos={videos} />*/}
+            {/*<YouTubeVideoList videos={videos} />*/}
           </div>
         </div>
-        <div className="ml-auto flex items-center gap-4 pt-10">
-          {/*<VideoList videos={videos} />*/}
-          {/*<YouTubeVideoList videos={videos} />*/}
-        </div>
       </main>
-      {/*<footer className="p-4 border-t grid items-center gap-4">*/}
-      {/*  <nav className="flex items-center gap-4">*/}
-      {/*    <Link className="flex items-center gap-2" href="#">*/}
-      {/*      <PlayCircleIcon className="w-5 h-5" />*/}
-      {/*      Home*/}
-      {/*    </Link>*/}
-      {/*    <Link className="flex items-center gap-2" href="#">*/}
-      {/*      <UserCircleIcon className="w-5 h-5" />*/}
-      {/*      Profile*/}
-      {/*    </Link>*/}
-      {/*  </nav>*/}
-      {/*  <div className="ml-auto flex items-center gap-4">*/}
-      {/*    <Link className="flex items-center gap-2" href="#">*/}
-      {/*      <TwitterIcon className="w-5 h-5" />*/}
-      {/*      Tweet*/}
-      {/*    </Link>*/}
-      {/*    <Button variant={'default'}>Upgrade</Button>*/}
-      {/*  </div>*/}
-      {/*</footer>*/}
     </div>
   );
 }

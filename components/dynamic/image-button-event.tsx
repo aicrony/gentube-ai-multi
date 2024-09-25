@@ -2,11 +2,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import Button from '@/components/ui/Button';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { signInWithPassword } from '@/utils/auth-helpers/server';
-import { useRouter } from 'next/navigation';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
-export function ImageDynamicButton({ prompt }: { prompt: string }) {
+export function ImageDynamicButton() {
+  const [prompt, setPrompt] = useState('');
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(event.target.value);
+  };
   const [imageData, setImageData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,25 +52,38 @@ export function ImageDynamicButton({ prompt }: { prompt: string }) {
   };
 
   return (
-    <div className="float-left">
-      <Button
-        variant="slim"
-        type="submit"
-        className="mt-1"
-        loading={isSubmitting}
-        onClick={handleGenerateImage}
-      >
-        Generate Image
-      </Button>
-      {imageData && (
-        <div className={'margin-top-8'}>
-          <p>View Image</p>
-          <a href={imageData} target={'_blank'} className={'textUnderline'}>
-            {imageData}
-          </a>
-          {renderVideoButton()}
-        </div>
-      )}
-    </div>
+    <>
+      <div className="float-left">
+        <Label htmlFor="prompt">Describe an image to start your video.</Label>
+        <Input
+          as="textarea"
+          className="min-h-[100px] text-xl"
+          id="prompt"
+          placeholder="Enter a description of your image."
+          value={prompt}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div>
+        <Button
+          variant="slim"
+          type="submit"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={handleGenerateImage}
+        >
+          Generate Image
+        </Button>
+        {imageData && (
+          <div className={'margin-top-8'}>
+            <p>View Image</p>
+            <a href={imageData} target={'_blank'} className={'textUnderline'}>
+              {imageData}
+            </a>
+            {renderVideoButton()}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
