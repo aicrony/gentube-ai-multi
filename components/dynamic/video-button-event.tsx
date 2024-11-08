@@ -21,7 +21,7 @@ export function VideoDynamicButton(urlData: any) {
           '&description=' +
           encodeURIComponent(videoDescription)
       );
-      console.log('response', response);
+
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {

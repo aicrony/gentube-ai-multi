@@ -31,7 +31,7 @@ export function ImageDynamicButton() {
       const response = await fetch(
         '/api/image?prompt=' + encodeURIComponent(prompt)
       );
-      console.log('response', response);
+
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {
