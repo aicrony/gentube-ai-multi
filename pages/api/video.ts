@@ -1,11 +1,9 @@
-// pages/api/video.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
-import uploadImageToGCSFromUrl from '@/functions/uploadImage';
-import Downloader from '@/components/dynamic/downloader';
-import React from 'react'; // adjust the path according to your project structure
+import { parse, serialize } from 'cookie';
 
-// This function can run for a maximum of 5 seconds
+const MAX_REQUESTS_PER_DAY = 3;
+
 export const config = {
   maxDuration: 120
 };
@@ -14,27 +12,58 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const cookies = parse(req.headers.cookie || '');
+  const currentCount = parseInt(cookies.videoRequestCount || '0', 10);
+  const videoLastRequestDate = cookies.videoLastRequestDate
+    ? new Date(cookies.videoLastRequestDate)
+    : new Date(0);
+  const today = new Date();
+  console.log('today', today);
+  console.log('videoLastRequestDate', videoLastRequestDate);
+
+  if (
+    currentCount >= MAX_REQUESTS_PER_DAY &&
+    isSameDay(today, videoLastRequestDate)
+  ) {
+    console.log('Daily VIDEO request limit exceeded');
+    res.status(429).json({
+      error:
+        'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+    });
+    return;
+  }
+
   try {
     const videoDescription = req.query.description as string;
-    if (req.query.url !== undefined) {
-      const imageUrl = req.query.url as string;
-      console.log('Image URL: ' + imageUrl);
-      console.log('Video Description: ' + videoDescription);
-      const result = await callVideoApi(imageUrl, videoDescription);
-      console.log('RESULT: ' + result);
-      res.status(200).send(result);
-    } else {
-      console.log('Video Description: ' + videoDescription);
-      const result = await callVideoApi('none', videoDescription);
-      console.log('RESULT: ' + result);
-      res.status(200).send(result);
-    }
+    const imageUrl = req.query.url as string | undefined;
+    const result = await callVideoApi(imageUrl || 'none', videoDescription);
+    //const result = { videoUrl: 'https://www.youtube.com/watch?v=6n3pFFPSlW4' };
 
-    // TODO: We need to get the URL of the image
-    console.log('Video Description: ' + videoDescription);
+    const newCount = isSameDay(today, videoLastRequestDate)
+      ? currentCount + 1
+      : 1;
 
-    // Upload the image to Google Cloud Storage
-    // const uploadedImageUrl = uploadImageToGCSFromUrl(imageUrl);
+    console.log('today', today);
+    console.log('videoLastRequestDate', videoLastRequestDate);
+    console.log('newCount', newCount);
+    console.log('currentCount', currentCount);
+
+    res.setHeader('Set-Cookie', [
+      serialize('videoRequestCount', newCount.toString(), {
+        path: '/',
+        maxAge: 86400,
+        httpOnly: true,
+        secure: true
+      }),
+      serialize('videoLastRequestDate', today.toISOString(), {
+        path: '/',
+        maxAge: 86400,
+        httpOnly: true,
+        secure: true
+      })
+    ]);
+
+    res.status(200).send(result);
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -42,4 +71,12 @@ export default async function handler(
       res.status(500).json({ error: 'An unknown error occurred' });
     }
   }
+}
+
+function isSameDay(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
 }

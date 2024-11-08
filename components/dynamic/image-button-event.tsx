@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 
 export function ImageDynamicButton() {
   const [prompt, setPrompt] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -24,26 +25,29 @@ export function ImageDynamicButton() {
 
   const handleGenerateImage = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
-    console.log('Generate Image button clicked');
     setImageData(null); // clear the imageData state
+    setErrorMessage(null); // clear any previous error message
     try {
       const response = await fetch(
         '/api/image?prompt=' + encodeURIComponent(prompt)
       );
+      console.log('response', response);
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 429) {
+          setErrorMessage(
+            'Daily IMAGE request limit exceeded. Please subscribe on the PRICING page.'
+          );
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return;
       }
       let dataResponse = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
         setIsSubmitting(false); // Response is received, enable the button
       }
-      console.log('FrontEnd Received');
-      console.log(dataResponse);
-      // console.log(JSON.stringify(dataResponse.data[0].revised_prompt));
-      // console.log(JSON.stringify(dataResponse.data[0].url));
-      // @ts-ignore
       setImageData(dataResponse); // set the url of the response
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -53,6 +57,9 @@ export function ImageDynamicButton() {
 
   return (
     <>
+      {errorMessage && (
+        <div className="error-message-large">{errorMessage}</div>
+      )}
       <div className="float-left">
         <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input

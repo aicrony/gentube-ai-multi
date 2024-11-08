@@ -57,3 +57,7 @@ p a {
 .height-screen-helper {
   min-height: calc(100vh - 80px);
 }
+
+.error-message-large {
+  font-size: 1.5em; /* Adjust the size as needed */
+}
