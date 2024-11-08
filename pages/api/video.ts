@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
 import { parse, serialize } from 'cookie';
 
-const MAX_REQUESTS_PER_DAY = 3;
+const MAX_REQUESTS_PER_DAY = 10;
 
 export const config = {
   maxDuration: 120

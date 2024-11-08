@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { callImageApi } from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 
-const MAX_REQUESTS_PER_DAY = 7;
+const MAX_REQUESTS_PER_DAY = 20;
 
 export default async function handler(
   req: NextApiRequest,
