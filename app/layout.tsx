@@ -1,4 +1,4 @@
-import { GoogleTagManager } from '@next/third-parties/google';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Metadata } from 'next';
 import Footer from '@/components/ui/Footer';
 import Navbar from '@/components/ui/Navbar';
@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           <Toaster />
         </Suspense>
       </body>
-      <GoogleTagManager gtmId="G-634FFY459F" />
+      <GoogleAnalytics gaId="G-634FFY459F" />
     </html>
   );
 }
