@@ -39,8 +39,8 @@ export default async function handler(
   }
 
   try {
-    const videoDescription = req.query.description as string;
-    const imageUrl = req.query.url as string | undefined;
+    const videoDescription = req.body.description as string;
+    const imageUrl = req.body.url as string | undefined;
     const result = await callVideoApi(imageUrl || 'none', videoDescription);
     //const result = { videoUrl: 'https://www.youtube.com/watch?v=6n3pFFPSlW4' };
 
@@ -68,6 +68,7 @@ export default async function handler(
       })
     ]);
 
+    res.setHeader('Content-Type', 'application/json');
     res.status(200).send(result);
   } catch (error) {
     if (error instanceof Error) {
