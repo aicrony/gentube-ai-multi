@@ -28,9 +28,13 @@ export function ImageDynamicButton() {
     setImageData(null); // clear the imageData state
     setErrorMessage(null); // clear any previous error message
     try {
-      const response = await fetch(
-        '/api/image?prompt=' + encodeURIComponent(prompt)
-      );
+      const response = await fetch('/api/image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
+      });
 
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button

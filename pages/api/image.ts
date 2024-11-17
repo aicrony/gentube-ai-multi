@@ -8,6 +8,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (req.method !== 'POST') {
+    res.status(405).end(); // Method Not Allowed
+    console.error('Method Not Allowed on /api/image');
+    return null;
+  }
+
   const cookies = parse(req.headers.cookie || '');
   const currentCount = parseInt(cookies.imageRequestCount || '0', 10);
   const imageLastRequestDate = cookies.imageLastRequestDate
@@ -30,9 +36,8 @@ export default async function handler(
   }
 
   try {
-    const imagePrompt = req.query.prompt;
+    const { prompt: imagePrompt } = req.body;
     const result = await callImageApi(imagePrompt);
-    // const result = { imageUrl: 'https://www.youtube.com/watch?v=6n3pFFPSlW4' };
 
     const newCount = isSameDay(today, imageLastRequestDate)
       ? currentCount + 1

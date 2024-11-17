@@ -12,6 +12,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (req.method !== 'POST') {
+    res.status(405).end(); // Method Not Allowed
+    console.error('Method Not Allowed on /api/video');
+    return null;
+  }
   const cookies = parse(req.headers.cookie || '');
   const currentCount = parseInt(cookies.videoRequestCount || '0', 10);
   const videoLastRequestDate = cookies.videoLastRequestDate

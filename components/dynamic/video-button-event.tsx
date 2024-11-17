@@ -15,12 +15,16 @@ export function VideoDynamicButton(urlData: any) {
     setVideoData(null); // clear the videoData state
     setErrorMessage(null); // clear any previous error message
     try {
-      const response = await fetch(
-        '/api/video?url=' +
-          encodeURIComponent(urlData.url) +
-          '&description=' +
-          encodeURIComponent(videoDescription)
-      );
+      const response = await fetch('/api/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          url: urlData.url,
+          description: videoDescription
+        })
+      });
 
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button

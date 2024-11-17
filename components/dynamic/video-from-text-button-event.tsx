@@ -16,9 +16,13 @@ export function VideoFromTextDynamicButton() {
     console.log('Video Generation from TEXT button clicked');
     setVideoData(null); // clear the videoData state
     try {
-      const response = await fetch(
-        '/api/video?description=' + encodeURIComponent(videoDescription)
-      );
+      const response = await fetch('/api/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ description: videoDescription })
+      });
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
         throw new Error(`HTTP error! status: ${response.status}`);
