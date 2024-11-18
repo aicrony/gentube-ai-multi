@@ -61,3 +61,7 @@ p a {
 .error-message-large {
   font-size: 1.5em; /* Adjust the size as needed */
 }
+
+h1 {
+  @apply text-3xl font-bold text-center text-fuchsia-400;
+}

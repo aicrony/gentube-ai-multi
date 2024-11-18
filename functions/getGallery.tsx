@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import Button from '@/components/ui/Button';
 
 const ImageGallery: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -39,25 +42,56 @@ const ImageGallery: React.FC = () => {
       });
   };
 
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex < images.length - 1 ? prevIndex + 1 : 0
+    );
+  };
+
   return (
     <div>
-      <h1>Image Gallery</h1>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {images.map((url, index) => (
-          <img
-            key={index}
-            src={url}
-            alt={`Image ${index + 1}`}
+      <h1>Public Image Gallery</h1>
+      {images.length > 0 && (
+        <div>
+          <div
+            style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}
+          >
+            <Button
+              variant="slim"
+              onClick={handlePrevious}
+              loading={isSubmitting}
+            >
+              Previous
+            </Button>
+            <Button variant="slim" onClick={handleNext} loading={isSubmitting}>
+              Next
+            </Button>
+          </div>
+          <div
             style={{
-              width: '200px',
-              height: '200px',
-              margin: '10px',
-              cursor: 'pointer'
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '20px'
             }}
-            onClick={() => handleImageClick(url)}
-          />
-        ))}
-      </div>
+          >
+            <img
+              src={images[currentIndex]}
+              alt={`Image ${currentIndex + 1}`}
+              style={{
+                width: '60%',
+                cursor: 'pointer'
+              }}
+              onClick={() => handleImageClick(images[currentIndex])}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
