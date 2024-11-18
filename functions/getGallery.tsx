@@ -28,6 +28,17 @@ const ImageGallery: React.FC = () => {
     fetchImages();
   }, []);
 
+  const handleImageClick = (url: string) => {
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        alert('Image URL copied to clipboard');
+      })
+      .catch((error) => {
+        console.error('Error copying URL to clipboard:', error);
+      });
+  };
+
   return (
     <div>
       <h1>Image Gallery</h1>
@@ -37,7 +48,13 @@ const ImageGallery: React.FC = () => {
             key={index}
             src={url}
             alt={`Image ${index + 1}`}
-            style={{ width: '200px', height: '200px', margin: '10px' }}
+            style={{
+              width: '200px',
+              height: '200px',
+              margin: '10px',
+              cursor: 'pointer'
+            }}
+            onClick={() => handleImageClick(url)}
           />
         ))}
       </div>
