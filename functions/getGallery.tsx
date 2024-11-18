@@ -56,12 +56,12 @@ const ImageGallery: React.FC = () => {
 
   return (
     <div>
-      <h1>Public Image Gallery</h1>
+      <h1 className="text-center text-2xl font-bold pt-5">
+        Public Image Gallery
+      </h1>
       {images.length > 0 && (
         <div>
-          <div
-            style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}
-          >
+          <div className="flex justify-center gap-2">
             <Button
               variant="slim"
               onClick={handlePrevious}
@@ -73,20 +73,11 @@ const ImageGallery: React.FC = () => {
               Next
             </Button>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginTop: '20px'
-            }}
-          >
+          <div className="flex justify-center mt-5">
             <img
               src={images[currentIndex]}
               alt={`Image ${currentIndex + 1}`}
-              style={{
-                width: '60%',
-                cursor: 'pointer'
-              }}
+              className="w-3/5 cursor-pointer md:w-full"
               onClick={() => handleImageClick(images[currentIndex])}
             />
           </div>
