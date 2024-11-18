@@ -10,25 +10,9 @@ import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 // import { VideoFromUploadedImageDynamicButton } from '@/components/dynamic/video-from-uploaded-image';
 import Image from 'next/image';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
+import ImageGallery from '@/functions/getGallery';
 
 export default function Home() {
-  const videos = {
-    // "1": "./generated_videos/2b03e7198c241c9cc304feda700452490ad2305ac22df7929817862b391d597e.mp4",
-    // "2": "./generated_videos/5f3aeb4f6e7f430bee6c93b79e9dda62462cccfc579ce650bf594c7d905123be.mp4",
-    // "3": "./generated_videos/006dbf3f6b2bc5f9103704acf23a58d82eec81f0c73a100d6ce501eba97cfc6b.mp4",
-    'John Sentient Self-Portrait':
-      './generated_videos/john-sentient-self-portrait.mp4',
-    // "5": "./generated_videos/77d082cf2208c11f4e3c052a87758c302c5f33c2226be1984dec83ecabb06048.mp4",
-    'Fireflies in Forrest v1': './generated_videos/fireflies-in-forrest-v1.mp4',
-    'Shooting Stars v1': './generated_videos/shooting-stars-v1.mp4',
-    'Godzilla v2': './generated_videos/godzilla-v2.mp4',
-    // "8": "./generated_videos/a6a3a1ebbd9bd6cf27be15d1726dbaa974b68f9abde0df841e73c8334a466701.mp4",
-    // "9": "./generated_videos/d726ea47c697e8350524f6102266893b9c8e0f20ee0fa617fde360f83212180e.mp4",
-    'Godzilla v3': './generated_videos/godzilla-v3.mp4',
-    'Godzilla v4': './generated_videos/godzilla-v4.mp4',
-    'Firey Sky v1': './generated_videos/firey-sky-v1.mp4'
-  };
-
   return (
     <div className="w-full min-h-screen flex flex-col gap-2">
       <main className="flex-1 items-center justify-center">
@@ -52,6 +36,8 @@ export default function Home() {
               <VideoFromUrlDynamicButton />
 
               <VideoFromTextDynamicButton />
+
+              <ImageGallery />
             </div>
           </div>
           <div className="ml-auto flex items-center gap-4 pt-10">
