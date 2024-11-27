@@ -47,6 +47,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-merge-refs": "^2.1.1",
+    "react-router-dom": "^7.0.1",
     "react-use-downloader": "^1.2.8",
     "sharp": "^0.33.2",
     "stripe": "^14.25.0",
