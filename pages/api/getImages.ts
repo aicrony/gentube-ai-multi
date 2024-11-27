@@ -19,7 +19,7 @@ export default async function handler(
   }
 
   try {
-    const [files] = await gcsBucket.getFiles({ maxResults: 20 });
+    const [files] = await gcsBucket.getFiles({ maxResults: 100 });
     const imageUrls = files.map(
       (file) => `https://storage.googleapis.com/${bucketName}/${file.name}`
     );

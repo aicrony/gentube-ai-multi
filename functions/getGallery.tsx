@@ -13,15 +13,7 @@ const ImageGallery: React.FC = () => {
         if (cachedImages) {
           setImages(JSON.parse(cachedImages));
         } else {
-          const response = await fetch('/api/getImages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          const imageUrls = await response.json();
-          setImages(imageUrls);
-          localStorage.setItem('imageUrls', JSON.stringify(imageUrls));
+          await fetchAndSetImages();
         }
       } catch (error) {
         console.error('Error fetching images:', error);
@@ -30,6 +22,25 @@ const ImageGallery: React.FC = () => {
 
     fetchImages();
   }, []);
+
+  const fetchAndSetImages = async () => {
+    try {
+      const response = await fetch('/api/getImages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const imageUrls = await response.json();
+      const randomImages = imageUrls
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 20);
+      setImages(randomImages);
+      localStorage.setItem('imageUrls', JSON.stringify(randomImages));
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    }
+  };
 
   const handleImageClick = (url: string) => {
     navigator.clipboard
@@ -59,8 +70,17 @@ const ImageGallery: React.FC = () => {
       <h1 className="text-center text-2xl font-bold pt-5">
         Public Image Gallery
       </h1>
+      <div className="flex justify-center gap-2">
+        <Button
+          variant="slim"
+          onClick={fetchAndSetImages}
+          loading={isSubmitting}
+        >
+          Refresh Images
+        </Button>
+      </div>
       {images.length > 0 && (
-        <div>
+        <div className="mt-1">
           <div className="flex justify-center gap-2">
             <Button
               variant="slim"
