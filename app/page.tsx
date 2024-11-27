@@ -7,6 +7,7 @@ import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-b
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import ImageGallery from '@/functions/getGallery';
+import Button from '@/components/ui/Button';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -30,14 +31,14 @@ export default function Home() {
             </div>
             <div className="grid gap-4">
               <nav className="flex justify-center gap-4">
-                <Link to="/" className="text-white">
-                  Text to Image
+                <Link to="/" className="text-white ">
+                  <Button variant="slim">Text to Image</Button>
                 </Link>
-                <Link to="/image-url-to-video" className="text-white">
-                  Image URL to Video
+                <Link to="/image-url-to-video" className="text-white ">
+                  <Button variant="slim">Image URL to Video</Button>
                 </Link>
                 <Link to="/text-to-video" className="text-white">
-                  Text to Video
+                  <Button variant="slim">Text to Video</Button>
                 </Link>
               </nav>
               <Routes>
