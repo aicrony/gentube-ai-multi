@@ -32,13 +32,13 @@ export default function Home() {
             <div className="grid gap-4">
               <nav className="flex flex-wrap justify-center gap-4">
                 <Link to="/" className="text-white">
-                  <Button variant="slim">Image</Button>
+                  <Button variant="slim">Image Gen</Button>
                 </Link>
                 <Link to="/image-url-to-video" className="text-white">
-                  <Button variant="slim">URL to Video</Button>
+                  <Button variant="slim">Image to Video</Button>
                 </Link>
                 <Link to="/text-to-video" className="text-white">
-                  <Button variant="slim">Video</Button>
+                  <Button variant="slim">Video Gen</Button>
                 </Link>
               </nav>
               <Routes>

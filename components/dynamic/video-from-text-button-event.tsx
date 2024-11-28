@@ -45,6 +45,7 @@ export function VideoFromTextDynamicButton() {
   return (
     <div className={'pt-5'}>
       <div className={'pt-4'}>
+        <Label>Describe the video you want to create.</Label>
         <Input
           type="text"
           placeholder={'What will happen in the video?'}

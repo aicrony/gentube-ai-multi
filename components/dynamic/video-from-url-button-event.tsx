@@ -50,7 +50,7 @@ export function VideoFromUrlDynamicButton() {
     <div className={'pt-5'}>
       <div className="grid gap-2">
         <Label htmlFor="imageUrl">
-          Enter a URL of an image to start your video.
+          Enter a URL of an image to start creating your video.
         </Label>
         <Input
           as="textarea"

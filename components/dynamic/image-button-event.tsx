@@ -65,9 +65,7 @@ export function ImageDynamicButton() {
         <div className="error-message-large">{errorMessage}</div>
       )}
       <div className="float-left">
-        <Label htmlFor="prompt">
-          Describe and generate an image. Then optionally create a video.
-        </Label>
+        <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input
           as="textarea"
           className="min-h-[100px] text-xl"
