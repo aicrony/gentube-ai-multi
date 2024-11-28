@@ -35,7 +35,7 @@ export default function Home() {
                   <Button variant="slim">Image Gen</Button>
                 </Link>
                 <Link to="/image-url-to-video" className="text-white">
-                  <Button variant="slim">Image to Video</Button>
+                  <Button variant="slim">URL to Video</Button>
                 </Link>
                 <Link to="/text-to-video" className="text-white">
                   <Button variant="slim">Video Gen</Button>
