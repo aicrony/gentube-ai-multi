@@ -72,24 +72,22 @@ const ImageGallery: React.FC = () => {
       <h1 className="text-center text-2xl font-bold pt-5">
         Public Image Gallery
       </h1>
-      <div className="flex justify-center gap-2">
-        <Button
-          variant="slim"
-          onClick={fetchAndSetImages}
-          loading={isSubmitting}
-        >
-          Refresh Images
-        </Button>
-      </div>
       {images.length > 0 && (
         <div className="mt-1">
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-1">
             <Button
               variant="slim"
               onClick={handlePrevious}
               loading={isSubmitting}
             >
               Previous
+            </Button>
+            <Button
+              variant="slim"
+              onClick={fetchAndSetImages}
+              loading={isSubmitting}
+            >
+              More Images
             </Button>
             <Button variant="slim" onClick={handleNext} loading={isSubmitting}>
               Next

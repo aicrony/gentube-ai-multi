@@ -30,7 +30,7 @@ export default function Home() {
               <p className="text-gray-500 max-w-md dark:text-gray-400" />
             </div>
             <div className="grid gap-4">
-              <nav className="flex flex-wrap justify-center gap-4">
+              <nav className="flex flex-wrap justify-center gap-1">
                 <Link to="/" className="text-white">
                   <Button variant="slim">Image Gen</Button>
                 </Link>
