@@ -4,6 +4,14 @@ import { parse, serialize } from 'cookie';
 
 const MAX_REQUESTS_PER_DAY = 20;
 
+function encodeCount(count: number): string {
+  return Buffer.from(count.toString()).toString('base64');
+}
+
+function decodeCount(encodedCount: string): number {
+  return parseInt(Buffer.from(encodedCount, 'base64').toString('ascii'), 10);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -15,13 +23,14 @@ export default async function handler(
   }
 
   const cookies = parse(req.headers.cookie || '');
-  const currentCount = parseInt(cookies.imageRequestCount || '0', 10);
-  const imageLastRequestDate = cookies.imageLastRequestDate
-    ? new Date(cookies.imageLastRequestDate)
+  const currentCount = decodeCount(cookies._owt || 'MA=='); // 'MA==' is Base64 for '0'
+  const imageLastRequestDate = cookies._eno
+    ? new Date(cookies._eno)
     : new Date(0);
   const today = new Date();
   console.log('today', today);
   console.log('imageLastRequestDate', imageLastRequestDate);
+  console.log('currentCount', currentCount);
 
   if (
     currentCount >= MAX_REQUESTS_PER_DAY &&
@@ -43,13 +52,13 @@ export default async function handler(
       ? currentCount + 1
       : 1;
     res.setHeader('Set-Cookie', [
-      serialize('imageRequestCount', newCount.toString(), {
+      serialize('_owt', encodeCount(newCount), {
         path: '/',
         maxAge: 86400,
         httpOnly: true,
         secure: true
       }),
-      serialize('imageLastRequestDate', today.toISOString(), {
+      serialize('_eno', today.toISOString(), {
         path: '/',
         maxAge: 86400,
         httpOnly: true,
