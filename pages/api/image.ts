@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { callImageApi } from '@/services/generateImage';
+import callImageApi from '@/services/generateLumaImage';
 import { parse, serialize } from 'cookie';
 
 const MAX_REQUESTS_PER_DAY = 20;
@@ -46,7 +46,7 @@ export default async function handler(
 
   try {
     const { prompt: imagePrompt } = req.body;
-    const result = await callImageApi(imagePrompt);
+    const result = await callImageApi('none', imagePrompt);
 
     const newCount = isSameDay(today, imageLastRequestDate)
       ? currentCount + 1

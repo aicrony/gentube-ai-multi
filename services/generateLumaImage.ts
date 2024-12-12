@@ -1,11 +1,12 @@
 import axios from 'axios';
-import { pingUntilCompleted } from '@/functions/getLumaVideoResult';
+import { pingUntilCompleted } from '@/functions/getLumaImageResult';
 require('dotenv').config();
 
 const apiKey = process.env.LUMA_API_KEY;
 const apiEndpoint = process.env.LUMA_API_ENDPOINT;
+const apiImageEndpoint = apiEndpoint + '/image';
 
-export default async function generateLumaVideo(
+export default async function generateLumaImage(
   url: string,
   description: string
 ) {
@@ -14,15 +15,10 @@ export default async function generateLumaVideo(
       // Send the imag url and the description
       const data = {
         prompt: description,
-        keyframes: {
-          frame0: {
-            type: 'image',
-            url: url
-          }
-        }
+        model: 'photon-1'
       };
       const response = await axios.request({
-        url: apiEndpoint,
+        url: apiImageEndpoint,
         method: 'post',
         headers: {
           accept: 'application/json',
@@ -31,14 +27,17 @@ export default async function generateLumaVideo(
         },
         data: data
       });
-      console.log('Response from LumaLabs: ', JSON.stringify(response.data));
-      console.log('Generation ID:', response.data.id);
-      console.log('State:', response.data.state);
+      console.log(
+        'Response from LumaLabs (image): ',
+        JSON.stringify(response.data)
+      );
+      console.log('Generation ID (image):', response.data.id);
+      console.log('State (image):', response.data.state);
       // console.log('Video URL:', response.data.assets.video);
-      const videoResponse = await pingUntilCompleted(response.data.id);
-      console.log(videoResponse);
+      const imageResponse = await pingUntilCompleted(response.data.id);
+      console.log(imageResponse);
       // Call getVideoResult with the generation ID
-      return videoResponse;
+      return imageResponse;
     } else {
       // Just send the description
       const data = {
@@ -46,7 +45,7 @@ export default async function generateLumaVideo(
       };
 
       const response = await axios.request({
-        url: apiEndpoint,
+        url: apiImageEndpoint,
         method: 'post',
         headers: {
           accept: 'application/json',
@@ -55,16 +54,19 @@ export default async function generateLumaVideo(
         },
         data: data
       });
-      console.log('Response from LumaLabs: ', JSON.stringify(response.data));
-      console.log('Generation ID:', response.data.id);
-      console.log('State:', response.data.state);
+      console.log(
+        'Response from LumaLabs (image): ',
+        JSON.stringify(response.data)
+      );
+      console.log('Generation ID (image):', response.data.id);
+      console.log('State (image):', response.data.state);
       // console.log('Video URL:', response.data.assets.video);
-      const videoResponse = await pingUntilCompleted(response.data.id);
-      console.log(videoResponse);
+      const imageResponse = await pingUntilCompleted(response.data.id);
+      console.log(imageResponse);
       // Call getVideoResult with the generation ID
-      return videoResponse;
+      return imageResponse;
     }
   } catch (error) {
-    console.error('An error occurred while generating the video:', error);
+    console.error('An error occurred while generating the image:', error);
   }
 }
