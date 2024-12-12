@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { pingUntilImageCompleted } from '@/functions/getLumaImageResult';
+import uploadImageToGCSFromUrl from '@/functions/uploadImage';
 require('dotenv').config();
 
 const apiKey = process.env.LUMA_API_KEY;
@@ -62,9 +63,8 @@ export default async function generateLumaImage(
       console.log('State (image):', response.data.state);
       // console.log('Video URL:', response.data.assets.video);
       const imageResponse = await pingUntilImageCompleted(response.data.id);
-      console.log(imageResponse);
-      // Call getVideoResult with the generation ID
-      return imageResponse;
+      console.log('IMAGE URL: ' + imageResponse);
+      return await uploadImageToGCSFromUrl(imageResponse);
     }
   } catch (error) {
     console.error('An error occurred while generating the image:', error);

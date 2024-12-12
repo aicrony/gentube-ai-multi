@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 
 export function VideoDynamicButton(urlData: any) {
+  const { url } = urlData;
+  // console.log('VideoDynamicButton imageURL:', url);
+
   const [videoData, setVideoData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
@@ -12,8 +15,8 @@ export function VideoDynamicButton(urlData: any) {
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
+    console.log('Video Generation button clicked');
     setVideoData(null); // clear the videoData state
-    setErrorMessage(null); // clear any previous error message
     try {
       const response = await fetch('/api/video', {
         method: 'POST',
@@ -21,31 +24,25 @@ export function VideoDynamicButton(urlData: any) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          url: urlData.url,
+          url: url,
           description: videoDescription
         })
       });
-
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
-        if (response.status === 429) {
-          console.log('429');
-          setErrorMessage(
-            'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
-          );
-        } else {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return;
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      let dataResponse = {};
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        dataResponse = await response.json();
+      let data = {};
+      if (response.headers) {
         setIsSubmitting(false); // Response is received, enable the button
+        data = await response.text();
       }
-      setVideoData(dataResponse); // set the state with the received data
+      console.log('FrontEnd Video ID Received');
+      console.log('DATA RECEIVED:' + data);
+      setVideoData(data); // set the state with the received data
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
+      console.log(error);
       console.error('There was an error with the fetch operation: ', error);
     }
   };

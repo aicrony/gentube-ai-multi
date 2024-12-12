@@ -61,6 +61,11 @@ export async function pingUntilVideoCompleted(
         return response.data.assets.video;
       }
 
+      if (state === 'failed') {
+        console.log('Video generation did NOT complete.');
+        return null;
+      }
+
       console.log(`Current state: ${state}. Retrying in 10 seconds...`);
       await new Promise((resolve) => setTimeout(resolve, 100000));
     } catch (error) {

@@ -15,7 +15,7 @@ export default async function handler(
   if (req.method !== 'POST') {
     res.status(405).end(); // Method Not Allowed
     console.error('Method Not Allowed on /api/video');
-    return null;
+    return;
   }
   const cookies = parse(req.headers.cookie || '');
   const currentCount = parseInt(cookies.videoRequestCount || '0', 10);
@@ -44,9 +44,7 @@ export default async function handler(
     const result = await callVideoApi(imageUrl || 'none', videoDescription);
 
     console.log('****** RESULT: ********');
-    console.log(JSON.stringify(result));
-
-    // const result = 'https://storage.cdn-luma.com/dream_machine/e555f0f3-4039-4603-8fda-636f3875776c/107a0cf0-8437-4b10-bafa-3e3590a9592a_video0816f671e2c2b4bf79581421f605d2786.mp4';
+    console.log(result);
 
     const newCount = isSameDay(today, videoLastRequestDate)
       ? currentCount + 1
