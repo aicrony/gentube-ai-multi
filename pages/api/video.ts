@@ -42,7 +42,11 @@ export default async function handler(
     const videoDescription = req.body.description as string;
     const imageUrl = req.body.url as string | undefined;
     const result = await callVideoApi(imageUrl || 'none', videoDescription);
-    //const result = { videoUrl: 'https://www.youtube.com/watch?v=6n3pFFPSlW4' };
+
+    console.log('****** RESULT: ********');
+    console.log(JSON.stringify(result));
+
+    // const result = 'https://storage.cdn-luma.com/dream_machine/e555f0f3-4039-4603-8fda-636f3875776c/107a0cf0-8437-4b10-bafa-3e3590a9592a_video0816f671e2c2b4bf79581421f605d2786.mp4';
 
     const newCount = isSameDay(today, videoLastRequestDate)
       ? currentCount + 1

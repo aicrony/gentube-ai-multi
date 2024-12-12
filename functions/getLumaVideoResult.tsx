@@ -41,7 +41,9 @@ async function uploadVideoToGCS(
   return `https://storage.googleapis.com/${bucketName}/${fileName}`;
 }
 
-export async function pingUntilCompleted(generationId: string): Promise<any> {
+export async function pingUntilVideoCompleted(
+  generationId: string
+): Promise<any> {
   const url = `${apiEndpoint}/${generationId}`;
   const headers = {
     accept: 'application/json',

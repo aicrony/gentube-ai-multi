@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { pingUntilCompleted } from '@/functions/getLumaVideoResult';
+import { pingUntilVideoCompleted } from '@/functions/getLumaVideoResult';
 require('dotenv').config();
 
 const apiKey = process.env.LUMA_API_KEY;
@@ -35,7 +35,7 @@ export default async function generateLumaVideo(
       console.log('Generation ID:', response.data.id);
       console.log('State:', response.data.state);
       // console.log('Video URL:', response.data.assets.video);
-      const videoResponse = await pingUntilCompleted(response.data.id);
+      const videoResponse = await pingUntilVideoCompleted(response.data.id);
       console.log(videoResponse);
       // Call getVideoResult with the generation ID
       return videoResponse;
@@ -59,7 +59,7 @@ export default async function generateLumaVideo(
       console.log('Generation ID:', response.data.id);
       console.log('State:', response.data.state);
       // console.log('Video URL:', response.data.assets.video);
-      const videoResponse = await pingUntilCompleted(response.data.id);
+      const videoResponse = await pingUntilVideoCompleted(response.data.id);
       console.log(videoResponse);
       // Call getVideoResult with the generation ID
       return videoResponse;
