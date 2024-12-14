@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import callImageApi from '@/services/generateLumaImage';
+import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 
 const MAX_REQUESTS_PER_DAY = 20;
