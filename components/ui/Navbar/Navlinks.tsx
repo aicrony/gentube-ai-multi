@@ -5,6 +5,7 @@ import { SignOut } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
 import { usePathname, useRouter } from 'next/navigation';
 import { getRedirectMethod } from '@/utils/auth-helpers/settings';
+import { FaCheck } from 'react-icons/fa';
 import s from './Navbar.module.css';
 
 interface NavlinksProps {
@@ -46,16 +47,20 @@ export default function Navlinks({ user, subscription }: NavlinksProps) {
                   value={usePathname() ?? ''}
                 />
                 <button type="submit" className={s.link}>
-                  Sign out {user.email}
+                  {subscription &&
+                    subscription[0] &&
+                    subscription[0].status &&
+                    subscription[0].status == 'active' && (
+                      <span>
+                        {subscription[0].status === 'active' && (
+                          <FaCheck style={{ color: 'green' }} />
+                        )}
+                      </span>
+                    )}{' '}
+                  &nbsp; Sign out
                 </button>
               </form>
             </div>
-            {subscription &&
-              subscription[0] &&
-              subscription[0].status &&
-              subscription[0].status !== 'canceled' && (
-                <div>subscription: {subscription[0].status}</div>
-              )}
           </div>
         ) : (
           <Link href="/signin" className={s.link}>
