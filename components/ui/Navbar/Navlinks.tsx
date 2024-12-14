@@ -3,16 +3,16 @@
 import Link from 'next/link';
 import { SignOut } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
-import Logo from '@/components/icons/Logo';
 import { usePathname, useRouter } from 'next/navigation';
 import { getRedirectMethod } from '@/utils/auth-helpers/settings';
 import s from './Navbar.module.css';
 
 interface NavlinksProps {
-  user?: any;
+  user: any | null;
+  subscription: any;
 }
 
-export default function Navlinks({ user }: NavlinksProps) {
+export default function Navlinks({ user, subscription }: NavlinksProps) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
 
   return (
@@ -37,12 +37,26 @@ export default function Navlinks({ user }: NavlinksProps) {
       </div>
       <div className="flex justify-end space-x-8">
         {user ? (
-          <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
-            <input type="hidden" name="pathName" value={usePathname() ?? ''} />
-            <button type="submit" className={s.link}>
-              Sign out
-            </button>
-          </form>
+          <div>
+            <div>
+              <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
+                <input
+                  type="hidden"
+                  name="pathName"
+                  value={usePathname() ?? ''}
+                />
+                <button type="submit" className={s.link}>
+                  Sign out {user.email}
+                </button>
+              </form>
+            </div>
+            {subscription &&
+              subscription[0] &&
+              subscription[0].status &&
+              subscription[0].status !== 'canceled' && (
+                <div>subscription: {subscription[0].status}</div>
+              )}
+          </div>
         ) : (
           <Link href="/signin" className={s.link}>
             Sign In
