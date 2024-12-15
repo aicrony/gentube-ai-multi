@@ -11,9 +11,14 @@ import s from './Navbar.module.css';
 interface NavlinksProps {
   user: any | null;
   subscription: any;
+  productName: string;
 }
 
-export default function Navlinks({ user, subscription }: NavlinksProps) {
+export default function Navlinks({
+  user,
+  subscription,
+  productName
+}: NavlinksProps) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
 
   return (
