@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -8,6 +9,7 @@ import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
+import { useProductName } from '@/context/ProductNameContext';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -15,6 +17,10 @@ const BrowserRouter = dynamic(
 );
 
 export default function Home() {
+  const productName = useProductName();
+  const displayName =
+    productName && productName.trim() !== '' ? productName : '"Limited Trial"';
+
   return (
     <BrowserRouter>
       <div className="w-full min-h-screen flex flex-col gap-2">
@@ -25,9 +31,8 @@ export default function Home() {
                 GenTube.ai
               </h1>
               <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-                Generate AI Images and Videos
+                Generate AI Images and Videos - {displayName}
               </p>
-              <p className="text-gray-500 max-w-md dark:text-gray-400" />
             </div>
             <div className="grid gap-4">
               <nav className="flex flex-wrap justify-center gap-1">
