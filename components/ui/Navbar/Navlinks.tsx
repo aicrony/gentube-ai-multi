@@ -10,13 +10,13 @@ import s from './Navbar.module.css';
 
 interface NavlinksProps {
   user: any | null;
-  subscription: any;
+  subscriptionStatus: any;
   productName: string;
 }
 
 export default function Navlinks({
   user,
-  subscription,
+  subscriptionStatus,
   productName
 }: NavlinksProps) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
@@ -52,16 +52,13 @@ export default function Navlinks({
                   value={usePathname() ?? ''}
                 />
                 <button type="submit" className={s.link}>
-                  {subscription &&
-                    subscription[0] &&
-                    subscription[0].status &&
-                    subscription[0].status == 'active' && (
-                      <span>
-                        {subscription[0].status === 'active' && (
-                          <FaCheck style={{ color: 'green' }} />
-                        )}
-                      </span>
-                    )}{' '}
+                  {subscriptionStatus && (
+                    <span>
+                      {subscriptionStatus === '"active"' && (
+                        <FaCheck style={{ color: 'green' }} />
+                      )}
+                    </span>
+                  )}{' '}
                   &nbsp; Sign out
                 </button>
               </form>

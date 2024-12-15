@@ -4,9 +4,13 @@ import Navlinks from './Navlinks';
 
 interface NavbarProps {
   productName: string;
+  subscriptionStatus: string;
 }
 
-export default async function Navbar({ productName }: NavbarProps) {
+export default async function Navbar({
+  productName,
+  subscriptionStatus
+}: NavbarProps) {
   const supabase = createClient();
 
   const {
@@ -23,7 +27,7 @@ export default async function Navbar({ productName }: NavbarProps) {
       <div className="max-w-6xl px-6 mx-auto">
         <Navlinks
           user={user}
-          subscription={subscriptionData}
+          subscriptionStatus={subscriptionStatus}
           productName={productName}
         />
       </div>

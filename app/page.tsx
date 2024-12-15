@@ -10,6 +10,7 @@ import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text
 import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useProductName } from '@/context/ProductNameContext';
+import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -18,8 +19,11 @@ const BrowserRouter = dynamic(
 
 export default function Home() {
   const productName = useProductName();
+  const subscriptionStatus = useSubscriptionStatus();
   const displayName =
-    productName && productName.trim() !== '' ? productName : '"Limited Trial"';
+    productName && productName.trim() !== '' && subscriptionStatus == '"active"'
+      ? productName
+      : '"Limited Trial"';
 
   return (
     <BrowserRouter>

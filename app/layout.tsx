@@ -9,6 +9,7 @@ import { getURL } from '@/utils/helpers';
 import 'styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { ProductNameProvider } from '@/context/ProductNameContext';
+import { SubscriptionStatusProvider } from '@/context/SubscriptionStatusContext';
 
 const title = 'Gentube AI Image and Video Generator';
 const description = 'Generate images and videos with artificial intelligence.';
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: PropsWithChildren) {
   const supabase = createClient();
   let productName: string = '';
+  let subscriptionStatus: string = '';
 
   const {
     data: { user }
@@ -56,9 +58,11 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         data[0] &&
         data[0].prices &&
         data[0].prices.products &&
-        data[0].prices.products.name
+        data[0].prices.products.name &&
+        data[0].status
       ) {
         productName = JSON.stringify(data[0].prices.products.name);
+        subscriptionStatus = JSON.stringify(data[0].status);
       }
     }
   }
@@ -67,17 +71,22 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <body className="bg-black">
         <ProductNameProvider productName={productName}>
-          <Navbar productName={productName} />
-          <main
-            id="skip"
-            className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
-          >
-            {children}
-          </main>
-          <Footer />
-          <Suspense>
-            <Toaster />
-          </Suspense>
+          <SubscriptionStatusProvider subscriptionStatus={subscriptionStatus}>
+            <Navbar
+              productName={productName}
+              subscriptionStatus={subscriptionStatus}
+            />
+            <main
+              id="skip"
+              className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
+            >
+              {children}
+            </main>
+            <Footer />
+            <Suspense>
+              <Toaster />
+            </Suspense>
+          </SubscriptionStatusProvider>
         </ProductNameProvider>
       </body>
       <GoogleAnalytics gaId="G-634FFY459F" />
