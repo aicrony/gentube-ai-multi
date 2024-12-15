@@ -8,6 +8,7 @@ const ImageGallery: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+  const requiredClickCount = 20;
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -86,7 +87,7 @@ const ImageGallery: React.FC = () => {
             >
               Previous
             </Button>
-            {clickCount >= 10 && (
+            {clickCount >= requiredClickCount && (
               <Button
                 variant="slim"
                 onClick={fetchAndSetImages}
