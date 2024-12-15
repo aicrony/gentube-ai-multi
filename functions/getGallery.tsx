@@ -6,7 +6,8 @@ import Button from '@/components/ui/Button';
 const ImageGallery: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -39,6 +40,7 @@ const ImageGallery: React.FC = () => {
         .slice(0, 20);
       setImages(randomImages);
       localStorage.setItem('imageUrls', JSON.stringify(randomImages));
+      setClickCount(0); // Reset click count
     } catch (error) {
       console.error('Error fetching images:', error);
     }
@@ -59,12 +61,14 @@ const ImageGallery: React.FC = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : images.length - 1
     );
+    setClickCount((prevCount) => prevCount + 1);
   };
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex < images.length - 1 ? prevIndex + 1 : 0
     );
+    setClickCount((prevCount) => prevCount + 1);
   };
 
   return (
@@ -82,13 +86,15 @@ const ImageGallery: React.FC = () => {
             >
               Previous
             </Button>
-            <Button
-              variant="slim"
-              onClick={fetchAndSetImages}
-              loading={isSubmitting}
-            >
-              More Images
-            </Button>
+            {clickCount >= 10 && (
+              <Button
+                variant="slim"
+                onClick={fetchAndSetImages}
+                loading={isSubmitting}
+              >
+                More Images
+              </Button>
+            )}
             <Button variant="slim" onClick={handleNext} loading={isSubmitting}>
               Next
             </Button>
