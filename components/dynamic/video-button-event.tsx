@@ -4,9 +4,22 @@ import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 
-export function VideoDynamicButton(urlData: any) {
+interface UrlData {
+  url: string;
+}
+
+interface VideoDynamicButtonProps {
+  urlData: UrlData;
+  productName: string;
+  subscriptionStatus: string;
+}
+
+export function VideoDynamicButton({
+  urlData,
+  productName,
+  subscriptionStatus
+}: VideoDynamicButtonProps) {
   const { url } = urlData;
-  // console.log('VideoDynamicButton imageURL:', url);
 
   const [videoData, setVideoData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,6 +27,9 @@ export function VideoDynamicButton(urlData: any) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleGenerateVideo = async () => {
+    // console.log('Product Name (video button): ' + productName);
+    // console.log('Subscription Status (video button): ' + subscriptionStatus);
+
     setIsSubmitting(true); // Disable the button while the request is being handled
     console.log('Video Generation button clicked');
     setVideoData(null); // clear the videoData state
@@ -21,7 +37,9 @@ export function VideoDynamicButton(urlData: any) {
       const response = await fetch('/api/video', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-product-name': productName,
+          'x-subscription-status': subscriptionStatus
         },
         body: JSON.stringify({
           url: url,

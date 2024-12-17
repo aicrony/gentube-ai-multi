@@ -51,14 +51,32 @@ export default function Home() {
                 </Link>
               </nav>
               <Routes>
-                <Route path="/" element={<ImageDynamicButton />} />
+                <Route
+                  path="/"
+                  element={
+                    <ImageDynamicButton
+                      productName={productName}
+                      subscriptionStatus={subscriptionStatus}
+                    />
+                  }
+                />
                 <Route
                   path="/image-url-to-video"
-                  element={<VideoFromUrlDynamicButton />}
+                  element={
+                    <VideoFromUrlDynamicButton
+                      productName={productName}
+                      subscriptionStatus={subscriptionStatus}
+                    />
+                  }
                 />
                 <Route
                   path="/text-to-video"
-                  element={<VideoFromTextDynamicButton />}
+                  element={
+                    <VideoFromTextDynamicButton
+                      productName={productName}
+                      subscriptionStatus={subscriptionStatus}
+                    />
+                  }
                 />
               </Routes>
             </div>

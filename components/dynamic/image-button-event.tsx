@@ -5,21 +5,38 @@ import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
-export function ImageDynamicButton() {
+interface ImageDynamicButtonProps {
+  productName: string;
+  subscriptionStatus: string;
+}
+
+export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
+  productName,
+  subscriptionStatus
+}) => {
   const [prompt, setPrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [imageData, setImageData] = React.useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // console.log('Product Name (image button): ' + productName);
+  // console.log('Subscription Status (image button): ' + subscriptionStatus);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
-  const [imageData, setImageData] = React.useState<any>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const renderVideoButton = useCallback(() => {
     if (!imageData) {
       return null;
     } else {
-      return <VideoDynamicButton url={imageData} />;
+      return (
+        <VideoDynamicButton
+          urlData={imageData}
+          productName={productName}
+          subscriptionStatus={subscriptionStatus}
+        />
+      );
     }
   }, [imageData]);
 
@@ -31,7 +48,9 @@ export function ImageDynamicButton() {
       const response = await fetch('/api/image', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-product-name': productName,
+          'x-subscription-status': subscriptionStatus
         },
         body: JSON.stringify({ prompt: prompt })
       });
@@ -97,4 +116,4 @@ export function ImageDynamicButton() {
       </div>
     </>
   );
-}
+};

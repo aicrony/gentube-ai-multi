@@ -2,24 +2,37 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 
-const MAX_REQUESTS_PER_DAY = 20;
-
-function encodeCount(count: number): string {
-  return Buffer.from(count.toString()).toString('base64');
-}
-
-function decodeCount(encodedCount: string): number {
-  return parseInt(Buffer.from(encodedCount, 'base64').toString('ascii'), 10);
-}
+export const config = {
+  maxDuration: 120
+};
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  let MAX_REQUESTS_PER_DAY = 5;
+
+  // Determine MAX_REQUESTS_PER_DAY based on product name and subscription status
+  const productName = req.headers['x-product-name'];
+  const subscriptionStatus = req.headers['x-subscription-status'];
+
+  if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
+    MAX_REQUESTS_PER_DAY = 50;
+  } else if (
+    productName === '"Video Creator"' &&
+    subscriptionStatus === '"active"'
+  ) {
+    MAX_REQUESTS_PER_DAY = 50;
+  }
+
+  console.log('productName (image api): ', productName);
+  console.log('subscriptionStatus (image api): ', subscriptionStatus);
+  console.log('MAX_REQUESTS_PER_DAY (image api): ', MAX_REQUESTS_PER_DAY);
+
   if (req.method !== 'POST') {
     res.status(405).end(); // Method Not Allowed
     console.error('Method Not Allowed on /api/image');
-    return null;
+    return;
   }
 
   const cookies = parse(req.headers.cookie || '');
@@ -78,6 +91,14 @@ export default async function handler(
       res.status(500).json({ error: 'An unknown error occurred' });
     }
   }
+}
+
+function encodeCount(count: number): string {
+  return Buffer.from(count.toString()).toString('base64');
+}
+
+function decodeCount(encodedCount: string): number {
+  return parseInt(Buffer.from(encodedCount, 'base64').toString('ascii'), 10);
 }
 
 function isSameDay(date1: Date, date2: Date): boolean {

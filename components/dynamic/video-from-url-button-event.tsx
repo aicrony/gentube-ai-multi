@@ -5,7 +5,15 @@ import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 
-export function VideoFromUrlDynamicButton() {
+interface VideoFromUrlDynamicButtonProps {
+  productName: string;
+  subscriptionStatus: string;
+}
+
+export function VideoFromUrlDynamicButton({
+  productName,
+  subscriptionStatus
+}: VideoFromUrlDynamicButtonProps) {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +28,9 @@ export function VideoFromUrlDynamicButton() {
       const response = await fetch('/api/video', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-product-name': productName,
+          'x-subscription-status': subscriptionStatus
         },
         body: JSON.stringify({
           url: imageUrl,

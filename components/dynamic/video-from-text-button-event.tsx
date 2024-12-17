@@ -4,12 +4,23 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
+import { useProductName } from '@/context/ProductNameContext';
+import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 
-export function VideoFromTextDynamicButton() {
+interface VideoFromTextDynamicButtonProps {
+  productName: string;
+  subscriptionStatus: string;
+}
+
+export const VideoFromTextDynamicButton: React.FC<
+  VideoFromTextDynamicButtonProps
+> = ({ productName, subscriptionStatus }) => {
   const [videoData, setVideoData] = useState<any>(null);
-  // const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
+
+  // console.log('Product Name (video button): ' + productName);
+  // console.log('Subscription Status (video button): ' + subscriptionStatus);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -19,7 +30,9 @@ export function VideoFromTextDynamicButton() {
       const response = await fetch('/api/video', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-product-name': productName,
+          'x-subscription-status': subscriptionStatus
         },
         body: JSON.stringify({ description: videoDescription })
       });
@@ -80,4 +93,4 @@ export function VideoFromTextDynamicButton() {
       )}
     </div>
   );
-}
+};
