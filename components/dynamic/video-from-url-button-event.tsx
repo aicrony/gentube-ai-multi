@@ -47,7 +47,7 @@ export function VideoFromUrlDynamicButton({
           );
         } else {
           setErrorMessage(
-            'Request Failed. Please check the URL and try again.'
+            'Request Failed. Please check the image URL and try again.'
           );
           throw new Error(`HTTP error! status: ${response.status}`);
         }

@@ -4,8 +4,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
-import { useProductName } from '@/context/ProductNameContext';
-import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 
 interface VideoFromTextDynamicButtonProps {
   productName: string;
