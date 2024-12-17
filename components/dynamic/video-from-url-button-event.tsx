@@ -46,6 +46,9 @@ export function VideoFromUrlDynamicButton({
             'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
+          setErrorMessage(
+            'Request Failed. Please check the URL and try again.'
+          );
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return;

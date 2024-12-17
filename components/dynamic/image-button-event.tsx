@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
@@ -62,6 +62,9 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             'Daily IMAGE request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
+          setErrorMessage(
+            'Request Failed. Please check that the prompt is appropriate and try again.'
+          );
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return;

@@ -48,7 +48,17 @@ export function VideoDynamicButton({
       });
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 429) {
+          setErrorMessage(
+            'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+          );
+        } else {
+          setErrorMessage(
+            'Request Failed. Please check that the prompt is appropriate and try again.'
+          );
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return;
       }
       let data = {};
       if (response.headers) {
