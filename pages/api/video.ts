@@ -68,7 +68,7 @@ export default async function handler(
       const imageUrl = req.body.url as string | undefined;
       const result = await callVideoApi(imageUrl || 'none', videoDescription);
 
-      console.log('****** RESULT: ********');
+      console.log('****** VIDEO RESULT: ********');
       console.log(result);
 
       const newCount = isSameDay(today, videoLastRequestDate)

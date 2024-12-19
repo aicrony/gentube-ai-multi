@@ -68,9 +68,17 @@ export default async function handler(
       const { prompt: imagePrompt } = req.body;
       const result = await callImageApi('none', imagePrompt);
 
+      console.log('****** IMAGE RESULT: ********');
+      console.log(result);
+
       const newCount = isSameDay(today, imageLastRequestDate)
         ? currentCount + 1
         : 1;
+
+      console.log('today', today);
+      console.log('imageLastRequestDate', imageLastRequestDate);
+      console.log('image newCount', newCount);
+      console.log('image currentCount', currentCount);
 
       res.setHeader('Set-Cookie', [
         serialize('_owt', encodeCount(newCount), {
