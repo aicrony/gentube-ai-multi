@@ -30,9 +30,19 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     if (!imageData) {
       return null;
     } else {
+      let url = '';
+      if (imageData && imageData.url) {
+        url = imageData.url;
+        console.log('URL Data: ' + JSON.stringify(imageData));
+        console.log('imageData.url: ' + url);
+      } else if (imageData && typeof imageData === 'string') {
+        url = imageData;
+        console.log('imageData: ' + url);
+      }
+
       return (
         <VideoDynamicButton
-          urlData={imageData}
+          urlData={url}
           productName={productName}
           subscriptionStatus={subscriptionStatus}
         />

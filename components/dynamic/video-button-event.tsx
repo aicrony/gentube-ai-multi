@@ -4,12 +4,8 @@ import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 
-interface UrlData {
-  url: string;
-}
-
 interface VideoDynamicButtonProps {
-  urlData: UrlData;
+  urlData: string;
   productName: string;
   subscriptionStatus: string;
 }
@@ -19,7 +15,7 @@ export function VideoDynamicButton({
   productName,
   subscriptionStatus
 }: VideoDynamicButtonProps) {
-  const { url } = urlData;
+  const url = urlData;
 
   const [videoData, setVideoData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
