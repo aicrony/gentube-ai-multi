@@ -17,20 +17,33 @@ export default async function handler(
   const productName = req.headers['x-product-name'];
   const subscriptionStatus = req.headers['x-subscription-status'];
   let monthlySubscriber: boolean = false;
+  let subscriptionTier;
 
   if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
     MAX_REQUESTS_PER_MONTH = 200; // Subscription limit - count monthly
     monthlySubscriber = true;
+    subscriptionTier = 1;
   } else if (
     productName === '"Video Creator"' &&
     subscriptionStatus === '"active"'
   ) {
     MAX_REQUESTS_PER_MONTH = 200; // Subscription limit - count monthly
     monthlySubscriber = true;
+    subscriptionTier = 2;
+  } else if (
+    productName === '"HQ Video Creator"' &&
+    subscriptionStatus === '"active"'
+  ) {
+    MAX_REQUESTS_PER_MONTH = 220; // Subscription limit - count monthly
+    monthlySubscriber = true;
+    subscriptionTier = 3;
+  } else {
+    subscriptionTier = 0;
   }
 
   console.log('productName (image api): ', productName);
   console.log('subscriptionStatus (image api): ', subscriptionStatus);
+  console.log('subscriptionTier (image api): ', subscriptionTier);
   console.log('MAX_REQUESTS_PER_DAY (image api): ', MAX_REQUESTS_PER_DAY);
   console.log('MAX_REQUESTS_PER_MONTH (image api): ', MAX_REQUESTS_PER_MONTH);
 
@@ -66,7 +79,21 @@ export default async function handler(
 
     try {
       const { prompt: imagePrompt } = req.body;
-      const result = await callImageApi('none', imagePrompt);
+      let result;
+      if (subscriptionTier == 1) {
+        result = await callImageApi('none', imagePrompt);
+      } else if (subscriptionTier == 2) {
+        result = await callImageApi('none', imagePrompt);
+      } else if (subscriptionTier == 3) {
+        result = await callImageApi('none', imagePrompt);
+      } else {
+        result = await callImageApi('none', imagePrompt);
+      }
+
+      if (!result) {
+        res.status(500).json({ error: 'An unknown error occurred' });
+        return;
+      }
 
       console.log('****** IMAGE RESULT: ********');
       console.log(result);
@@ -126,7 +153,21 @@ export default async function handler(
 
     try {
       const { prompt: imagePrompt } = req.body;
-      const result = await callImageApi('none', imagePrompt);
+      let result;
+      if (subscriptionTier == 1) {
+        result = await callImageApi('none', imagePrompt);
+      } else if (subscriptionTier == 2) {
+        result = await callImageApi('none', imagePrompt);
+      } else if (subscriptionTier == 3) {
+        result = await callImageApi('none', imagePrompt);
+      } else {
+        result = await callImageApi('none', imagePrompt);
+      }
+
+      if (!result) {
+        res.status(500).json({ error: 'An unknown error occurred' });
+        return;
+      }
 
       console.log('****** IMAGE RESULT: ********');
       console.log(result);

@@ -17,9 +17,17 @@ export const VideoFromTextDynamicButton: React.FC<
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  let hqLink: boolean = false;
 
   // console.log('Product Name (video button): ' + productName);
   // console.log('Subscription Status (video button): ' + subscriptionStatus);
+
+  if (
+    subscriptionStatus === '"active"' &&
+    productName === '"HQ Video Creator"'
+  ) {
+    hqLink = true;
+  }
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -34,7 +42,10 @@ export const VideoFromTextDynamicButton: React.FC<
           'x-product-name': productName,
           'x-subscription-status': subscriptionStatus
         },
-        body: JSON.stringify({ description: videoDescription })
+        body: JSON.stringify({
+          url: 'none',
+          description: videoDescription
+        })
       });
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
@@ -80,16 +91,28 @@ export const VideoFromTextDynamicButton: React.FC<
             onChange={(e) => setVideoDescription(e.target.value)}
           />
         </div>
-        <div className={'pt-4'}>
-          <Button
-            variant="slim"
-            type="submit"
-            className="mt-1"
-            loading={isSubmitting}
-            onClick={handleGenerateVideo}
-          >
-            Generate Video from Text
-          </Button>
+        <div className="flex space-x-4 pt-4">
+          <div>
+            <Button
+              variant="slim"
+              type="submit"
+              className="mt-1"
+              loading={isSubmitting}
+              onClick={handleGenerateVideo}
+            >
+              Generate Video from Text
+            </Button>
+          </div>
+          {hqLink && (
+            <div className="pt-2">
+              <p>
+                Note:{' '}
+                <a href="/image-url-to-video">
+                  High Quality video must be created from an existing image.
+                </a>
+              </p>
+            </div>
+          )}
         </div>
         {videoData && (
           <div className={'padding-top-4'}>

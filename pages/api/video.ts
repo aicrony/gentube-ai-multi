@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
+import callHqVideoApi from '@/services/generateFalVideo';
 import { parse, serialize } from 'cookie';
+import callImageApi from '@/services/generateImage';
 
 export const config = {
   maxDuration: 120
@@ -17,19 +19,31 @@ export default async function handler(
   const productName = req.headers['x-product-name'];
   const subscriptionStatus = req.headers['x-subscription-status'];
   let monthlySubscriber: boolean = false;
+  let subscriptionTier;
 
   if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
     MAX_REQUESTS_PER_MONTH = 0; // Detect zero to know they are not on subscription - count daily
+    monthlySubscriber = true;
+    subscriptionTier = 1;
   } else if (
     productName === '"Video Creator"' &&
     subscriptionStatus === '"active"'
   ) {
     MAX_REQUESTS_PER_MONTH = 100; // Subscription limit - count monthly
     monthlySubscriber = true;
+    subscriptionTier = 2;
+  } else if (
+    productName === '"HQ Video Creator"' &&
+    subscriptionStatus === '"active"'
+  ) {
+    MAX_REQUESTS_PER_MONTH = 120; // Subscription limit - count monthly
+    monthlySubscriber = true;
+    subscriptionTier = 3;
   }
 
   console.log('productName (video api): ', productName);
   console.log('subscriptionStatus (video api): ', subscriptionStatus);
+  console.log('subscriptionTier (video api): ', subscriptionTier);
   console.log('MAX_REQUESTS_PER_DAY (video api): ', MAX_REQUESTS_PER_DAY);
   console.log('MAX_REQUESTS_PER_MONTH (video api): ', MAX_REQUESTS_PER_MONTH);
 
@@ -130,7 +144,27 @@ export default async function handler(
     try {
       const videoDescription = req.body.description as string;
       const imageUrl = req.body.url as string | undefined;
-      const result = await callVideoApi(imageUrl || 'none', videoDescription);
+      let result;
+
+      if (subscriptionTier == 1) {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      } else if (subscriptionTier == 2) {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      } else if (
+        subscriptionTier == 3 &&
+        imageUrl &&
+        imageUrl !== 'none' &&
+        imageUrl.length > 0
+      ) {
+        result = await callHqVideoApi(imageUrl || 'none', videoDescription);
+      } else {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      }
+
+      if (!result) {
+        res.status(500).json({ error: 'An unknown error occurred' });
+        return;
+      }
 
       console.log('****** VIDEO RESULT: ********');
       console.log(result);
