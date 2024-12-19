@@ -10,7 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let MAX_REQUESTS_PER_DAY = 3;
+  let MAX_REQUESTS_PER_DAY = 10;
 
   // Determine MAX_REQUESTS_PER_DAY based on product name and subscription status
   const productName = req.headers['x-product-name'];
@@ -35,9 +35,9 @@ export default async function handler(
     return;
   }
   const cookies = parse(req.headers.cookie || '');
-  const currentCount = parseInt(cookies.videoRequestCount || '0', 10);
-  const videoLastRequestDate = cookies.videoLastRequestDate
-    ? new Date(cookies.videoLastRequestDate)
+  const currentCount = decodeCount(cookies._ruof || 'MA=='); // 'MA==' is Base64 for '0'
+  const videoLastRequestDate = cookies._eerht
+    ? new Date(cookies._eerht)
     : new Date(0);
   const today = new Date();
   console.log('today', today);
@@ -73,13 +73,13 @@ export default async function handler(
     console.log('currentCount', currentCount);
 
     res.setHeader('Set-Cookie', [
-      serialize('videoRequestCount', newCount.toString(), {
+      serialize('_ruof', encodeCount(newCount), {
         path: '/',
         maxAge: 86400,
         httpOnly: true,
         secure: true
       }),
-      serialize('videoLastRequestDate', today.toISOString(), {
+      serialize('_eerht', today.toISOString(), {
         path: '/',
         maxAge: 86400,
         httpOnly: true,
@@ -96,6 +96,14 @@ export default async function handler(
       res.status(500).json({ error: 'An unknown error occurred' });
     }
   }
+}
+
+function encodeCount(count: number): string {
+  return Buffer.from(count.toString()).toString('base64');
+}
+
+function decodeCount(encodedCount: string): number {
+  return parseInt(Buffer.from(encodedCount, 'base64').toString('ascii'), 10);
 }
 
 function isSameDay(date1: Date, date2: Date): boolean {

@@ -10,7 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let MAX_REQUESTS_PER_DAY = 5;
+  let MAX_REQUESTS_PER_DAY = 20;
 
   // Determine MAX_REQUESTS_PER_DAY based on product name and subscription status
   const productName = req.headers['x-product-name'];
