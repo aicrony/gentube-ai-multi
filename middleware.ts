@@ -4,7 +4,7 @@ import { updateSession } from '@/utils/supabase/middleware';
 export async function middleware(request: NextRequest) {
   const mainUrl = 'https://gentube.ai';
 
-  if (request.nextUrl.hostname.endsWith('.vercelo.app')) {
+  if (request.nextUrl.hostname.endsWith('.vercel.app')) {
     return NextResponse.redirect(mainUrl);
   }
 
