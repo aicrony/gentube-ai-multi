@@ -8,11 +8,12 @@ import Downloader from '@/components/dynamic/downloader';
 interface VideoFromTextDynamicButtonProps {
   productName: string;
   subscriptionStatus: string;
+  userId: string;
 }
 
 export const VideoFromTextDynamicButton: React.FC<
   VideoFromTextDynamicButtonProps
-> = ({ productName, subscriptionStatus }) => {
+> = ({ productName, subscriptionStatus, userId }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
@@ -40,7 +41,8 @@ export const VideoFromTextDynamicButton: React.FC<
         headers: {
           'Content-Type': 'application/json',
           'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus
+          'x-subscription-status': subscriptionStatus,
+          'x-user-id': userId
         },
         body: JSON.stringify({
           url: 'none',

@@ -7,7 +7,8 @@ import Uploader from '@/components/dynamic/uploader';
 
 export function VideoFromUploadedImageDynamicButton(
   productName: string,
-  subscriptionStatus: string
+  subscriptionStatus: string,
+  userId: string
 ) {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -27,7 +28,8 @@ export function VideoFromUploadedImageDynamicButton(
         headers: {
           'Content-Type': 'application/json',
           'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus
+          'x-subscription-status': subscriptionStatus,
+          'x-user-id': userId
         },
         body: JSON.stringify({
           url: imageUrl,

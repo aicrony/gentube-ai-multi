@@ -11,6 +11,7 @@ import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useProductName } from '@/context/ProductNameContext';
 import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
+import { useUserId } from '@/context/UserIdContext';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -20,6 +21,7 @@ const BrowserRouter = dynamic(
 export default function Home() {
   const productName = useProductName();
   const subscriptionStatus = useSubscriptionStatus();
+  const userId = useUserId();
   const displayName =
     productName && productName.trim() !== '' && subscriptionStatus == '"active"'
       ? productName
@@ -57,6 +59,7 @@ export default function Home() {
                     <ImageDynamicButton
                       productName={productName}
                       subscriptionStatus={subscriptionStatus}
+                      userId={userId}
                     />
                   }
                 />
@@ -66,6 +69,7 @@ export default function Home() {
                     <VideoFromUrlDynamicButton
                       productName={productName}
                       subscriptionStatus={subscriptionStatus}
+                      userId={userId}
                     />
                   }
                 />
@@ -75,6 +79,7 @@ export default function Home() {
                     <VideoFromTextDynamicButton
                       productName={productName}
                       subscriptionStatus={subscriptionStatus}
+                      userId={userId}
                     />
                   }
                 />

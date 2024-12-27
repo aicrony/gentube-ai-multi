@@ -10,6 +10,7 @@ import 'styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { ProductNameProvider } from '@/context/ProductNameContext';
 import { SubscriptionStatusProvider } from '@/context/SubscriptionStatusContext';
+import { UserIdProvider } from '@/context/UserIdContext';
 
 const title = 'Gentube AI Image and Video Generator';
 const description = 'Generate images and videos with artificial intelligence.';
@@ -28,12 +29,14 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const supabase = createClient();
   let productName: string = '';
   let subscriptionStatus: string = '';
+  let userId: string = '';
 
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
   if (user) {
+    userId = user.id;
     const { data, error } = await supabase
       .from('subscriptions')
       .select(
@@ -70,24 +73,26 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
       <body className="bg-black">
-        <ProductNameProvider productName={productName}>
-          <SubscriptionStatusProvider subscriptionStatus={subscriptionStatus}>
-            <Navbar
-              productName={productName}
-              subscriptionStatus={subscriptionStatus}
-            />
-            <main
-              id="skip"
-              className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
-            >
-              {children}
-            </main>
-            <Footer />
-            <Suspense>
-              <Toaster />
-            </Suspense>
-          </SubscriptionStatusProvider>
-        </ProductNameProvider>
+        <UserIdProvider userId={userId}>
+          <ProductNameProvider productName={productName}>
+            <SubscriptionStatusProvider subscriptionStatus={subscriptionStatus}>
+              <Navbar
+                productName={productName}
+                subscriptionStatus={subscriptionStatus}
+              />
+              <main
+                id="skip"
+                className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
+              >
+                {children}
+              </main>
+              <Footer />
+              <Suspense>
+                <Toaster />
+              </Suspense>
+            </SubscriptionStatusProvider>
+          </ProductNameProvider>
+        </UserIdProvider>
       </body>
       <GoogleAnalytics gaId="G-634FFY459F" />
     </html>

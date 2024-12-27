@@ -8,11 +8,13 @@ import Downloader from '@/components/dynamic/downloader';
 interface VideoFromUrlDynamicButtonProps {
   productName: string;
   subscriptionStatus: string;
+  userId: string;
 }
 
 export function VideoFromUrlDynamicButton({
   productName,
-  subscriptionStatus
+  subscriptionStatus,
+  userId
 }: VideoFromUrlDynamicButtonProps) {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -32,7 +34,8 @@ export function VideoFromUrlDynamicButton({
         headers: {
           'Content-Type': 'application/json',
           'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus
+          'x-subscription-status': subscriptionStatus,
+          'x-user-id': userId
         },
         body: JSON.stringify({
           url: imageUrl,

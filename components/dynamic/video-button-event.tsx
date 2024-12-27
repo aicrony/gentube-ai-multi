@@ -8,12 +8,14 @@ interface VideoDynamicButtonProps {
   urlData: string;
   productName: string;
   subscriptionStatus: string;
+  userId: string;
 }
 
 export function VideoDynamicButton({
   urlData,
   productName,
-  subscriptionStatus
+  subscriptionStatus,
+  userId
 }: VideoDynamicButtonProps) {
   const url = urlData;
 
@@ -35,7 +37,8 @@ export function VideoDynamicButton({
         headers: {
           'Content-Type': 'application/json',
           'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus
+          'x-subscription-status': subscriptionStatus,
+          'x-user-id': userId
         },
         body: JSON.stringify({
           url: url,

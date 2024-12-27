@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
+import { saveUserActivity } from '@/functions/saveUserActivity';
 
 export const config = {
   maxDuration: 120
@@ -16,8 +17,9 @@ export default async function handler(
   // Determine MAX_REQUESTS_PER_DAY based on product name and subscription status
   const productName = req.headers['x-product-name'];
   const subscriptionStatus = req.headers['x-subscription-status'];
+  const userId = req.headers['x-user-id'];
   let monthlySubscriber: boolean = false;
-  let subscriptionTier;
+  let subscriptionTier: number = 0;
 
   if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
     MAX_REQUESTS_PER_MONTH = 200; // Subscription limit - count monthly
@@ -122,6 +124,21 @@ export default async function handler(
         })
       ]);
 
+      // Data save
+      const activityResponse = await saveUserActivity({
+        AssetSource: '',
+        AssetType: 'img',
+        CountedAssetPreviousState: currentCount,
+        CountedAssetState: newCount,
+        CreatedAssetUrl: result,
+        DateTime: new Date().toISOString(),
+        Prompt: imagePrompt,
+        SubscriptionTier: subscriptionTier,
+        UserId: userId
+      });
+
+      console.log('Data saved: ', activityResponse);
+
       res.status(200).json(result);
     } catch (error) {
       if (error instanceof Error) {
@@ -195,6 +212,21 @@ export default async function handler(
           secure: true
         })
       ]);
+
+      // Data save
+      const activityResponse = await saveUserActivity({
+        AssetSource: '',
+        AssetType: 'img',
+        CountedAssetPreviousState: currentCount,
+        CountedAssetState: newCount,
+        CreatedAssetUrl: result,
+        DateTime: new Date().toISOString(),
+        Prompt: imagePrompt,
+        SubscriptionTier: subscriptionTier,
+        UserId: userId
+      });
+
+      console.log('Data saved: ', activityResponse);
 
       res.status(200).json(result);
     } catch (error) {

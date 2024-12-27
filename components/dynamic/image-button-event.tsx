@@ -8,11 +8,13 @@ import { Input } from '@/components/ui/input';
 interface ImageDynamicButtonProps {
   productName: string;
   subscriptionStatus: string;
+  userId: string;
 }
 
 export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   productName,
-  subscriptionStatus
+  subscriptionStatus,
+  userId
 }) => {
   const [prompt, setPrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           urlData={url}
           productName={productName}
           subscriptionStatus={subscriptionStatus}
+          userId={userId}
         />
       );
     }
@@ -60,7 +63,8 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus
+          'x-subscription-status': subscriptionStatus,
+          'x-user-id': userId
         },
         body: JSON.stringify({ prompt: prompt })
       });
