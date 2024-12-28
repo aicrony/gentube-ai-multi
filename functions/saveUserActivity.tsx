@@ -1,10 +1,11 @@
 import { Datastore } from '@google-cloud/datastore';
 import { GcloudUserActivity } from '@/interfaces/gcloudUserActivity';
+import { google_app_creds } from '@/interfaces/googleCredentials';
 require('dotenv').config();
 
 const datastore = new Datastore({
-  projectId: process.env.PROJECT_ID,
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  projectId: google_app_creds.project_id,
+  credentials: google_app_creds
 });
 
 const kind = 'UserActivity';
