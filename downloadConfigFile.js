@@ -4,7 +4,7 @@ const path = require('path');
 const bucketName = process.env.GOOGLE_CONFIG_BUCKET_NAME;
 const srcFilename = process.env.GOOGLE_CONFIG_FILE_NAME;
 const destFilename = path.join(
-  '/tmp',
+  __dirname,
   process.env.GOOGLE_APPLICATION_CREDENTIALS
 );
 
