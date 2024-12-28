@@ -41,3 +41,5 @@ yarn-error.log*
 certificates
 .env*.local
 /.idea/
+/local-cedar-324921-5c8f531afb2e.json
+/supabase/login_response.json
