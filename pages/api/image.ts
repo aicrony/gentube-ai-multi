@@ -181,6 +181,9 @@ export default async function handler(
         result = await callImageApi('none', imagePrompt);
       }
 
+      // const result =
+      //   'https://storage.googleapis.com/gen-image-storage/lgYgE6EcTcHh3hv6dFkK7.png';
+
       if (!result) {
         res.status(500).json({ error: 'An unknown error occurred' });
         return;

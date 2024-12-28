@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import axios from 'axios';
 import { Storage } from '@google-cloud/storage';
 import { GoogleAppCreds } from '@/interfaces/googleCredentials';
@@ -32,7 +31,7 @@ export async function uploadImageToGCSFromBase64(
   base64data: string
 ): Promise<string> {
   const imageBuffer = Buffer.from(base64data, 'base64');
-  const fileName = `${nanoid()}.png`;
+  const fileName = `fix_this_name.png`;
   const file = gcsBucket.file(fileName);
 
   await new Promise((resolve, reject) => {
