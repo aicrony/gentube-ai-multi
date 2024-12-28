@@ -1,0 +1,8 @@
+{
+  "build": {
+    "env": {
+      "GOOGLE_APPLICATION_CREDENTIALS": "/tmp/local-cedar-324921-5c8f531afb2e.json"
+    },
+    "buildCommand": "pnpm run prebuild"
+  }
+}

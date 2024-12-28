@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "next dev --turbo",
     "prebuild": "node downloadConfigFile.js",
-    "build": "pnpm run prebuild && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "prettier-fix": "prettier --write .",
