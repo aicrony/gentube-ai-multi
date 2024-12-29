@@ -8,4 +8,5 @@ export interface GcloudUserActivity {
   Prompt: string;
   SubscriptionTier: number;
   UserId: string | string[] | undefined;
+  UserIp: string | string[] | undefined;
 }

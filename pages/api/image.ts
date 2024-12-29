@@ -18,6 +18,8 @@ export default async function handler(
   const productName = req.headers['x-product-name'];
   const subscriptionStatus = req.headers['x-subscription-status'];
   const userId = req.headers['x-user-id'];
+  const userIp =
+    req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
   let monthlySubscriber: boolean = false;
   let subscriptionTier: number = 0;
 
@@ -134,7 +136,8 @@ export default async function handler(
         DateTime: new Date().toISOString(),
         Prompt: imagePrompt,
         SubscriptionTier: subscriptionTier,
-        UserId: userId
+        UserId: userId,
+        UserIp: userIp
       });
 
       console.log('Data saved: ', activityResponse);
@@ -226,7 +229,8 @@ export default async function handler(
         DateTime: new Date().toISOString(),
         Prompt: imagePrompt,
         SubscriptionTier: subscriptionTier,
-        UserId: userId
+        UserId: userId,
+        UserIp: userIp
       });
 
       console.log('Data saved: ', activityResponse);

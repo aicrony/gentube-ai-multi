@@ -33,7 +33,8 @@ export async function saveUserActivity(
       { name: 'DateTime', value: activity.DateTime },
       { name: 'Prompt', value: activity.Prompt },
       { name: 'SubscriptionTier', value: activity.SubscriptionTier },
-      { name: 'UserId', value: activity.UserId }
+      { name: 'UserId', value: activity.UserId },
+      { name: 'UserIp', value: activity.UserIp } // Add this line
     ]
   };
 
