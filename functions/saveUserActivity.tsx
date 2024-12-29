@@ -40,12 +40,10 @@ export async function saveUserActivity(
 
   try {
     await datastore.save(entity);
+    console.log(`Saved ${kind}: ${taskKey.id}`);
+    return taskKey.id;
   } catch (error) {
     console.error('Error saving activity', error);
-    return 'Error: ' + error;
+    return 'Error saving activity, check prompt log.';
   }
-
-  await datastore.save(entity);
-  console.log(`Saved ${kind}: ${taskKey.id}`);
-  return taskKey.id;
 }

@@ -24,6 +24,18 @@ export function VideoDynamicButton({
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  let videoGenButtonLabel: string;
+  let videoGenCompleteMessage: string;
+
+  console.log('Product Name (video button): ' + productName);
+  if (productName === '"HQ Video Creator"') {
+    videoGenButtonLabel = 'Generate HQ Video';
+    videoGenCompleteMessage = 'HQ Video Generation Complete';
+  } else {
+    videoGenButtonLabel = 'Generate Video';
+    videoGenCompleteMessage = 'Video Generation Complete';
+  }
+
   const handleGenerateVideo = async () => {
     // console.log('Product Name (video button): ' + productName);
     // console.log('Subscription Status (video button): ' + subscriptionStatus);
@@ -95,11 +107,11 @@ export function VideoDynamicButton({
           loading={isSubmitting}
           onClick={handleGenerateVideo}
         >
-          Generate Video
+          {videoGenButtonLabel}
         </Button>
         {videoData && (
           <div className={'padding-top-4'}>
-            <p>Video Generation Complete</p>
+            <p>{videoGenCompleteMessage}</p>
             <div>
               <video width="600" controls>
                 <source src={videoData} type="video/mp4" />

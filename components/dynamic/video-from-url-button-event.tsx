@@ -21,6 +21,17 @@ export function VideoFromUrlDynamicButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  let videoGenButtonLabel: string;
+  let videoGenCompleteMessage: string;
+
+  console.log('Product Name (video button): ' + productName);
+  if (productName === '"HQ Video Creator"') {
+    videoGenButtonLabel = 'Generate HQ Video from Image URL';
+    videoGenCompleteMessage = 'HQ Video Generation Complete';
+  } else {
+    videoGenButtonLabel = 'Generate Video from Image URL';
+    videoGenCompleteMessage = 'Video Generation Complete';
+  }
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -106,12 +117,12 @@ export function VideoFromUrlDynamicButton({
             loading={isSubmitting}
             onClick={handleGenerateVideo}
           >
-            Generate Video from Image URL
+            {videoGenButtonLabel}
           </Button>
         </div>
         {videoData && (
           <div className={'padding-top-4'}>
-            <p>Video Generation Complete</p>
+            <p>{videoGenCompleteMessage}</p>
             <div>
               <video width="600" controls>
                 <source src={videoData} type="video/mp4" />

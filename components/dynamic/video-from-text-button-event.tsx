@@ -109,8 +109,8 @@ export const VideoFromTextDynamicButton: React.FC<
             <div className="pt-2">
               <p>
                 Note:{' '}
-                <a href="/image-url-to-video">
-                  High Quality video must be created from an existing image.
+                <a href="/">
+                  High Quality Video is created from Image Gen or URL to Video.
                 </a>
               </p>
             </div>
