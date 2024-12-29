@@ -5,10 +5,6 @@ import { parse, serialize } from 'cookie';
 import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
 
-export const config = {
-  maxDuration: 120
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
