@@ -24,7 +24,7 @@ export function VideoFromUrlDynamicButton({
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  console.log('Product Name (video button): ' + productName);
+  // console.log('Product Name (video button): ' + productName);
   if (productName === '"HQ Video Creator"') {
     videoGenButtonLabel = 'Generate HQ Video from Image URL';
     videoGenCompleteMessage = 'HQ Video Generation Complete';

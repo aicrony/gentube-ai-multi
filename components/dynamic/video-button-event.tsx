@@ -27,7 +27,7 @@ export function VideoDynamicButton({
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  console.log('Product Name (video button): ' + productName);
+  // console.log('Product Name (video button): ' + productName);
   if (productName === '"HQ Video Creator"') {
     videoGenButtonLabel = 'Generate HQ Video';
     videoGenCompleteMessage = 'HQ Video Generation Complete';
