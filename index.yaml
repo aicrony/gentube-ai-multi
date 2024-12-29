@@ -1,0 +1,13 @@
+indexes:
+  - kind: UserActivity
+    properties:
+      - name: UserIp
+      - name: DateTime
+        direction: desc
+  - kind: UserActivity
+    properties:
+      - name: AssetType
+      - name: DateTime
+        direction: desc
+
+
