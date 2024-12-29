@@ -1,10 +1,10 @@
 {
   "functions": {
-    "api/image": {
+    "pages/api/image.ts": {
       "memory": 3009,
       "maxDuration": 200
     },
-    "api/video": {
+    "pages/api/video.ts": {
       "memory": 3009,
       "maxDuration": 300
     }
