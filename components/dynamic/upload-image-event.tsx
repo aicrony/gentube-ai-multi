@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -16,12 +16,6 @@ export const UploadImageDynamicButton: React.FC<
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [uploadResponse, setUploadResponse] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (base64Image) {
-      handleUploadImage();
-    }
-  }, [base64Image]);
 
   const handleUploadImage = async () => {
     setIsSubmitting(true);
@@ -70,15 +64,15 @@ export const UploadImageDynamicButton: React.FC<
         <div className="error-message-large">{errorMessage}</div>
       )}
       <div>
-        {/*<Button*/}
-        {/*  variant="slim"*/}
-        {/*  type="submit"*/}
-        {/*  className="mt-1"*/}
-        {/*  loading={isSubmitting}*/}
-        {/*  onClick={handleUploadImage}*/}
-        {/*>*/}
-        {/*  Upload Image*/}
-        {/*</Button>*/}
+        <Button
+          variant="slim"
+          type="submit"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={handleUploadImage}
+        >
+          Upload Image
+        </Button>
         {uploadResponse && (
           <div className={'margin-top-8'}>
             <p>Upload Response</p>

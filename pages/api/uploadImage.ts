@@ -24,7 +24,7 @@ export default async function handler(
     // For demonstration, we'll just return the received image data
     console.log('Saving image...');
     const imageUrl = await uploadImageToGCSFromBase64(
-      process.env.GCLOUD_USER_BUCKET_NAME,
+      process.env.GCLOUD_TEMP_PUBLIC_BUCKET_NAME,
       image
     );
     console.log('Image URL Created:', imageUrl);
