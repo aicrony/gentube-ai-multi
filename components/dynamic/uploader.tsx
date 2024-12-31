@@ -1,22 +1,33 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
 
 function Uploader() {
-  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heif']; // Add allowed extensions here
-
-  // @ts-ignore
-  const onDrop = useCallback((acceptedFiles) => {
-    // @ts-ignore
-    const filteredFiles = acceptedFiles.filter((file) => {
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heif'];
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const filteredFiles = acceptedFiles.filter((file: File) => {
       const fileExtension = file.name.split('.').pop();
       return allowedExtensions.includes(`.${fileExtension}`);
     });
 
-    // @ts-ignore
-    filteredFiles.forEach((file) => {
-      console.log(file.name);
-      // You can perform other actions with the file here
-    });
+    for (const file of filteredFiles) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64data = reader.result?.toString().split(',')[1];
+        if (base64data) {
+          try {
+            const gcsUrl = await uploadImageToGCSFromBase64(
+              'gentube-user-image-storage',
+              base64data
+            );
+            console.log(`File uploaded to GCS: ${gcsUrl}`);
+          } catch (error) {
+            console.error('Error uploading file to GCS:', error);
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });

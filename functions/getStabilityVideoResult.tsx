@@ -14,7 +14,7 @@ async function uploadVideoToGCS(
     credentials: google_app_creds
   });
 
-  const bucketName = process.env.GCLOUD_BUCKET_NAME;
+  const bucketName = process.env.GCLOUD_DEFAULT_BUCKET_NAME;
   const bucket = storage.bucket(`${bucketName}`);
 
   const file = bucket.file(fileName);

@@ -2,25 +2,37 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { Storage } from '@google-cloud/storage';
 import { google_app_creds } from '@/interfaces/googleCredentials';
+
 require('dotenv').config();
 
-// TODO: Storage for GCP, which requires higher security - https://cloud.google.com/run/docs/configuring/services/environment-variables
-// const storage = new Storage({ keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS });
-
-// Storage for Vercel
 const storage = new Storage({
   credentials: google_app_creds
 });
 
-const bucketName = 'gen-image-storage';
-const gcsBucket = storage.bucket(bucketName);
+function getBucketName(bucketName: string | undefined) {
+  if (bucketName == 'default') {
+    bucketName = 'gen-image-storage';
+  }
+  return bucketName;
+}
+
+function setBucketFile(fileName: string, bucketName: string | undefined) {
+  if (bucketName != null) {
+    const gcsBucket = storage.bucket(bucketName);
+    return gcsBucket.file(fileName);
+  }
+  throw new Error('Bucket name is required');
+}
 
 export async function uploadImageToGCSFromBase64(
+  bucketName: string | undefined,
   base64data: string
 ): Promise<string> {
   const imageBuffer = Buffer.from(base64data, 'base64');
   const fileName = `${uuidv4()}.png`;
-  const file = gcsBucket.file(fileName);
+
+  bucketName = getBucketName(bucketName);
+  const file = setBucketFile(fileName, bucketName);
 
   await new Promise((resolve, reject) => {
     const stream = file.createWriteStream({
@@ -39,6 +51,7 @@ export async function uploadImageToGCSFromBase64(
 }
 
 export default async function uploadImageToGCSFromUrl(
+  bucketName: string | undefined,
   imageUrl: string
 ): Promise<string> {
   console.log('IMAGE GOING TO GCS: ' + imageUrl);
@@ -47,7 +60,8 @@ export default async function uploadImageToGCSFromUrl(
   const pathParts = urlParts.pathname.split('/');
   const fileName = pathParts[pathParts.length - 1];
 
-  const file = gcsBucket.file(fileName);
+  bucketName = getBucketName(bucketName);
+  const file = setBucketFile(fileName, bucketName);
 
   const response = await axios({
     method: 'get',

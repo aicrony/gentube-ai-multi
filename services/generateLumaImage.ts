@@ -64,7 +64,7 @@ export default async function generateLumaImage(
       // console.log('Video URL:', response.data.assets.video);
       const imageResponse = await pingUntilImageCompleted(response.data.id);
       console.log('IMAGE URL: ' + imageResponse);
-      return await uploadImageToGCSFromUrl(imageResponse);
+      return await uploadImageToGCSFromUrl('default', imageResponse);
     }
   } catch (error) {
     console.error('An error occurred while generating the image:', error);

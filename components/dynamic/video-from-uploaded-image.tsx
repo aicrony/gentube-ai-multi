@@ -5,11 +5,15 @@ import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 import Uploader from '@/components/dynamic/uploader';
 
-export function VideoFromUploadedImageDynamicButton(
-  productName: string,
-  subscriptionStatus: string,
-  userId: string
-) {
+interface VideoFromUploadedImageDynamicButtonProps {
+  productName: string;
+  subscriptionStatus: string;
+  userId: string;
+}
+
+export const VideoFromUploadedImageDynamicButton: React.FC<
+  VideoFromUploadedImageDynamicButtonProps
+> = ({ productName, subscriptionStatus, userId }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,4 +114,4 @@ export function VideoFromUploadedImageDynamicButton(
       </div>
     </>
   );
-}
+};

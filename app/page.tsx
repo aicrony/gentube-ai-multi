@@ -12,6 +12,8 @@ import Button from '@/components/ui/Button';
 import { useProductName } from '@/context/ProductNameContext';
 import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 import { useUserId } from '@/context/UserIdContext';
+import FileInterpreter from '@/functions/FileInterpreter';
+import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -51,6 +53,9 @@ export default function Home() {
                 <Link to="/text-to-video" className="text-white">
                   <Button variant="slim">Video Gen</Button>
                 </Link>
+                <Link to="/upload-to-video" className="text-white">
+                  <Button variant="slim">Upload Image</Button>
+                </Link>
               </nav>
               <Routes>
                 <Route
@@ -83,6 +88,7 @@ export default function Home() {
                     />
                   }
                 />
+                <Route path="/upload-to-video" element={<FileInterpreter />} />
               </Routes>
             </div>
             <ImageGallery />

@@ -12,6 +12,10 @@ module.exports = {
       {
         source: '/text-to-video',
         destination: '/'
+      },
+      {
+        source: '/upload-to-video',
+        destination: '/'
       }
     ];
   }

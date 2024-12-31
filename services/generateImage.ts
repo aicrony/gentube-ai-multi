@@ -36,7 +36,10 @@ export default async function callImageApi(
     console.log('ASYNC URL Response:');
     // console.log(response);
     // Return the URL of the uploaded image
-    return await uploadImageToGCSFromBase64(response.data[0].b64_json);
+    return await uploadImageToGCSFromBase64(
+      'default',
+      response.data[0].b64_json
+    );
   } catch (err) {
     console.log(err);
     return err;

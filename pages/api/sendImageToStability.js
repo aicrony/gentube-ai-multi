@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   const storage = new Storage();
-  const bucket = storage.bucket(process.env.GCLOUD_BUCKET_NAME);
+  const bucket = storage.bucket(process.env.GCLOUD_DEFAULT_BUCKET_NAME);
 
   const file = bucket.file(imageName);
   const stream = file.createReadStream();
