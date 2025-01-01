@@ -1,3 +1,8 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { fileTypeFromBuffer } from 'file-type';
+import heicConvert from 'heic-convert';
+import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
+
 export const config = {
   api: {
     bodyParser: {
@@ -5,8 +10,6 @@ export const config = {
     }
   }
 };
-import { NextApiRequest, NextApiResponse } from 'next';
-import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,18 +29,35 @@ export default async function handler(
   }
 
   try {
-    // console.log('Image Data: ', image);
-    // Here you would handle the image upload logic, e.g., saving to a storage service
-    // For demonstration, we'll just return the received image data
-    console.log('Saving image...');
+    let imageBuffer = Buffer.from(image, 'base64');
+    const fileType = await fileTypeFromBuffer(imageBuffer);
+
+    if (!fileType) {
+      res.status(400).json({ error: 'File type could not be determined' });
+      return;
+    }
+
+    if (fileType.ext === 'heic') {
+      // Convert HEIC to PNG
+      const outputBuffer = await heicConvert({
+        buffer: imageBuffer, // the HEIC file buffer
+        format: 'PNG', // output format
+        quality: 1 // quality of the output image, between 0 and 1
+      });
+      imageBuffer = outputBuffer;
+    }
+
+    console.log('fileType:', fileType.ext);
+
+    const base64Image = imageBuffer.toString('base64');
     const imageUrl = await uploadImageToGCSFromBase64(
       process.env.GCLOUD_TEMP_PUBLIC_BUCKET_NAME,
-      image
+      base64Image
     );
-    console.log('Image URL Created:', imageUrl);
 
-    res.status(200).json({ url: imageUrl });
+    res.status(200).json({ url: imageUrl, fileType: fileType.ext });
   } catch (error) {
+    console.error('Conversion error:', error);
     res
       .status(500)
       .json({ error: 'An error occurred while uploading the image' });

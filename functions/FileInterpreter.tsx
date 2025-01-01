@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
 import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
+import { fileTypeFromBuffer } from 'file-type';
 
 const FileInterpreter: React.FC = () => {
   const [base64Data, setBase64Data] = useState<string | null>(null);
@@ -9,23 +10,30 @@ const FileInterpreter: React.FC = () => {
     height: number;
   } | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
   const subscriptionTier = Number(useSubscriptionTier().subscriptionTier);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileSize(file.size);
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const base64String = reader.result?.toString().split(',')[1];
         setBase64Data(base64String || null);
 
         if (base64String) {
+          const buffer = Buffer.from(base64String, 'base64');
+          const type = await fileTypeFromBuffer(buffer);
+          setFileType(type?.ext || 'unknown');
+
           const img = new Image();
           img.onload = () => {
             setImageSize({ width: img.width, height: img.height });
           };
-          img.src = `data:image/png;base64,${base64String}`;
+          img.src = `data:image/${type?.ext};base64,${base64String}`;
         }
       };
       reader.readAsDataURL(file);
@@ -51,7 +59,7 @@ const FileInterpreter: React.FC = () => {
             <p>
               Unfortunately, you need to be a premium subscriber to upload
               files. Select the{' '}
-              <a href={'/pricing'}>HQ Video Creator on thePricing Page</a> to
+              <a href={'/pricing'}>HQ Video Creator on the Pricing Page</a> to
               upgrade your subscription.
             </p>
           </div>
@@ -67,11 +75,17 @@ const FileInterpreter: React.FC = () => {
               </p>
             )}
             {fileSize !== null && <p>Bytes: {formatFileSize(fileSize)}</p>}
-            <img
-              src={`data:image/png;base64,${base64Data}`}
-              alt="Uploaded image."
-            />
+            {fileType && <p>File Type: {fileType}</p>}
           </div>
+
+          {fileType !== 'heic' && (
+            <img
+              src={`data:image/${fileType};base64,${base64Data}`}
+              alt="Uploaded image."
+              style={{ maxWidth: '140px' }}
+            />
+          )}
+
           <UploadImageDynamicButton
             base64Image={base64Data}
             productName="ExampleProduct"
