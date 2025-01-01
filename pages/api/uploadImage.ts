@@ -1,3 +1,10 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '2mb' // Set the maximum body size to 2MB
+    }
+  }
+};
 import { NextApiRequest, NextApiResponse } from 'next';
 import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
 
