@@ -10,6 +10,7 @@ import 'styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { ProductNameProvider } from '@/context/ProductNameContext';
 import { SubscriptionStatusProvider } from '@/context/SubscriptionStatusContext';
+import { SubscriptionTierProvider } from '@/context/SubscriptionTierContext';
 import { UserIdProvider } from '@/context/UserIdContext';
 
 const title = 'Gentube AI Image and Video Generator';
@@ -76,20 +77,25 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <UserIdProvider userId={userId}>
           <ProductNameProvider productName={productName}>
             <SubscriptionStatusProvider subscriptionStatus={subscriptionStatus}>
-              <Navbar
+              <SubscriptionTierProvider
                 productName={productName}
                 subscriptionStatus={subscriptionStatus}
-              />
-              <main
-                id="skip"
-                className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
               >
-                {children}
-              </main>
-              <Footer />
-              <Suspense>
-                <Toaster />
-              </Suspense>
+                <Navbar
+                  productName={productName}
+                  subscriptionStatus={subscriptionStatus}
+                />
+                <main
+                  id="skip"
+                  className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
+                >
+                  {children}
+                </main>
+                <Footer />
+                <Suspense>
+                  <Toaster />
+                </Suspense>
+              </SubscriptionTierProvider>
             </SubscriptionStatusProvider>
           </ProductNameProvider>
         </UserIdProvider>

@@ -13,7 +13,6 @@ import { useProductName } from '@/context/ProductNameContext';
 import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 import { useUserId } from '@/context/UserIdContext';
 import FileInterpreter from '@/functions/FileInterpreter';
-import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),

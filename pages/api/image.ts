@@ -3,6 +3,7 @@ import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
+import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,27 +25,11 @@ export default async function handler(
   let subscriptionTier: number = 0;
   let result;
 
-  if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
-    MAX_REQUESTS_PER_MONTH = 200; // Subscription limit - count monthly
-    monthlySubscriber = true;
-    subscriptionTier = 1;
-  } else if (
-    productName === '"Video Creator"' &&
-    subscriptionStatus === '"active"'
-  ) {
-    MAX_REQUESTS_PER_MONTH = 200; // Subscription limit - count monthly
-    monthlySubscriber = true;
-    subscriptionTier = 2;
-  } else if (
-    productName === '"HQ Video Creator"' &&
-    subscriptionStatus === '"active"'
-  ) {
-    MAX_REQUESTS_PER_MONTH = 220; // Subscription limit - count monthly
-    monthlySubscriber = true;
-    subscriptionTier = 3;
-  } else {
-    subscriptionTier = 0;
-  }
+  const subscriptionObject = useSubscriptionTier();
+
+  subscriptionTier = subscriptionObject.subscriptionTier;
+  MAX_REQUESTS_PER_MONTH = subscriptionObject.maxRequestsPerMonth;
+  monthlySubscriber = subscriptionObject.monthlySubscriber;
 
   console.log('productName (image api): ', productName);
   console.log('subscriptionStatus (image api): ', subscriptionStatus);

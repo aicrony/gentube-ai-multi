@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
+import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
 
 const FileInterpreter: React.FC = () => {
   const [base64Data, setBase64Data] = useState<string | null>(null);
+  const subscriptionTier = Number(useSubscriptionTier().subscriptionTier);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -19,7 +21,22 @@ const FileInterpreter: React.FC = () => {
   return (
     <div>
       <input type="file" onChange={handleFileChange} />
-      {base64Data && (
+      {base64Data && subscriptionTier != 3 && (
+        <div>
+          <div>
+            <p>
+              Thank you for your interest in uploading a file to Gentube.ai.
+            </p>
+            <p>
+              Unfortunately, you need to be a premium subscriber to upload
+              files. Select the HQ Video Creator on the{' '}
+              <a href={'/pricing'}>Pricing Page</a> to upgrade your
+              subscription.
+            </p>
+          </div>
+        </div>
+      )}
+      {base64Data && subscriptionTier == 3 && (
         <div>
           <div>
             <p>Base64 Data:</p>
