@@ -29,9 +29,9 @@ const FileInterpreter: React.FC = () => {
             </p>
             <p>
               Unfortunately, you need to be a premium subscriber to upload
-              files. Select the HQ Video Creator on the{' '}
-              <a href={'/pricing'}>Pricing Page</a> to upgrade your
-              subscription.
+              files. Select the{' '}
+              <a href={'/pricing'}>HQ Video Creator on thePricing Page</a> to
+              upgrade your subscription.
             </p>
           </div>
         </div>
