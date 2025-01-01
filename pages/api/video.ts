@@ -4,6 +4,7 @@ import callHqVideoApi from '@/services/generateFalVideo';
 import { parse, serialize } from 'cookie';
 import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
+import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,25 +23,14 @@ export default async function handler(
   let subscriptionTier: number = 0;
   let result;
 
-  if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
-    MAX_REQUESTS_PER_MONTH = 0; // Detect zero to know they are not on subscription - count daily
-    monthlySubscriber = true;
-    subscriptionTier = 1;
-  } else if (
-    productName === '"Video Creator"' &&
-    subscriptionStatus === '"active"'
-  ) {
-    MAX_REQUESTS_PER_MONTH = 100; // Subscription limit - count monthly
-    monthlySubscriber = true;
-    subscriptionTier = 2;
-  } else if (
-    productName === '"HQ Video Creator"' &&
-    subscriptionStatus === '"active"'
-  ) {
-    MAX_REQUESTS_PER_MONTH = 120; // Subscription limit - count monthly
-    monthlySubscriber = true;
-    subscriptionTier = 3;
-  }
+  const subscriptionObject = getSubscriptionTier(
+    productName,
+    subscriptionStatus
+  );
+
+  subscriptionTier = subscriptionObject.subscriptionTier;
+  MAX_REQUESTS_PER_MONTH = subscriptionObject.maxRequestsPerMonth;
+  monthlySubscriber = subscriptionObject.monthlySubscriber;
 
   console.log('productName (video api): ', productName);
   console.log('subscriptionStatus (video api): ', subscriptionStatus);

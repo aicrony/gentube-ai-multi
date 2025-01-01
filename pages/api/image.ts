@@ -3,7 +3,7 @@ import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
-import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
+import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,7 +25,10 @@ export default async function handler(
   let subscriptionTier: number = 0;
   let result;
 
-  const subscriptionObject = useSubscriptionTier();
+  const subscriptionObject = getSubscriptionTier(
+    productName,
+    subscriptionStatus
+  );
 
   subscriptionTier = subscriptionObject.subscriptionTier;
   MAX_REQUESTS_PER_MONTH = subscriptionObject.maxRequestsPerMonth;
