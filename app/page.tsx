@@ -11,6 +11,7 @@ import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useProductName } from '@/context/ProductNameContext';
 import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
+import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
 import { useUserId } from '@/context/UserIdContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 
@@ -22,6 +23,7 @@ const BrowserRouter = dynamic(
 export default function Home() {
   const productName = useProductName();
   const subscriptionStatus = useSubscriptionStatus();
+  const subscriptionTier = useSubscriptionTier();
   const userId = useUserId();
   const displayName =
     productName && productName.trim() !== '' && subscriptionStatus == '"active"'
@@ -52,9 +54,11 @@ export default function Home() {
                 <Link to="/text-to-video" className="text-white">
                   <Button variant="slim">Video Gen</Button>
                 </Link>
-                <Link to="/upload-to-video" className="text-white">
-                  <Button variant="slim">Upload Image</Button>
-                </Link>
+                {subscriptionTier && subscriptionTier.subscriptionTier == 3 && (
+                  <Link to="/upload-to-video" className="text-white">
+                    <Button variant="slim">Upload Image</Button>
+                  </Link>
+                )}
               </nav>
               <Routes>
                 <Route
