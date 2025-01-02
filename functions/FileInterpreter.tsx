@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
 import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
+import { useProductName } from '@/context/ProductNameContext';
+import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
+import { useUserId } from '@/context/UserIdContext';
 import { fileTypeFromBuffer } from 'file-type';
 
 const FileInterpreter: React.FC = () => {
@@ -12,6 +15,9 @@ const FileInterpreter: React.FC = () => {
   const [fileSize, setFileSize] = useState<number | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
   const subscriptionTier = Number(useSubscriptionTier().subscriptionTier);
+  const productName = useProductName();
+  const subscriptionStatus = useSubscriptionStatus();
+  const userId = useUserId();
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -88,9 +94,9 @@ const FileInterpreter: React.FC = () => {
 
           <UploadImageDynamicButton
             base64Image={base64Data}
-            productName="ExampleProduct"
-            subscriptionStatus="active"
-            userId="12345"
+            productName={productName}
+            subscriptionStatus={subscriptionStatus}
+            userId={userId}
           />
         </div>
       )}
