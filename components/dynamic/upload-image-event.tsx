@@ -73,12 +73,15 @@ export const UploadImageDynamicButton: React.FC<
         </Button>
         {uploadResponse && (
           <div className={'margin-top-8'}>
-            <p>Upload Response</p>
-            <pre>
-              <a href={uploadResponse} target="_blank">
-                View Image
-              </a>
-            </pre>
+            <p>Image Uploaded</p>
+            <p>View Image</p>
+            <a
+              href={uploadResponse}
+              target={'_blank'}
+              className={'textUnderline'}
+            >
+              {uploadResponse}
+            </a>
           </div>
         )}
       </div>
