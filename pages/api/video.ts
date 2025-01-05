@@ -6,6 +6,7 @@ import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 import { getUserCredits, updateUserCredits } from '@/functions/userCredits';
+import callImageApi from '@/services/generateImage';
 
 export default async function handler(
   req: NextApiRequest,
@@ -55,6 +56,7 @@ export default async function handler(
   }
 
   try {
+    // Prompt declaration
     const videoDescription = req.body.description as string;
     const imageUrl = req.body.url as string | undefined;
 
@@ -63,10 +65,23 @@ export default async function handler(
       result =
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
     } else {
-      result = await callVideoApi(imageUrl || 'none', videoDescription);
+      if (subscriptionTier == 1) {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      } else if (subscriptionTier == 2) {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      } else if (subscriptionTier == 3) {
+        result = await callHqVideoApi(imageUrl || 'none', videoDescription);
+      } else {
+        result = await callVideoApi(imageUrl || 'none', videoDescription);
+      }
     }
 
     console.log('****** VIDEO RESULT: ********');
+    // Check for error response code
+    if (result.error) {
+      res.status(result.error.code).json({ error: result.error.message });
+      return;
+    }
     console.log(result);
 
     // Update user credits

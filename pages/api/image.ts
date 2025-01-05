@@ -5,6 +5,14 @@ import { saveUserActivity } from '@/functions/saveUserActivity';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 import { getUserCredits, updateUserCredits } from '@/functions/userCredits';
 
+type ImageApiResult = {
+  error?: {
+    code: number;
+    message: string;
+  };
+  url?: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -53,19 +61,28 @@ export default async function handler(
   }
 
   try {
-    const imageDescription = (req.body.description as string) || '';
-    const imageUrl = (req.body.url as string) || '';
+    // Prompt declaration
+    const { prompt: imagePrompt } = req.body;
+    const imageUrl = req.body.url as string | '';
 
     let result;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       result =
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
     } else {
-      result = await callImageApi(imageUrl || 'none', imageDescription);
+      if (subscriptionTier == 1) {
+        result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+      } else if (subscriptionTier == 2) {
+        result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+      } else if (subscriptionTier == 3) {
+        result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+      } else {
+        result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+      }
     }
 
     console.log('****** IMAGE RESULT: ********');
-    console.log(result);
+    console.log(JSON.stringify(result));
 
     // Update user credits
     userCredits -= 1;
@@ -82,13 +99,13 @@ export default async function handler(
 
     // Data save
     const activityResponse = await saveUserActivity({
-      AssetSource: imageUrl,
+      AssetSource: '',
       AssetType: 'img',
       CountedAssetPreviousState: userCredits + 1,
       CountedAssetState: userCredits,
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
-      Prompt: imageDescription,
+      Prompt: imagePrompt,
       SubscriptionTier: subscriptionTier,
       UserId: userId,
       UserIp: userIp

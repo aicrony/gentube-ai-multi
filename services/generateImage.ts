@@ -21,6 +21,7 @@ export default async function callImageApi(
     Authorization: process.env.OPENAI_API_KEY_W_BEARER
   };
 
+  console.log('imageDescription: ' + imageDescription);
   const params = {
     model: process.env.OPENAI_MODEL_ID,
     prompt: imageDescription,
