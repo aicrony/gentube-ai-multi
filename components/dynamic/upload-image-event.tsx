@@ -184,11 +184,11 @@ export const UploadImageDynamicButton: React.FC<
                 <div>
                   <Downloader fileUrl={videoData} />
                 </div>
-              </div>
-            )}
-            {userCredits !== null && (
-              <div className={'padding-top-4'}>
-                <p>Remaining Credits: {userCredits}</p>
+                {userCredits !== null && (
+                  <div className={'padding-top-4'}>
+                    <p>Remaining Credits: {userCredits}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

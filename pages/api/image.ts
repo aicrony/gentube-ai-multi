@@ -64,20 +64,26 @@ export default async function handler(
     // Prompt declaration
     const { prompt: imagePrompt } = req.body;
     const imageUrl = req.body.url as string | '';
+    let creditCost = 100;
 
     let result;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       result =
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
+      creditCost = 4;
     } else {
       if (subscriptionTier == 1) {
         result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+        creditCost = 4;
       } else if (subscriptionTier == 2) {
         result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+        creditCost = 4;
       } else if (subscriptionTier == 3) {
         result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+        creditCost = 4;
       } else {
         result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+        creditCost = 4;
       }
     }
 
@@ -85,7 +91,7 @@ export default async function handler(
     console.log(JSON.stringify(result));
 
     // Update user credits
-    userCredits -= 1;
+    userCredits -= creditCost;
     await updateUserCredits(userId, userIp, userCredits);
 
     res.setHeader('Set-Cookie', [
@@ -101,7 +107,7 @@ export default async function handler(
     const activityResponse = await saveUserActivity({
       AssetSource: '',
       AssetType: 'img',
-      CountedAssetPreviousState: userCredits + 1,
+      CountedAssetPreviousState: creditCost,
       CountedAssetState: userCredits,
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
