@@ -21,10 +21,11 @@ export function VideoFromUrlDynamicButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
+
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  // console.log('Product Name (video button): ' + productName);
   if (productName === '"HQ Video Creator"') {
     videoGenButtonLabel = 'Generate HQ Video from Image URL';
     videoGenCompleteMessage = 'HQ Video Generation Complete';
@@ -80,6 +81,7 @@ export function VideoFromUrlDynamicButton({
           'video-from-url-button-event DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
+        setUserCredits(userCredits);
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -138,6 +140,11 @@ export function VideoFromUrlDynamicButton({
             <div>
               <Downloader fileUrl={videoData} />
             </div>
+          </div>
+        )}
+        {userCredits !== null && (
+          <div className={'padding-top-4'}>
+            <p>Remaining Credits: {userCredits}</p>
           </div>
         )}
       </div>

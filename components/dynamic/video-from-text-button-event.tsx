@@ -18,10 +18,8 @@ export const VideoFromTextDynamicButton: React.FC<
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
   let hqLink: boolean = false;
-
-  // console.log('Product Name (video button): ' + productName);
-  // console.log('Subscription Status (video button): ' + subscriptionStatus);
 
   if (
     subscriptionStatus === '"active"' &&
@@ -76,6 +74,7 @@ export const VideoFromTextDynamicButton: React.FC<
           'video-from-text-button-event DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
+        setUserCredits(userCredits);
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -134,6 +133,11 @@ export const VideoFromTextDynamicButton: React.FC<
             <div>
               <Downloader fileUrl={videoData} />
             </div>
+          </div>
+        )}
+        {userCredits !== null && (
+          <div className={'padding-top-4'}>
+            <p>Remaining Credits: {userCredits}</p>
           </div>
         )}
       </div>

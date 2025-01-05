@@ -19,6 +19,7 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -67,8 +68,8 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
           'video-from-uploaded-image DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
+        setUserCredits(userCredits);
       }
-      setVideoData(data); // set the state with the received data
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
       console.log(error);
@@ -116,6 +117,11 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
             <div>
               <Downloader fileUrl={videoData} />
             </div>
+          </div>
+        )}
+        {userCredits !== null && (
+          <div className={'padding-top-4'}>
+            <p>Remaining Credits: {userCredits}</p>
           </div>
         )}
       </div>

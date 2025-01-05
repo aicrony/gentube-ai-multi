@@ -20,9 +20,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [imageData, setImageData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // console.log('Product Name (image button): ' + productName);
-  // console.log('Subscription Status (image button): ' + subscriptionStatus);
+  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -93,6 +91,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         console.log('Result:', result);
         console.log('UserCredits:', userCredits);
         setImageData(result); // set the url of the response
+        setUserCredits(userCredits); // set user credits from response
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -126,6 +125,11 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         >
           Generate Image
         </Button>
+        {userCredits !== null && (
+          <div className={'padding-top-4'}>
+            <p>Remaining Credits: {userCredits}</p>
+          </div>
+        )}
         {imageData && (
           <div className={'margin-top-8'}>
             <p>View Image</p>

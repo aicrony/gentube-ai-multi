@@ -23,11 +23,11 @@ export function VideoDynamicButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userCredits, setUserCredits] = useState<any>(null);
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  // console.log('Product Name (video button): ' + productName);
   if (productName === '"HQ Video Creator"') {
     videoGenButtonLabel = 'Generate HQ Video';
     videoGenCompleteMessage = 'HQ Video Generation Complete';
@@ -37,9 +37,6 @@ export function VideoDynamicButton({
   }
 
   const handleGenerateVideo = async () => {
-    // console.log('Product Name (video button): ' + productName);
-    // console.log('Subscription Status (video button): ' + subscriptionStatus);
-
     setIsSubmitting(true); // Disable the button while the request is being handled
     console.log('Video Generation button clicked');
     setVideoData(null); // clear the videoData state
@@ -82,6 +79,7 @@ export function VideoDynamicButton({
         console.log('UserCredits: ', userCredits);
         console.log('video-button-event DATA RECEIVED:' + JSON.stringify(data));
         setVideoData(result);
+        setUserCredits(userCredits);
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -125,6 +123,11 @@ export function VideoDynamicButton({
             <div>
               <Downloader fileUrl={videoData} />
             </div>
+          </div>
+        )}
+        {userCredits !== null && (
+          <div className={'padding-top-4'}>
+            <p>Remaining Credits: {userCredits}</p>
           </div>
         )}
       </div>

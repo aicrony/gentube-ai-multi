@@ -118,6 +118,7 @@ export const UploadImageDynamicButton: React.FC<
         console.log('UserCredits: ', userCredits);
         console.log('upload-image-event DATA RECEIVED:' + JSON.stringify(data));
         setVideoData(result);
+        setUserCredits(userCredits); // Set user credits from response
       }
     } catch (error) {
       setIsSubmitting(false);
@@ -183,6 +184,11 @@ export const UploadImageDynamicButton: React.FC<
                 <div>
                   <Downloader fileUrl={videoData} />
                 </div>
+              </div>
+            )}
+            {userCredits !== null && (
+              <div className={'padding-top-4'}>
+                <p>Remaining Credits: {userCredits}</p>
               </div>
             )}
           </div>
