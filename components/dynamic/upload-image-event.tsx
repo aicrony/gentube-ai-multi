@@ -18,11 +18,11 @@ export const UploadImageDynamicButton: React.FC<
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoData, setVideoData] = useState<any>(null);
   const [videoDescription, setVideoDescription] = useState<string>('');
+  const [userCredits, setUserCredits] = useState<number | null>(null);
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  // console.log('Product Name (video button): ' + productName);
   if (productName === '"HQ Video Creator"') {
     videoGenButtonLabel = 'Generate HQ Video';
     videoGenCompleteMessage = 'HQ Video Generation Complete';
@@ -51,7 +51,7 @@ export const UploadImageDynamicButton: React.FC<
         setIsSubmitting(false);
         if (response.status === 429) {
           setErrorMessage(
-            'Daily IMAGE upload limit exceeded. Please subscribe on the PRICING page.'
+            'IMAGE upload limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
@@ -66,6 +66,7 @@ export const UploadImageDynamicButton: React.FC<
       setUploadResponse(
         JSON.stringify(dataResponse.url, null, 2).replace(/^"|"$/g, '')
       );
+      setUserCredits(dataResponse.userCredits); // Set user credits from response
     } catch (error) {
       setIsSubmitting(false);
       console.error('There was an error with the fetch operation: ', error);
@@ -73,11 +74,11 @@ export const UploadImageDynamicButton: React.FC<
   };
 
   const handleGenerateVideo = async () => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
+    setIsSubmitting(true);
     console.log('Video Generation from Uploaded Image button clicked');
     console.log(uploadResponse);
-    setVideoData(null); // clear the videoData state
-    setErrorMessage(null); // clear any previous error message
+    setVideoData(null);
+    setErrorMessage(null);
     try {
       const response = await fetch('/api/video', {
         method: 'POST',
@@ -93,10 +94,12 @@ export const UploadImageDynamicButton: React.FC<
         })
       });
       if (!response.ok) {
-        setIsSubmitting(false); // Response is received, enable the button
+        setIsSubmitting(false);
         if (response.status === 429) {
+          const errorData = await response.json();
           setErrorMessage(
-            'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+            errorData.error ||
+              'VIDEO request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
@@ -106,16 +109,18 @@ export const UploadImageDynamicButton: React.FC<
         }
         return;
       }
-      let data = {};
-      if (response.headers) {
+      let data: { result?: any; userCredits?: any } = {};
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        data = await response.json();
+        const { result, userCredits } = data;
         setIsSubmitting(false); // Response is received, enable the button
-        data = await response.text();
+        console.log('Result: ', result);
+        console.log('UserCredits: ', userCredits);
+        console.log('upload-image-event DATA RECEIVED:' + JSON.stringify(data));
+        setVideoData(result);
       }
-      console.log('FrontEnd Video ID Received');
-      console.log('DATA RECEIVED:' + data);
-      setVideoData(data); // set the state with the received data
     } catch (error) {
-      setIsSubmitting(false); // Response is received, enable the button
+      setIsSubmitting(false);
       console.log(error);
       console.error('There was an error with the fetch operation: ', error);
     }

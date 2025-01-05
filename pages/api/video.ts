@@ -86,7 +86,7 @@ export default async function handler(
     const activityResponse = await saveUserActivity({
       AssetSource: imageUrl,
       AssetType: 'vid',
-      CountedAssetPreviousState: userCredits - 1,
+      CountedAssetPreviousState: userCredits + 1,
       CountedAssetState: userCredits,
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
@@ -99,7 +99,7 @@ export default async function handler(
     console.log('Data saved: ', activityResponse);
 
     res.setHeader('Content-Type', 'application/json');
-    res.status(200).send(result);
+    res.status(200).json({ result, userCredits });
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });

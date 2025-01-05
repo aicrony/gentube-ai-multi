@@ -72,8 +72,10 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {
+          const errorData = await response.json();
           setErrorMessage(
-            'Daily IMAGE request limit exceeded. Please subscribe on the PRICING page.'
+            errorData.error ||
+              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
@@ -83,12 +85,15 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         }
         return;
       }
-      let dataResponse = {};
+      let dataResponse: { result?: any; userCredits?: any } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
+        const { result, userCredits } = dataResponse;
         setIsSubmitting(false); // Response is received, enable the button
+        console.log('Result:', result);
+        console.log('UserCredits:', userCredits);
+        setImageData(result); // set the url of the response
       }
-      setImageData(dataResponse); // set the url of the response
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
       console.error('There was an error with the fetch operation: ', error);

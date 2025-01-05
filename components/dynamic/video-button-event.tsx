@@ -60,8 +60,10 @@ export function VideoDynamicButton({
       if (!response.ok) {
         setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {
+          const errorData = await response.json();
           setErrorMessage(
-            'Daily VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+            errorData.error ||
+              'VIDEO request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
@@ -71,14 +73,16 @@ export function VideoDynamicButton({
         }
         return;
       }
-      let data = {};
-      if (response.headers) {
+      let data: { result?: any; userCredits?: any } = {};
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        data = await response.json();
+        const { result, userCredits } = data;
         setIsSubmitting(false); // Response is received, enable the button
-        data = await response.text();
+        console.log('Result: ', result);
+        console.log('UserCredits: ', userCredits);
+        console.log('video-button-event DATA RECEIVED:' + JSON.stringify(data));
+        setVideoData(result);
       }
-      console.log('FrontEnd Video ID Received');
-      console.log('DATA RECEIVED:' + data);
-      setVideoData(data); // set the state with the received data
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
       console.log(error);
