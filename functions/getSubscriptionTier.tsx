@@ -2,39 +2,41 @@ export function getSubscriptionTier(
   productName: string | string[] | undefined,
   subscriptionStatus: string | string[] | undefined
 ): {
-  monthlySubscriber: boolean;
+  currentSubscriber: boolean;
   subscriptionTier: number;
-  maxRequestsPerMonth: number;
+  availableCredits: number;
 } {
-  let monthlySubscriber: boolean = false;
+  let currentSubscriber: boolean = false;
   let subscriptionTier: number = 0;
-  let maxRequestsPerMonth: number = 0;
+  let availableCredits: number = 0;
 
   if (productName === '"Image Creator"' && subscriptionStatus === '"active"') {
-    maxRequestsPerMonth = 200; // Subscription limit - count monthly
-    monthlySubscriber = true;
+    availableCredits = 500; // Subscription limit - count monthly
+    currentSubscriber = true;
     subscriptionTier = 1;
   } else if (
     productName === '"Video Creator"' &&
     subscriptionStatus === '"active"'
   ) {
-    maxRequestsPerMonth = 200; // Subscription limit - count monthly
-    monthlySubscriber = true;
+    availableCredits = 1000; // Subscription limit - count monthly
+    currentSubscriber = true;
     subscriptionTier = 2;
   } else if (
     productName === '"HQ Video Creator"' &&
     subscriptionStatus === '"active"'
   ) {
-    maxRequestsPerMonth = 220; // Subscription limit - count monthly
-    monthlySubscriber = true;
+    availableCredits = 1500; // Subscription limit - count monthly
+    currentSubscriber = true;
     subscriptionTier = 3;
   } else {
+    availableCredits = 50; // Free tier limit
+    currentSubscriber = false;
     subscriptionTier = 0;
   }
 
   return {
-    monthlySubscriber,
+    currentSubscriber,
     subscriptionTier,
-    maxRequestsPerMonth
+    availableCredits
   };
 }

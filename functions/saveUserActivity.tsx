@@ -19,6 +19,8 @@ export async function saveUserActivity(
     path: [kind]
   });
 
+  console.log('Activity: ', activity);
+
   const entity = {
     key: taskKey,
     data: [

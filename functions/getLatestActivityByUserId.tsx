@@ -17,7 +17,7 @@ export async function getLatestActivityByIp(
 ): Promise<GcloudUserActivity | null> {
   const query = datastore
     .createQuery(namespace, kind)
-    .filter('UserIp', '=', userIp)
+    .filter('UserId', '=', userIp)
     .order('DateTime', { descending: true })
     .limit(1);
 
