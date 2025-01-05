@@ -29,7 +29,7 @@ export default async function handler(
   );
 
   const subscriptionTier = subscriptionObject.subscriptionTier;
-  const availableCredits = subscriptionObject.availableCredits;
+  const initialCredits = subscriptionObject.initialCredits;
   const currentSubscriber = subscriptionObject.currentSubscriber;
 
   console.log('productName (video api): ', productName);
@@ -40,7 +40,7 @@ export default async function handler(
   let userCredits = await getUserCredits(userId, userIp);
 
   if (userCredits === null) {
-    userCredits = availableCredits;
+    userCredits = initialCredits;
     await updateUserCredits(userId, userIp, userCredits);
   }
 
