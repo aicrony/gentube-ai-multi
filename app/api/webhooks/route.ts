@@ -5,7 +5,8 @@ import {
   upsertPriceRecord,
   manageSubscriptionStatusChange,
   deleteProductRecord,
-  deletePriceRecord
+  deletePriceRecord,
+  addCustomerCredit
 } from '@/utils/supabase/admin';
 
 const relevantEvents = new Set([
@@ -18,7 +19,10 @@ const relevantEvents = new Set([
   'checkout.session.completed',
   'customer.subscription.created',
   'customer.subscription.updated',
-  'customer.subscription.deleted'
+  'customer.subscription.deleted',
+  'payment_intent.created',
+  'payment_intent.succeeded',
+  'charge.succeeded'
 ]);
 
 export async function POST(req: Request) {
@@ -59,6 +63,7 @@ export async function POST(req: Request) {
           const subscription = event.data.object as Stripe.Subscription;
           await manageSubscriptionStatusChange(
             subscription.id,
+
             subscription.customer as string,
             event.type === 'customer.subscription.created'
           );
@@ -73,7 +78,23 @@ export async function POST(req: Request) {
               true
             );
           }
+          if (checkoutSession.mode === 'payment') {
+            const paymentIntent = checkoutSession.payment_intent;
+            // creditId: string,
+            //   customerId: string,
+            //   amount: number,
+            //   currency: string
+            await addCustomerCredit(
+              paymentIntent as string,
+              checkoutSession.customer as string,
+              checkoutSession.amount_total as number,
+              checkoutSession.currency as string
+            );
+          }
           break;
+        case 'payment_intent.created':
+        case 'payment_intent.succeeded':
+        case 'charge.succeeded':
         default:
           throw new Error('Unhandled relevant event!');
       }

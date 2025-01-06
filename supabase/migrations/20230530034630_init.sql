@@ -1,4 +1,4 @@
-/** 
+/**
 * USERS
 * Note: This table contains user data. Users should only be able to view and update their own data.
 */
@@ -18,8 +18,8 @@ create policy "Can update own user data." on users for update using (auth.uid() 
 
 /**
 * This trigger automatically creates a user entry when a new user signs up via Supabase Auth.
-*/ 
-create function public.handle_new_user() 
+*/
+create function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.users (id, full_name, avatar_url)
@@ -44,7 +44,7 @@ create table customers (
 alter table customers enable row level security;
 -- No policies as this is a private table that the user must not have access to.
 
-/** 
+/**
 * PRODUCTS
 * Note: products are created and managed in Stripe and synced to our DB via Stripe webhooks.
 */
@@ -75,7 +75,7 @@ create table prices (
   -- Price ID from Stripe, e.g. price_1234.
   id text primary key,
   -- The ID of the prduct that this price belongs to.
-  product_id text references products, 
+  product_id text references products,
   -- Whether the price can be used for new purchases.
   active boolean,
   -- A brief description of the price.
@@ -97,6 +97,26 @@ create table prices (
 );
 alter table prices enable row level security;
 create policy "Allow public read-only access." on prices for select using (true);
+
+/**
+* CREDITS
+* Note: This table contains credit data for customers.
+*/
+create table credits (
+    -- Unique identifier for the credit record.
+    id text primary key,
+    -- UUID of the user who purchased the credit.
+    user_id uuid references auth.users not null,
+    -- The amount of credit purchased.
+    amount bigint not null,
+    -- Three-letter ISO currency code, in lowercase.
+    currency text check (char_length(currency) = 3) not null,
+    -- Timestamp when the credit was created.
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+alter table credits enable row level security;
+create policy "Can view own credit data." on credits for select using (auth.uid() = user_id);
+create policy "Can insert credit data." on credits for insert with check (auth.uid() = user_id);
 
 /**
 * SUBSCRIPTIONS

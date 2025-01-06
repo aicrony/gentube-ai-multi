@@ -89,7 +89,8 @@ const deletePriceRecord = async (price: Stripe.Price) => {
     .from('prices')
     .delete()
     .eq('id', price.id);
-  if (deletionError) throw new Error(`Price deletion failed: ${deletionError.message}`);
+  if (deletionError)
+    throw new Error(`Price deletion failed: ${deletionError.message}`);
   console.log(`Price deleted: ${price.id}`);
 };
 
@@ -99,7 +100,9 @@ const upsertCustomerToSupabase = async (uuid: string, customerId: string) => {
     .upsert([{ id: uuid, stripe_customer_id: customerId }]);
 
   if (upsertError)
-    throw new Error(`Supabase customer record creation failed: ${upsertError.message}`);
+    throw new Error(
+      `Supabase customer record creation failed: ${upsertError.message}`
+    );
 
   return customerId;
 };
@@ -206,7 +209,51 @@ const copyBillingDetailsToCustomer = async (
       payment_method: { ...payment_method[payment_method.type] }
     })
     .eq('id', uuid);
-  if (updateError) throw new Error(`Customer update failed: ${updateError.message}`);
+  if (updateError)
+    throw new Error(`Customer update failed: ${updateError.message}`);
+};
+
+const addCustomerCredit = async (
+  paymentIntent: string,
+  customerId: string,
+  amount: number,
+  currency: string
+) => {
+  // Get customer's UUID from mapping table.
+  const { data: customerData, error: noCustomerError } = await supabaseAdmin
+    .from('customers')
+    .select('id')
+    .eq('stripe_customer_id', customerId)
+    .single();
+
+  if (noCustomerError)
+    throw new Error(`Customer lookup failed: ${noCustomerError.message}`);
+
+  const { id: uuid } = customerData!;
+
+  // Create the credit data object.
+  const creditData: {
+    amount: number;
+    user_id: any;
+    created_at: string;
+    currency: string;
+    id: string;
+  } = {
+    id: paymentIntent,
+    user_id: uuid,
+    amount: amount,
+    currency: currency,
+    created_at: new Date().toISOString()
+  };
+
+  // Insert the credit data into the credits table.
+  const { error: insertError } = await supabaseAdmin
+    .from('credits')
+    .insert([creditData]);
+
+  if (insertError)
+    throw new Error(`Credit insert failed: ${insertError.message}`);
+  console.log(`Inserted credit [${paymentIntent}] for user [${uuid}]`);
 };
 
 const manageSubscriptionStatusChange = async (
@@ -268,7 +315,9 @@ const manageSubscriptionStatusChange = async (
     .from('subscriptions')
     .upsert([subscriptionData]);
   if (upsertError)
-    throw new Error(`Subscription insert/update failed: ${upsertError.message}`);
+    throw new Error(
+      `Subscription insert/update failed: ${upsertError.message}`
+    );
   console.log(
     `Inserted/updated subscription [${subscription.id}] for user [${uuid}]`
   );
@@ -289,5 +338,6 @@ export {
   deleteProductRecord,
   deletePriceRecord,
   createOrRetrieveCustomer,
-  manageSubscriptionStatusChange
+  manageSubscriptionStatusChange,
+  addCustomerCredit
 };
