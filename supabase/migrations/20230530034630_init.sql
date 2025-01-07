@@ -99,6 +99,42 @@ alter table prices enable row level security;
 create policy "Allow public read-only access." on prices for select using (true);
 
 /**
+* CREDIT_TRACKING
+* Note: This table contains credit_tracking data for customers.
+*/
+CREATE TABLE public.credit_tracking (
+                                        id uuid PRIMARY KEY,
+                                        credits integer NOT NULL,
+                                        updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- Enable Row Level Security on the credit_tracking table
+ALTER TABLE public.credit_tracking ENABLE ROW LEVEL SECURITY;
+
+-- Create a policy to allow users to select their own credit data
+CREATE POLICY select_own_credit_tracking ON public.credit_tracking
+FOR SELECT
+               USING (auth.uid() = id);
+
+-- Create a policy to allow users to insert their own credit data
+CREATE POLICY insert_own_credit_tracking ON public.credit_tracking
+FOR INSERT
+WITH CHECK (auth.uid() = id);
+
+-- Create a policy to allow users to update their own credit data
+CREATE POLICY update_own_credit_tracking ON public.credit_tracking
+FOR UPDATE
+                      USING (auth.uid() = id);
+
+-- Create a policy to allow users to delete their own credit data (if needed)
+CREATE POLICY delete_own_credit_tracking ON public.credit_tracking
+FOR DELETE
+USING (auth.uid() = id);
+
+-- Apply the policies
+ALTER TABLE public.credit_tracking FORCE ROW LEVEL SECURITY;
+
+/**
 * CREDITS
 * Note: This table contains credit data for customers.
 */
