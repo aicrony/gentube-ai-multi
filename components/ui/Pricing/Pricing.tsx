@@ -28,11 +28,17 @@ interface Props {
   user: User | null | undefined;
   products: ProductWithPrices[];
   subscription: SubscriptionWithProduct | null;
+  credits: Tables<'credit_tracking'> | any | null;
 }
 
 type BillingInterval = 'lifetime' | 'year' | 'month';
 
-export default function Pricing({ user, products, subscription }: Props) {
+export default function Pricing({
+  user,
+  products,
+  subscription,
+  credits
+}: Props) {
   const intervals = Array.from(
     new Set(
       products.flatMap((product) =>
@@ -111,7 +117,7 @@ export default function Pricing({ user, products, subscription }: Props) {
               GenTube.ai Pricing Plans
             </h1>
             <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-              Choose your level of creativity.
+              Choose your level of creativity. You have {credits} credits.
             </p>
             <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
               {intervals.includes('month') && (
