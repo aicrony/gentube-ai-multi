@@ -86,6 +86,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       let dataResponse: { result?: any; userCredits?: any } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
+        // TODO: Remove userCredits
         const { result, userCredits } = dataResponse;
         setIsSubmitting(false); // Response is received, enable the button
         console.log('Result:', result);
