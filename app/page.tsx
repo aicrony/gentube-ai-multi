@@ -1,4 +1,3 @@
-// app/page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
@@ -13,6 +12,7 @@ import { useProductName } from '@/context/ProductNameContext';
 import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
 import { useUserId } from '@/context/UserIdContext';
+import { usePurchasedCredits } from '@/context/PurchasedCreditsContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 
 const BrowserRouter = dynamic(
@@ -25,9 +25,11 @@ export default function Home() {
   const subscriptionStatus = useSubscriptionStatus();
   const subscriptionTier = useSubscriptionTier();
   const userId = useUserId();
+  const { purchasedCredits } = usePurchasedCredits();
+
   const displayName =
     productName && productName.trim() !== '' && subscriptionStatus == '"active"'
-      ? productName
+      ? `Credits: ${purchasedCredits}`
       : '"Limited Trial"';
 
   return (
