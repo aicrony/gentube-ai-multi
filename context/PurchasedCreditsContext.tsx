@@ -1,6 +1,5 @@
 'use client';
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/server';
 
 interface PurchasedCreditsContextProps {
   purchasedCredits: number;
@@ -13,13 +12,15 @@ const PurchasedCreditsContext = createContext<
 
 export const PurchasedCreditsProvider: React.FC<{
   userId: string;
+  purchasedCredits: number;
   children: React.ReactNode;
-}> = ({ userId, children }) => {
-  const [purchasedCredits, setPurchasedCredits] = useState<number>(0);
+}> = ({ userId, purchasedCredits: initialCredits, children }) => {
+  const [purchasedCredits, setPurchasedCredits] =
+    useState<number>(initialCredits);
 
   useEffect(() => {
-    setPurchasedCredits(25000);
-  }, []);
+    setPurchasedCredits(initialCredits);
+  }, [initialCredits]);
 
   return (
     <PurchasedCreditsContext.Provider

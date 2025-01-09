@@ -32,6 +32,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   let productName: string = '';
   let subscriptionStatus: string = '';
   let userId: string = '';
+  let purchasedCredits: number = 0;
 
   const {
     data: { user }
@@ -70,13 +71,28 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         subscriptionStatus = JSON.stringify(data[0].status);
       }
     }
+
+    const { data: creditsData, error: creditsError } = await supabase
+      .from('credit_tracking')
+      .select('credits')
+      .eq('id', user.id)
+      .single();
+
+    if (creditsError) {
+      console.error('Error fetching credits data:', creditsError);
+    } else {
+      purchasedCredits = creditsData.credits;
+    }
   }
 
   return (
     <html lang="en">
       <body className="bg-black">
         <UserIdProvider userId={userId}>
-          <PurchasedCreditsProvider userId={userId}>
+          <PurchasedCreditsProvider
+            userId={userId}
+            purchasedCredits={purchasedCredits}
+          >
             <ProductNameProvider productName={productName}>
               <SubscriptionStatusProvider
                 subscriptionStatus={subscriptionStatus}
