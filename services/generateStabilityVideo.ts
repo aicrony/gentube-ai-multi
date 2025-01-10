@@ -3,9 +3,9 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { Storage } from '@google-cloud/storage';
 import getStabilityVideoResult from '../functions/getStabilityVideoResult';
-import uploadImageToGCSFromUrl from '../functions/uploadImage';
+import uploadImageToGCSFromUrl from '../utils/gcloud/uploadImage';
 import sharp from 'sharp';
-import extractImageName from '../functions/uploadImage';
+import extractImageName from '../utils/gcloud/uploadImage';
 import { getFileDataAndResize } from './video_utils';
 require('dotenv').config();
 

@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
-import { saveUserActivity } from '@/functions/saveUserActivity';
+import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
-import { getUserCredits, updateUserCredits } from '@/functions/userCredits';
+import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
 
 type ImageApiResult = {
   error?: {

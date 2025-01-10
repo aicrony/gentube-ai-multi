@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fileTypeFromBuffer } from 'file-type';
 import heicConvert from 'heic-convert';
-import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
+import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 
 export const config = {
   api: {

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import got from 'got';
-import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
+import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 
 dotenv.config();
 

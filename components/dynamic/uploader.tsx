@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { uploadImageToGCSFromBase64 } from '@/functions/uploadImage';
+import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 
 function Uploader() {
   const allowedExtensions = ['.jpg', '.jpeg', '.png', '.heif'];

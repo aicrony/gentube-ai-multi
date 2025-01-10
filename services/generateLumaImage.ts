@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { pingUntilImageCompleted } from '@/functions/getLumaImageResult';
-import uploadImageToGCSFromUrl from '@/functions/uploadImage';
+import uploadImageToGCSFromUrl from '@/utils/gcloud/uploadImage';
 require('dotenv').config();
 
 const apiKey = process.env.LUMA_API_KEY;

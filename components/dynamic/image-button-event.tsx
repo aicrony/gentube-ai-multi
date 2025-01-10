@@ -4,6 +4,8 @@ import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { createClient } from '@/utils/supabase/server';
+import { getPurchasedCredits } from '@/utils/supabase/queries';
 
 interface ImageDynamicButtonProps {
   productName: string;

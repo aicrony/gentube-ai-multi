@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
 import callHqVideoApi from '@/services/generateFalVideo';
 import { parse, serialize } from 'cookie';
-import { saveUserActivity } from '@/functions/saveUserActivity';
-import { getLatestActivityByIp } from '@/functions/getLatestActivityByIp';
+import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
+import { getLatestActivityByIp } from '@/utils/gcloud/getLatestActivityByIp';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
-import { getUserCredits, updateUserCredits } from '@/functions/userCredits';
+import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
 import callImageApi from '@/services/generateImage';
 
 export default async function handler(
