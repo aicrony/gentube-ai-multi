@@ -13,9 +13,24 @@ export default async function handler(
 
   try {
     console.log('Request body:', req.body);
-    const body = req.body;
-    console.log('Request ID:', JSON.stringify(body.id));
-    // await updateUserCredits('1234', '-', 17001);
+    const { type, table, record, schema, old_record } = req.body;
+    console.log('Type:', type);
+    console.log('Table:', table);
+    console.log('Record:', record);
+    console.log('Schema:', schema);
+    console.log('Old Record:', old_record);
+
+    if (record) {
+      const { id, amount, user_id, currency, created_at, credits_purchased } =
+        record;
+      console.log('Record ID:', id);
+      console.log('Amount:', amount);
+      console.log('User ID:', user_id);
+      console.log('Currency:', currency);
+      console.log('Created At:', created_at);
+      console.log('Credits Purchased:', credits_purchased);
+    }
+
     res.status(200).json({ received: true });
   } catch (error) {
     console.error('Sync Webhook handler failed.', error);
