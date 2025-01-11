@@ -13,7 +13,9 @@ export default async function handler(
 
   try {
     console.log('Request body:', req.body);
-    await updateUserCredits('1234', '-', 17001);
+    const body = req.body;
+    console.log('Request ID:', JSON.stringify(body.id));
+    // await updateUserCredits('1234', '-', 17001);
     res.status(200).json({ received: true });
   } catch (error) {
     console.error('Sync Webhook handler failed.', error);
