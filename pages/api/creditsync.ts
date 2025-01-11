@@ -12,6 +12,7 @@ export default async function handler(
   }
 
   try {
+    console.log('Request body:', req.body);
     await updateUserCredits('1234', '-', 17001);
     res.status(200).json({ received: true });
   } catch (error) {
