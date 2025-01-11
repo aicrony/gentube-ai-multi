@@ -3,7 +3,8 @@ import { stripe } from '@/utils/stripe/config';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import type { Database, Tables, TablesInsert } from 'types_db';
-
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 type Product = Tables<'products'>;
 type Price = Tables<'prices'>;
 
@@ -251,15 +252,33 @@ const addCustomerCredit = async (
 
   const { id: uuid } = customerData!;
 
-  // Create the credit data object.
-  const creditData: {
-    amount: number;
-    user_id: any;
-    created_at: string;
-    currency: string;
-    id: string;
-    credits_purchased: number;
-  } = {
+  const ajv = new Ajv();
+  addFormats(ajv);
+
+  const schema = {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      user_id: { type: 'string', format: 'uuid' },
+      amount: { type: 'number' },
+      currency: { type: 'string' },
+      created_at: { type: 'string', format: 'date-time' },
+      credits_purchased: { type: 'number' }
+    },
+    required: [
+      'id',
+      'user_id',
+      'amount',
+      'currency',
+      'created_at',
+      'credits_purchased'
+    ],
+    additionalProperties: false
+  };
+
+  const validate = ajv.compile(schema);
+
+  const creditData = {
     id: paymentIntent,
     user_id: uuid,
     amount: amount,
@@ -268,10 +287,34 @@ const addCustomerCredit = async (
     credits_purchased: getCreditsValue(amount)
   };
 
+  const valid = validate(creditData);
+
+  if (!valid) {
+    console.error(validate.errors);
+  } else {
+    console.log('JSON is valid');
+  }
+
+  console.log('creditData: ' + JSON.stringify(creditData));
+  // const creditDataString = JSON.stringify(creditData);
+
   // Insert the credit data into the credits table.
+  // const { id, user_id, amount, currency, created_at, credits_purchased } =
+  //   creditData;
+
   const { error: insertError } = await supabaseAdmin
     .from('credits')
-    .insert([creditData]);
+    .insert([
+      {
+        id: paymentIntent,
+        user_id: uuid,
+        amount: amount,
+        currency: currency,
+        created_at: new Date().toISOString(),
+        credits_purchased: getCreditsValue(amount)
+      }
+    ])
+    .eq('user_id', uuid);
 
   if (insertError)
     throw new Error(`Credit insert failed: ${insertError.message}`);

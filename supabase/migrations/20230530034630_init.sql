@@ -138,23 +138,45 @@ ALTER TABLE public.credit_tracking FORCE ROW LEVEL SECURITY;
 * CREDITS
 * Note: This table contains credit data for customers.
 */
-create table credits (
-    -- Unique identifier for the credit record.
-    id text primary key,
-    -- UUID of the user who purchased the credit.
-    user_id uuid references auth.users not null,
-    -- The amount of credit purchased.
-    amount bigint not null,
-    -- Three-letter ISO currency code, in lowercase.
-    currency text check (char_length(currency) = 3) not null,
-    -- Timestamp when the credit was created.
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    -- The number of credits purchasced
-    credits_purchased integer not null
+-- Drop the policies
+-- DROP POLICY IF EXISTS "Allow users to insert their own credits" ON credits;
+-- DROP POLICY IF EXISTS "Allow users to update their own credits" ON credits;
+-- DROP POLICY IF EXISTS "Allow users to delete their own credits" ON credits;
+
+-- Drop the credits table
+-- DROP TABLE IF EXISTS credits;
+
+-- Create the credits table
+CREATE TABLE credits (
+                         id TEXT PRIMARY KEY,
+                         user_id UUID NOT NULL,
+                         amount NUMERIC NOT NULL,
+                         currency TEXT NOT NULL,
+                         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                         credits_purchased NUMERIC NOT NULL,
+                         FOREIGN KEY (user_id) REFERENCES customers(id)
 );
-alter table credits enable row level security;
-create policy "Can view own credit data." on credits for select using (auth.uid() = user_id);
-create policy "Can insert credit data." on credits for insert with check (auth.uid() = user_id);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
+
+-- Create a policy to allow users to insert their own credits
+CREATE POLICY "Allow users to insert their own credits"
+  ON credits
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Create a policy to allow users to update their own credits
+CREATE POLICY "Allow users to update their own credits"
+  ON credits
+  FOR UPDATE
+                        USING (auth.uid() = user_id);
+
+-- Create a policy to allow users to delete their own credits
+CREATE POLICY "Allow users to delete their own credits"
+  ON credits
+  FOR DELETE
+USING (auth.uid() = user_id);
 
 /**
 * SUBSCRIPTIONS
