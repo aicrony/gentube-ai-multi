@@ -148,7 +148,9 @@ create table credits (
     -- Three-letter ISO currency code, in lowercase.
     currency text check (char_length(currency) = 3) not null,
     -- Timestamp when the credit was created.
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    -- The number of credits purchasced
+    credits_purchased integer not null
 );
 alter table credits enable row level security;
 create policy "Can view own credit data." on credits for select using (auth.uid() = user_id);

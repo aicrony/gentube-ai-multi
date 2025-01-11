@@ -258,12 +258,14 @@ const addCustomerCredit = async (
     created_at: string;
     currency: string;
     id: string;
+    credits_purchased: number;
   } = {
     id: paymentIntent,
     user_id: uuid,
     amount: amount,
     currency: currency,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    credits_purchased: getCreditsValue(amount)
   };
 
   // Insert the credit data into the credits table.
@@ -274,54 +276,6 @@ const addCustomerCredit = async (
   if (insertError)
     throw new Error(`Credit insert failed: ${insertError.message}`);
   console.log(`Inserted credit [${paymentIntent}] for user [${uuid}]`);
-
-  // Get the credits value for the amount paid.
-  const creditsAmountForTracking = getCreditsValue(amount);
-
-  // Check if the user already has a credit tracking record
-  const { data: existingCredit, error: fetchError } = await supabaseAdmin
-    .from('credit_tracking')
-    .select('credits')
-    .eq('id', uuid)
-    .single();
-
-  if (fetchError && fetchError.code !== 'PGRST116') {
-    throw new Error(`Credit tracking lookup failed: ${fetchError.message}`);
-  }
-
-  if (existingCredit) {
-    // Update the existing record by adding creditsAmountForTracking
-    const updatedCredits = existingCredit.credits + creditsAmountForTracking;
-    const { error: updateError } = await supabaseAdmin
-      .from('credit_tracking')
-      .update({ credits: updatedCredits, updated_at: new Date().toISOString() })
-      .eq('id', uuid);
-
-    if (updateError)
-      throw new Error(`Credit tracking update failed: ${updateError.message}`);
-    console.log(`Updated credits for user [${uuid}]`);
-  } else {
-    // Create a new credit tracking record
-    const creditTrackingData: {
-      id: string;
-      credits: number;
-      updated_at: string;
-    } = {
-      id: uuid,
-      credits: creditsAmountForTracking,
-      updated_at: new Date().toISOString()
-    };
-
-    const { error: insertTrackingError } = await supabaseAdmin
-      .from('credit_tracking')
-      .insert([creditTrackingData]);
-
-    if (insertTrackingError)
-      throw new Error(
-        `Credit tracking insert failed: ${insertTrackingError.message}`
-      );
-    console.log(`Created new credit tracking entry for user [${uuid}]`);
-  }
 };
 
 const manageSubscriptionStatusChange = async (
