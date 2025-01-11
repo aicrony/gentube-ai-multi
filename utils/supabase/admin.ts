@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import type { Database, Tables, TablesInsert } from 'types_db';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+type Credits = Tables<'credits'>;
 type Product = Tables<'products'>;
 type Price = Tables<'prices'>;
 
@@ -278,7 +279,7 @@ const addCustomerCredit = async (
 
   const validate = ajv.compile(schema);
 
-  const creditData = {
+  const creditData: Credits = {
     id: paymentIntent,
     user_id: uuid,
     amount: amount,
@@ -304,17 +305,7 @@ const addCustomerCredit = async (
 
   const { error: insertError } = await supabaseAdmin
     .from('credits')
-    .insert([
-      {
-        id: paymentIntent,
-        user_id: uuid,
-        amount: amount,
-        currency: currency,
-        created_at: new Date().toISOString(),
-        credits_purchased: getCreditsValue(amount)
-      }
-    ])
-    .eq('user_id', uuid);
+    .insert([creditData]);
 
   if (insertError)
     throw new Error(`Credit insert failed: ${insertError.message}`);
