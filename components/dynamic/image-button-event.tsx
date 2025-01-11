@@ -4,25 +4,26 @@ import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { createClient } from '@/utils/supabase/server';
-import { getPurchasedCredits } from '@/utils/supabase/queries';
+import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface ImageDynamicButtonProps {
   productName: string;
   subscriptionStatus: string;
   userId: string;
+  onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   productName,
   subscriptionStatus,
-  userId
+  userId,
+  onUserCreditsUpdate
 }) => {
   const [prompt, setPrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [imageData, setImageData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -88,13 +89,15 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       let dataResponse: { result?: any; userCredits?: any } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
-        // TODO: Remove userCredits
         const { result, userCredits } = dataResponse;
         setIsSubmitting(false); // Response is received, enable the button
         console.log('Result:', result);
         console.log('UserCredits:', userCredits);
         setImageData(result); // set the url of the response
-        setUserCredits(userCredits); // set user credits from response
+        setUserCreditsResponse(userCredits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+        }
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -128,9 +131,9 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         >
           Generate Image
         </Button>
-        {userCredits !== null && (
+        {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCredits}</p>
+            <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
         {imageData && (

@@ -4,24 +4,27 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
+import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoFromUrlDynamicButtonProps {
   productName: string;
   subscriptionStatus: string;
   userId: string;
+  onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export function VideoFromUrlDynamicButton({
   productName,
   subscriptionStatus,
-  userId
+  userId,
+  onUserCreditsUpdate
 }: VideoFromUrlDynamicButtonProps) {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
@@ -81,7 +84,10 @@ export function VideoFromUrlDynamicButton({
           'video-from-url-button-event DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
-        setUserCredits(userCredits);
+        setUserCreditsResponse(userCredits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+        }
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -142,9 +148,9 @@ export function VideoFromUrlDynamicButton({
             </div>
           </div>
         )}
-        {userCredits !== null && (
+        {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCredits}</p>
+            <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
       </div>

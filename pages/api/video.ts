@@ -58,7 +58,7 @@ export default async function handler(
   try {
     // Prompt declaration
     const videoDescription = req.body.description as string;
-    const imageUrl = req.body.url as string | undefined;
+    const imageUrl = (req.body.url as string) || 'none';
     let creditCost = 100;
 
     let result;

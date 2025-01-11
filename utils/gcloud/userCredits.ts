@@ -17,7 +17,6 @@ export async function getUserCredits(
   const query = datastore
     .createQuery(namespace, kind)
     .filter('UserId', '=', userId)
-    .filter('UserIp', '=', userIp)
     .limit(1);
 
   const [credits] = await datastore.runQuery(query);
