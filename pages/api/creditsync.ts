@@ -29,9 +29,11 @@ export default async function handler(
       console.log('Currency:', currency);
       console.log('Created At:', created_at);
       console.log('Credits Purchased:', credits_purchased);
+      await updateUserCredits(id, '-', credits_purchased);
+      res.status(200).json({ received: true });
+    } else {
+      res.status(200).json({ received: false });
     }
-
-    res.status(200).json({ received: true });
   } catch (error) {
     console.error('Sync Webhook handler failed.', error);
     res.status(500).json({ error: 'Sync Webhook handler failed.' });
