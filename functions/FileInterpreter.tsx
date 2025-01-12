@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
-import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
-import { useProductName } from '@/context/ProductNameContext';
-import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
 import { useUserId } from '@/context/UserIdContext';
 import { fileTypeFromBuffer } from 'file-type';
 
@@ -14,9 +11,6 @@ const FileInterpreter: React.FC = () => {
   } | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
-  const subscriptionTier = Number(useSubscriptionTier().subscriptionTier);
-  const productName = useProductName();
-  const subscriptionStatus = useSubscriptionStatus();
   const userId = useUserId();
 
   const handleFileChange = async (
@@ -56,25 +50,9 @@ const FileInterpreter: React.FC = () => {
   return (
     <div>
       <input type="file" onChange={handleFileChange} />
-      {base64Data && subscriptionTier != 3 && (
+      {base64Data && (
         <div>
           <div>
-            <p>
-              Thank you for your interest in uploading a file to Gentube.ai.
-            </p>
-            <p>
-              Unfortunately, you need to be a premium subscriber to upload
-              files. Select the{' '}
-              <a href={'/pricing'}>HQ Video Creator on the Pricing Page</a> to
-              upgrade your subscription.
-            </p>
-          </div>
-        </div>
-      )}
-      {base64Data && subscriptionTier == 3 && (
-        <div>
-          <div>
-            <p>Image Data:</p>
             {imageSize && (
               <p>
                 Dimensions: {imageSize.width} x {imageSize.height} pixels
@@ -92,12 +70,7 @@ const FileInterpreter: React.FC = () => {
             />
           )}
 
-          <UploadImageDynamicButton
-            base64Image={base64Data}
-            productName={productName}
-            subscriptionStatus={subscriptionStatus}
-            userId={userId}
-          />
+          <UploadImageDynamicButton base64Image={base64Data} userId={userId} />
         </div>
       )}
     </div>

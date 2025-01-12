@@ -7,15 +7,11 @@ import { Input } from '@/components/ui/input';
 import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface ImageDynamicButtonProps {
-  productName: string;
-  subscriptionStatus: string;
   userId: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
-  productName,
-  subscriptionStatus,
   userId,
   onUserCreditsUpdate
 }) => {
@@ -46,8 +42,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       return (
         <VideoDynamicButton
           urlData={url}
-          productName={productName}
-          subscriptionStatus={subscriptionStatus}
           userId={userId}
           onUserCreditsUpdate={onUserCreditsUpdate}
         />
@@ -64,8 +58,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus,
           'x-user-id': userId
         },
         body: JSON.stringify({ prompt: prompt })

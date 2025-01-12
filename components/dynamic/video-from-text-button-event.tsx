@@ -6,21 +6,18 @@ import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoFromTextDynamicButtonProps {
-  productName: string;
-  subscriptionStatus: string;
   userId: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const VideoFromTextDynamicButton: React.FC<
   VideoFromTextDynamicButtonProps
-> = ({ productName, subscriptionStatus, userId, onUserCreditsUpdate }) => {
-  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+> = ({ userId, onUserCreditsUpdate }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<any>(null);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [userCredits, setUserCreditsState] = useState<number | null>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true);
@@ -31,8 +28,6 @@ export const VideoFromTextDynamicButton: React.FC<
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus,
           'x-user-id': userId
         },
         body: JSON.stringify({
@@ -62,7 +57,6 @@ export const VideoFromTextDynamicButton: React.FC<
         setIsSubmitting(false);
         setVideoData(result);
         setUserCreditsResponse(userCredits); // set user credits from response
-        setUserCreditsState(userCredits); // Set user credits state
         if (onUserCreditsUpdate) {
           onUserCreditsUpdate(userCredits); // update parent component if callback is provided
         }

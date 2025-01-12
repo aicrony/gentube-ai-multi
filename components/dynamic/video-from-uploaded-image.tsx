@@ -4,22 +4,22 @@ import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 import Uploader from '@/components/dynamic/uploader';
+import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoFromUploadedImageDynamicButtonProps {
-  productName: string;
-  subscriptionStatus: string;
   userId: string;
+  onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const VideoFromUploadedImageDynamicButton: React.FC<
   VideoFromUploadedImageDynamicButtonProps
-> = ({ productName, subscriptionStatus, userId }) => {
+> = ({ userId, onUserCreditsUpdate }) => {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [userCredits, setUserCredits] = useState<number | null>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -32,8 +32,6 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus,
           'x-user-id': userId
         },
         body: JSON.stringify({
@@ -68,7 +66,7 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
           'video-from-uploaded-image DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
-        setUserCredits(userCredits);
+        setUserCreditsResponse(userCredits);
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -127,9 +125,9 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
             </div>
           </div>
         )}
-        {userCredits !== null && (
+        {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCredits}</p>
+            <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
       </div>

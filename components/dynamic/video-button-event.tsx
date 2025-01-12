@@ -7,16 +7,12 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoDynamicButtonProps {
   urlData: string;
-  productName: string;
-  subscriptionStatus: string;
   userId: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export function VideoDynamicButton({
   urlData,
-  productName,
-  subscriptionStatus,
   userId,
   onUserCreditsUpdate
 }: VideoDynamicButtonProps) {
@@ -31,13 +27,8 @@ export function VideoDynamicButton({
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  if (productName === '"HQ Video Creator"') {
-    videoGenButtonLabel = 'Generate HQ Video';
-    videoGenCompleteMessage = 'HQ Video Generation Complete';
-  } else {
-    videoGenButtonLabel = 'Generate Video';
-    videoGenCompleteMessage = 'Video Generation Complete';
-  }
+  videoGenButtonLabel = 'Generate Video';
+  videoGenCompleteMessage = 'Video Generation Complete';
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -48,8 +39,6 @@ export function VideoDynamicButton({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus,
           'x-user-id': userId
         },
         body: JSON.stringify({

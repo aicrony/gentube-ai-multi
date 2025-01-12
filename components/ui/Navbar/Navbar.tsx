@@ -2,15 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
-interface NavbarProps {
-  productName: string;
-  subscriptionStatus: string;
-}
-
-export default async function Navbar({
-  productName,
-  subscriptionStatus
-}: NavbarProps) {
+export default async function Navbar() {
   const supabase = createClient();
 
   const {
@@ -23,11 +15,7 @@ export default async function Navbar({
         Skip to content
       </a>
       <div className="max-w-6xl px-6 mx-auto">
-        <Navlinks
-          user={user}
-          subscriptionStatus={subscriptionStatus}
-          productName={productName}
-        />
+        <Navlinks user={user} />
       </div>
     </nav>
   );

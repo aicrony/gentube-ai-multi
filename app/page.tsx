@@ -8,9 +8,6 @@ import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
-import { useProductName } from '@/context/ProductNameContext';
-import { useSubscriptionStatus } from '@/context/SubscriptionStatusContext';
-import { useSubscriptionTier } from '@/context/SubscriptionTierContext';
 import { useUserId } from '@/context/UserIdContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
@@ -21,12 +18,9 @@ const BrowserRouter = dynamic(
 );
 
 export default function Home() {
-  const productName = useProductName();
-  const subscriptionStatus = useSubscriptionStatus();
-  const subscriptionTier = useSubscriptionTier();
   const userId = useUserId();
   const [userCredits, setUserCredits] = useState<number | null>(null);
-  const [displayName, setDisplayName] = useState<string>('"Limited Trial"');
+  const [displayName, setDisplayName] = useState<string>('');
 
   const handleUserCreditsUpdate = useCallback((credits: number | null) => {
     setUserCredits(credits);
@@ -34,11 +28,11 @@ export default function Home() {
 
   useEffect(() => {
     if (userCredits !== null) {
-      setDisplayName(`Credits: ${userCredits}`);
-    } else {
-      setDisplayName('"Limited Trial"');
+      setDisplayName(` - Credits: ${userCredits}`);
     }
   }, [userCredits]);
+
+  console.log('User ID: ' + userId);
 
   return (
     <UserCreditsProvider>
@@ -51,7 +45,7 @@ export default function Home() {
                   GenTube.ai
                 </h1>
                 <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-                  Generate AI Images and Videos - {displayName}
+                  Generate AI Images and Videos {displayName}
                 </p>
               </div>
               <div className="grid gap-4">
@@ -65,20 +59,15 @@ export default function Home() {
                   <Link to="/text-to-video" className="text-white">
                     <Button variant="slim">Video Gen</Button>
                   </Link>
-                  {subscriptionTier &&
-                    subscriptionTier.subscriptionTier == 3 && (
-                      <Link to="/upload-to-video" className="text-white">
-                        <Button variant="slim">Upload Image</Button>
-                      </Link>
-                    )}
+                  <Link to="/upload-to-video" className="text-white">
+                    <Button variant="slim">Upload Image</Button>
+                  </Link>
                 </nav>
                 <Routes>
                   <Route
                     path="/"
                     element={
                       <ImageDynamicButton
-                        productName={productName}
-                        subscriptionStatus={subscriptionStatus}
                         userId={userId}
                         onUserCreditsUpdate={handleUserCreditsUpdate}
                       />
@@ -88,8 +77,6 @@ export default function Home() {
                     path="/image-url-to-video"
                     element={
                       <VideoFromUrlDynamicButton
-                        productName={productName}
-                        subscriptionStatus={subscriptionStatus}
                         userId={userId}
                         onUserCreditsUpdate={handleUserCreditsUpdate}
                       />
@@ -99,8 +86,6 @@ export default function Home() {
                     path="/text-to-video"
                     element={
                       <VideoFromTextDynamicButton
-                        productName={productName}
-                        subscriptionStatus={subscriptionStatus}
                         userId={userId}
                         onUserCreditsUpdate={handleUserCreditsUpdate}
                       />
@@ -108,7 +93,12 @@ export default function Home() {
                   />
                   <Route
                     path="/upload-to-video"
-                    element={<FileInterpreter />}
+                    element={
+                      <FileInterpreter
+                        userId={userId}
+                        onUserCreditsUpdate={handleUserCreditsUpdate}
+                      />
+                    }
                   />
                 </Routes>
               </div>

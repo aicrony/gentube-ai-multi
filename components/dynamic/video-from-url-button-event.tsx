@@ -7,15 +7,11 @@ import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoFromUrlDynamicButtonProps {
-  productName: string;
-  subscriptionStatus: string;
   userId: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export function VideoFromUrlDynamicButton({
-  productName,
-  subscriptionStatus,
   userId,
   onUserCreditsUpdate
 }: VideoFromUrlDynamicButtonProps) {
@@ -29,13 +25,8 @@ export function VideoFromUrlDynamicButton({
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
 
-  if (productName === '"HQ Video Creator"') {
-    videoGenButtonLabel = 'Generate HQ Video from Image URL';
-    videoGenCompleteMessage = 'HQ Video Generation Complete';
-  } else {
-    videoGenButtonLabel = 'Generate Video from Image URL';
-    videoGenCompleteMessage = 'Video Generation Complete';
-  }
+  videoGenButtonLabel = 'Generate Video from Image URL';
+  videoGenCompleteMessage = 'Video Generation Complete';
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -48,8 +39,6 @@ export function VideoFromUrlDynamicButton({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-product-name': productName,
-          'x-subscription-status': subscriptionStatus,
           'x-user-id': userId
         },
         body: JSON.stringify({
