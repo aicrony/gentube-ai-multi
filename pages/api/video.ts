@@ -1,12 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
 import callHqVideoApi from '@/services/generateFalVideo';
-import { parse, serialize } from 'cookie';
+import { serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
-import { getLatestActivityByIp } from '@/utils/gcloud/getLatestActivityByIp';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
-import callImageApi from '@/services/generateImage';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,24 +22,11 @@ export default async function handler(
     return;
   }
 
-  const subscriptionObject = getSubscriptionTier(
-    productName,
-    subscriptionStatus
-  );
-
-  const subscriptionTier = subscriptionObject.subscriptionTier;
-  const initialCredits = subscriptionObject.initialCredits;
-  const currentSubscriber = subscriptionObject.currentSubscriber;
-
-  console.log('productName (video api): ', productName);
-  console.log('subscriptionStatus (video api): ', subscriptionStatus);
-  console.log('subscriptionTier (video api): ', subscriptionTier);
-
   // Get user credits from the new table
   let userCredits = await getUserCredits(userId, userIp);
 
   if (userCredits === null) {
-    userCredits = initialCredits;
+    userCredits = 120;
     await updateUserCredits(userId, userIp, userCredits);
   }
 
@@ -67,19 +52,8 @@ export default async function handler(
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
       creditCost = 40;
     } else {
-      if (subscriptionTier == 1) {
-        result = await callVideoApi(imageUrl || 'none', videoDescription);
-        creditCost = 40;
-      } else if (subscriptionTier == 2) {
-        result = await callVideoApi(imageUrl || 'none', videoDescription);
-        creditCost = 40;
-      } else if (subscriptionTier == 3) {
-        result = await callHqVideoApi(imageUrl || 'none', videoDescription);
-        creditCost = 50;
-      } else {
-        result = await callVideoApi(imageUrl || 'none', videoDescription);
-        creditCost = 40;
-      }
+      result = await callHqVideoApi(imageUrl || 'none', videoDescription);
+      creditCost = 50;
     }
 
     console.log('****** VIDEO RESULT: ********');
@@ -112,7 +86,7 @@ export default async function handler(
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
       Prompt: videoDescription,
-      SubscriptionTier: subscriptionTier,
+      SubscriptionTier: 0,
       UserId: userId,
       UserIp: userIp
     });

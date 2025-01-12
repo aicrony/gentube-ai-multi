@@ -36,8 +36,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     userId = user.id;
   }
 
-  console.log('userId: ', userId);
-
   return (
     <html lang="en">
       <body className="bg-black">

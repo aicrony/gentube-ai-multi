@@ -32,8 +32,6 @@ export default function Home() {
     }
   }, [userCredits]);
 
-  console.log('User ID: ' + userId);
-
   return (
     <UserCreditsProvider>
       <BrowserRouter>

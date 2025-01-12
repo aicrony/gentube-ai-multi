@@ -32,8 +32,8 @@ export default async function handler(
   const initialCredits = subscriptionObject.initialCredits;
 
   // Get user credits from the new table
-  console.log('userId: ', userId);
-  console.log('userIp: ', userIp);
+  // console.log('userId: ', userId);
+  // console.log('userIp: ', userIp);
   let userCredits = await getUserCredits(userId, userIp);
 
   if (userCredits === null) {
