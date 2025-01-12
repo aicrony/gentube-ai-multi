@@ -13,10 +13,43 @@ export default async function generateLumaImage(
 ) {
   try {
     if (url !== 'none') {
-      // Send the imag url and the description
+      // Image Reference
+      const imageRef = {
+        url: 'http://storage-of-image.gcloud.com',
+        weight: 50
+      };
+      // Style Reference
+      const styleRef = {
+        url: 'http://storage-of-style-image.gcloud.com',
+        weight: 50
+      };
+
+      // Character Reference
+      const characterRef = {
+        identity0: {
+          images: ['http://storage-of-character-image.gcloud.com']
+        }
+      };
+
+      // Modify Image Reference
+      const modifyImageRef = {
+        url: 'http://storage-of-modify-image.gcloud.com',
+        weight: 50
+      };
+
+      // Callback queue
+      const callbackQueue = 'https://gentube.ai/api/callback_queue';
+
+      // Send the img url and the description
       const data = {
+        generation_type: 'image',
+        model: 'photon-1',
         prompt: description,
-        model: 'photon-1'
+        callback_queue: callbackQueue ? callbackQueue : null,
+        modify_image_ref: modifyImageRef ? modifyImageRef : null,
+        style_ref: styleRef ? [styleRef] : null,
+        character_ref: characterRef ? characterRef : null,
+        image_ref: imageRef ? [imageRef] : null
       };
       const response = await axios.request({
         url: apiImageEndpoint,
