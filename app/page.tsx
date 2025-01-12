@@ -93,12 +93,7 @@ export default function Home() {
                   />
                   <Route
                     path="/upload-to-video"
-                    element={
-                      <FileInterpreter
-                        userId={userId}
-                        onUserCreditsUpdate={handleUserCreditsUpdate}
-                      />
-                    }
+                    element={<FileInterpreter />}
                   />
                 </Routes>
               </div>
