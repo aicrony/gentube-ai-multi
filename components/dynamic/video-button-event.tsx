@@ -3,19 +3,22 @@ import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
+import { useUserCredits } from '@/context/UserCreditsContext';
 
 interface VideoDynamicButtonProps {
   urlData: string;
   productName: string;
   subscriptionStatus: string;
   userId: string;
+  onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export function VideoDynamicButton({
   urlData,
   productName,
   subscriptionStatus,
-  userId
+  userId,
+  onUserCreditsUpdate
 }: VideoDynamicButtonProps) {
   const url = urlData;
 
@@ -23,7 +26,7 @@ export function VideoDynamicButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [userCredits, setUserCredits] = useState<any>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
@@ -79,7 +82,10 @@ export function VideoDynamicButton({
         console.log('UserCredits: ', userCredits);
         console.log('video-button-event DATA RECEIVED:' + JSON.stringify(data));
         setVideoData(result);
-        setUserCredits(userCredits);
+        setUserCreditsResponse(userCredits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+        }
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
@@ -125,9 +131,9 @@ export function VideoDynamicButton({
             </div>
           </div>
         )}
-        {userCredits !== null && (
+        {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCredits}</p>
+            <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
       </div>

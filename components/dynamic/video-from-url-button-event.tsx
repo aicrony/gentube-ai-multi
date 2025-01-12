@@ -99,7 +99,15 @@ export function VideoFromUrlDynamicButton({
   return (
     <>
       {errorMessage && (
-        <div className="error-message-large">{errorMessage}</div>
+        <Button
+          variant="slim"
+          type="button"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={() => (window.location.href = '/pricing')}
+        >
+          {errorMessage}
+        </Button>
       )}
       <div className={'pt-5'}>
         <div className="grid gap-2">

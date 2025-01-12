@@ -49,6 +49,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           productName={productName}
           subscriptionStatus={subscriptionStatus}
           userId={userId}
+          onUserCreditsUpdate={onUserCreditsUpdate}
         />
       );
     }
@@ -108,7 +109,15 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   return (
     <>
       {errorMessage && (
-        <div className="error-message-large">{errorMessage}</div>
+        <Button
+          variant="slim"
+          type="button"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={() => (window.location.href = '/pricing')}
+        >
+          {errorMessage}
+        </Button>
       )}
       <div className="float-left">
         <Label htmlFor="prompt">Describe an image to start your video.</Label>

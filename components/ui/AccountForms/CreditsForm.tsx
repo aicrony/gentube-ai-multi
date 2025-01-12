@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
@@ -34,9 +34,14 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
       footer={
         <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <p className="pb-4 sm:pb-0">Buy more credits.</p>
-          <a href="/pricing">
-            <Button variant="slim">Pricing</Button>
-          </a>
+          <Button
+            variant="slim"
+            type="button"
+            className="mt-1"
+            onClick={() => (window.location.href = '/pricing')}
+          >
+            Pricing
+          </Button>
         </div>
       }
     >
@@ -47,16 +52,26 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
               <>
                 {credits}
                 {' ---> '}
-                <a href="/">
-                  <Button variant="slim">Start Generating</Button>
-                </a>
+                <Button
+                  variant="slim"
+                  type="button"
+                  className="mt-1"
+                  onClick={() => (window.location.href = '/')}
+                >
+                  Start Generating
+                </Button>
               </>
             ) : (
               <>
                 <p className="text-sm">All credits have depleted.</p>
-                <a href="/pricing">
-                  <Button variant="slim">More Credits</Button>
-                </a>
+                <Button
+                  variant="slim"
+                  type="button"
+                  className="mt-1"
+                  onClick={() => (window.location.href = '/pricing')}
+                >
+                  More Credits
+                </Button>
               </>
             )}
           </p>

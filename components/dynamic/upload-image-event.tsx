@@ -130,7 +130,15 @@ export const UploadImageDynamicButton: React.FC<
   return (
     <>
       {errorMessage && (
-        <div className="error-message-large">{errorMessage}</div>
+        <Button
+          variant="slim"
+          type="button"
+          className="mt-1"
+          loading={isSubmitting}
+          onClick={() => (window.location.href = '/pricing')}
+        >
+          {errorMessage}
+        </Button>
       )}
       <div>
         <Button
