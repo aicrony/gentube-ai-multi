@@ -14,10 +14,23 @@ export async function getUserCredits(
   userId: string | string[] | undefined,
   userIp: string | string[] | undefined
 ): Promise<number | null> {
-  const query = datastore
-    .createQuery(namespace, kind)
-    .filter('UserId', '=', userId)
-    .limit(1);
+  let query;
+  if (
+    userId == undefined &&
+    (userIp != undefined || userIp != '-' || userIp != '')
+  ) {
+    query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserIp', '=', userIp)
+      .limit(1);
+  } else if (userId != undefined) {
+    query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserId', '=', userId)
+      .limit(1);
+  } else {
+    return null;
+  }
 
   const [credits] = await datastore.runQuery(query);
   return credits.length > 0 ? credits[0].Credits : null;
@@ -28,17 +41,6 @@ export async function updateUserCredits(
   userIp: string | string[] | undefined,
   credits: number
 ): Promise<void> {
-  const query = datastore
-    .createQuery(namespace, kind)
-    .filter('UserId', '=', userId)
-    .filter('UserIp', '=', userIp)
-    .limit(1);
-
-  const [existingCredits] = await datastore.runQuery(query);
-  const currentCredits =
-    existingCredits.length > 0 ? existingCredits[0].Credits : 0;
-  const newCredits = currentCredits + credits;
-
   const keyValue = [kind, userId ? userId : userIp];
   const key = datastore.key({
     namespace,
@@ -50,9 +52,29 @@ export async function updateUserCredits(
     data: {
       UserId: userId,
       UserIp: userIp,
-      Credits: newCredits
+      Credits: credits
     }
   };
 
   await datastore.save(entity);
+}
+
+export async function aggregateUserCredits(
+  userId: string | string[] | undefined,
+  userIp: string | string[] | undefined,
+  credits: number
+): Promise<void> {
+  if (userId == undefined) {
+    return;
+  } else if (userId && userId.length > 0) {
+    const query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserId', '=', userId)
+      .limit(1);
+    const [existingCredits] = await datastore.runQuery(query);
+    const currentCredits =
+      existingCredits.length > 0 ? existingCredits[0].Credits : 0;
+    const newCredits = currentCredits + credits;
+    await updateUserCredits(userId, '-', newCredits);
+  }
 }

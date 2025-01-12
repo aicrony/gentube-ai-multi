@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { updateUserCredits } from '@/utils/gcloud/userCredits';
+import { aggregateUserCredits } from '@/utils/gcloud/userCredits';
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,7 +29,7 @@ export default async function handler(
       console.log('Currency:', currency);
       console.log('Created At:', created_at);
       console.log('Credits Purchased:', credits_purchased);
-      await updateUserCredits(user_id, '-', credits_purchased);
+      await aggregateUserCredits(user_id, '-', credits_purchased);
       res.status(200).json({ received: true });
     } else {
       res.status(200).json({ received: false });

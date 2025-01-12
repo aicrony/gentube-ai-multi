@@ -62,7 +62,7 @@ export async function checkoutWithStripe(
         }
       ],
       cancel_url: getURL(),
-      success_url: getURL(redirectPath)
+      success_url: getURL('/account')
     };
 
     console.log(
