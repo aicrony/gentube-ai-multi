@@ -51,7 +51,10 @@ export default async function handler(
       result =
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
       creditCost = 40;
-    } else {
+    } else if (imageUrl === 'none') {
+      result = await callVideoApi(imageUrl || 'none', videoDescription);
+      creditCost = 40;
+    } else if (imageUrl !== 'none') {
       result = await callHqVideoApi(imageUrl || 'none', videoDescription);
       creditCost = 50;
     }
