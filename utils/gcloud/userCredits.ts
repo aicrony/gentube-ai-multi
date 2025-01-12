@@ -28,6 +28,17 @@ export async function updateUserCredits(
   userIp: string | string[] | undefined,
   credits: number
 ): Promise<void> {
+  const query = datastore
+    .createQuery(namespace, kind)
+    .filter('UserId', '=', userId)
+    .filter('UserIp', '=', userIp)
+    .limit(1);
+
+  const [existingCredits] = await datastore.runQuery(query);
+  const currentCredits =
+    existingCredits.length > 0 ? existingCredits[0].Credits : 0;
+  const newCredits = currentCredits + credits;
+
   const keyValue = [kind, userId ? userId : userIp];
   const key = datastore.key({
     namespace,
@@ -39,7 +50,7 @@ export async function updateUserCredits(
     data: {
       UserId: userId,
       UserIp: userIp,
-      Credits: credits
+      Credits: newCredits
     }
   };
 
