@@ -40,9 +40,26 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
         </div>
       }
     >
-      <div className="mt-8 mb-4 text-xl font-semibold">
+      <div className="mt-4 mb-4 text-xl font-semibold">
         {credits !== null ? (
-          <p className="text-xlg">{credits}</p>
+          <p className="text-xlg">
+            {credits > 0 ? (
+              <>
+                {credits}
+                {' ---> '}
+                <a href="/">
+                  <Button variant="slim">Start Generating</Button>
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="text-sm">All credits have depleted.</p>
+                <a href="/pricing">
+                  <Button variant="slim">More Credits</Button>
+                </a>
+              </>
+            )}
+          </p>
         ) : (
           <p className="text-lg">Loading credits...</p>
         )}
