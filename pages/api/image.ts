@@ -46,7 +46,7 @@ export default async function handler(
   if (userCredits <= 0) {
     console.log('Credit limit exceeded');
     res.status(429).json({
-      error: 'Credit limit exceeded. Please subscribe on the PRICING page.'
+      error: 'Credit limit exceeded. Purchase credits on the PRICING page.'
     });
     return;
   }

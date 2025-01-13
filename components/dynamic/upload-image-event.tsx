@@ -3,6 +3,7 @@ import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
+import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 
 interface UploadImageDynamicButtonProps {
   userId: string;
@@ -67,17 +68,7 @@ export const UploadImageDynamicButton: React.FC<
 
   return (
     <>
-      {errorMessage && (
-        <Button
-          variant="slim"
-          type="button"
-          className="mt-1"
-          loading={isSubmitting}
-          onClick={() => (window.location.href = '/pricing')}
-        >
-          {errorMessage}
-        </Button>
-      )}
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div>
         <Button
           variant="slim"

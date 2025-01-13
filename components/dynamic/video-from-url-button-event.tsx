@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
+import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
@@ -87,17 +88,7 @@ export function VideoFromUrlDynamicButton({
 
   return (
     <>
-      {errorMessage && (
-        <Button
-          variant="slim"
-          type="button"
-          className="mt-1"
-          loading={isSubmitting}
-          onClick={() => (window.location.href = '/pricing')}
-        >
-          {errorMessage}
-        </Button>
-      )}
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className={'pt-5'}>
         <div className="grid gap-2">
           <Label htmlFor="imageUrl">

@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
+import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 
 interface VideoDynamicButtonProps {
   urlData: string;
@@ -85,9 +86,7 @@ export function VideoDynamicButton({
 
   return (
     <div className={'margin-top-8'}>
-      {errorMessage && (
-        <div className="error-message-large">{errorMessage}</div>
-      )}
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className={'pt-4'}>
         <Input
           type="text"

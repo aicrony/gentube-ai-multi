@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useUserCredits } from '@/context/UserCreditsContext';
+import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice-button';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -100,17 +101,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
 
   return (
     <>
-      {errorMessage && (
-        <Button
-          variant="slim"
-          type="button"
-          className="mt-1"
-          loading={isSubmitting}
-          onClick={() => (window.location.href = '/pricing')}
-        >
-          {errorMessage}
-        </Button>
-      )}
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className="float-left">
         <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input

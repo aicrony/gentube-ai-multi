@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 import Uploader from '@/components/dynamic/uploader';
 import { useUserCredits } from '@/context/UserCreditsContext';
+import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 
 interface VideoFromUploadedImageDynamicButtonProps {
   userId: string;
@@ -77,17 +78,7 @@ export const VideoFromUploadedImageDynamicButton: React.FC<
 
   return (
     <>
-      {errorMessage && (
-        <Button
-          variant="slim"
-          type="button"
-          className="mt-1"
-          loading={isSubmitting}
-          onClick={() => (window.location.href = '/pricing')}
-        >
-          {errorMessage}
-        </Button>
-      )}
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className={'pt-5'}>
         <div className="grid gap-2">
           <Uploader />

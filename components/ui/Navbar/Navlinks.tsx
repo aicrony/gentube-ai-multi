@@ -46,7 +46,10 @@ export default function Navlinks({ user }: NavlinksProps) {
                   value={usePathname() ?? ''}
                 />
                 <button type="submit" className={s.link}>
-                  Sign out
+                  <span>
+                    <FaCheck style={{ color: 'green' }} />
+                  </span>
+                  &nbsp; Sign out
                 </button>
               </form>
             </div>
