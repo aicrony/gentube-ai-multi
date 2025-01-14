@@ -110,7 +110,7 @@ export default function Pricing({ user, products, subscription }: Props) {
             <h1 className="text-4xl font-extrabold text-white sm:text-center sm:text-6xl">
               GenTube.ai Pricing Plans
             </h1>
-            <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
+            <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 text-center sm:text-center sm:text-2xl">
               Choose your level of creativity.
             </p>
             {/*<div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">*/}
@@ -195,6 +195,10 @@ export default function Pricing({ user, products, subscription }: Props) {
               );
             })}
           </div>
+          <p className="m-auto mt-5 text-xl text-zinc-200 text-center sm:text-center sm:text-xl">
+            Currently, image generations are 4-6 credits, video is 40-50 credits
+            based on quality.
+          </p>
           <LogoCloud />
         </div>
       </section>
