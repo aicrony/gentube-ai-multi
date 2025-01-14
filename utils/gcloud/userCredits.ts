@@ -33,7 +33,14 @@ export async function getUserCredits(
   }
 
   const [credits] = await datastore.runQuery(query);
-  return credits.length > 0 ? credits[0].Credits : null;
+  let response = credits.length > 0 ? credits[0].Credits : null;
+
+  if (response == null) {
+    await updateUserCredits(userId, userIp, 120);
+    response = 120;
+  }
+
+  return response;
 }
 
 export async function updateUserCredits(
