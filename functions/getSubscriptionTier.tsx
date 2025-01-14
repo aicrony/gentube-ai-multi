@@ -3,7 +3,7 @@ export function getSubscriptionTier(): {
 } {
   let initialCredits: number = 0;
 
-  initialCredits = 100; // Free tier limit
+  initialCredits = 120; // Free tier limit
 
   return {
     initialCredits
