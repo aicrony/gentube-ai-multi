@@ -70,15 +70,17 @@ export const UploadImageDynamicButton: React.FC<
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div>
-        <Button
-          variant="slim"
-          type="submit"
-          className="mt-1"
-          loading={isSubmitting}
-          onClick={handleUploadImage}
-        >
-          Upload Image
-        </Button>
+        {!uploadResponse && (
+          <Button
+            variant="slim"
+            type="submit"
+            className="mt-1"
+            loading={isSubmitting}
+            onClick={handleUploadImage}
+          >
+            Upload Image
+          </Button>
+        )}
         {uploadResponse && (
           <div className={'margin-top-8'}>
             <p>Image Uploaded</p>

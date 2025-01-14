@@ -48,10 +48,10 @@ const FileInterpreter: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="pt-4 flex flex-col items-center">
       <input type="file" onChange={handleFileChange} />
       {base64Data && (
-        <div>
+        <div className="flex flex-col items-center">
           <div>
             {imageSize && (
               <p>
@@ -62,14 +62,15 @@ const FileInterpreter: React.FC = () => {
             {fileType && <p>File Type: {fileType}</p>}
           </div>
 
-          {fileType !== 'heic' && (
-            <img
-              src={`data:image/${fileType};base64,${base64Data}`}
-              alt="Uploaded image."
-              style={{ maxWidth: '140px' }}
-            />
-          )}
-
+          <div>
+            {fileType !== 'heic' && (
+              <img
+                src={`data:image/${fileType};base64,${base64Data}`}
+                alt="Uploaded image."
+                style={{ maxWidth: '140px' }}
+              />
+            )}
+          </div>
           <UploadImageDynamicButton base64Image={base64Data} userId={userId} />
         </div>
       )}
