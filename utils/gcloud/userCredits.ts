@@ -15,21 +15,16 @@ export async function getUserCredits(
   userIp: string | string[] | undefined
 ): Promise<number | null> {
   let query;
-  if (
-    userId == undefined &&
-    (userIp != undefined || userIp != '-' || userIp != '')
-  ) {
+  if (userId == undefined) {
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserIp', '=', userIp)
       .limit(1);
-  } else if (userId != undefined) {
+  } else {
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
       .limit(1);
-  } else {
-    return null;
   }
 
   const [credits] = await datastore.runQuery(query);
