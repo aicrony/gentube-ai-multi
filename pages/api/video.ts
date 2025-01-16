@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import callVideoApi from '@/services/generateLumaVideo';
-// import callHqVideoApi from '@/services/generateFalVideo';
+import callHqVideoApi from '@/services/generateFalVideo';
 import { serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 // import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
@@ -55,7 +55,7 @@ export default async function handler(
       result = await callVideoApi(imageUrl || 'none', videoDescription);
       creditCost = 40;
     } else if (imageUrl !== 'none') {
-      result = await callVideoApi(imageUrl || 'none', videoDescription);
+      result = await callHqVideoApi(imageUrl || 'none', videoDescription);
       creditCost = 50;
     }
 
