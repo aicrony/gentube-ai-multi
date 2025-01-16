@@ -13,7 +13,7 @@ export default async function handler(
   const { userId } = req.query;
 
   try {
-    const credits = await getUserCredits(userId as string, '-');
+    const credits = await getUserCredits(userId as string, undefined);
     console.log('getUserCredits: ', credits);
     res.status(200).json({ credits });
   } catch (error) {
