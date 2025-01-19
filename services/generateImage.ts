@@ -26,7 +26,7 @@ export default async function callImageApi(
     model: process.env.OPENAI_MODEL_ID,
     prompt: imageDescription,
     n: 1,
-    size: '1024x1024',
+    size: '1792x1024',
     quality: 'standard',
     response_format: 'b64_json'
   };
