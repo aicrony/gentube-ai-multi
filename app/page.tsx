@@ -18,7 +18,7 @@ const BrowserRouter = dynamic(
 );
 
 export default function Home() {
-  const userId = useUserId();
+  const [userId] = useState<string | 'none'>(useUserId() || 'none');
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
 

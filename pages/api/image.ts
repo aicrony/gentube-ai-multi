@@ -38,6 +38,7 @@ export default async function handler(
 
   if (userCredits === null) {
     userCredits = initialCredits;
+    console.log('Set Initial Credits: ', userCredits);
     await updateUserCredits(userId, userIp, userCredits);
   }
 
@@ -70,6 +71,7 @@ export default async function handler(
 
     // Update user credits
     userCredits -= creditCost;
+    console.log('UPDATED User Credits: ', userCredits);
     await updateUserCredits(userId, userIp, userCredits);
 
     res.setHeader('Set-Cookie', [
@@ -95,7 +97,7 @@ export default async function handler(
       UserIp: userIp
     });
 
-    console.log('Data saved: ', activityResponse);
+    console.log('Image Data saved: ', activityResponse);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({ result, userCredits });

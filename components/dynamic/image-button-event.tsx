@@ -54,6 +54,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setIsSubmitting(true); // Disable the button while the request is being handled
     setImageData(null); // clear the imageData state
     setErrorMessage(null); // clear any previous error message
+    console.log('PASS userId:', userId);
     try {
       const response = await fetch('/api/image', {
         method: 'POST',
