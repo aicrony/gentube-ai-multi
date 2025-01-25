@@ -123,6 +123,13 @@ const MyAssets: React.FC = () => {
                     {expandedPrompts[index] ? 'less' : 'more'}
                   </button>
                 )}
+                <button
+                  onClick={() => handleCopy(activity.Prompt, 'Prompt copied!')}
+                  className="text-blue-500 icon-size-small ml-2"
+                  title="Copy Prompt"
+                >
+                  <FaCopy />
+                </button>
               </p>
             </div>
           </div>
@@ -149,15 +156,19 @@ const MyAssets: React.FC = () => {
                 className="text-blue-500 icon-size"
                 title="Copy Image URL"
               >
-                {activity.AssetType === 'vid' ? <FaVideo /> : <FaImage />}
+                <FaImage />
               </button>
-              <button
-                onClick={() => handleCopy(activity.Prompt, 'Prompt copied!')}
-                className="text-blue-500 icon-size"
-                title="Copy Prompt"
-              >
-                <FaCopy />
-              </button>
+              {activity.AssetType === 'vid' && (
+                <button
+                  onClick={() =>
+                    handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
+                  }
+                  className="text-blue-500 icon-size"
+                  title="Copy Video URL"
+                >
+                  <FaVideo />
+                </button>
+              )}
             </div>
           </div>
         </div>
