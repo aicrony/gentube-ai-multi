@@ -19,7 +19,6 @@ const MyAssets: React.FC = () => {
   useEffect(() => {
     const fetchUserActivities = async () => {
       if (userId) {
-        console.log('Assets USERID: ', userId);
         try {
           const response = await fetch(
             `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}`
@@ -47,7 +46,7 @@ const MyAssets: React.FC = () => {
     return <p>Loading...</p>;
   }
 
-  if (activities.length === 0) {
+  if (activities && activities.length === 0) {
     return <p>No assets found.</p>;
   }
 
