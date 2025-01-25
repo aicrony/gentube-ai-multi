@@ -70,6 +70,7 @@ export const VideoFromTextDynamicButton: React.FC<
 
   return (
     <>
+      <h1 className="text-xl font-bold">Text to Video Generation</h1>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div>
         <Input

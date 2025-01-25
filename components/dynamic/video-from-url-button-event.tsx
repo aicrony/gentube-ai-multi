@@ -88,6 +88,7 @@ export function VideoFromUrlDynamicButton({
 
   return (
     <>
+      <h1 className="text-xl font-bold">Image URL to Video Generation</h1>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className={'pt-5'}>
         <div className="grid gap-2">

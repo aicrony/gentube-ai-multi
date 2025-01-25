@@ -6,7 +6,7 @@ import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '3mb' // Set the maximum body size to 2MB
+      sizeLimit: '5mb' // Set the maximum body size to 2MB
     }
   }
 };

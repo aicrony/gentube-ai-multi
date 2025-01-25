@@ -49,7 +49,8 @@ const FileInterpreter: React.FC = () => {
 
   return (
     <div className="pt-4 flex flex-col items-center">
-      <p>Upload up to 3MB:</p>
+      <h1 className="text-xl font-bold">Upload Image (for AI Video)</h1>
+      <p>Up to 5MB image:</p>
       <input type="file" onChange={handleFileChange} />
       {base64Data && (
         <div className="flex flex-col items-center">
