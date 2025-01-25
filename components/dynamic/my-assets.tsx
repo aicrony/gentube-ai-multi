@@ -15,7 +15,11 @@ const MyAssets: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [expandedPrompts, setExpandedPrompts] = useState<{
+    [key: number]: boolean;
+  }>({});
   const limit = 10;
+  const promptLength = 100;
 
   useEffect(() => {
     const fetchUserActivities = async () => {
@@ -48,6 +52,10 @@ const MyAssets: React.FC = () => {
     alert(message);
   };
 
+  const togglePrompt = (index: number) => {
+    setExpandedPrompts((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -57,7 +65,7 @@ const MyAssets: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="my-assets-container">
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
@@ -82,7 +90,18 @@ const MyAssets: React.FC = () => {
           </a>
           <div className="flex flex-wrap w-full max-w-full">
             <p>
-              <strong>Prompt:</strong> {activity.Prompt}
+              <strong>Prompt:</strong>
+              {expandedPrompts[index] || activity.Prompt.length <= promptLength
+                ? activity.Prompt
+                : `${activity.Prompt.substring(0, promptLength)}... `}
+              {activity.Prompt.length > promptLength && (
+                <button
+                  onClick={() => togglePrompt(index)}
+                  className="text-blue-500"
+                >
+                  {expandedPrompts[index] ? 'less' : 'more'}
+                </button>
+              )}
             </p>
           </div>
           <div>
