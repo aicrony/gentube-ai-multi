@@ -100,7 +100,7 @@ export default function Home() {
                   <Route path="/my-assets" element={<MyAssets />} />
                 </Routes>
               </div>
-              <ImageGallery />
+              {/*<ImageGallery />*/}
             </div>
           </main>
         </div>
