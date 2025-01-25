@@ -1,0 +1,36 @@
+import { Datastore } from '@google-cloud/datastore';
+import { google_app_creds } from '@/interfaces/googleCredentials';
+
+require('dotenv').config();
+
+const datastore = new Datastore({
+  projectId: google_app_creds.project_id,
+  credentials: google_app_creds
+});
+
+const USER_ACTIVITY_KIND = 'UserActivity';
+const NAMESPACE = 'GenTube';
+
+interface UserActivity {
+  CreatedAssetUrl: string;
+  Prompt: string;
+}
+
+export async function getUserAssets(
+  userId: string | string[] | undefined
+): Promise<UserActivity[] | null> {
+  if (!userId || userId.length === 0) {
+    console.log('Invalid userId');
+    return null;
+  }
+
+  const query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .filter('UserId', '=', userId);
+
+  const [results] = await datastore.runQuery(query);
+  return results.map((activity: any) => ({
+    CreatedAssetUrl: activity.CreatedAssetUrl,
+    Prompt: activity.Prompt
+  }));
+}

@@ -6,6 +6,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
+import MyAssets from '@/components/dynamic/my-assets';
 import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useUserId } from '@/context/UserIdContext';
@@ -60,6 +61,9 @@ export default function Home() {
                   <Link to="/upload-to-video" className="text-white">
                     <Button variant="slim">Upload Image</Button>
                   </Link>
+                  <Link to="/my-assets" className="text-white">
+                    <Button variant="slim">My Assets</Button>
+                  </Link>
                 </nav>
                 <Routes>
                   <Route
@@ -93,6 +97,7 @@ export default function Home() {
                     path="/upload-to-video"
                     element={<FileInterpreter />}
                   />
+                  <Route path="/my-assets" element={<MyAssets />} />
                 </Routes>
               </div>
               <ImageGallery />
