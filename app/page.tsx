@@ -78,24 +78,35 @@ export default function Home() {
                   <Route
                     path="/image-url-to-video"
                     element={
-                      <VideoFromUrlDynamicButton
-                        userId={userId}
-                        onUserCreditsUpdate={handleUserCreditsUpdate}
-                      />
+                      <>
+                        <VideoFromUrlDynamicButton
+                          userId={userId}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
                     }
                   />
                   <Route
                     path="/text-to-video"
                     element={
-                      <VideoFromTextDynamicButton
-                        userId={userId}
-                        onUserCreditsUpdate={handleUserCreditsUpdate}
-                      />
+                      <>
+                        <VideoFromTextDynamicButton
+                          userId={userId}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
                     }
                   />
                   <Route
                     path="/upload-to-video"
-                    element={<FileInterpreter />}
+                    element={
+                      <>
+                        <FileInterpreter />
+                        <MyAssets />
+                      </>
+                    }
                   />
                 </Routes>
               </div>
