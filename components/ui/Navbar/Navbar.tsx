@@ -2,7 +2,11 @@ import { createClient } from '@/utils/supabase/server';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
-export default async function Navbar() {
+interface NavbarProps {
+  className?: string;
+}
+
+const Navbar: React.FC<NavbarProps> = async ({ className }) => {
   const supabase = createClient();
 
   const {
@@ -19,4 +23,6 @@ export default async function Navbar() {
       </div>
     </nav>
   );
-}
+};
+
+export default Navbar;

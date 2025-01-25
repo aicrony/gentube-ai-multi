@@ -65,3 +65,12 @@ p a {
 h1 {
   @apply text-3xl font-bold text-center text-red-700;
 }
+
+/* styles/main.css */
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Ensure it stays on top of other content */
+}

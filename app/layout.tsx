@@ -1,4 +1,3 @@
-// app/layout.tsx
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Metadata } from 'next';
 import Footer from '@/components/ui/Footer';
@@ -40,7 +39,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <body className="bg-black">
         <UserIdProvider userId={userId}>
-          <Navbar />
+          <Navbar className="navbar" />
           <main
             id="skip"
             className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"

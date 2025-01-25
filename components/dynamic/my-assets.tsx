@@ -51,7 +51,7 @@ const MyAssets: React.FC = () => {
   }
 
   return (
-    <div className="grid gap-4">
+    <div>
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
@@ -74,19 +74,9 @@ const MyAssets: React.FC = () => {
               />
             )}
           </a>
-          <div>
+          <div className="flex flex-wrap w-full max-w-full">
             <p>
               <strong>Prompt:</strong> {activity.Prompt}
-            </p>
-            <p>
-              <strong>Created Asset URL:</strong>{' '}
-              <a
-                href={activity.CreatedAssetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {activity.CreatedAssetUrl}
-              </a>
             </p>
           </div>
         </div>
