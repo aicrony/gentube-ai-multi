@@ -18,7 +18,6 @@ export default async function handler(
       Number(limit),
       Number(offset)
     );
-    console.log('getUserCredits: ', assets ? assets.length : 0);
     res.status(200).json({ assets });
   } catch (error) {
     console.error('Failed to fetch user assets:', error);

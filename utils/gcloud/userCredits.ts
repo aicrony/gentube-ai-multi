@@ -53,7 +53,6 @@ export async function getUserCredits(
   }
 
   const [credits] = await datastore.runQuery(query);
-  console.log('getUserCredits: ', credits);
   let response = credits.length > 0 ? credits[0].Credits : null;
   console.log('getUserCredits response: ', response);
 

@@ -61,18 +61,18 @@ export default function Home() {
                   <Link to="/upload-to-video" className="text-white">
                     <Button variant="slim">Upload Image</Button>
                   </Link>
-                  <Link to="/my-assets" className="text-white">
-                    <Button variant="slim">My Assets</Button>
-                  </Link>
                 </nav>
                 <Routes>
                   <Route
                     path="/"
                     element={
-                      <ImageDynamicButton
-                        userId={userId}
-                        onUserCreditsUpdate={handleUserCreditsUpdate}
-                      />
+                      <>
+                        <ImageDynamicButton
+                          userId={userId}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
                     }
                   />
                   <Route
@@ -97,7 +97,6 @@ export default function Home() {
                     path="/upload-to-video"
                     element={<FileInterpreter />}
                   />
-                  <Route path="/my-assets" element={<MyAssets />} />
                 </Routes>
               </div>
               {/*<ImageGallery />*/}

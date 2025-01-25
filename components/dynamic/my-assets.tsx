@@ -21,29 +21,29 @@ const MyAssets: React.FC = () => {
   const limit = 10;
   const promptLength = 100;
 
-  useEffect(() => {
-    const fetchUserActivities = async () => {
-      if (userId) {
-        try {
-          const response = await fetch(
-            `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}`
-          );
-          if (!response.ok) {
-            throw new Error('Failed to fetch user assets');
-          }
-          const data = await response.json();
-          setActivities((prev) => [...prev, ...data.assets]);
-          setHasMore(data.assets.length === limit);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
+  const fetchUserActivities = async () => {
+    if (userId) {
+      try {
+        const response = await fetch(
+          `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch user assets');
         }
-      } else {
+        const data = await response.json();
+        setActivities((prev) => [...prev, ...data.assets]);
+        setHasMore(data.assets.length === limit);
+      } catch (error) {
+        console.error(error);
+      } finally {
         setLoading(false);
       }
-    };
+    } else {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserActivities();
   }, [userId, page]);
 
@@ -56,6 +56,13 @@ const MyAssets: React.FC = () => {
     setExpandedPrompts((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
+  const handleRefresh = () => {
+    setActivities([]);
+    setPage(0);
+    setLoading(true);
+    fetchUserActivities();
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -66,6 +73,9 @@ const MyAssets: React.FC = () => {
 
   return (
     <div className="my-assets-container">
+      <button onClick={handleRefresh} className="mb-4">
+        Refresh Assets
+      </button>
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
@@ -117,7 +127,12 @@ const MyAssets: React.FC = () => {
               </a>
               <button
                 onClick={() =>
-                  handleCopy(activity.CreatedAssetUrl, 'Image URL copied!')
+                  handleCopy(
+                    activity.CreatedAssetUrl,
+                    activity.AssetType === 'vid'
+                      ? 'Video URL copied!'
+                      : 'Image URL copied!'
+                  )
                 }
                 className="text-blue-500 icon-size"
                 title="Copy Image URL"
