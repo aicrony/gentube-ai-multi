@@ -102,20 +102,29 @@ const MyAssets: React.FC = () => {
             )}
           </a>
           <div className="flex flex-wrap w-full max-w-full">
-            <p>
-              <strong>Prompt:</strong>
-              {expandedPrompts[index] || activity.Prompt.length <= promptLength
-                ? activity.Prompt
-                : `${activity.Prompt.substring(0, promptLength)}... `}
-              {activity.Prompt.length > promptLength && (
-                <button
-                  onClick={() => togglePrompt(index)}
-                  className="text-blue-500"
-                >
-                  {expandedPrompts[index] ? 'less' : 'more'}
-                </button>
-              )}
-            </p>
+            <div className="pr-2">
+              <p>
+                <strong>Type:</strong>{' '}
+                {activity.AssetType === 'vid' ? 'Video' : 'Image'}
+              </p>
+            </div>
+            <div>
+              <p>
+                <strong>Prompt:</strong>
+                {expandedPrompts[index] ||
+                activity.Prompt.length <= promptLength
+                  ? activity.Prompt
+                  : `${activity.Prompt.substring(0, promptLength)}... `}
+                {activity.Prompt.length > promptLength && (
+                  <button
+                    onClick={() => togglePrompt(index)}
+                    className="text-blue-500"
+                  >
+                    {expandedPrompts[index] ? 'less' : 'more'}
+                  </button>
+                )}
+              </p>
+            </div>
           </div>
           <div>
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
