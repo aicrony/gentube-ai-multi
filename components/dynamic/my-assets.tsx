@@ -105,7 +105,7 @@ const MyAssets: React.FC = () => {
             </p>
           </div>
           <div>
-            <div className="flex space-x-2 mt-2">
+            <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <a
                 href={activity.CreatedAssetUrl}
                 target="_blank"
