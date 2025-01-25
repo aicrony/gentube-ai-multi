@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import Downloader from '@/components/dynamic/downloader';
+import { useUserIp } from '@/context/UserIpContext';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 
@@ -14,18 +13,10 @@ interface UploadImageDynamicButtonProps {
 export const UploadImageDynamicButton: React.FC<
   UploadImageDynamicButtonProps
 > = ({ userId, base64Image, onUserCreditsUpdate }) => {
+  const { userIp } = useUserIp();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [uploadResponse, setUploadResponse] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [videoData, setVideoData] = useState<any>(null);
-  const [videoDescription, setVideoDescription] = useState<string>('');
-  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
-
-  let videoGenButtonLabel: string;
-  let videoGenCompleteMessage: string;
-
-  videoGenButtonLabel = 'Generate Video';
-  videoGenCompleteMessage = 'Video Generation Complete';
 
   const handleUploadImage = async () => {
     setIsSubmitting(true);
@@ -36,9 +27,10 @@ export const UploadImageDynamicButton: React.FC<
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': userId
+          'x-user-id': userId,
+          'x-forwarded-for': userIp
         },
-        body: JSON.stringify({ image: base64Image })
+        body: JSON.stringify({ image: base64Image, userId, userIp })
       });
 
       if (!response.ok) {

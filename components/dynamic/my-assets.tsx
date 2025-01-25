@@ -105,7 +105,11 @@ const MyAssets: React.FC = () => {
             <div className="pr-2">
               <p>
                 <strong>Type:</strong>{' '}
-                {activity.AssetType === 'vid' ? 'Video' : 'Image'}
+                {activity.AssetType === 'vid'
+                  ? 'Video'
+                  : activity.AssetType === 'upl'
+                    ? 'Upload'
+                    : 'Image'}
               </p>
             </div>
             <div>

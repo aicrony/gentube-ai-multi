@@ -2,11 +2,12 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fileTypeFromBuffer } from 'file-type';
 import heicConvert from 'heic-convert';
 import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
+import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '5mb' // Set the maximum body size to 2MB
+      sizeLimit: '5mb' // Set the maximum body size to 5MB
     }
   }
 };
@@ -21,7 +22,7 @@ export default async function handler(
     return;
   }
 
-  const { image } = req.body;
+  const { image, userId, userIp } = req.body;
 
   if (!image) {
     res.status(400).json({ error: 'Image data is required' });
@@ -54,6 +55,20 @@ export default async function handler(
       process.env.GCLOUD_TEMP_PUBLIC_BUCKET_NAME,
       base64Image
     );
+
+    // Save user activity
+    await saveUserActivity({
+      AssetSource: '',
+      AssetType: 'upl',
+      CountedAssetPreviousState: 0,
+      CountedAssetState: 0,
+      CreatedAssetUrl: imageUrl,
+      DateTime: new Date().toISOString(),
+      Prompt: '',
+      SubscriptionTier: 0,
+      UserId: userId,
+      UserIp: userIp
+    });
 
     res.status(200).json({ url: imageUrl, fileType: fileType.ext });
   } catch (error) {
