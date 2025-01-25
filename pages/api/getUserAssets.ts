@@ -10,10 +10,14 @@ export default async function handler(
     return;
   }
 
-  const { userId } = req.query;
+  const { userId, limit = 10, offset = 0 } = req.query;
 
   try {
-    const assets = await getUserAssets(userId as string);
+    const assets = await getUserAssets(
+      userId as string,
+      Number(limit),
+      Number(offset)
+    );
     console.log('getUserCredits: ', assets ? assets.length : 0);
     res.status(200).json({ assets });
   } catch (error) {

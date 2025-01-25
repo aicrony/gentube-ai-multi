@@ -10,18 +10,24 @@ const MyAssets: React.FC = () => {
   const userId = useUserId();
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 10;
 
   useEffect(() => {
     const fetchUserActivities = async () => {
       if (userId) {
         console.log('Assets USERID: ', userId);
         try {
-          const response = await fetch(`/api/getUserAssets?userId=${userId}`);
+          const response = await fetch(
+            `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}`
+          );
           if (!response.ok) {
             throw new Error('Failed to fetch user assets');
           }
           const data = await response.json();
-          setActivities(data.assets || []);
+          setActivities((prev) => [...prev, ...data.assets]);
+          setHasMore(data.assets.length === limit);
         } catch (error) {
           console.error(error);
         } finally {
@@ -33,7 +39,7 @@ const MyAssets: React.FC = () => {
     };
 
     fetchUserActivities();
-  }, [userId]);
+  }, [userId, page]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -62,6 +68,11 @@ const MyAssets: React.FC = () => {
           </p>
         </div>
       ))}
+      {hasMore && (
+        <button onClick={() => setPage((prev) => prev + 1)} className="mt-4">
+          Load More
+        </button>
+      )}
     </div>
   );
 };

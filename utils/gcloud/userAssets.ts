@@ -17,7 +17,9 @@ interface UserActivity {
 }
 
 export async function getUserAssets(
-  userId: string | string[] | undefined
+  userId: string | string[] | undefined,
+  limit: number,
+  offset: number
 ): Promise<UserActivity[] | null> {
   if (!userId || userId.length === 0) {
     console.log('Invalid userId');
@@ -26,7 +28,9 @@ export async function getUserAssets(
 
   const query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('UserId', '=', userId);
+    .filter('UserId', '=', userId)
+    .limit(limit)
+    .offset(offset);
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
