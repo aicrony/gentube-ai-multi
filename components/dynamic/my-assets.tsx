@@ -73,9 +73,12 @@ const MyAssets: React.FC = () => {
 
   return (
     <div className="my-assets-container">
-      <button onClick={handleRefresh} className="mb-4">
-        Refresh Assets
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold">My Assets</h1>
+        <button onClick={handleRefresh} className="text-blue-500">
+          Refresh Assets
+        </button>
+      </div>
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
