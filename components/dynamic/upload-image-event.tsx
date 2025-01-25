@@ -3,16 +3,18 @@ import Button from '@/components/ui/Button';
 import { useUserIp } from '@/context/UserIpContext';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
+import MyAssets from '@/components/dynamic/my-assets';
 
 interface UploadImageDynamicButtonProps {
   userId: string;
   base64Image: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
+  onUploadSuccess?: () => void;
 }
 
 export const UploadImageDynamicButton: React.FC<
   UploadImageDynamicButtonProps
-> = ({ userId, base64Image, onUserCreditsUpdate }) => {
+> = ({ userId, base64Image, onUserCreditsUpdate, onUploadSuccess }) => {
   const { userIp } = useUserIp();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [uploadResponse, setUploadResponse] = useState<string | null>(null);
@@ -52,6 +54,11 @@ export const UploadImageDynamicButton: React.FC<
       setUploadResponse(
         JSON.stringify(dataResponse.url, null, 2).replace(/^"|"$/g, '')
       );
+
+      // Call the onUploadSuccess function if provided
+      if (onUploadSuccess) {
+        onUploadSuccess();
+      }
     } catch (error) {
       setIsSubmitting(false);
       console.error('There was an error with the fetch operation: ', error);
@@ -74,17 +81,22 @@ export const UploadImageDynamicButton: React.FC<
           </Button>
         )}
         {uploadResponse && (
-          <div className={'margin-top-8'}>
-            <p>Image Uploaded</p>
-            <p>View Image</p>
-            <a
-              href={uploadResponse}
-              target={'_blank'}
-              className={'textUnderline'}
-            >
-              {uploadResponse}
-            </a>
-          </div>
+          <>
+            <div className={'margin-top-8'}>
+              <p>Image Uploaded</p>
+              <p>View Image</p>
+              <a
+                href={uploadResponse}
+                target={'_blank'}
+                className={'textUnderline'}
+              >
+                {uploadResponse}
+              </a>
+            </div>
+            <div>
+              <MyAssets />
+            </div>
+          </>
         )}
       </div>
     </>

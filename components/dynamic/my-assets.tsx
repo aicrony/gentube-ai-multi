@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
-import { FaExternalLinkAlt, FaCopy, FaImage, FaVideo } from 'react-icons/fa';
+import {
+  FaExternalLinkAlt,
+  FaCopy,
+  FaImage,
+  FaVideo,
+  FaTrash
+} from 'react-icons/fa';
 
 interface UserActivity {
   CreatedAssetUrl: string;
@@ -63,6 +69,30 @@ const MyAssets: React.FC = () => {
     fetchUserActivities();
   };
 
+  const handleDelete = async (activity: UserActivity) => {
+    if (confirm('Are you sure you want to delete this asset?')) {
+      try {
+        const response = await fetch('/api/deleteUserAsset', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId,
+            assetUrl: activity.CreatedAssetUrl,
+            assetType: activity.AssetType
+          })
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete asset');
+        }
+        handleRefresh();
+      } catch (error) {
+        console.error('Error deleting asset:', error);
+      }
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -76,7 +106,7 @@ const MyAssets: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">My Assets</h1>
         <button onClick={handleRefresh} className="text-blue-500">
-          Refresh Assets
+          Refresh Assets - {userId}
         </button>
       </div>
       {activities.map((activity, index) => (
@@ -87,19 +117,19 @@ const MyAssets: React.FC = () => {
             rel="noopener noreferrer"
             className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
           >
-            {activity.AssetType === 'vid' ? (
-              <img
-                src={activity.AssetSource}
-                alt="Thumbnail"
-                className="w-16 h-16 object-cover"
-              />
-            ) : (
-              <img
-                src={activity.CreatedAssetUrl}
-                alt="Thumbnail"
-                className="w-16 h-16 object-cover"
-              />
-            )}
+            {/*{activity.AssetType === 'upl' ? (*/}
+            {/*  <img*/}
+            {/*    src={activity.AssetSource}*/}
+            {/*    alt="Thumbnail"*/}
+            {/*    className="w-16 h-16 object-cover"*/}
+            {/*  />*/}
+            {/*) : (*/}
+            <img
+              src={activity.CreatedAssetUrl}
+              alt="Thumbnail"
+              className="w-16 h-16 object-cover"
+            />
+            {/*)}*/}
           </a>
           <div className="flex flex-wrap w-full max-w-full">
             <div className="pr-2">
@@ -173,6 +203,13 @@ const MyAssets: React.FC = () => {
                   <FaVideo />
                 </button>
               )}
+              <button
+                onClick={() => handleDelete(activity)}
+                className="text-red-500 icon-size"
+                title="Delete Asset"
+              >
+                <FaTrash />
+              </button>
             </div>
           </div>
         </div>
