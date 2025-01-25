@@ -74,3 +74,7 @@ h1 {
   left: 0;
   z-index: 1000; /* Ensure it stays on top of other content */
 }
+
+.icon-size {
+  font-size: 1.5em; /* Adjust the size as needed */
+}

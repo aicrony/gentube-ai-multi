@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
+import { FaExternalLinkAlt, FaCopy, FaImage, FaVideo } from 'react-icons/fa';
 
 interface UserActivity {
   CreatedAssetUrl: string;
@@ -42,6 +43,11 @@ const MyAssets: React.FC = () => {
     fetchUserActivities();
   }, [userId, page]);
 
+  const handleCopy = (text: string, message: string) => {
+    navigator.clipboard.writeText(text);
+    alert(message);
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -78,6 +84,35 @@ const MyAssets: React.FC = () => {
             <p>
               <strong>Prompt:</strong> {activity.Prompt}
             </p>
+          </div>
+          <div>
+            <div className="flex space-x-2 mt-2">
+              <a
+                href={activity.CreatedAssetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 icon-size"
+                title="Open"
+              >
+                <FaExternalLinkAlt />
+              </a>
+              <button
+                onClick={() =>
+                  handleCopy(activity.CreatedAssetUrl, 'Image URL copied!')
+                }
+                className="text-blue-500 icon-size"
+                title="Copy Image URL"
+              >
+                {activity.AssetType === 'vid' ? <FaVideo /> : <FaImage />}
+              </button>
+              <button
+                onClick={() => handleCopy(activity.Prompt, 'Prompt copied!')}
+                className="text-blue-500 icon-size"
+                title="Copy Prompt"
+              >
+                <FaCopy />
+              </button>
+            </div>
           </div>
         </div>
       ))}
