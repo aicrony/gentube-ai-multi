@@ -14,6 +14,8 @@ const NAMESPACE = 'GenTube';
 interface UserActivity {
   CreatedAssetUrl: string;
   Prompt: string;
+  AssetSource: string;
+  AssetType: string;
 }
 
 export async function getUserAssets(
@@ -35,6 +37,8 @@ export async function getUserAssets(
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
     CreatedAssetUrl: activity.CreatedAssetUrl,
-    Prompt: activity.Prompt
+    Prompt: activity.Prompt,
+    AssetSource: activity.AssetSource,
+    AssetType: activity.AssetType
   }));
 }

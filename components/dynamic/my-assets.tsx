@@ -4,6 +4,8 @@ import { useUserId } from '@/context/UserIdContext';
 interface UserActivity {
   CreatedAssetUrl: string;
   Prompt: string;
+  AssetSource: string;
+  AssetType: string;
 }
 
 const MyAssets: React.FC = () => {
@@ -52,20 +54,42 @@ const MyAssets: React.FC = () => {
   return (
     <div className="grid gap-4">
       {activities.map((activity, index) => (
-        <div key={index} className="border p-4">
-          <p>
-            <strong>Prompt:</strong> {activity.Prompt}
-          </p>
-          <p>
-            <strong>Created Asset URL:</strong>{' '}
-            <a
-              href={activity.CreatedAssetUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {activity.CreatedAssetUrl}
-            </a>
-          </p>
+        <div key={index} className="border p-4 flex items-center">
+          <a
+            href={activity.CreatedAssetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
+          >
+            {activity.AssetType === 'vid' ? (
+              <img
+                src={activity.AssetSource}
+                alt="Thumbnail"
+                className="w-16 h-16 object-cover"
+              />
+            ) : (
+              <img
+                src={activity.CreatedAssetUrl}
+                alt="Thumbnail"
+                className="w-16 h-16 object-cover"
+              />
+            )}
+          </a>
+          <div>
+            <p>
+              <strong>Prompt:</strong> {activity.Prompt}
+            </p>
+            <p>
+              <strong>Created Asset URL:</strong>{' '}
+              <a
+                href={activity.CreatedAssetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {activity.CreatedAssetUrl}
+              </a>
+            </p>
+          </div>
         </div>
       ))}
       {hasMore && (
