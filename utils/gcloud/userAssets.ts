@@ -47,3 +47,17 @@ export async function getUserAssets(
     AssetType: activity.AssetType
   }));
 }
+
+export async function getPublicAssets(
+  limit: number,
+  offset: number
+): Promise<string[] | null> {
+  let query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .filter('SubscriptionTier', '=', 3)
+    .limit(limit)
+    .offset(offset);
+
+  const [results] = await datastore.runQuery(query);
+  return results.map((activity: any) => activity.CreatedAssetUrl);
+}

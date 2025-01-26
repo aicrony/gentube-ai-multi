@@ -29,8 +29,8 @@ const ImageGallery: React.FC = () => {
 
   const fetchAndSetImages = async () => {
     try {
-      const response = await fetch('/api/getImages', {
-        method: 'POST',
+      const response = await fetch('/api/getPublicAssets?limit=100', {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
