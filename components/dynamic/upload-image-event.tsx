@@ -65,6 +65,10 @@ export const UploadImageDynamicButton: React.FC<
     }
   };
 
+  if (!userId) {
+    return <p>Please login to upload an image.</p>;
+  }
+
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />

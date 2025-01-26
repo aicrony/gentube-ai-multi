@@ -18,6 +18,19 @@ const FileInterpreter: React.FC = () => {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
+      const validImageTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/webp',
+        'image/heic'
+      ];
+      if (!validImageTypes.includes(file.type)) {
+        alert('Only image files are allowed!');
+        return;
+      }
+
       setFileSize(file.size);
       const reader = new FileReader();
       reader.onloadend = async () => {
