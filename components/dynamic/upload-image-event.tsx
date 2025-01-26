@@ -66,7 +66,11 @@ export const UploadImageDynamicButton: React.FC<
   };
 
   if (!userId) {
-    return <p>Please login to upload an image.</p>;
+    return (
+      <p>
+        Please <a href="/signin">sign in</a> to upload an image.
+      </p>
+    );
   }
 
   return (

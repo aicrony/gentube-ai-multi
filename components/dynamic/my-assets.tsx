@@ -42,7 +42,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         }
         const data = await response.json();
         setActivities((prev) => [...prev, ...data.assets]);
-        setHasMore(data.assets.length === limit);
+        setHasMore(data.assets.length === limit && data.assets.length > 0);
       } catch (error) {
         console.error(error);
       } finally {
@@ -218,7 +218,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           </div>
         </div>
       ))}
-      {hasMore && (
+      {activities.length > 0 && hasMore && (
         <button onClick={() => setPage((prev) => prev + 1)} className="mt-4">
           Load More
         </button>
