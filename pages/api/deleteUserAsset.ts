@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Storage } from '@google-cloud/storage';
 import { deleteUserActivity } from '@/utils/gcloud/deleteUserActivity';
 
-const storage = new Storage();
+const storage = new Storage({ projectId: 'local-cedar-324921' });
 
 export default async function handler(
   req: NextApiRequest,
