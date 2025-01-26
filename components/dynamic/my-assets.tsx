@@ -110,19 +110,27 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">My Assets</h1>
         <button onClick={handleRefresh} className="text-blue-500">
-          Refresh Assets - {userId}
+          Refresh Assets
         </button>
       </div>
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
-            href={activity.CreatedAssetUrl}
+            href={
+              activity.AssetType === 'vid'
+                ? activity.AssetSource
+                : activity.CreatedAssetUrl
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
           >
             <img
-              src={activity.CreatedAssetUrl}
+              src={
+                activity.AssetType === 'vid'
+                  ? activity.AssetSource
+                  : activity.CreatedAssetUrl
+              }
               alt="Thumbnail"
               className="w-16 h-16 object-cover"
             />
@@ -138,35 +146,43 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     : 'Image'}
               </p>
             </div>
-            <div>
-              <p>
-                <strong>Prompt:</strong>
-                {expandedPrompts[index] ||
-                activity.Prompt.length <= promptLength
-                  ? activity.Prompt
-                  : `${activity.Prompt.substring(0, promptLength)}... `}
-                {activity.Prompt.length > promptLength && (
+            {activity.AssetType !== 'upl' && (
+              <div>
+                <p>
+                  <strong>Prompt:</strong>
+                  {expandedPrompts[index] ||
+                  activity.Prompt.length <= promptLength
+                    ? activity.Prompt
+                    : `${activity.Prompt.substring(0, promptLength)}... `}
+                  {activity.Prompt.length > promptLength && (
+                    <button
+                      onClick={() => togglePrompt(index)}
+                      className="text-blue-500"
+                    >
+                      {expandedPrompts[index] ? 'less' : 'more'}
+                    </button>
+                  )}
                   <button
-                    onClick={() => togglePrompt(index)}
-                    className="text-blue-500"
+                    onClick={() =>
+                      handleCopy(activity.Prompt, 'Prompt copied!')
+                    }
+                    className="text-blue-500 icon-size-small ml-2"
+                    title="Copy Prompt"
                   >
-                    {expandedPrompts[index] ? 'less' : 'more'}
+                    <FaCopy />
                   </button>
-                )}
-                <button
-                  onClick={() => handleCopy(activity.Prompt, 'Prompt copied!')}
-                  className="text-blue-500 icon-size-small ml-2"
-                  title="Copy Prompt"
-                >
-                  <FaCopy />
-                </button>
-              </p>
-            </div>
+                </p>
+              </div>
+            )}
           </div>
           <div>
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <a
-                href={activity.CreatedAssetUrl}
+                href={
+                  activity.AssetType === 'vid'
+                    ? activity.AssetSource
+                    : activity.CreatedAssetUrl
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 icon-size"
@@ -177,7 +193,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               <button
                 onClick={() =>
                   handleCopy(
-                    activity.CreatedAssetUrl,
+                    activity.AssetType === 'vid'
+                      ? activity.AssetSource
+                      : activity.CreatedAssetUrl,
                     activity.AssetType === 'vid'
                       ? 'Video URL copied!'
                       : 'Image URL copied!'
@@ -191,7 +209,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               {activity.AssetType === 'vid' && (
                 <button
                   onClick={() =>
-                    handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
+                    handleCopy(activity.AssetSource, 'Video URL copied!')
                   }
                   className="text-blue-500 icon-size"
                   title="Copy Video URL"
