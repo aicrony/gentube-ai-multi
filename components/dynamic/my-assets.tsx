@@ -117,9 +117,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         <div key={index} className="border p-4 flex items-center">
           <a
             href={
-              activity.AssetType === 'vid'
-                ? activity.AssetSource
-                : activity.CreatedAssetUrl
+              activity.AssetType === 'vid' || activity.AssetType === 'upl'
+                ? activity.CreatedAssetUrl
+                : activity.AssetSource
             }
             target="_blank"
             rel="noopener noreferrer"
@@ -179,7 +179,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <a
                 href={
-                  activity.AssetType === 'vid'
+                  activity.AssetType === 'vid' || activity.AssetType === 'upl'
                     ? activity.CreatedAssetUrl
                     : activity.AssetSource
                 }
@@ -196,9 +196,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     activity.AssetType === 'vid'
                       ? activity.AssetSource
                       : activity.CreatedAssetUrl,
-                    activity.AssetType === 'vid'
-                      ? 'Video URL copied!'
-                      : 'Image URL copied!'
+                    'Image URL copied!'
                   )
                 }
                 className="text-blue-500 icon-size"
