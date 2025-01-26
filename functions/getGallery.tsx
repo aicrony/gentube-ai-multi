@@ -48,17 +48,6 @@ const ImageGallery: React.FC = () => {
     }
   };
 
-  const handleMediaClick = (url: string) => {
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        alert('Media URL copied to clipboard');
-      })
-      .catch((error) => {
-        console.error('Error copying URL to clipboard:', error);
-      });
-  };
-
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : media.length - 1
@@ -87,14 +76,12 @@ const ImageGallery: React.FC = () => {
             controls
             autoPlay
             className="w-3/5 cursor-pointer md:w-full"
-            onClick={() => handleMediaClick(url)}
           />
         ) : (
           <img
             src={url}
             alt={`Media ${currentIndex + 1}`}
             className="w-3/5 cursor-pointer md:w-full"
-            onClick={() => handleMediaClick(url)}
           />
         )}
         <FaExternalLinkAlt
