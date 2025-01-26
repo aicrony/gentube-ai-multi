@@ -3,6 +3,7 @@ import { google_app_creds } from '@/interfaces/googleCredentials';
 
 const datastore = new Datastore({
   namespace: 'GenTube',
+  projectId: google_app_creds.projectId,
   credentials: google_app_creds
 });
 
