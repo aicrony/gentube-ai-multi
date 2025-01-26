@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
 const ImageGallery: React.FC = () => {
   const [media, setMedia] = useState<string[]>([]);
@@ -72,28 +73,37 @@ const ImageGallery: React.FC = () => {
     setClickCount((prevCount) => prevCount + 1);
   };
 
+  const handleExternalLink = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   const renderMedia = (url: string) => {
     const isVideo = url.endsWith('.mp4');
-    if (isVideo) {
-      return (
-        <video
-          src={url}
-          controls
-          autoPlay
-          className="w-3/5 cursor-pointer md:w-full"
-          onClick={() => handleMediaClick(url)}
+    return (
+      <div className="relative">
+        {isVideo ? (
+          <video
+            src={url}
+            controls
+            autoPlay
+            className="w-3/5 cursor-pointer md:w-full"
+            onClick={() => handleMediaClick(url)}
+          />
+        ) : (
+          <img
+            src={url}
+            alt={`Media ${currentIndex + 1}`}
+            className="w-3/5 cursor-pointer md:w-full"
+            onClick={() => handleMediaClick(url)}
+          />
+        )}
+        <FaExternalLinkAlt
+          onClick={() => handleExternalLink(url)}
+          className="absolute top-2 right-2 text-blue-500 cursor-pointer"
+          title="Open in new tab"
         />
-      );
-    } else {
-      return (
-        <img
-          src={url}
-          alt={`Media ${currentIndex + 1}`}
-          className="w-3/5 cursor-pointer md:w-full"
-          onClick={() => handleMediaClick(url)}
-        />
-      );
-    }
+      </div>
+    );
   };
 
   return (
