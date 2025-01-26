@@ -33,6 +33,9 @@ export default function Navlinks({ user }: NavlinksProps) {
               Account
             </Link>
           )}
+          <Link href="/gallery" className={s.link}>
+            Gallery
+          </Link>
         </nav>
       </div>
       <div className="flex justify-end space-x-8">
