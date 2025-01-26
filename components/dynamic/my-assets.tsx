@@ -180,8 +180,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               <a
                 href={
                   activity.AssetType === 'vid'
-                    ? activity.AssetSource
-                    : activity.CreatedAssetUrl
+                    ? activity.CreatedAssetUrl
+                    : activity.AssetSource
                 }
                 target="_blank"
                 rel="noopener noreferrer"
@@ -209,7 +209,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               {activity.AssetType === 'vid' && (
                 <button
                   onClick={() =>
-                    handleCopy(activity.AssetSource, 'Video URL copied!')
+                    handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
                   }
                   className="text-blue-500 icon-size"
                   title="Copy Video URL"
