@@ -45,7 +45,7 @@ export default async function handler(
   try {
     await bucket.file(fileName).delete();
   } catch (error) {
-    console.error('Error deleting asset:', error);
+    console.log('Error deleting asset:', error);
   }
 
   try {
@@ -54,7 +54,7 @@ export default async function handler(
     console.log('DELETE deleteUserActivity url:', assetUrl);
     res.status(200).json({ message: 'Asset deleted successfully' });
   } catch (error) {
-    console.error('Error deleting user activity:', error);
+    console.log('Error deleting user activity:', error);
     res
       .status(500)
       .json({ error: 'An error occurred while deleting the user activity' });
