@@ -1,7 +1,9 @@
 import { Datastore } from '@google-cloud/datastore';
+import { google_app_creds } from '@/interfaces/googleCredentials';
 
 const datastore = new Datastore({
-  namespace: 'GenTube'
+  namespace: 'GenTube',
+  credentials: google_app_creds
 });
 
 export const deleteUserActivity = async (userId: string, assetUrl: string) => {
