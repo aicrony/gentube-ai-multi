@@ -94,7 +94,7 @@ export const UploadImageDynamicButton: React.FC<
               </a>
             </div>
             <div>
-              <MyAssets />
+              <MyAssets assetType={'upl'} />
             </div>
           </>
         )}

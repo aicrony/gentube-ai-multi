@@ -15,7 +15,11 @@ interface UserActivity {
   AssetType: string;
 }
 
-const MyAssets: React.FC = () => {
+interface MyAssetsProps {
+  assetType?: string;
+}
+
+const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const userId = useUserId();
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +35,7 @@ const MyAssets: React.FC = () => {
     if (userId) {
       try {
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}`
+          `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch user assets');
@@ -51,7 +55,7 @@ const MyAssets: React.FC = () => {
 
   useEffect(() => {
     fetchUserActivities();
-  }, [userId, page]);
+  }, [userId, page, assetType]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -117,19 +121,11 @@ const MyAssets: React.FC = () => {
             rel="noopener noreferrer"
             className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
           >
-            {/*{activity.AssetType === 'upl' ? (*/}
-            {/*  <img*/}
-            {/*    src={activity.AssetSource}*/}
-            {/*    alt="Thumbnail"*/}
-            {/*    className="w-16 h-16 object-cover"*/}
-            {/*  />*/}
-            {/*) : (*/}
             <img
               src={activity.CreatedAssetUrl}
               alt="Thumbnail"
               className="w-16 h-16 object-cover"
             />
-            {/*)}*/}
           </a>
           <div className="flex flex-wrap w-full max-w-full">
             <div className="pr-2">
