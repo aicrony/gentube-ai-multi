@@ -101,18 +101,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     return <p>Loading...</p>;
   }
 
-  if (activities && activities.length === 0) {
-    return <p>No assets found.</p>;
-  }
+  const assetTypeName =
+    assetType === 'vid' ? 'Video' : assetType === 'upl' ? 'Uploaded' : '';
 
   return (
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">My Assets</h1>
+        <h1 className="text-xl font-bold">My {assetTypeName} Assets</h1>
         <button onClick={handleRefresh} className="text-blue-500">
           Refresh Assets
         </button>
       </div>
+      {activities && activities.length === 0 && <p>No assets found.</p>}
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a

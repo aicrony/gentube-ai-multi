@@ -84,7 +84,6 @@ export const UploadImageDynamicButton: React.FC<
           <>
             <div className={'margin-top-8'}>
               <p>Image Uploaded</p>
-              <p>View Image</p>
               <a
                 href={uploadResponse}
                 target={'_blank'}
