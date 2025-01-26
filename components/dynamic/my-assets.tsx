@@ -116,11 +116,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
-            href={
-              activity.AssetType === 'vid'
-                ? activity.CreatedAssetUrl
-                : activity.AssetSource
-            }
+            href={activity.CreatedAssetUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
@@ -178,11 +174,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           <div>
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <a
-                href={
-                  activity.AssetType === 'vid'
-                    ? activity.CreatedAssetUrl
-                    : activity.AssetSource
-                }
+                href={activity.CreatedAssetUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 icon-size"
