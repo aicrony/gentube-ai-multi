@@ -86,7 +86,7 @@ const ImageGallery: React.FC = () => {
         )}
         <FaExternalLinkAlt
           onClick={() => handleExternalLink(url)}
-          className="absolute top-2 right-2 text-blue-500 cursor-pointer"
+          className="absolute bottom-2 right-2 text-blue-500 cursor-pointer"
           title="Open in new tab"
         />
       </div>
