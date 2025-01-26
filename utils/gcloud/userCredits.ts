@@ -3,7 +3,7 @@ import { google_app_creds } from '@/interfaces/googleCredentials';
 require('dotenv').config();
 
 const datastore = new Datastore({
-  projectId: google_app_creds.project_id,
+  projectId: google_app_creds.projectId,
   credentials: google_app_creds
 });
 
