@@ -4,30 +4,30 @@ import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
 
 const ImageGallery: React.FC = () => {
-  const [images, setImages] = useState<string[]>([]);
+  const [media, setMedia] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const requiredClickCount = 20;
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchMedia = async () => {
       try {
-        const cachedImages = localStorage.getItem('imageUrls');
-        if (cachedImages) {
-          setImages(JSON.parse(cachedImages));
+        const cachedMedia = localStorage.getItem('mediaUrls');
+        if (cachedMedia) {
+          setMedia(JSON.parse(cachedMedia));
         } else {
-          await fetchAndSetImages();
+          await fetchAndSetMedia();
         }
       } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error('Error fetching media:', error);
       }
     };
 
-    fetchImages();
+    fetchMedia();
   }, []);
 
-  const fetchAndSetImages = async () => {
+  const fetchAndSetMedia = async () => {
     try {
       const response = await fetch('/api/getPublicAssets?limit=100', {
         method: 'GET',
@@ -35,23 +35,23 @@ const ImageGallery: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      const imageUrls = await response.json();
-      const randomImages = imageUrls
+      const mediaUrls = await response.json();
+      const randomMedia = mediaUrls
         .sort(() => 0.5 - Math.random())
         .slice(0, 20);
-      setImages(randomImages);
-      localStorage.setItem('imageUrls', JSON.stringify(randomImages));
+      setMedia(randomMedia);
+      localStorage.setItem('mediaUrls', JSON.stringify(randomMedia));
       setClickCount(0); // Reset click count
     } catch (error) {
-      console.error('Error fetching images:', error);
+      console.error('Error fetching media:', error);
     }
   };
 
-  const handleImageClick = (url: string) => {
+  const handleMediaClick = (url: string) => {
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        alert('Image URL copied to clipboard');
+        alert('Media URL copied to clipboard');
       })
       .catch((error) => {
         console.error('Error copying URL to clipboard:', error);
@@ -60,24 +60,48 @@ const ImageGallery: React.FC = () => {
 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+      prevIndex > 0 ? prevIndex - 1 : media.length - 1
     );
     setClickCount((prevCount) => prevCount + 1);
   };
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex < images.length - 1 ? prevIndex + 1 : 0
+      prevIndex < media.length - 1 ? prevIndex + 1 : 0
     );
     setClickCount((prevCount) => prevCount + 1);
+  };
+
+  const renderMedia = (url: string) => {
+    const isVideo = url.endsWith('.mp4');
+    if (isVideo) {
+      return (
+        <video
+          src={url}
+          controls
+          autoPlay
+          className="w-3/5 cursor-pointer md:w-full"
+          onClick={() => handleMediaClick(url)}
+        />
+      );
+    } else {
+      return (
+        <img
+          src={url}
+          alt={`Media ${currentIndex + 1}`}
+          className="w-3/5 cursor-pointer md:w-full"
+          onClick={() => handleMediaClick(url)}
+        />
+      );
+    }
   };
 
   return (
     <div>
       <h1 className="text-center text-2xl font-bold pt-5">
-        Public Image Gallery
+        Public Media Gallery
       </h1>
-      {images.length > 0 && (
+      {media.length > 0 && (
         <div className="mt-1">
           <div className="flex justify-center gap-1">
             <Button
@@ -90,10 +114,10 @@ const ImageGallery: React.FC = () => {
             {clickCount >= requiredClickCount && (
               <Button
                 variant="slim"
-                onClick={fetchAndSetImages}
+                onClick={fetchAndSetMedia}
                 loading={isSubmitting}
               >
-                More Images
+                More Media
               </Button>
             )}
             <Button variant="slim" onClick={handleNext} loading={isSubmitting}>
@@ -101,12 +125,7 @@ const ImageGallery: React.FC = () => {
             </Button>
           </div>
           <div className="flex justify-center mt-5">
-            <img
-              src={images[currentIndex]}
-              alt={`Image ${currentIndex + 1}`}
-              className="w-3/5 cursor-pointer md:w-full"
-              onClick={() => handleImageClick(images[currentIndex])}
-            />
+            {renderMedia(media[currentIndex])}
           </div>
         </div>
       )}

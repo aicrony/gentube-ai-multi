@@ -112,7 +112,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           Refresh Assets
         </button>
       </div>
-      {activities && activities.length === 0 && <p>No assets found.</p>}
+      {activities && activities.length === 0 && (
+        <p>
+          No assets found. You may need to <a href="/signin">sign in</a> to see
+          your assets.
+        </p>
+      )}
       {activities.map((activity, index) => (
         <div key={index} className="border p-4 flex items-center">
           <a
