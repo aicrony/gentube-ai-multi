@@ -7,6 +7,7 @@ import {
   FaVideo,
   FaTrash
 } from 'react-icons/fa';
+import Modal from '@/components/ui/Modal'; // Import the Modal component
 
 interface UserActivity {
   CreatedAssetUrl: string;
@@ -28,6 +29,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
   }>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMediaUrl, setModalMediaUrl] = useState('');
   const limit = 10;
   const promptLength = 100;
 
@@ -95,6 +98,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         console.error('Error deleting asset:', error);
       }
     }
+  };
+
+  const openModal = (url: string) => {
+    setModalMediaUrl(url);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalMediaUrl('');
   };
 
   if (loading) {
@@ -178,15 +191,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           </div>
           <div>
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
-              <a
-                href={activity.CreatedAssetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => openModal(activity.CreatedAssetUrl)}
                 className="text-blue-500 icon-size"
                 title="Open"
               >
                 <FaExternalLinkAlt />
-              </a>
+              </button>
               <button
                 onClick={() =>
                   handleCopy(
@@ -228,6 +239,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           Load More
         </button>
       )}
+      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} />}
     </div>
   );
 };
