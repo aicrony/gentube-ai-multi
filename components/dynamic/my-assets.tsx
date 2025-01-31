@@ -138,6 +138,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
+            onClick={(e) => {
+              e.preventDefault();
+              openModal(activity.CreatedAssetUrl);
+            }}
           >
             <img
               src={
