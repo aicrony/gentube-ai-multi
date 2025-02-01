@@ -9,5 +9,10 @@ indexes:
       - name: AssetType
       - name: DateTime
         direction: desc
+  - kind: UserActivity
+    properties:
+      - name: UserId
+      - name: DateTime
+        direction: desc
 
 

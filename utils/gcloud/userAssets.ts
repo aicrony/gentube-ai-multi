@@ -16,6 +16,7 @@ interface UserActivity {
   Prompt: string;
   AssetSource: string;
   AssetType?: string | string[] | undefined;
+  DateTime: Date;
 }
 
 export async function getUserAssets(
@@ -33,7 +34,8 @@ export async function getUserAssets(
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
     .filter('UserId', '=', userId)
     .limit(limit)
-    .offset(offset);
+    .offset(offset)
+    .order('DateTime', { descending: true });
 
   if (assetType && assetType.length > 0) {
     query = query.filter('AssetType', '=', assetType);
@@ -44,20 +46,7 @@ export async function getUserAssets(
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
-    AssetType: activity.AssetType
+    AssetType: activity.AssetType,
+    DateTime: activity.DateTime
   }));
-}
-
-export async function getPublicAssets(
-  limit: number,
-  offset: number
-): Promise<string[] | null> {
-  let query = datastore
-    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('SubscriptionTier', '=', 3)
-    .limit(limit)
-    .offset(offset);
-
-  const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => activity.CreatedAssetUrl);
 }
