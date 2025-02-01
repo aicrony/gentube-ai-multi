@@ -16,6 +16,10 @@ module.exports = {
       {
         source: '/upload-to-video',
         destination: '/'
+      },
+      {
+        source: '/admin',
+        destination: '/'
       }
     ];
   }
