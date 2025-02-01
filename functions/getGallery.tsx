@@ -5,18 +5,21 @@ import Button from '@/components/ui/Button';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 
 const ImageGallery: React.FC = () => {
-  const [media, setMedia] = useState<string[]>([]);
+  const [media, setMedia] = useState<{ CreatedAssetUrl: string }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
-  const requiredClickCount = 20;
 
   useEffect(() => {
     const fetchMedia = async () => {
       try {
         const cachedMedia = localStorage.getItem('mediaUrls');
         if (cachedMedia) {
-          setMedia(JSON.parse(cachedMedia));
+          const parsedMedia = JSON.parse(cachedMedia);
+          if (parsedMedia.length > 0 && parsedMedia[0].CreatedAssetUrl) {
+            setMedia(parsedMedia);
+          } else {
+            await fetchAndSetMedia();
+          }
         } else {
           await fetchAndSetMedia();
         }
@@ -30,19 +33,18 @@ const ImageGallery: React.FC = () => {
 
   const fetchAndSetMedia = async () => {
     try {
-      const response = await fetch('/api/getPublicAssets?limit=100', {
+      const response = await fetch('/api/getGalleryAssets?limit=60', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const mediaUrls = await response.json();
-      const randomMedia = mediaUrls
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 20);
-      setMedia(randomMedia);
-      localStorage.setItem('mediaUrls', JSON.stringify(randomMedia));
-      setClickCount(0); // Reset click count
+      const mediaData = await response.json();
+      const formattedMedia = mediaData.map((item: any) => ({
+        CreatedAssetUrl: item.CreatedAssetUrl
+      }));
+      setMedia(formattedMedia);
+      localStorage.setItem('mediaUrls', JSON.stringify(formattedMedia));
     } catch (error) {
       console.error('Error fetching media:', error);
     }
@@ -52,22 +54,21 @@ const ImageGallery: React.FC = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex > 0 ? prevIndex - 1 : media.length - 1
     );
-    setClickCount((prevCount) => prevCount + 1);
   };
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex < media.length - 1 ? prevIndex + 1 : 0
     );
-    setClickCount((prevCount) => prevCount + 1);
   };
 
   const handleExternalLink = (url: string) => {
     window.open(url, '_blank');
   };
 
-  const renderMedia = (url: string) => {
-    const isVideo = url.endsWith('.mp4');
+  const renderMedia = (mediaItem: { CreatedAssetUrl: string }) => {
+    const url = mediaItem.CreatedAssetUrl;
+    const isVideo = url && url.length > 0 && url.endsWith('.mp4');
     return (
       <div className="relative">
         {isVideo ? (
@@ -81,7 +82,7 @@ const ImageGallery: React.FC = () => {
           <img
             src={url}
             alt={`Media ${currentIndex + 1}`}
-            className="w-3/5 cursor-pointer md:w-full"
+            className="w-3/5 cursor-pointer md:w/full"
           />
         )}
         <FaExternalLinkAlt
@@ -108,15 +109,6 @@ const ImageGallery: React.FC = () => {
             >
               Previous
             </Button>
-            {clickCount >= requiredClickCount && (
-              <Button
-                variant="slim"
-                onClick={fetchAndSetMedia}
-                loading={isSubmitting}
-              >
-                More Media
-              </Button>
-            )}
             <Button variant="slim" onClick={handleNext} loading={isSubmitting}>
               Next
             </Button>

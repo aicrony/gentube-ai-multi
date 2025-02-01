@@ -13,6 +13,7 @@ import { useUserId } from '@/context/UserIdContext';
 import { UserIpProvider } from '@/context/UserIpContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
+import GalleryAssets from '@/components/dynamic/gallery-assets';
 
 const BrowserRouter = dynamic(
   () => import('react-router-dom').then((mod) => mod.BrowserRouter),
@@ -23,6 +24,7 @@ export default function Home() {
   const [userId] = useState<string | 'none'>(useUserId() || 'none');
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
+  const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
 
   const handleUserCreditsUpdate = useCallback((credits: number | null) => {
     setUserCredits(credits);
@@ -33,6 +35,12 @@ export default function Home() {
       setDisplayName(` - Credits: ${userCredits}`);
     }
   }, [userCredits]);
+
+  useEffect(() => {
+    if (window.location.hostname === 'localhost') {
+      setIsLocalhost(true);
+    }
+  }, []);
 
   return (
     <UserCreditsProvider>
@@ -63,6 +71,11 @@ export default function Home() {
                     <Link to="/upload-to-video" className="text-white">
                       <Button variant="slim">Upload Image</Button>
                     </Link>
+                    {isLocalhost && (
+                      <Link to="/admin" className="text-white">
+                        <Button variant="slim">Admin</Button>
+                      </Link>
+                    )}
                   </nav>
                   <Routes>
                     <Route
@@ -109,9 +122,18 @@ export default function Home() {
                         </>
                       }
                     />
+                    {isLocalhost && (
+                      <Route
+                        path="/admin"
+                        element={
+                          <>
+                            <GalleryAssets />
+                          </>
+                        }
+                      />
+                    )}
                   </Routes>
                 </div>
-                {/*<ImageGallery />*/}
               </div>
             </main>
           </div>

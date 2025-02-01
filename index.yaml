@@ -14,5 +14,11 @@ indexes:
       - name: UserId
       - name: DateTime
         direction: desc
+  - kind: UserActivity
+    properties:
+    - name: SubscriptionTier
+    - name: DateTime
+      direction: desc
+
 
 

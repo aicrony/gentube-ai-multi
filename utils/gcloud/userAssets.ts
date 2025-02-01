@@ -50,3 +50,55 @@ export async function getUserAssets(
     DateTime: activity.DateTime
   }));
 }
+
+export async function getPublicAssets(
+  limit: number,
+  offset: number,
+  assetType?: string | string[] | undefined
+): Promise<UserActivity[] | null> {
+  let query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .filter('UserId', '=', 'none')
+    .limit(limit)
+    .offset(offset)
+    .order('DateTime', { descending: true });
+
+  if (assetType && assetType.length > 0) {
+    query = query.filter('AssetType', '=', assetType);
+  }
+
+  const [results] = await datastore.runQuery(query);
+  return results.map((activity: any) => ({
+    CreatedAssetUrl: activity.CreatedAssetUrl,
+    Prompt: activity.Prompt,
+    AssetSource: activity.AssetSource,
+    AssetType: activity.AssetType,
+    DateTime: activity.DateTime
+  }));
+}
+
+export async function getGalleryAssets(
+  limit: number,
+  offset: number,
+  assetType?: string | string[] | undefined
+): Promise<UserActivity[] | null> {
+  let query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .filter('SubscriptionTier', '=', 3)
+    .limit(limit)
+    .offset(offset)
+    .order('DateTime', { descending: true });
+
+  if (assetType && assetType.length > 0) {
+    query = query.filter('AssetType', '=', assetType);
+  }
+
+  const [results] = await datastore.runQuery(query);
+  return results.map((activity: any) => ({
+    CreatedAssetUrl: activity.CreatedAssetUrl,
+    Prompt: activity.Prompt,
+    AssetSource: activity.AssetSource,
+    AssetType: activity.AssetType,
+    DateTime: activity.DateTime
+  }));
+}
