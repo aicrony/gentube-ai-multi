@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
+import ImageGallery from '@/functions/getGallery';
+import GenericModal from '@/components/ui/GenericModal/GenericModal';
 
 interface VideoFromTextDynamicButtonProps {
   userId: string;
@@ -16,13 +18,16 @@ export const VideoFromTextDynamicButton: React.FC<
 > = ({ userId, onUserCreditsUpdate }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<any>(null);
+  const [imageGalleryData, setImageGalleryData] = useState<any>(null); // State for ImageGallery
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for Modal
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true);
     setVideoData(null);
+    setImageGalleryData(null); // Reset ImageGallery data
     setErrorMessage(null);
     try {
       const response = await fetch('/api/video', {
@@ -51,12 +56,13 @@ export const VideoFromTextDynamicButton: React.FC<
         }
         return;
       }
-      let data: { result?: any; userCredits?: any } = {};
+      let data: { result?: any; userCredits?: any; images?: any } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         data = await response.json();
-        const { result, userCredits } = data;
+        const { result, userCredits, images } = data;
         setIsSubmitting(false);
         setVideoData(result);
+        setImageGalleryData(images); // Set ImageGallery data
         setUserCreditsResponse(userCredits); // set user credits from response
         if (onUserCreditsUpdate) {
           onUserCreditsUpdate(userCredits); // update parent component if callback is provided
@@ -66,6 +72,14 @@ export const VideoFromTextDynamicButton: React.FC<
       setIsSubmitting(false);
       console.error('There was an error with the fetch operation: ', error);
     }
+  };
+
+  const handleGalleryClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -88,6 +102,13 @@ export const VideoFromTextDynamicButton: React.FC<
         >
           Generate Video
         </Button>
+        {isSubmitting && (
+          <div className="pt-4">
+            <Button onClick={handleGalleryClick}>
+              Check out the gallery while you wait for your video to generate...
+            </Button>
+          </div>
+        )}
         {videoData && (
           <div className={'padding-top-4'}>
             <p>Video Generation Complete</p>
@@ -108,6 +129,9 @@ export const VideoFromTextDynamicButton: React.FC<
           </div>
         )}
       </div>
+      <GenericModal isOpen={isModalOpen} onClose={closeModal}>
+        <ImageGallery />
+      </GenericModal>
     </>
   );
 };

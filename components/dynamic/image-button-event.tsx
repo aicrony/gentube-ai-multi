@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice-button';
+import GenericModal from '@/components/ui/GenericModal';
+import ImageGallery from '@/functions/getGallery';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -20,6 +22,9 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [imageData, setImageData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for Modal
+  const [imageGalleryData, setImageGalleryData] = useState<any>(null); // State for ImageGallery
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null); // State for Modal Image URL
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -53,6 +58,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const handleGenerateImage = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
     setImageData(null); // clear the imageData state
+    setImageGalleryData(null); // Reset ImageGallery data
     setErrorMessage(null); // clear any previous error message
     console.log('PASS userId:', userId);
     try {
@@ -81,23 +87,35 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         }
         return;
       }
-      let dataResponse: { result?: any; userCredits?: any } = {};
+      let dataResponse: { result?: any; userCredits?: any; images?: any } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
-        const { result, userCredits } = dataResponse;
+        const { result, userCredits, images } = dataResponse;
         setIsSubmitting(false); // Response is received, enable the button
         console.log('Result:', result);
         console.log('UserCredits:', userCredits);
         setImageData(result); // set the url of the response
+        setImageGalleryData(images); // Set ImageGallery data
         setUserCreditsResponse(userCredits); // set user credits from response
         if (onUserCreditsUpdate) {
           onUserCreditsUpdate(userCredits); // update parent component if callback is provided
         }
+        setModalImageUrl(result); // Set the image URL for the modal
+        setIsModalOpen(false); // Open the modal
       }
     } catch (error) {
       setIsSubmitting(false); // Response is received, enable the button
       console.error('There was an error with the fetch operation: ', error);
     }
+  };
+
+  const handleGalleryClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalImageUrl(null); // Clear the modal image URL
   };
 
   return (
@@ -125,6 +143,13 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         >
           Generate Image
         </Button>
+        {isSubmitting && (
+          <div className="pt-4">
+            <Button onClick={handleGalleryClick}>
+              Check out the gallery while you wait for your image to generate...
+            </Button>
+          </div>
+        )}
         {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
             <p>Remaining Credits: {userCreditsResponse}</p>
@@ -132,14 +157,19 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         )}
         {imageData && (
           <div className={'margin-top-8'}>
-            <p>View Image</p>
-            <a href={imageData} target={'_blank'} className={'textUnderline'}>
-              {imageData}
-            </a>
+            <div>
+              <a href={imageData} target="_blank">
+                Open Image
+              </a>
+            </div>
+            <img src={imageData} alt="Generated Image" />
             {renderVideoButton()}
           </div>
         )}
       </div>
+      <GenericModal isOpen={isModalOpen} onClose={closeModal}>
+        <ImageGallery />
+      </GenericModal>
     </>
   );
 };
