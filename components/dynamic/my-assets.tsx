@@ -5,7 +5,8 @@ import {
   FaCopy,
   FaImage,
   FaVideo,
-  FaTrash
+  FaTrash,
+  FaPlay
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
@@ -143,15 +144,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               openModal(activity.CreatedAssetUrl);
             }}
           >
-            <img
-              src={
-                activity.AssetType === 'vid'
-                  ? activity.AssetSource
-                  : activity.CreatedAssetUrl
-              }
-              alt="Thumbnail"
-              className="w-16 h-16 object-cover"
-            />
+            {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
+              <FaPlay className="w-8 h-8 text-gray-500" />
+            ) : (
+              <img
+                src={
+                  activity.AssetType === 'vid'
+                    ? activity.AssetSource
+                    : activity.CreatedAssetUrl
+                }
+                alt="Thumbnail"
+                className="w-16 h-16 object-cover"
+              />
+            )}
           </a>
           <div className="flex flex-wrap w-full max-w-full">
             <div className="pr-2">

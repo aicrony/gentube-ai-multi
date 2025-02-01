@@ -196,8 +196,8 @@ export default function Pricing({ user, products, subscription }: Props) {
             })}
           </div>
           <p className="m-auto mt-5 text-xl text-zinc-200 text-center sm:text-center sm:text-xl">
-            Currently, image generations are 4-6 credits, video is 40-50 credits
-            based on quality.
+            Currently, image generations are 4-6 credits, video is 40-80 credits
+            based on quality and length.
           </p>
           <LogoCloud />
         </div>

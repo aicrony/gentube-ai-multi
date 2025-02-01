@@ -24,22 +24,26 @@ export default function Downloader({ fileUrl }: DownloaderProps) {
 
   return (
     <div className="App">
-      <p>Download is in {isInProgress ? 'in progress' : 'stopped'}</p>
+      {/*<p>Download is {isInProgress ? 'in progress' : 'stopped'}</p>*/}
       <div>
         <Button onClick={() => download(fileUrl, filename)}>
           Download Video file
         </Button>
-        <p>Download size in bytes {size}</p>
+        {/*<p>Download size in bytes {size}</p>*/}
       </div>
-      <div>
-        <Button onClick={() => cancel()}>Cancel Download</Button>
-      </div>
-      <div>
-        <label htmlFor="file">Downloading progress:</label>
-        <progress id="file" value={percentage} max="100" />
-        <p>Elapsed time in seconds {elapsed}</p>
-        {error && <p>possible error {JSON.stringify(error)}</p>}
-      </div>
+      {isInProgress && (
+        <>
+          <div>
+            <Button onClick={() => cancel()}>Cancel Download</Button>
+          </div>
+          <div>
+            <label htmlFor="file">Downloading progress:</label>
+            <progress id="file" value={percentage} max="100" />
+            <p>Elapsed time in seconds {elapsed}</p>
+            {error && <p>possible error {JSON.stringify(error)}</p>}
+          </div>
+        </>
+      )}
     </div>
   );
 }

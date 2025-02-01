@@ -1,4 +1,3 @@
-'use client';
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,8 @@ import Button from '@/components/ui/Button';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
+import ImageGallery from '@/functions/getGallery';
+import GenericModal from '@/components/ui/GenericModal/GenericModal';
 
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
@@ -21,6 +22,7 @@ export function VideoFromUrlDynamicButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   let videoGenButtonLabel: string;
@@ -30,11 +32,11 @@ export function VideoFromUrlDynamicButton({
   videoGenCompleteMessage = 'Video Generation Complete';
 
   const handleGenerateVideo = async () => {
-    setIsSubmitting(true); // Disable the button while the request is being handled
+    setIsSubmitting(true);
     console.log('Video Generation from URL button clicked');
     console.log(imageUrl);
-    setVideoData(null); // clear the videoData state
-    setErrorMessage(null); // clear any previous error message
+    setVideoData(null);
+    setErrorMessage(null);
     try {
       const response = await fetch('/api/video', {
         method: 'POST',
@@ -48,7 +50,7 @@ export function VideoFromUrlDynamicButton({
         })
       });
       if (!response.ok) {
-        setIsSubmitting(false); // Response is received, enable the button
+        setIsSubmitting(false);
         if (response.status === 429) {
           const errorData = await response.json();
           setErrorMessage(
@@ -67,23 +69,31 @@ export function VideoFromUrlDynamicButton({
       if (response.headers.get('content-type')?.includes('application/json')) {
         data = await response.json();
         const { result, userCredits } = data;
-        setIsSubmitting(false); // Response is received, enable the button
+        setIsSubmitting(false);
         console.log('Result: ', result);
         console.log('UserCredits: ', userCredits);
         console.log(
           'video-from-url-button-event DATA RECEIVED:' + JSON.stringify(data)
         );
         setVideoData(result);
-        setUserCreditsResponse(userCredits); // set user credits from response
+        setUserCreditsResponse(userCredits);
         if (onUserCreditsUpdate) {
-          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+          onUserCreditsUpdate(userCredits);
         }
       }
     } catch (error) {
-      setIsSubmitting(false); // Response is received, enable the button
+      setIsSubmitting(false);
       console.log(error);
       console.error('There was an error with the fetch operation: ', error);
     }
+  };
+
+  const handleGalleryClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -123,6 +133,13 @@ export function VideoFromUrlDynamicButton({
             {videoGenButtonLabel}
           </Button>
         </div>
+        {isSubmitting && (
+          <div className="pt-4">
+            <Button onClick={handleGalleryClick}>
+              Check out the gallery while you wait for your video to generate...
+            </Button>
+          </div>
+        )}
         {videoData && (
           <div className={'padding-top-4'}>
             <p>{videoGenCompleteMessage}</p>
@@ -143,6 +160,9 @@ export function VideoFromUrlDynamicButton({
           </div>
         )}
       </div>
+      <GenericModal isOpen={isModalOpen} onClose={closeModal}>
+        <ImageGallery />
+      </GenericModal>
     </>
   );
 }

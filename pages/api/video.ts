@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import callVideoApi from '@/services/generateLumaVideo';
-import callHqVideoApi from '@/services/generateFalVideo';
+import callLumaVideoApi from '@/services/generateLumaVideo';
+import callRay2VideoApi from '@/services/generateFrontierLumaVideo';
 import { serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
-// import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
 
 export default async function handler(
@@ -48,14 +47,15 @@ export default async function handler(
 
     let result;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       result =
         'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
       creditCost = 40;
     } else if (imageUrl === 'none') {
-      result = await callVideoApi(imageUrl || 'none', videoDescription);
-      creditCost = 40;
+      result = await callRay2VideoApi(imageUrl || 'none', videoDescription);
+      creditCost = 80;
     } else if (imageUrl !== 'none') {
-      result = await callHqVideoApi(imageUrl || 'none', videoDescription);
+      result = await callLumaVideoApi(imageUrl || 'none', videoDescription);
       creditCost = 50;
     }
 
