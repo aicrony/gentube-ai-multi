@@ -71,6 +71,13 @@ const ImageGallery: React.FC = () => {
     const isVideo = url && url.length > 0 && url.endsWith('.mp4');
     return (
       <div className="relative">
+        <div className="flex justify-end">
+          <FaExternalLinkAlt
+            onClick={() => handleExternalLink(url)}
+            className="relative mb-1 text-gray-500 cursor-pointer"
+            title="Open in new tab"
+          />
+        </div>
         {isVideo ? (
           <video
             src={url}
@@ -85,11 +92,6 @@ const ImageGallery: React.FC = () => {
             className="w-3/5 cursor-pointer md:w/full"
           />
         )}
-        <FaExternalLinkAlt
-          onClick={() => handleExternalLink(url)}
-          className="absolute bottom-2 right-2 text-blue-500 cursor-pointer"
-          title="Open in new tab"
-        />
       </div>
     );
   };

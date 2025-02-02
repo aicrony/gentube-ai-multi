@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
 import { useUserIp } from '@/context/UserIpContext';
 import { useUserCredits } from '@/context/UserCreditsContext';
@@ -18,7 +18,13 @@ export const UploadImageDynamicButton: React.FC<
   const { userIp } = useUserIp();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [uploadResponse, setUploadResponse] = useState<string | null>(null);
+  const [base64Img, setBase64Img] = useState<string | null>(base64Image);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setBase64Img(base64Image);
+    setUploadResponse(null);
+  }, [base64Image]);
 
   const handleUploadImage = async () => {
     setIsSubmitting(true);
