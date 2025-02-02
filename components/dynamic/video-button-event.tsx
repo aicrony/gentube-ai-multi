@@ -1,10 +1,11 @@
-'use client';
 import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
+import GenericModal from '@/components/ui/GenericModal';
+import ImageGallery from '@/functions/getGallery';
 
 interface VideoDynamicButtonProps {
   urlData: string;
@@ -24,6 +25,7 @@ export function VideoDynamicButton({
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
@@ -84,6 +86,14 @@ export function VideoDynamicButton({
     }
   };
 
+  const handleGalleryClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className={'margin-top-8'}>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
@@ -105,6 +115,13 @@ export function VideoDynamicButton({
         >
           {videoGenButtonLabel}
         </Button>
+        {isSubmitting && (
+          <div className="pt-4">
+            <Button onClick={handleGalleryClick}>
+              Check out the gallery while you wait for your video to generate...
+            </Button>
+          </div>
+        )}
         {videoData && (
           <div className={'padding-top-4'}>
             <p>{videoGenCompleteMessage}</p>
@@ -125,6 +142,9 @@ export function VideoDynamicButton({
           </div>
         )}
       </div>
+      <GenericModal isOpen={isModalOpen} onClose={closeModal}>
+        <ImageGallery />
+      </GenericModal>
     </div>
   );
 }
