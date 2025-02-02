@@ -155,7 +155,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
-        {imageData && (
+        {imageData && imageData !== '[object%20Object]' && (
           <div className={'margin-top-8'}>
             <div>
               <a href={imageData} target="_blank">

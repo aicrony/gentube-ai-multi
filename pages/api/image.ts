@@ -58,7 +58,7 @@ export default async function handler(
     // const imageUrl = req.body.url as string | '';
     let creditCost = 100;
 
-    let result;
+    let result: string | ImageApiResult;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 7000));
       result =
