@@ -13,16 +13,23 @@ const ImageGallery: React.FC = () => {
     const fetchMedia = async () => {
       try {
         const cachedMedia = localStorage.getItem('mediaUrls');
-        if (cachedMedia) {
-          const parsedMedia = JSON.parse(cachedMedia);
-          if (parsedMedia.length > 0 && parsedMedia[0].CreatedAssetUrl) {
-            setMedia(parsedMedia);
-          } else {
-            await fetchAndSetMedia();
+        const cachedTimestamp = localStorage.getItem('mediaUrlsTimestamp');
+        const twelveHours = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+
+        if (cachedMedia && cachedTimestamp) {
+          const parsedTimestamp = new Date(cachedTimestamp).getTime();
+          const currentTime = new Date().getTime();
+
+          if (currentTime - parsedTimestamp < twelveHours) {
+            const parsedMedia = JSON.parse(cachedMedia);
+            if (parsedMedia.length > 0 && parsedMedia[0].CreatedAssetUrl) {
+              setMedia(parsedMedia);
+              return;
+            }
           }
-        } else {
-          await fetchAndSetMedia();
         }
+
+        await fetchAndSetMedia();
       } catch (error) {
         console.error('Error fetching media:', error);
       }
@@ -45,6 +52,7 @@ const ImageGallery: React.FC = () => {
       }));
       setMedia(formattedMedia);
       localStorage.setItem('mediaUrls', JSON.stringify(formattedMedia));
+      localStorage.setItem('mediaUrlsTimestamp', new Date().toISOString());
     } catch (error) {
       console.error('Error fetching media:', error);
     }

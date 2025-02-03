@@ -10,14 +10,21 @@ export default async function handler(
     return;
   }
 
-  const { userId, limit = 10, offset = 0, assetType } = req.query;
+  const {
+    userId,
+    limit = 10,
+    offset = 0,
+    assetType,
+    subscriptionTier = 0
+  } = req.query;
 
   try {
     const assets = await getUserAssetsToggle(
       userId as string,
       Number(limit),
       Number(offset),
-      assetType as string
+      assetType as string,
+      subscriptionTier as number
     );
     res.status(200).json({ assets });
   } catch (error) {

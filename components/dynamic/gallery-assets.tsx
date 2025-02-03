@@ -6,11 +6,11 @@ import {
   FaVideo,
   FaTrash,
   FaPlay,
-  FaMinus
+  FaMinus,
+  FaPlus
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { toggleOnGallery } from '@/utils/gcloud/userGalleryToggle';
-import { FaPlus } from 'react-icons/fa';
 
 interface UserActivity {
   CreatedAssetUrl: string;
@@ -107,6 +107,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
+  const [subscriptionTier, setSubscriptionTier] = useState(0); // Add state for subscriptionTier
   const limit = 10;
   const promptLength = 100;
 
@@ -114,7 +115,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     if (userId) {
       try {
         const response = await fetch(
-          `/api/getUserAssetsToggle?userId=${userId}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
+          `/api/getUserAssetsToggle?userId=${userId}&limit=${limit}&offset=${page * limit}&subscriptionTier=${subscriptionTier}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch user assets');
@@ -134,7 +135,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
   useEffect(() => {
     fetchUserActivities();
-  }, [userId, page, assetType]);
+  }, [userId, page, assetType, subscriptionTier]); // Add subscriptionTier to dependencies
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -196,10 +197,21 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   return (
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">My {assetTypeName} Assets</h1>
+        <h1 className="text-xl font-bold">Gallery {assetTypeName} Assets</h1>
         <button onClick={handleRefresh} className="text-blue-500">
           Refresh Assets
         </button>
+      </div>
+      <div className="flex items-center mb-4">
+        <label className="mr-2">Removable Assets Only:</label>
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={subscriptionTier === 3}
+            onChange={() => setSubscriptionTier(subscriptionTier === 0 ? 3 : 0)}
+          />
+          <span className="slider round"></span>
+        </label>
       </div>
       {activities && activities.length === 0 && (
         <p>
