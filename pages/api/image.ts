@@ -60,7 +60,7 @@ export default async function handler(
 
     let result: string | ImageApiResult;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
-      await new Promise((resolve) => setTimeout(resolve, 7000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       result =
         'https://storage.googleapis.com/gen-image-storage/0c38f3ef-7a4d-4d4d-a6fb-3854f0dc5b9c.png';
     } else {

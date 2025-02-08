@@ -56,11 +56,6 @@ export async function getUserCredits(
   let response = credits.length > 0 ? credits[0].Credits : null;
   console.log('getUserCredits response: ', response);
 
-  if (response == null) {
-    await updateUserCredits(userId, userIp, 120);
-    response = 120;
-  }
-
   return response;
 }
 
