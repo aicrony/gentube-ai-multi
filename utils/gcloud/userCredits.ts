@@ -15,12 +15,6 @@ export async function getUserCredits(
   userIp: string | string[] | undefined
 ): Promise<number | null> {
   let query;
-  const partialIp = getPartialIp(userIp);
-  console.log(
-    '------------------------- Get User Credits -------------------------'
-  );
-  console.log('Partial IP: ', partialIp);
-  console.log('userIp: ', userIp);
   if (
     userId != undefined &&
     userId.length > 0 &&
@@ -51,7 +45,7 @@ export async function getUserCredits(
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
-      .filter('UserIp', '<=', partialIp)
+      .filter('UserIp', '=', userIp)
       .limit(1);
   } else {
     console.log('Invalid userId and userIp');
@@ -92,19 +86,6 @@ export async function updateUserCredits(
   };
 
   await datastore.save(entity);
-}
-
-// Helper function to extract the first three octets of the IP address
-function getPartialIp(userIp: string | string[] | undefined): string | null {
-  if (typeof userIp === 'string') {
-    const octets = userIp.split('.');
-    if (octets.length >= 3) {
-      return `${octets[0]}.${octets[1]}.${octets[2]}`;
-    } else {
-      return userIp;
-    }
-  }
-  return null;
 }
 
 export async function aggregateUserCredits(
