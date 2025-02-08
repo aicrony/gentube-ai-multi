@@ -5,9 +5,9 @@ export async function middleware(request: NextRequest) {
   const mainUrl = 'https://gentube.ai';
 
   // Comment out the following function to enable Preview apps in Vercel
-  if (request.nextUrl.hostname.endsWith('.vercel.app')) {
-    return NextResponse.redirect(mainUrl);
-  }
+  // if (request.nextUrl.hostname.endsWith('.vercel.app')) {
+  //   return NextResponse.redirect(mainUrl);
+  // }
 
   return await updateSession(request);
 }

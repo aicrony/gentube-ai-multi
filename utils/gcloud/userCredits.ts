@@ -1,5 +1,6 @@
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
+import ipUtils from '@/utils/ipUtils';
 require('dotenv').config();
 
 const datastore = new Datastore({
@@ -12,13 +13,14 @@ const namespace = 'GenTube';
 
 export async function getUserCredits(
   userId: string | string[] | undefined,
-  userIp: string | string[] | undefined
+  userIp: string | string[]
 ): Promise<number | null> {
+  const normalizedIpAddress = ipUtils(userIp);
   let query;
   if (
     userId != undefined &&
     userId.length > 0 &&
-    (userIp == undefined || userIp.length == 0)
+    (normalizedIpAddress == undefined || normalizedIpAddress.length == 0)
   ) {
     console.log('Query 1');
     query = datastore
@@ -26,29 +28,29 @@ export async function getUserCredits(
       .filter('UserId', '=', userId)
       .limit(1);
   } else if (
-    userIp != undefined &&
-    userIp.length > 0 &&
+    normalizedIpAddress != undefined &&
+    normalizedIpAddress.length > 0 &&
     (userId == undefined || userId.length == 0)
   ) {
     console.log('Query 2');
     query = datastore
       .createQuery(namespace, kind)
-      .filter('UserIp', '=', userIp)
+      .filter('normalizedIpAddress', '=', normalizedIpAddress)
       .limit(1);
   } else if (
     userId != undefined &&
     userId.length > 0 &&
-    userIp != undefined &&
-    userIp.length > 0
+    normalizedIpAddress != undefined &&
+    normalizedIpAddress.length > 0
   ) {
     console.log('Query 3');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
-      .filter('UserIp', '=', userIp)
+      .filter('normalizedIpAddress', '=', normalizedIpAddress)
       .limit(1);
   } else {
-    console.log('Invalid userId and userIp');
+    console.log('Invalid userId and normalizedIpAddress');
     return null;
   }
 
@@ -61,15 +63,15 @@ export async function getUserCredits(
 
 export async function updateUserCredits(
   userId: string | string[] | undefined,
-  userIp: string | string[] | undefined,
+  normalizedIpAddress: string | string[] | undefined,
   credits: number
 ): Promise<void> {
   console.log(
     '+++++++++++++++++++++++++++++ Update User Credits +++++++++++++++++++++++++++++'
   );
   console.log('UserId: ', userId);
-  console.log('UserIp: ', userIp);
-  const keyValue = [kind, userId ? userId : userIp];
+  console.log('normalizedIpAddress: ', normalizedIpAddress);
+  const keyValue = [kind, userId ? userId : normalizedIpAddress];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
     namespace,
@@ -80,7 +82,7 @@ export async function updateUserCredits(
     key,
     data: {
       UserId: userId,
-      UserIp: userIp,
+      normalizedIpAddress: normalizedIpAddress,
       Credits: credits
     }
   };
