@@ -35,7 +35,7 @@ export async function getUserCredits(
     console.log('Query 2');
     query = datastore
       .createQuery(namespace, kind)
-      .filter('normalizedIpAddress', '=', normalizedIpAddress)
+      .filter('UserIp', '=', normalizedIpAddress)
       .limit(1);
   } else if (
     userId != undefined &&
@@ -47,7 +47,7 @@ export async function getUserCredits(
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
-      .filter('normalizedIpAddress', '=', normalizedIpAddress)
+      .filter('UserIp', '=', normalizedIpAddress)
       .limit(1);
   } else {
     console.log('Invalid userId and normalizedIpAddress');
@@ -63,14 +63,17 @@ export async function getUserCredits(
 
 export async function updateUserCredits(
   userId: string | string[] | undefined,
-  normalizedIpAddress: string | string[] | undefined,
+  userIp: string | string[],
   credits: number
 ): Promise<void> {
   console.log(
     '+++++++++++++++++++++++++++++ Update User Credits +++++++++++++++++++++++++++++'
   );
   console.log('UserId: ', userId);
-  console.log('normalizedIpAddress: ', normalizedIpAddress);
+  console.log('UserIp: ', userIp);
+  const normalizedIpAddress = ipUtils(userIp);
+  console.log('NormalizedIpAddress: ', normalizedIpAddress);
+
   const keyValue = [kind, userId ? userId : normalizedIpAddress];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
@@ -82,7 +85,7 @@ export async function updateUserCredits(
     key,
     data: {
       UserId: userId,
-      normalizedIpAddress: normalizedIpAddress,
+      UserIp: normalizedIpAddress,
       Credits: credits
     }
   };
