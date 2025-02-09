@@ -1,6 +1,6 @@
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
-import ipUtils from '@/utils/ipUtils';
+import { normalizeIp, localIpConfig } from '@/utils/ipUtils';
 require('dotenv').config();
 
 const datastore = new Datastore({
@@ -15,7 +15,7 @@ export async function getUserCredits(
   userId: string | string[] | undefined,
   userIp: string | string[]
 ): Promise<number | null> {
-  const normalizedIpAddress = ipUtils(userIp);
+  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let query;
   if (
     userId != undefined &&
@@ -71,7 +71,7 @@ export async function updateUserCredits(
   );
   console.log('UserId: ', userId);
   console.log('UserIp: ', userIp);
-  const normalizedIpAddress = ipUtils(userIp);
+  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   console.log('NormalizedIpAddress: ', normalizedIpAddress);
 
   const keyValue = [kind, userId ? userId : normalizedIpAddress];

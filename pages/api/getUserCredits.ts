@@ -10,10 +10,10 @@ export default async function handler(
     return;
   }
 
-  const { userId } = req.query;
+  const { userId, userIp } = req.query;
 
   try {
-    const credits = await getUserCredits(userId as string, 'none');
+    const credits = await getUserCredits(userId as string, userIp as string);
     console.log('getUserCredits: ', credits);
     res.status(200).json({ credits });
   } catch (error) {

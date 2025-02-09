@@ -1,6 +1,6 @@
 import * as ipaddr from 'ipaddr.js';
 
-export default function normalizeIp(ip: string | string[]): string | string[] {
+export function normalizeIp(ip: string | string[]): string | string[] {
   if (Array.isArray(ip)) {
     return ip.map((item) => normalizeIp(item) as string);
   } else {
@@ -18,4 +18,8 @@ export default function normalizeIp(ip: string | string[]): string | string[] {
       return ip;
     }
   }
+}
+
+export function localIpConfig(localIp: string | string[]): string | string[] {
+  return localIp == '::1' ? '192.168.1.1' : localIp;
 }

@@ -1,4 +1,4 @@
-import normalizeIp from '@/utils/ipUtils';
+import { normalizeIp } from '@/utils/ipUtils';
 import assert from 'assert';
 
 describe('normalizeIp', () => {
