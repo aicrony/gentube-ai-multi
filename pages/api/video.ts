@@ -1,16 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import callLumaVideoApi from '@/services/generateLumaVideo';
 import callRay2VideoApi from '@/services/generateFrontierLumaVideo';
 import { serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
+import generateFalVideo from '@/services/generateFalVideo';
+import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const productName = req.headers['x-product-name'];
-  const subscriptionStatus = req.headers['x-subscription-status'];
   const userId = req.headers['x-user-id'];
   const userIp =
     req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
@@ -21,11 +20,16 @@ export default async function handler(
     return;
   }
 
+  const subscriptionObject = getSubscriptionTier();
+
+  const initialCredits = subscriptionObject.initialCredits;
+
   // Get user credits from the new table
   let userCredits = await getUserCredits(userId, userIp);
 
   if (userCredits === null) {
-    userCredits = 120;
+    userCredits = initialCredits;
+    console.log('Set Initial Credits: ', userCredits);
     await updateUserCredits(userId, userIp, userCredits);
   }
 
@@ -55,7 +59,7 @@ export default async function handler(
       result = await callRay2VideoApi(imageUrl || 'none', videoDescription);
       creditCost = 80;
     } else if (imageUrl !== 'none') {
-      result = await callLumaVideoApi(imageUrl || 'none', videoDescription);
+      result = await generateFalVideo(imageUrl || 'none', videoDescription);
       creditCost = 50;
     }
 
