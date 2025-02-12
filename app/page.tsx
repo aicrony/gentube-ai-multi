@@ -30,6 +30,11 @@ export default function Home() {
     setUserCredits(credits);
   }, []);
 
+  const signInMessage =
+    userId && userId == 'none'
+      ? 'Create a free account for 110 free credits.'
+      : '';
+
   useEffect(() => {
     if (userCredits !== null) {
       setDisplayName(` - Credits: ${userCredits}`);
@@ -54,8 +59,11 @@ export default function Home() {
                     GenTube.ai
                   </h1>
                   <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-                    Generate AI Images and Videos {displayName}
+                    Generate AI Images and Videos
                   </p>
+                  {signInMessage && (
+                    <h1 className="text-xl font-bold">{signInMessage}</h1>
+                  )}
                 </div>
                 <div className="grid gap-4">
                   <nav className="flex flex-wrap justify-center gap-1">
