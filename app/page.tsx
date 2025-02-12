@@ -31,9 +31,15 @@ export default function Home() {
   }, []);
 
   const signInMessage =
-    userId && userId == 'none'
-      ? 'Create a free account for 110 free credits.'
-      : '';
+    userId && userId == 'none' ? (
+      <span>
+        <a href="/signin" className="font-light text-md">
+          Sign In for 110 free credits (1 time).
+        </a>
+      </span>
+    ) : (
+      ''
+    );
 
   useEffect(() => {
     if (userCredits !== null) {
@@ -112,6 +118,18 @@ export default function Home() {
                     />
                     <Route
                       path="/text-to-video"
+                      element={
+                        <>
+                          <VideoFromTextDynamicButton
+                            userId={userId}
+                            onUserCreditsUpdate={handleUserCreditsUpdate}
+                          />
+                          <MyAssets />
+                        </>
+                      }
+                    />
+                    <Route
+                      path="/signin/signup"
                       element={
                         <>
                           <VideoFromTextDynamicButton
