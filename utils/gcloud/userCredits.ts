@@ -10,6 +10,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
+const defaultCredits = 110;
 
 export async function getUserCredits(
   userId: string | string[] | undefined,
@@ -110,5 +111,30 @@ export async function aggregateUserCredits(
       existingCredits.length > 0 ? existingCredits[0].Credits : 0;
     const newCredits = currentCredits + credits;
     await updateUserCredits(userId, '-', newCredits);
+  }
+}
+
+export async function newUserCredits(
+  userId: string | string[] | undefined
+): Promise<void> {
+  if (userId == undefined) {
+    return;
+  } else if (userId && userId.length == 36) {
+    const keyValue = [kind, userId];
+    console.log('KeyValue: ', keyValue);
+    const key = datastore.key({
+      namespace,
+      path: [kind, `${keyValue}`]
+    });
+
+    const entity = {
+      key,
+      data: {
+        UserId: userId,
+        Credits: defaultCredits
+      }
+    };
+    const response = await datastore.save(entity);
+    console.log('New User Credits response: ', JSON.stringify(response));
   }
 }
