@@ -53,7 +53,7 @@ export default async function handler(
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 20000));
       result =
-        'https://storage.googleapis.com/gen-image-storage/4e1805d4-5841-46a9-bdff-fcdf29b2c790.png';
+        'https://storage.cdn-luma.com/dream_machine/fb797f94-8657-4a93-927b-5cd307298827/85eab626-a48e-4c53-92b0-7aa633129478_result.mp4';
       creditCost = 40;
     } else if (imageUrl === 'none') {
       result = await callRay2VideoApi(imageUrl || 'none', videoDescription);

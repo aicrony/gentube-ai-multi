@@ -18,11 +18,7 @@ export async function getUserCredits(
 ): Promise<number | null> {
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let query;
-  if (
-    userId != undefined &&
-    userId.length > 0 &&
-    (normalizedIpAddress == undefined || normalizedIpAddress.length == 0)
-  ) {
+  if (userId != undefined && userId.length > 0) {
     console.log('Query 1');
     query = datastore
       .createQuery(namespace, kind)
