@@ -5,15 +5,18 @@ const apiEndpoint = process.env.KLING_API_ENDPOINT as string;
 
 export default async function generateFalVideo(
   url: string,
-  description: string
+  description: string,
+  // no looping capabilities in Kling as of 2/16/25
+  duration: string,
+  aspectRatio: string
 ) {
   try {
     const result = await fal.subscribe(apiEndpoint, {
       input: {
         prompt: description,
         image_url: url,
-        duration: '5', // 5,10 for Kling; 4,6 for Haiper
-        aspect_ratio: '16:9'
+        duration: duration, // 5,10 for Kling; 4,6 for Haiper
+        aspect_ratio: aspectRatio
       },
       logs: true,
       onQueueUpdate: (status: QueueStatus) => {

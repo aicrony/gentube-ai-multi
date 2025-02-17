@@ -7,13 +7,19 @@ const apiEndpoint = process.env.LUMA_API_ENDPOINT;
 
 export default async function generateLumaVideo(
   url: string,
-  description: string
+  description: string,
+  // no duration option in Luma Image to Video as of 2/16/25, only Luma Text to Video
+  loop: string,
+  aspectRatio: string
 ) {
   try {
     const data =
       url !== 'none'
         ? {
             prompt: description,
+            aspect_ratio: aspectRatio,
+            loop: loop,
+            model: 'ray-1-6',
             keyframes: {
               frame0: {
                 type: 'image',
@@ -22,7 +28,9 @@ export default async function generateLumaVideo(
             }
           }
         : {
-            prompt: description
+            prompt: description,
+            aspect_ratio: aspectRatio,
+            loop: loop
           };
 
     const response = await axios.request({

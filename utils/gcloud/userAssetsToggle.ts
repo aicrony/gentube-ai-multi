@@ -34,7 +34,7 @@ export async function getUserAssetsToggle(
 
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('UserId', '=', userId || 'none')
+    // .filter('UserId', '=', userId || 'none')
     .limit(limit)
     .offset(offset)
     .order('DateTime', { descending: true });

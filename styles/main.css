@@ -88,3 +88,11 @@ h1 {
   width: 98%;
   margin: 0 auto; /* Center the container */
 }
+
+.gray-text {
+  color: gray;
+}
+
+.rounded-corners {
+  border-radius: 4px; /* Adjust the value as needed */
+}

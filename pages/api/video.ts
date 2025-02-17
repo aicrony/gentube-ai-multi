@@ -5,6 +5,8 @@ import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
 import generateFalVideo from '@/services/generateFalVideo';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
+import generateLumaVideo from '@/services/generateLumaVideo';
+import generateFrontierLumaVideo from '@/services/generateFrontierLumaVideo';
 
 export default async function handler(
   req: NextApiRequest,
@@ -44,9 +46,16 @@ export default async function handler(
   }
 
   try {
+    console.log('Generating video...');
+    console.log('Video request body: ', req.body);
     // Prompt declaration
     const videoDescription = req.body.description as string;
+    const duration = req.body.duration as string;
+    const aspectRatio = req.body.aspectRatio as string;
+    const loop = req.body.loop;
+    const motion = req.body.motion as string;
     const imageUrl = (req.body.url as string) || 'none';
+    const combinedPrompt = 'Camera ' + motion + '. ' + videoDescription;
     let creditCost = 100;
 
     let result;
@@ -56,11 +65,37 @@ export default async function handler(
         'https://storage.cdn-luma.com/dream_machine/fb797f94-8657-4a93-927b-5cd307298827/85eab626-a48e-4c53-92b0-7aa633129478_result.mp4';
       creditCost = 40;
     } else if (imageUrl === 'none') {
-      result = await callRay2VideoApi(imageUrl || 'none', videoDescription);
+      result = await callRay2VideoApi(
+        imageUrl || 'none',
+        combinedPrompt,
+        loop,
+        aspectRatio
+      );
       creditCost = 80;
-    } else if (imageUrl !== 'none') {
-      result = await generateFalVideo(imageUrl || 'none', videoDescription);
-      creditCost = 50;
+    } else if (imageUrl !== 'none' && loop === false) {
+      console.log('Generating video with Kling');
+      result = await generateFalVideo(
+        imageUrl || 'none',
+        combinedPrompt,
+        duration,
+        aspectRatio
+      );
+      if (duration === '5') {
+        creditCost = 50;
+      } else if (duration === '10') {
+        creditCost = 100;
+      } else {
+        creditCost = 50;
+      }
+    } else if (imageUrl !== 'none' && loop === true) {
+      console.log('Generating video with Frontier LumaLabs');
+      result = await generateFrontierLumaVideo(
+        imageUrl || 'none',
+        combinedPrompt,
+        loop,
+        aspectRatio
+      );
+      creditCost = 80;
     }
 
     console.log('****** VIDEO RESULT: ********');
@@ -92,7 +127,7 @@ export default async function handler(
       CountedAssetState: userCredits,
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
-      Prompt: videoDescription,
+      Prompt: combinedPrompt,
       SubscriptionTier: 0,
       UserId: userId,
       UserIp: userIp
