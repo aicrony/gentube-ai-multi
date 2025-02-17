@@ -58,6 +58,7 @@ export default async function handler(
 
     // Save user activity
     await saveUserActivity({
+      id: undefined,
       AssetSource: '',
       AssetType: 'upl',
       CountedAssetPreviousState: 0,

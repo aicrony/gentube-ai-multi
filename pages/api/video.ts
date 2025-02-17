@@ -116,6 +116,7 @@ export default async function handler(
       // Data save
       try {
         const activityResponse = await saveUserActivity({
+          id: undefined,
           AssetSource: imageUrl,
           AssetType: 'que',
           CountedAssetPreviousState: creditCost,
@@ -139,6 +140,7 @@ export default async function handler(
       // Data save
       try {
         const activityResponse = await saveUserActivity({
+          id: undefined,
           AssetSource: imageUrl,
           AssetType: 'vid',
           CountedAssetPreviousState: creditCost,

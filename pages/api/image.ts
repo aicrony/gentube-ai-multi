@@ -86,6 +86,7 @@ export default async function handler(
 
     // Data save
     const activityResponse = await saveUserActivity({
+      id: undefined,
       AssetSource: '',
       AssetType: 'img',
       CountedAssetPreviousState: creditCost,
