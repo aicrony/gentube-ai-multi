@@ -21,5 +21,12 @@ export async function getLatestActivityByRequestId(
 
   const [activities] = await datastore.runQuery(query);
   console.log('Request found: ', activities.length > 0 ? activities[0] : null);
-  return activities.length > 0 ? activities[0] : null;
+
+  if (activities.length > 0) {
+    const activity = activities[0];
+    activity.id = activity[datastore.KEY].id;
+    return activity;
+  }
+
+  return null;
 }

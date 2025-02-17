@@ -1,5 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Datastore } from '@google-cloud/datastore';
 import { getLatestActivityByRequestId } from '@/utils/gcloud/getUserActivityByRequestId';
+
+const datastore = new Datastore();
+
+async function checkExists() {
+  const testKey = datastore.key([
+    `UserActivity`,
+    `cfd04719-410a-487c-950e-6d00a0b9d14b`
+  ]);
+  const [entity] = await datastore.get(testKey);
+  console.log(`Test entity:`, entity);
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,18 +23,59 @@ export default async function handler(
     return;
   }
 
-  console.log('Webhook data upon completion:', req.body);
+  console.log('Video webhook request body:', req.body);
 
-  if (req.body.requestId && req.body.status === 'OK') {
-    console.log('Request ID:', req.body.requestId);
+  checkExists();
+
+  if (
+    req.body.request_id &&
+    req.body.status === 'OK' &&
+    req.body.error === null
+  ) {
+    console.log('Request ID:', req.body.request_id);
     console.log('Status:', req.body.status);
+    console.log('Incoming Payload: ', JSON.stringify(req.body.payload));
+
     const userQueueRecord = await getLatestActivityByRequestId(
-      req.body.requestId
+      req.body.request_id
     );
+
     console.log('Queue Record:', JSON.stringify(userQueueRecord));
 
     if (userQueueRecord && userQueueRecord.UserId) {
       console.log('Queue Record - UserId:', userQueueRecord.UserId);
+
+      const transaction = datastore.transaction();
+      const userActivityKey = datastore.key({
+        namespace: 'GenTube',
+        path: ['UserActivity', datastore.int(Number(userQueueRecord.id))]
+      });
+
+      console.log('userActivityKey: ' + JSON.stringify(userActivityKey));
+
+      try {
+        await transaction.run();
+        const [userActivity] = await transaction.get(userActivityKey);
+
+        console.log('userActivity: ', userActivity);
+
+        if (userActivity) {
+          userActivity.CreatedAssetUrl = req.body.payload.video.url;
+          userActivity.AssetType = 'vid';
+          transaction.save({
+            key: userActivityKey,
+            data: userActivity
+          });
+          await transaction.commit();
+          console.log('UserActivity updated successfully');
+        } else {
+          console.error('UserActivity not found');
+          await transaction.rollback();
+        }
+      } catch (error) {
+        console.error('Error updating UserActivity:', error);
+        await transaction.rollback();
+      }
     }
   } else {
     console.error('Invalid data received');

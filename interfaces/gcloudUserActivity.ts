@@ -1,4 +1,5 @@
 export interface GcloudUserActivity {
+  id: string | number;
   AssetSource: string | undefined;
   AssetType: string;
   CountedAssetPreviousState: number;
