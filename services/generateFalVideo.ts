@@ -20,13 +20,6 @@ export default async function generateFalVideo(
       },
       logs: true,
       webhookUrl: 'https://gentube.ai/api/falvideoresult'
-      // onQueueUpdate: (status: QueueStatus) => {
-      //   if (status.status === 'IN_PROGRESS') {
-      //     (status as InProgressQueueStatus).logs
-      //       .map((log: { message: string }) => log.message)
-      //       .forEach(console.log);
-      //   }
-      // }
     });
     console.log(result.data);
     console.log(result.requestId);
