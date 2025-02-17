@@ -74,17 +74,6 @@ export function VideoFromUrlDynamicButton({
     setVideoData(null);
     setErrorMessage(null);
 
-    // Validation logic
-    // if (loop === 'true' && duration !== '5') {
-    //   setErrorMessage('Duration must be 5 seconds when loop is enabled.');
-    //   setIsSubmitting(false);
-    //   return;
-    // } else if (duration === '10' && loop !== 'false') {
-    //   setErrorMessage('Loop must be disabled when duration is 10 seconds.');
-    //   setIsSubmitting(false);
-    //   return;
-    // }
-
     try {
       const response = await fetch('/api/video', {
         method: 'POST',
