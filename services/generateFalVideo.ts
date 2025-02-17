@@ -19,13 +19,14 @@ export default async function generateFalVideo(
         aspect_ratio: aspectRatio
       },
       logs: true,
-      onQueueUpdate: (status: QueueStatus) => {
-        if (status.status === 'IN_PROGRESS') {
-          (status as InProgressQueueStatus).logs
-            .map((log: { message: string }) => log.message)
-            .forEach(console.log);
-        }
-      }
+      webhookUrl: 'https://gentube.ai/api/falvideoresult'
+      // onQueueUpdate: (status: QueueStatus) => {
+      //   if (status.status === 'IN_PROGRESS') {
+      //     (status as InProgressQueueStatus).logs
+      //       .map((log: { message: string }) => log.message)
+      //       .forEach(console.log);
+      //   }
+      // }
     });
     console.log(result.data);
     console.log(result.requestId);
