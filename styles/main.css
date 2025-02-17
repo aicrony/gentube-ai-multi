@@ -101,3 +101,20 @@ a.disabled {
   pointer-events: none;
   cursor: default;
 }
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* Adjust the gap as needed */
+}
+
+.flex-container > div {
+  flex: 1 1 10%; /* Adjust the basis percentage as needed */
+  min-width: 10px; /* Adjust the minimum width as needed */
+}
+
+@media (max-width: 643px) {
+  .flex-container {
+    flex-direction: column;
+  }
+}
