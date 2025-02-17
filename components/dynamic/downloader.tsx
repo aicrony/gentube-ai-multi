@@ -9,10 +9,14 @@ interface DownloaderProps {
 export default function Downloader({ fileUrl }: DownloaderProps) {
   const { size, elapsed, percentage, download, cancel, error, isInProgress } =
     useDownloader();
-  let filename = fileUrl.split('/').pop();
+  console.log('fileUrl: ', fileUrl);
+  let filename =
+    typeof fileUrl === 'string' && fileUrl.includes('/')
+      ? fileUrl.split('/').pop() || ''
+      : '';
   if (
-    filename === undefined ||
-    filename === '' ||
+    filename !== undefined &&
+    filename !== '' &&
     !['mp4'].includes(filename.split('.').pop() || '')
   ) {
     return (
