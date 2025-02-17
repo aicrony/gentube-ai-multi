@@ -7,7 +7,8 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 import ImageGallery from '@/functions/getGallery';
 import GenericModal from '@/components/ui/GenericModal/GenericModal';
-import '@/styles/main.css'; // Import the CSS file
+import '@/styles/main.css';
+import getFileNameFromUrl from '@/utils/stringUtils'; // Import the CSS file
 
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
@@ -234,7 +235,21 @@ export function VideoFromUrlDynamicButton({
             </Button>
           </div>
         )}
-        {videoData && (
+
+        {/*{JSON.stringify(videoData)}*/}
+
+        {/*Display Status*/}
+        {videoData &&
+        videoData.webhook &&
+        videoData.response &&
+        videoData.response.status ? (
+          <div className="pt-4 pb-4">
+            <p>Your video request is: {videoData.response.status}</p>
+            <p>Refresh your assets for updates.</p>
+          </div>
+        ) : null}
+
+        {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
             <p>{videoGenCompleteMessage}</p>
             <div>
@@ -244,6 +259,7 @@ export function VideoFromUrlDynamicButton({
               </video>
             </div>
             <div>
+              {JSON.stringify(videoData)}
               <Downloader fileUrl={videoData} />
             </div>
           </div>

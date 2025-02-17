@@ -1,6 +1,7 @@
 import React from 'react';
 import useDownloader from 'react-use-downloader';
 import Button from '@/components/ui/Button';
+import getFileNameFromUrl from '@/utils/stringUtils';
 
 interface DownloaderProps {
   fileUrl: string;
@@ -9,14 +10,10 @@ interface DownloaderProps {
 export default function Downloader({ fileUrl }: DownloaderProps) {
   const { size, elapsed, percentage, download, cancel, error, isInProgress } =
     useDownloader();
-  console.log('fileUrl: ', fileUrl);
-  let filename =
-    typeof fileUrl === 'string' && fileUrl.includes('/')
-      ? fileUrl.split('/').pop() || ''
-      : '';
+  let filename = getFileNameFromUrl(fileUrl);
   if (
-    filename !== undefined &&
-    filename !== '' &&
+    filename === undefined ||
+    filename === '' ||
     !['mp4'].includes(filename.split('.').pop() || '')
   ) {
     return (
