@@ -1,0 +1,14 @@
+{
+  request_id: '7688810a-02e2-4ff7-9110-2e73aefc938d',
+  gateway_request_id: '7688810a-02e2-4ff7-9110-2e73aefc938d',
+  status: 'OK',
+  error: null,
+  payload: {
+    video: {
+      url: 'https://v3.fal.media/files/panda/C68n1ueANgfvR3bSwxVVa_output.mp4',
+      content_type: 'video/mp4',
+      file_name: 'output.mp4',
+      file_size: 10354868
+    }
+  }
+}

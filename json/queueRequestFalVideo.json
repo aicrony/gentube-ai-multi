@@ -1,0 +1,11 @@
+{
+  data: {
+    video: {
+      url: 'https://v3.fal.media/files/rabbit/aNMLHz30racF_9ADavwNn_output.mp4',
+      content_type: 'video/mp4',
+      file_name: 'output.mp4',
+      file_size: 10265249
+    }
+  },
+  requestId: '992cf773-fd83-47f8-a0f2-0924153bb0c8'
+}

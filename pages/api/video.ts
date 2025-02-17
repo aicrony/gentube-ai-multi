@@ -106,8 +106,57 @@ export default async function handler(
       res.status(result.error.code).json({ error: result.error.message });
       return;
     }
-    console.log(result);
 
+    // Check for queued webhook response and save it
+    if (result.webhook) {
+      const webhook = result.webhook;
+      console.log('Webhook: ', webhook);
+      const requestId = result.response.requestId;
+      console.log('Queue response: ', requestId);
+      // Data save
+      try {
+        const activityResponse = await saveUserActivity({
+          AssetSource: imageUrl,
+          AssetType: 'vid',
+          CountedAssetPreviousState: creditCost,
+          CountedAssetState: userCredits,
+          CreatedAssetUrl: requestId,
+          DateTime: new Date().toISOString(),
+          Prompt: combinedPrompt,
+          SubscriptionTier: 0,
+          UserId: userId,
+          UserIp: userIp
+        });
+        console.log('Webhook data saved: ', activityResponse);
+      } catch (error) {
+        console.error(
+          'An error occurred while saving the webhook data:',
+          error
+        );
+      }
+    } else if (result.data) {
+      result = result.data;
+      // Data save
+      try {
+        const activityResponse = await saveUserActivity({
+          AssetSource: imageUrl,
+          AssetType: 'vid',
+          CountedAssetPreviousState: creditCost,
+          CountedAssetState: userCredits,
+          CreatedAssetUrl: result,
+          DateTime: new Date().toISOString(),
+          Prompt: combinedPrompt,
+          SubscriptionTier: 0,
+          UserId: userId,
+          UserIp: userIp
+        });
+        console.log('Data saved: ', activityResponse);
+      } catch (error) {
+        console.error('An error occurred while saving the data:', error);
+      }
+    }
+
+    console.log(result);
     // Update user credits
     userCredits -= creditCost;
     await updateUserCredits(userId, userIp, userCredits);
@@ -120,22 +169,6 @@ export default async function handler(
         secure: true
       })
     ]);
-
-    // Data save
-    const activityResponse = await saveUserActivity({
-      AssetSource: imageUrl,
-      AssetType: 'vid',
-      CountedAssetPreviousState: creditCost,
-      CountedAssetState: userCredits,
-      CreatedAssetUrl: result,
-      DateTime: new Date().toISOString(),
-      Prompt: combinedPrompt,
-      SubscriptionTier: 0,
-      UserId: userId,
-      UserIp: userIp
-    });
-
-    console.log('Data saved: ', activityResponse);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({ result, userCredits });
