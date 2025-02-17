@@ -72,11 +72,12 @@ export default async function handler(
         aspectRatio
       );
       creditCost = 80;
-    } else if (imageUrl !== 'none' && loop === false) {
+    } else if (imageUrl !== 'none') {
       console.log('Generating video with Kling');
       result = await generateFalVideo(
         imageUrl || 'none',
         combinedPrompt,
+        loop,
         duration,
         aspectRatio
       );

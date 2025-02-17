@@ -12,7 +12,7 @@ const callback = {
 export default async function generateFalVideo(
   url: string,
   description: string,
-  // no looping capabilities in Kling as of 2/16/25
+  loop: boolean,
   duration: string,
   aspectRatio: string
 ) {
@@ -21,6 +21,8 @@ export default async function generateFalVideo(
       process.env.FAL_VIDEO_TEST_MODE &&
       process.env.FAL_VIDEO_TEST_MODE === 'true'
     ) {
+      console.log('Looping is: ' + loop);
+      console.log(typeof loop);
       result = {
         status: 'IN_QUEUE',
         request_id: 'f3cdc601-9c51-4cc7-a961-23d3280599c2',
@@ -40,7 +42,8 @@ export default async function generateFalVideo(
           prompt: description,
           image_url: url,
           duration: duration, // 5,10 for Kling; 4,6 for Haiper
-          aspect_ratio: aspectRatio
+          aspect_ratio: aspectRatio,
+          ...(loop ? [{ tail_image_url: url }] : [])
         },
         webhookUrl: falApiWebhook
       });

@@ -55,18 +55,10 @@ export function VideoFromUrlDynamicButton({
   videoGenCompleteMessage = 'Video Generation Complete';
 
   useEffect(() => {
-    if (loop === 'true' && duration !== '5') {
-      setDuration('5');
-      alert('Duration must be 5 seconds when loop is enabled.');
+    if (loop === 'true') {
+      alert('Looping will be enabled.');
     }
   }, [loop]);
-
-  useEffect(() => {
-    if (duration === '10' && loop !== 'false') {
-      setLoop('false');
-      alert('Loop must be disabled when duration is 10 seconds.');
-    }
-  }, [duration]);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true);
@@ -206,20 +198,19 @@ export function VideoFromUrlDynamicButton({
               ))}
             </select>
           </div>
+          <div>
+            <Label htmlFor="loop">Loop: </Label>
+            <select
+              id="loop"
+              value={loop}
+              onChange={(e) => setLoop(e.target.value)}
+              className="min-h-[25px] text-xl gray-text rounded-corners"
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
         </div>
-        {/*TODO: Uncomment when looping is improved*/}
-        {/*<div className={'pt-4'}>*/}
-        {/*  <Label htmlFor="loop">Loop: </Label>*/}
-        {/*  <select*/}
-        {/*    id="loop"*/}
-        {/*    value={loop}*/}
-        {/*    onChange={(e) => setLoop(e.target.value)}*/}
-        {/*    className="min-h-[25px] text-xl gray-text rounded-corners"*/}
-        {/*  >*/}
-        {/*    <option value="true">Yes</option>*/}
-        {/*    <option value="false">No</option>*/}
-        {/*  </select>*/}
-        {/*</div>*/}
         <div className={'pt-4'}>
           <Button
             variant="slim"

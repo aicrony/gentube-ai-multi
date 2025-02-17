@@ -1,0 +1,7 @@
+{
+  "request_id": "7088a84b-d62b-4a5c-8732-40d3687a88b1",
+  "gateway_request_id": "7088a84b-d62b-4a5c-8732-40d3687a88b1",
+  "status": "ERROR",
+  "error": "Invalid status code: 422",
+  "payload": { "detail": [] }
+}
