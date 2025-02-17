@@ -214,18 +214,19 @@ export function VideoFromUrlDynamicButton({
             ))}
           </select>
         </div>
-        <div className={'pt-4'}>
-          <Label htmlFor="loop">Loop: </Label>
-          <select
-            id="loop"
-            value={loop}
-            onChange={(e) => setLoop(e.target.value)}
-            className="min-h-[25px] text-xl gray-text rounded-corners"
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </div>
+        {/*TODO: Uncomment when looping is improved*/}
+        {/*<div className={'pt-4'}>*/}
+        {/*  <Label htmlFor="loop">Loop: </Label>*/}
+        {/*  <select*/}
+        {/*    id="loop"*/}
+        {/*    value={loop}*/}
+        {/*    onChange={(e) => setLoop(e.target.value)}*/}
+        {/*    className="min-h-[25px] text-xl gray-text rounded-corners"*/}
+        {/*  >*/}
+        {/*    <option value="true">Yes</option>*/}
+        {/*    <option value="false">No</option>*/}
+        {/*  </select>*/}
+        {/*</div>*/}
         <div className={'pt-4'}>
           <Button
             variant="slim"

@@ -87,16 +87,18 @@ export default async function handler(
       } else {
         creditCost = 50;
       }
-    } else if (imageUrl !== 'none' && loop === true) {
-      console.log('Generating video with Frontier LumaLabs');
-      result = await generateFrontierLumaVideo(
-        imageUrl || 'none',
-        combinedPrompt,
-        loop,
-        aspectRatio
-      );
-      creditCost = 80;
     }
+    // TODO: Uncomment when looping is improved
+    // else if (imageUrl !== 'none' && loop === true) {
+    //   console.log('Generating video with Frontier LumaLabs');
+    //   result = await generateFrontierLumaVideo(
+    //     imageUrl || 'none',
+    //     combinedPrompt,
+    //     loop,
+    //     aspectRatio
+    //   );
+    //   creditCost = 80;
+    // }80
 
     console.log('****** VIDEO RESULT: ********');
     // Check for error response code
