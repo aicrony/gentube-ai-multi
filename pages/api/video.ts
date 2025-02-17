@@ -117,7 +117,7 @@ export default async function handler(
       try {
         const activityResponse = await saveUserActivity({
           AssetSource: imageUrl,
-          AssetType: 'vid',
+          AssetType: 'que',
           CountedAssetPreviousState: creditCost,
           CountedAssetState: userCredits,
           CreatedAssetUrl: requestId,

@@ -115,13 +115,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     return <p>Loading...</p>;
   }
 
-  const assetTypeName =
+  const assetTypeTitle =
     assetType === 'vid' ? 'Video' : assetType === 'upl' ? 'Uploaded' : '';
 
   return (
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">My {assetTypeName} Assets</h1>
+        <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
         <button onClick={handleRefresh} className="text-blue-500">
           Refresh Assets
         </button>
@@ -138,7 +138,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             href={activity.CreatedAssetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
+            className={`w-16 h-16 flex items-center justify-center bg-gray-200 mr-4 ${activity.AssetType === 'que' ? 'disabled' : ''}`}
             onClick={(e) => {
               e.preventDefault();
               openModal(activity.CreatedAssetUrl);
@@ -149,7 +149,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             ) : (
               <img
                 src={
-                  activity.AssetType === 'vid'
+                  activity.AssetType === 'vid' || activity.AssetType === 'que'
                     ? activity.AssetSource
                     : activity.CreatedAssetUrl
                 }
@@ -164,9 +164,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 <strong>Type:</strong>{' '}
                 {activity.AssetType === 'vid'
                   ? 'Video'
-                  : activity.AssetType === 'upl'
-                    ? 'Upload'
-                    : 'Image'}
+                  : activity.AssetType === 'img'
+                    ? 'Image'
+                    : activity.AssetType === 'upl'
+                      ? 'Upload'
+                      : activity.AssetType === 'que'
+                        ? 'In Queue'
+                        : '???'}
               </p>
             </div>
             {activity.AssetType !== 'upl' && (

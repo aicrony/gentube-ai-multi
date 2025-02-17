@@ -96,3 +96,8 @@ h1 {
 .rounded-corners {
   border-radius: 4px; /* Adjust the value as needed */
 }
+
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+}

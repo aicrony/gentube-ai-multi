@@ -247,7 +247,9 @@ export function VideoFromUrlDynamicButton({
             <p>Your video request is: {videoData.response.status}</p>
             <p>Refresh your assets for updates.</p>
           </div>
-        ) : null}
+        ) : (
+          ''
+        )}
 
         {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
