@@ -35,6 +35,8 @@ export default async function handler(
     bucketName = 'gen-image-storage';
   } else if (assetType === 'vid') {
     bucketName = 'gen-video-storage';
+  } else if (assetType === 'err') {
+    bucketName = 'none';
   }
 
   const fileName = assetUrl.split('/').pop();

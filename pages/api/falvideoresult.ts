@@ -1,8 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Datastore } from '@google-cloud/datastore';
+import { google_app_creds } from '@/interfaces/googleCredentials';
 import { getLatestActivityByRequestId } from '@/utils/gcloud/getUserActivityByRequestId';
 
-const datastore = new Datastore();
+const datastore = new Datastore({
+  projectId: google_app_creds.projectId,
+  credentials: google_app_creds
+});
 
 async function checkExists() {
   const testKey = datastore.key([
@@ -25,9 +29,56 @@ export default async function handler(
 
   console.log('Video webhook request body:', req.body);
 
-  checkExists();
+  // console.log('req.body.status: ' + req.body.status);
 
-  if (
+  // Get the status from the request body
+  const status = req.body.status;
+  console.log('Status:', status);
+
+  if (status === 'ERROR') {
+    const userQueueRecord = await getLatestActivityByRequestId(
+      req.body.request_id
+    );
+
+    console.log('userQueueRecord on ERROR: ' + userQueueRecord);
+
+    if (userQueueRecord && userQueueRecord.UserId) {
+      console.log('Queue Record - UserId:', userQueueRecord.UserId);
+
+      const transaction = datastore.transaction();
+      const userActivityKey = datastore.key({
+        namespace: 'GenTube',
+        path: ['UserActivity', datastore.int(Number(userQueueRecord.id))]
+      });
+
+      console.log(
+        'userActivityKey on ERROR: ' + JSON.stringify(userActivityKey)
+      );
+
+      try {
+        await transaction.run();
+        const [userActivity] = await transaction.get(userActivityKey);
+
+        console.log('userActivity: ', userActivity);
+
+        if (userActivity) {
+          userActivity.AssetType = 'err';
+          transaction.save({
+            key: userActivityKey,
+            data: userActivity
+          });
+          await transaction.commit();
+          console.log('UserActivity updated successfully with ERROR');
+        } else {
+          console.error('UserActivity not found');
+          await transaction.rollback();
+        }
+      } catch (error) {
+        console.error('Error updating UserActivity:', error);
+        await transaction.rollback();
+      }
+    }
+  } else if (
     req.body.request_id &&
     req.body.status === 'OK' &&
     req.body.error === null

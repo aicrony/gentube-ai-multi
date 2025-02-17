@@ -138,7 +138,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             href={activity.CreatedAssetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-16 h-16 flex items-center justify-center bg-gray-200 mr-4 ${activity.AssetType === 'que' ? 'disabled' : ''}`}
+            className={`w-16 h-16 flex items-center justify-center bg-gray-200 mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
             onClick={(e) => {
               e.preventDefault();
               openModal(activity.CreatedAssetUrl);
@@ -170,7 +170,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                       ? 'Upload'
                       : activity.AssetType === 'que'
                         ? 'In Queue'
-                        : '???'}
+                        : activity.AssetType === 'err'
+                          ? 'ERROR'
+                          : activity.AssetType}
               </p>
             </div>
             {activity.AssetType !== 'upl' && (
