@@ -55,7 +55,8 @@ export default async function handler(
     const loop = req.body.loop;
     const motion = req.body.motion as string;
     const imageUrl = (req.body.url as string) || 'none';
-    const combinedPrompt = 'Camera ' + motion + '. ' + videoDescription;
+    const combinedPrompt =
+      videoDescription + '.. ' + motion + ' camera movement.';
     let creditCost = 100;
 
     let result;

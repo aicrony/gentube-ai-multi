@@ -30,6 +30,7 @@ export function VideoFromUrlDynamicButton({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+  const [message, setMessage] = useState<string>('');
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
@@ -59,6 +60,21 @@ export function VideoFromUrlDynamicButton({
       alert('Looping will be enabled.');
     }
   }, [loop]);
+
+  useEffect(() => {
+    if (
+      videoData &&
+      videoData.webhook &&
+      videoData.response &&
+      videoData.response.status
+    ) {
+      setMessage('Refresh your assets to see your queued video.');
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [videoData]);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true);
@@ -230,16 +246,13 @@ export function VideoFromUrlDynamicButton({
           </div>
         )}
 
-        {/*{JSON.stringify(videoData)}*/}
-
         {/*Display Status*/}
         {videoData &&
         videoData.webhook &&
         videoData.response &&
         videoData.response.status ? (
-          <div className="pt-4 pb-4">
-            <p>Your video request is: {videoData.response.status}</p>
-            <p>Refresh your assets for updates.</p>
+          <div>
+            <h3>{message}</h3>
           </div>
         ) : (
           ''
