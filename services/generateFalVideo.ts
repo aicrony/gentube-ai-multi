@@ -43,7 +43,7 @@ export default async function generateFalVideo(
           image_url: url,
           duration: duration, // 5,10 for Kling; 4,6 for Haiper
           aspect_ratio: aspectRatio,
-          ...(loop ? [{ tail_image_url: url }] : [])
+          ...(loop && { tail_image_url: url })
         },
         webhookUrl: falApiWebhook
       });
