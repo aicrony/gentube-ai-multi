@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useCallback } from 'react';
-import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -156,15 +155,24 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
-        {imageData && imageData !== '[object%20Object]' && (
+        {imageData &&
+          imageData !== '[object%20Object]' &&
+          imageData.code !== 'ERR_NON_2XX_3XX_RESPONSE' && (
+            <div className={'margin-top-8'}>
+              <div>
+                <a href={imageData} target="_blank">
+                  Open Image <br /> {JSON.stringify(imageData.code)}
+                </a>
+              </div>
+              <img src={imageData} alt="Generated Image" />
+              {renderVideoButton()}
+            </div>
+          )}
+        {imageData && imageData.code === 'ERR_NON_2XX_3XX_RESPONSE' && (
           <div className={'margin-top-8'}>
             <div>
-              <a href={imageData} target="_blank">
-                Open Image
-              </a>
+              <h3>Error. Please try again by refining your prompt.</h3>
             </div>
-            <img src={imageData} alt="Generated Image" />
-            {renderVideoButton()}
           </div>
         )}
       </div>
