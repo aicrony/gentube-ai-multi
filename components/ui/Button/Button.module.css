@@ -26,7 +26,5 @@
 .disabled:hover {
   @apply text-zinc-400 border-zinc-600 bg-zinc-700 cursor-not-allowed;
   filter: grayscale(1);
-  -webkit-transform: translateZ(0);
-  -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
 }

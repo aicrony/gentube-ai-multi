@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
@@ -6,6 +6,7 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
+import getFileNameFromUrl from '@/utils/stringUtils';
 
 interface VideoDynamicButtonProps {
   urlData: string;
@@ -20,18 +21,61 @@ export function VideoDynamicButton({
 }: VideoDynamicButtonProps) {
   const url = urlData;
 
-  const [videoData, setVideoData] = React.useState<any>(null);
+  const [videoData, setVideoData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoDescription, setVideoDescription] = useState<string>('');
+  const [duration, setDuration] = useState<string>('5');
+  const [aspectRatio, setAspectRatio] = useState<string>('16:9');
+  const [motion, setMotion] = useState<string>('Static');
+  const [loop, setLoop] = useState<string>('false');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [message, setMessage] = useState<string>('');
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
+  const motionOptions = [
+    'Static',
+    'Move Left',
+    'Move Right',
+    'Move Up',
+    'Move Down',
+    'Push In',
+    'Pull Out',
+    'Zoom In',
+    'Zoom Out',
+    'Pan Left',
+    'Pan Right',
+    'Orbit Left',
+    'Orbit Right',
+    'Crane Up',
+    'Crane Down'
+  ];
 
   videoGenButtonLabel = 'Generate Video';
   videoGenCompleteMessage = 'Video Generation Complete';
+
+  useEffect(() => {
+    if (loop === 'true') {
+      alert('Looping will be enabled.');
+    }
+  }, [loop]);
+
+  useEffect(() => {
+    if (
+      videoData &&
+      videoData.webhook &&
+      videoData.response &&
+      videoData.response.status
+    ) {
+      setMessage('Refresh your assets to see your queued video.');
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [videoData]);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
@@ -46,7 +90,11 @@ export function VideoDynamicButton({
         },
         body: JSON.stringify({
           url: url,
-          description: videoDescription
+          description: videoDescription,
+          duration: duration,
+          aspectRatio: aspectRatio,
+          motion: motion,
+          loop: loop === 'true'
         })
       });
       if (!response.ok) {
@@ -105,6 +153,60 @@ export function VideoDynamicButton({
           onChange={(e) => setVideoDescription(e.target.value)}
         />
       </div>
+      {/* VIDEO OPTIONS */}
+      <div className="flex-container pt-4">
+        <div>
+          <label htmlFor="duration">Duration (in sec): </label>
+          <select
+            id="duration"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="aspectRatio">Aspect Ratio: </label>
+          <select
+            id="aspectRatio"
+            value={aspectRatio}
+            onChange={(e) => setAspectRatio(e.target.value)}
+            className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+          >
+            <option value="16:9">16:9</option>
+            <option value="9:16">9:16</option>
+            <option value="1:1">1:1</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="motion">Motion: </label>
+          <select
+            id="motion"
+            value={motion}
+            className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+          >
+            {motionOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="loop">Loop: </label>
+          <select
+            id="loop"
+            value={loop}
+            onChange={(e) => setLoop(e.target.value)}
+            className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
       <div className={'pt-4'}>
         <Button
           variant="slim"
@@ -122,7 +224,17 @@ export function VideoDynamicButton({
             </Button>
           </div>
         )}
-        {videoData && (
+        {videoData &&
+        videoData.webhook &&
+        videoData.response &&
+        videoData.response.status ? (
+          <div>
+            <h3>{message}</h3>
+          </div>
+        ) : (
+          ''
+        )}
+        {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
             <p>{videoGenCompleteMessage}</p>
             <div>

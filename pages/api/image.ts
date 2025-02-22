@@ -62,7 +62,7 @@ export default async function handler(
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       result =
-        'https://storage.googleapis.com/gen-image-storage/b43bc0ac-0c6b-46d0-9c3b-0c00406f1836.png';
+        'https://storage.googleapis.com/gentube-upload-image-storage/5b5fe70c-e0f0-4ed1-bf64-42a3bc71fd0c.png';
     } else {
       result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
     }
