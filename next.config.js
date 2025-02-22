@@ -22,5 +22,10 @@ module.exports = {
         destination: '/'
       }
     ];
+  },
+  experimental: {
+    images: {
+      allowFutureImage: true
+    }
   }
 };

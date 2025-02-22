@@ -8,10 +8,10 @@ import { getURL } from '@/utils/helpers';
 import 'styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { UserIdProvider } from '@/context/UserIdContext';
-import { PurchasedCreditsProvider } from '@/context/PurchasedCreditsContext';
 
 const title = 'Gentube AI Image and Video Generator';
 const description = 'Generate images and videos with artificial intelligence.';
+const ogImageUrl = `${getURL()}/api/og?title=${encodeURIComponent(title)}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(getURL()),
@@ -19,7 +19,15 @@ export const metadata: Metadata = {
   description: description,
   openGraph: {
     title: title,
-    description: description
+    description: description,
+    images: [
+      {
+        url: ogImageUrl,
+        width: 1200,
+        height: 630,
+        alt: title
+      }
+    ]
   }
 };
 
