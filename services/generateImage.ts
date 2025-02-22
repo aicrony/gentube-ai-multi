@@ -43,6 +43,9 @@ export default async function callImageApi(
     );
   } catch (err) {
     console.log(err);
-    return err;
+    return {
+      success: false,
+      error: 'An error occurred.'
+    };
   }
 }

@@ -31,7 +31,12 @@ export async function saveUserActivity(
         value: activity.CountedAssetPreviousState
       },
       { name: 'CountedAssetState', value: activity.CountedAssetState },
-      { name: 'CreatedAssetUrl', value: activity.CreatedAssetUrl },
+      {
+        name: 'CreatedAssetUrl',
+        value: activity.CreatedAssetUrl.error
+          ? activity.CreatedAssetUrl.error
+          : activity.CreatedAssetUrl
+      },
       { name: 'DateTime', value: activity.DateTime },
       { name: 'Prompt', value: activity.Prompt },
       { name: 'SubscriptionTier', value: activity.SubscriptionTier },

@@ -17,7 +17,7 @@ export default async function handler(
     return;
   }
 
-  const { userId, assetUrl, assetType } = req.body;
+  let { userId, assetUrl, assetType } = req.body;
 
   console.log('DELETE userId:', userId);
   console.log('DELETE assetUrl:', assetUrl);
@@ -41,18 +41,25 @@ export default async function handler(
     bucketName = 'none';
   }
 
-  const fileName = assetUrl.split('/').pop();
-  console.log('DELETE fileName:', fileName);
-  const bucket = storage.bucket(bucketName);
-  console.log('DELETE bucketname:', bucketName);
-
   try {
-    await bucket.file(fileName).delete();
+    const error = JSON.parse(JSON.stringify(assetUrl)).error
+      ? JSON.parse(JSON.stringify(assetUrl)).error
+      : null;
+    const bucket = storage.bucket(bucketName);
+    console.log('DELETE bucketname:', bucketName);
+    if (!error) {
+      const fileName = assetUrl.split('/').pop();
+      console.log('DELETE fileName:', fileName);
+      await bucket.file(fileName).delete();
+    }
   } catch (error) {
     console.log('Error deleting asset:', error);
   }
 
   try {
+    if (typeof assetUrl !== 'string') {
+      assetUrl = JSON.stringify(assetUrl);
+    }
     await deleteUserActivity(userId, assetUrl);
     console.log('DELETE deleteUserActivity id:', userId);
     console.log('DELETE deleteUserActivity url:', assetUrl);

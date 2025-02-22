@@ -155,7 +155,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
-        {imageData && imageData !== '[object%20Object]' && (
+        {imageData && !imageData.error && (
           <div className={'margin-top-8'}>
             <div>
               <a href={imageData} target="_blank">
@@ -164,6 +164,15 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             </div>
             <img src={imageData} alt="Generated Image" />
             {renderVideoButton()}
+          </div>
+        )}
+        {imageData && imageData.error && (
+          <div className={'margin-top-8'}>
+            <div>
+              <a href={imageData} target="_blank">
+                Error. Please refine your prompt.
+              </a>
+            </div>
           </div>
         )}
       </div>

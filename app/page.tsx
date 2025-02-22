@@ -61,10 +61,10 @@ export default function Home() {
             <main className="flex-1 items-center justify-center">
               <div className="container grid gap-4">
                 <div className="grid gap-2 text-center">
-                  <h1 className="text-4xl font-extrabold text-white sm:text-center sm:text-6xl">
+                  <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
                     GenTube.ai
                   </h1>
-                  <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
+                  <p className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl">
                     Generate AI Images and Videos
                   </p>
                   {signInMessage && (
@@ -73,20 +73,20 @@ export default function Home() {
                 </div>
                 <div className="grid gap-4">
                   <nav className="flex flex-wrap justify-center gap-1">
-                    <Link to="/" className="text-white">
+                    <Link to="/">
                       <Button variant="slim">Image Gen</Button>
                     </Link>
-                    <Link to="/image-url-to-video" className="text-white">
+                    <Link to="/image-url-to-video">
                       <Button variant="slim">URL to Video</Button>
                     </Link>
-                    <Link to="/text-to-video" className="text-white">
+                    <Link to="/text-to-video">
                       <Button variant="slim">Video Gen</Button>
                     </Link>
-                    <Link to="/upload-to-video" className="text-white">
+                    <Link to="/upload-to-video">
                       <Button variant="slim">Upload Image</Button>
                     </Link>
                     {isLocalhost && (
-                      <Link to="/admin" className="text-white">
+                      <Link to="/admin">
                         <Button variant="slim">Admin</Button>
                       </Link>
                     )}

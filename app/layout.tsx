@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <html lang="en">
-      <body className="bg-black">
+      <body>
         <UserIdProvider userId={userId}>
           <Navbar className="navbar" />
           <main

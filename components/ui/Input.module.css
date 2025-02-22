@@ -1,4 +1,3 @@
-/* Input.module.css */
 .root {
   @apply bg-white py-2 px-3 w-full appearance-none transition duration-150 ease-in-out border border-black text-zinc-900 rounded-md;
 }

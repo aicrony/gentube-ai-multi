@@ -50,7 +50,7 @@ export default function Navlinks({ user }: NavlinksProps) {
                 />
                 <button type="submit" className={s.link}>
                   <span>
-                    <FaCheck style={{ color: 'green' }} />
+                    <FaCheck className="text-blue-700" />
                   </span>
                   &nbsp; Sign out
                 </button>

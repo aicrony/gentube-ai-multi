@@ -70,6 +70,12 @@ export default async function handler(
     console.log('****** IMAGE RESULT: ********');
     console.log(JSON.stringify(result));
 
+    if (typeof result == 'string' && JSON.parse(<string>result)) {
+      console.log('1: ' + result);
+    } else {
+      console.log('2: ' + JSON.parse(JSON.stringify(result)).error);
+    }
+
     // Update user credits
     userCredits -= creditCost;
     console.log('UPDATED User Credits: ', userCredits);

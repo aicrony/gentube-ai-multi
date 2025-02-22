@@ -180,7 +180,7 @@ export function VideoFromUrlDynamicButton({
               id="duration"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
-              className="min-h-[25px] text-xl gray-text rounded-corners"
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
             >
               <option value="5">5</option>
               <option value="10">10</option>
@@ -192,7 +192,7 @@ export function VideoFromUrlDynamicButton({
               id="aspectRatio"
               value={aspectRatio}
               onChange={(e) => setAspectRatio(e.target.value)}
-              className="min-h-[25px] text-xl gray-text rounded-corners"
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
             >
               <option value="16:9">16:9</option>
               <option value="9:16">9:16</option>
@@ -205,7 +205,7 @@ export function VideoFromUrlDynamicButton({
               id="motion"
               value={motion}
               onChange={(e) => setMotion(e.target.value)}
-              className="min-h-[25px] text-xl gray-text rounded-corners"
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
             >
               {motionOptions.map((option) => (
                 <option key={option} value={option}>
@@ -220,7 +220,7 @@ export function VideoFromUrlDynamicButton({
               id="loop"
               value={loop}
               onChange={(e) => setLoop(e.target.value)}
-              className="min-h-[25px] text-xl gray-text rounded-corners"
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
             >
               <option value="true">Yes</option>
               <option value="false">No</option>
