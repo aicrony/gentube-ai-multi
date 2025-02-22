@@ -8,6 +8,7 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice-button';
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
+import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -46,10 +47,10 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       }
 
       return (
-        <VideoDynamicButton
-          urlData={url}
+        <VideoFromUrlDynamicButton
           userId={userId}
           onUserCreditsUpdate={onUserCreditsUpdate}
+          urlData={url}
         />
       );
     }

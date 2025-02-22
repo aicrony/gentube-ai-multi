@@ -13,11 +13,13 @@ import getFileNameFromUrl from '@/utils/stringUtils'; // Import the CSS file
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
+  urlData?: string;
 }
 
 export function VideoFromUrlDynamicButton({
   userId,
-  onUserCreditsUpdate
+  onUserCreditsUpdate,
+  urlData
 }: VideoFromUrlDynamicButtonProps) {
   const [videoData, setVideoData] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -31,6 +33,10 @@ export function VideoFromUrlDynamicButton({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
   const [message, setMessage] = useState<string>('');
+
+  if (urlData && urlData.length > 0) {
+    setImageUrl(urlData);
+  }
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
