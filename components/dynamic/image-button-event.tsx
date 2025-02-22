@@ -8,7 +8,6 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice-button';
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
-import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -47,10 +46,10 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       }
 
       return (
-        <VideoFromUrlDynamicButton
+        <VideoDynamicButton
+          urlData={url}
           userId={userId}
           onUserCreditsUpdate={onUserCreditsUpdate}
-          urlData={url}
         />
       );
     }
@@ -156,7 +155,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             <p>Remaining Credits: {userCreditsResponse}</p>
           </div>
         )}
-        {imageData && !imageData.error && (
+        {imageData && imageData !== '[object%20Object]' && (
           <div className={'margin-top-8'}>
             <div>
               <a href={imageData} target="_blank">
@@ -165,15 +164,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             </div>
             <img src={imageData} alt="Generated Image" />
             {renderVideoButton()}
-          </div>
-        )}
-        {imageData && imageData.error && (
-          <div className={'margin-top-8'}>
-            <div>
-              <a href={imageData} target="_blank">
-                Error. Please refine your prompt.
-              </a>
-            </div>
           </div>
         )}
       </div>

@@ -94,7 +94,7 @@ export default async function handler(
       CreatedAssetUrl: result,
       DateTime: new Date().toISOString(),
       Prompt: imagePrompt,
-      SubscriptionTier: 0,
+      SubscriptionTier: 0 /**/,
       UserId: userId,
       UserIp: userIp
     });
