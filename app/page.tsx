@@ -33,7 +33,7 @@ export default function Home() {
   const signInMessage =
     userId && userId == 'none' ? (
       <span>
-        <a href="/signin" className="font-light text-md">
+        <a href="/signin" className="font-light text-md text-blue-700">
           Sign In for 110 free credits (1 time).
         </a>
       </span>
