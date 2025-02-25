@@ -3,15 +3,10 @@ import callImageApi from '@/services/generateImage';
 import { parse, serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
-import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
-
-type ImageApiResult = {
-  error?: {
-    code: number;
-    message: string;
-  };
-  url?: string;
-};
+import {
+  processUserImageRequest,
+  updateUserCredits
+} from '@/utils/gcloud/processUserImageRequest';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,89 +15,30 @@ export default async function handler(
   const userId = req.headers['x-user-id'];
   const userIp =
     req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-
+  let prompt: string = 'X';
   if (req.method !== 'POST') {
     res.status(405).end(); // Method Not Allowed
     console.error('Method Not Allowed on /api/image');
     return;
   }
 
-  const subscriptionObject = getSubscriptionTier();
+  // const subscriptionObject = getSubscriptionTier();
 
-  const initialCredits = subscriptionObject.initialCredits;
-
-  // Get user credits from the new table
-  console.log('userId: ', userId);
-  console.log('userIp: ', userIp);
-  let userCredits = await getUserCredits(userId, userIp);
-
-  if (userCredits === null) {
-    userCredits = initialCredits;
-    console.log('Set Initial Credits: ', userCredits);
-    await updateUserCredits(userId, userIp, userCredits);
-  }
-
-  console.log('Check credit count: ', userCredits);
-
-  if (userCredits <= 0) {
-    console.log('Credit limit exceeded');
-    res.status(429).json({
-      error: 'Credit limit exceeded. Purchase credits on the PRICING page.'
-    });
-    return;
-  }
+  // const initialCredits = subscriptionObject.initialCredits;
 
   try {
-    // Prompt declaration
-    const { prompt: imagePrompt } = req.body;
-    // const imageUrl = req.body.url as string | '';
-    let creditCost = 100;
-
-    let result: string | ImageApiResult;
-    if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      result =
-        'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png';
-    } else {
-      result = (await callImageApi('none', imagePrompt)) as ImageApiResult;
+    // Get user credits from the new table
+    console.log('userId: ', userId);
+    console.log('userIp: ', userIp);
+    console.log('prompt: ', req.body);
+    if (req.body && typeof req.body == 'string' && req.body.length > 0) {
+      prompt = req.body ? req.body : '';
     }
-    creditCost = 4;
-    console.log('****** IMAGE RESULT: ********');
-    console.log(JSON.stringify(result));
 
-    // Update user credits
-    userCredits -= creditCost;
-    console.log('UPDATED User Credits: ', userCredits);
-    await updateUserCredits(userId, userIp, userCredits);
-
-    res.setHeader('Set-Cookie', [
-      serialize('_ruofv', encodeCount(userCredits), {
-        path: '/',
-        maxAge: 86400,
-        httpOnly: true,
-        secure: true
-      })
-    ]);
-
-    // Data save
-    const activityResponse = await saveUserActivity({
-      id: undefined,
-      AssetSource: '',
-      AssetType: 'img',
-      CountedAssetPreviousState: creditCost,
-      CountedAssetState: userCredits,
-      CreatedAssetUrl: result,
-      DateTime: new Date().toISOString(),
-      Prompt: imagePrompt,
-      SubscriptionTier: 0 /**/,
-      UserId: userId,
-      UserIp: userIp
-    });
-
-    console.log('Image Data saved: ', activityResponse);
+    const userResponse = await processUserImageRequest(userId, userIp, prompt);
 
     res.setHeader('Content-Type', 'application/json');
-    res.status(200).json({ result, userCredits });
+    res.status(200).json(userResponse);
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });

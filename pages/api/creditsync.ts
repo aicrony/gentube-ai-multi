@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { aggregateUserCredits } from '@/utils/gcloud/userCredits';
+import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 
 export default async function handler(
   req: NextApiRequest,

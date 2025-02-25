@@ -58,7 +58,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const handleGenerateImage = async () => {
     setIsSubmitting(true); // Disable the button while the request is being handled
     setImageData(null); // clear the imageData state
-    setImageGalleryData(null); // Reset ImageGallery data
     setErrorMessage(null); // clear any previous error message
     console.log('PASS userId:', userId);
     try {
@@ -87,20 +86,36 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         }
         return;
       }
-      let dataResponse: { result?: any; userCredits?: any; images?: any } = {};
+      let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
-        const { result, userCredits, images } = dataResponse;
         setIsSubmitting(false); // Response is received, enable the button
-        console.log('Result:', result);
-        console.log('UserCredits:', userCredits);
-        setImageData(result); // set the url of the response
-        setImageGalleryData(images); // Set ImageGallery data
-        setUserCreditsResponse(userCredits); // set user credits from response
-        if (onUserCreditsUpdate) {
-          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+        console.log('Result:', dataResponse.result);
+        console.log('UserCredits:', dataResponse.credits);
+        if (dataResponse.error) {
+          // Set response
+          setErrorMessage(
+            dataResponse.result === 'LimitExceeded'
+              ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
+              : dataResponse.result === 'CreateAccount'
+                ? 'Create an account for free credits.'
+                : dataResponse.result === ''
+                  ? 'Error. Please try again.'
+                  : dataResponse.result
+          );
+          // Sample Image
+          setImageData(
+            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
+          ); // set the url of the response
+        } else if (!dataResponse.error) {
+          setImageData(dataResponse.result);
         }
-        setModalImageUrl(result); // Set the image URL for the modal
+
+        setUserCreditsResponse(dataResponse.credits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(dataResponse.credits); // update parent component if callback is provided
+        }
+        setModalImageUrl(dataResponse.result); // Set the image URL for the modal
         setIsModalOpen(false); // Open the modal
       }
     } catch (error) {

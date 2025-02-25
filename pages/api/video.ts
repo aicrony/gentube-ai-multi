@@ -2,7 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import callRay2VideoApi from '@/services/generateFrontierLumaVideo';
 import { serialize } from 'cookie';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
-import { getUserCredits, updateUserCredits } from '@/utils/gcloud/userCredits';
+import {
+  processUserImageRequest,
+  updateUserCredits
+} from '@/utils/gcloud/processUserImageRequest';
 import generateFalVideo from '@/services/generateFalVideo';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
 import generateLumaVideo from '@/services/generateLumaVideo';
@@ -27,7 +30,7 @@ export default async function handler(
   const initialCredits = subscriptionObject.initialCredits;
 
   // Get user credits from the new table
-  let userCredits = await getUserCredits(userId, userIp);
+  let userCredits = await userCredits(userId, userIp);
 
   if (userCredits === null) {
     userCredits = initialCredits;

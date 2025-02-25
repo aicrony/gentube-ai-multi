@@ -1,23 +1,58 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserCredits } from '@/utils/gcloud/userCredits';
+import { Datastore } from '@google-cloud/datastore';
+import { google_app_creds } from '@/interfaces/googleCredentials';
+import { normalizeIp, localIpConfig } from '@/utils/ipUtils';
+require('dotenv').config();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'GET') {
-    res.status(405).end(); // Method Not Allowed
-    return;
+const datastore = new Datastore({
+  projectId: google_app_creds.projectId,
+  credentials: google_app_creds
+});
+
+const kind = 'UserCredits';
+const namespace = 'GenTube';
+
+export async function getUserCredits(
+  userId: string | string[] | undefined,
+  userIp: string | string[]
+): Promise<number | null> {
+  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
+  let query;
+  if (userId != undefined && userId.length > 0) {
+    console.log('Query 1');
+    query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserId', '=', userId)
+      .limit(1);
+  } else if (
+    normalizedIpAddress != undefined &&
+    normalizedIpAddress.length > 0 &&
+    (userId == undefined || userId.length == 0)
+  ) {
+    console.log('Query 2');
+    query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserIp', '=', normalizedIpAddress)
+      .limit(1);
+  } else if (
+    userId != undefined &&
+    userId.length > 0 &&
+    normalizedIpAddress != undefined &&
+    normalizedIpAddress.length > 0
+  ) {
+    console.log('Query 3');
+    query = datastore
+      .createQuery(namespace, kind)
+      .filter('UserId', '=', userId)
+      .filter('UserIp', '=', normalizedIpAddress)
+      .limit(1);
+  } else {
+    console.log('Invalid userId and normalizedIpAddress');
+    return null;
   }
 
-  const { userId, userIp } = req.query;
+  const [credits] = await datastore.runQuery(query);
+  let response = credits.length > 0 ? credits[0].Credits : null;
+  console.log('getUserCredits response: ', response);
 
-  try {
-    const credits = await getUserCredits(userId as string, userIp as string);
-    console.log('getUserCredits: ', credits);
-    res.status(200).json({ credits });
-  } catch (error) {
-    console.error('Failed to fetch user credits:', error);
-    res.status(500).json({ error: 'Failed to fetch user credits' });
-  }
+  return response;
 }
