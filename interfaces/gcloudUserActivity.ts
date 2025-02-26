@@ -6,7 +6,7 @@ export interface GcloudUserActivity {
   CountedAssetState: number;
   CreatedAssetUrl: any;
   DateTime: string;
-  Prompt: string;
+  Prompt: string | undefined;
   SubscriptionTier: number;
   UserId: string | string[] | undefined;
   UserIp: string | string[] | undefined;

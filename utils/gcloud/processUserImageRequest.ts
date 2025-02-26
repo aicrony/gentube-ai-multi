@@ -1,8 +1,7 @@
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
 import { normalizeIp, localIpConfig } from '@/utils/ipUtils';
-import callImageApi from '@/services/generateImage';
-import { serialize } from 'cookie';
+import callImageApi from '@/services/generateFalImage';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 require('dotenv').config();
 
@@ -108,13 +107,13 @@ export async function processUserImageRequest(
       userResponse.result =
         imageResult && imageResult.url ? imageResult.url : '';
     }
-    creditCost = 4;
-    console.log('****** IMAGE RESULT: ********');
-    console.log(JSON.stringify(userResponse.result));
-    if (userResponse.result === '') {
-      userResponse.error = true;
-      userResponse.result = 'Error. Please refine your prompt.';
-    }
+    creditCost = 6;
+    // console.log('****** IMAGE RESULT: ********');
+    // console.log(JSON.stringify(userResponse.result));
+    // if (userResponse.result === '') {
+    //   userResponse.error = true;
+    //   userResponse.result = 'Error. Please refine your prompt.';
+    // }
 
     // Update user credits
     userResponse.credits && userResponse.credits > 0
@@ -127,10 +126,10 @@ export async function processUserImageRequest(
     const activityResponse = await saveUserActivity({
       id: undefined,
       AssetSource: '',
-      AssetType: 'img',
+      AssetType: 'que',
       CountedAssetPreviousState: creditCost,
       CountedAssetState: userResponse.credits,
-      CreatedAssetUrl: userResponse.result,
+      CreatedAssetUrl: 'InQueue',
       DateTime: new Date().toISOString(),
       Prompt: imagePrompt ? imagePrompt : '',
       SubscriptionTier: 0 /**/,
@@ -139,6 +138,9 @@ export async function processUserImageRequest(
     });
 
     console.log('Image Data saved: ', activityResponse);
+
+    userResponse.error = false;
+    userResponse.result = 'InQueue';
     return userResponse;
   } catch (error) {
     if (error instanceof Error) {
