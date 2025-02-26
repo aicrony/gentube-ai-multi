@@ -95,6 +95,7 @@ export async function processUserImageRequest(
   }
 
   let imageResult;
+  let requestId;
   try {
     let creditCost = 100;
     let result: string | ImageApiResult;
@@ -103,9 +104,21 @@ export async function processUserImageRequest(
       userResponse.result =
         'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png';
     } else {
-      imageResult = (await callImageApi('none', imagePrompt)) as ImageApiResult;
-      userResponse.result =
-        imageResult && imageResult.url ? imageResult.url : '';
+      imageResult = (await callImageApi('none', imagePrompt)) as any;
+      // Check for queued webhook response and save it
+      if (imageResult) {
+        console.log(imageResult);
+        if (imageResult.webhook) {
+          const webhook = imageResult.webhook;
+          console.log('Webhook: ', webhook);
+          requestId = imageResult.response.request_id;
+          // Continue here
+        } else {
+          requestId = '';
+        }
+      }
+      // userResponse.result =
+      //   imageResult && imageResult.url ? imageResult.url : '';
     }
     creditCost = 6;
     // console.log('****** IMAGE RESULT: ********');
@@ -129,7 +142,7 @@ export async function processUserImageRequest(
       AssetType: 'que',
       CountedAssetPreviousState: creditCost,
       CountedAssetState: userResponse.credits,
-      CreatedAssetUrl: 'InQueue',
+      CreatedAssetUrl: requestId,
       DateTime: new Date().toISOString(),
       Prompt: imagePrompt ? imagePrompt : '',
       SubscriptionTier: 0 /**/,

@@ -27,15 +27,15 @@ export default async function handler(
     // Get user credits from the new table
     console.log('userId: ', userId);
     console.log('userIp: ', userIp);
-    console.log('prompt: ', req.body);
-    if (req.body && typeof req.body == 'string' && req.body.length > 0) {
-      prompt = req.body ? req.body : '';
-    }
+    console.log('prompt: ', req.body.prompt);
+    prompt = req.body.prompt ? req.body.prompt : '';
+    console.log('Prompt OK');
 
     const userResponse = await processUserImageRequest(userId, userIp, prompt);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(userResponse);
+    res.status(200);
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });

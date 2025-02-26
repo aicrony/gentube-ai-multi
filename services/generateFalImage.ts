@@ -44,7 +44,10 @@ export default async function generateFalImage(
     } else {
       result = await fal.queue.submit(apiEndpoint, {
         input: {
-          prompt: imagePrompt
+          prompt: imagePrompt,
+          safety_tolerance: 2,
+          output_format: 'png',
+          aspect_ratio: '16:9'
         },
         webhookUrl: falApiWebhook
       });

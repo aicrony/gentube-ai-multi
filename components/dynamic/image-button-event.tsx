@@ -20,6 +20,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
 }) => {
   const [prompt, setPrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [imageData, setImageData] = React.useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // State for Modal
@@ -108,7 +109,9 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
           ); // set the url of the response
         } else if (!dataResponse.error) {
-          setImageData(dataResponse.result);
+          if (dataResponse.result == 'InQueue') {
+            setMessage('Refresh your assets to see your image in queue.');
+          }
         }
 
         setUserCreditsResponse(dataResponse.credits); // set user credits from response
@@ -168,6 +171,11 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
             <p>Remaining Credits: {userCreditsResponse}</p>
+          </div>
+        )}
+        {userCreditsResponse !== null && (
+          <div className={'padding-top-4'}>
+            <p>{message}</p>
           </div>
         )}
         {imageData &&
