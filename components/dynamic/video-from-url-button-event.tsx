@@ -256,6 +256,7 @@ export function VideoFromUrlDynamicButton({
             className="mt-1"
             loading={isSubmitting}
             onClick={handleGenerateVideo}
+            disabled={isSubmitting || message !== ''}
           >
             {videoGenButtonLabel}
           </Button>
