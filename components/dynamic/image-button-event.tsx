@@ -175,7 +175,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         )}
         {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
-            <h3>{message}</h3>
+            <p>{message}</p>
           </div>
         )}
         {imageData &&

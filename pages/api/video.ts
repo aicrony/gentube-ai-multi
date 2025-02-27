@@ -11,7 +11,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userId = req.headers['x-user-id'] as string;
+  const userId = req.headers['x-user-id'];
   const userIp =
     req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
@@ -22,9 +22,11 @@ export default async function handler(
   }
 
   const subscriptionObject = getSubscriptionTier();
+
   const initialCredits = subscriptionObject.initialCredits;
 
-  let userCredits: number | null = await getUserCredits(req, res);
+  // Get user credits from the new table
+  let userCredits = await getUserCredits(userId, userIp);
 
   if (userCredits === null) {
     userCredits = initialCredits;
@@ -119,7 +121,7 @@ export default async function handler(
           AssetSource: imageUrl,
           AssetType: 'que',
           CountedAssetPreviousState: creditCost,
-          CountedAssetState: userCredits as number,
+          CountedAssetState: userCredits,
           CreatedAssetUrl: requestId,
           DateTime: new Date().toISOString(),
           Prompt: combinedPrompt,
@@ -143,7 +145,7 @@ export default async function handler(
           AssetSource: imageUrl,
           AssetType: 'vid',
           CountedAssetPreviousState: creditCost,
-          CountedAssetState: userCredits as number,
+          CountedAssetState: userCredits,
           CreatedAssetUrl: result,
           DateTime: new Date().toISOString(),
           Prompt: combinedPrompt,
@@ -159,7 +161,7 @@ export default async function handler(
 
     console.log(result);
     // Update user credits
-    userCredits = (userCredits as number) - creditCost;
+    userCredits -= creditCost;
     await updateUserCredits(userId, userIp, userCredits);
 
     res.setHeader('Set-Cookie', [

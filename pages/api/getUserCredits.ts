@@ -15,7 +15,7 @@ const namespace = 'GenTube';
 export default async function getUserCredits(
   req: NextApiRequest,
   res: NextApiResponse
-): Promise<number | null> {
+): Promise<void> {
   const { userId, userIp } = req.query;
 
   try {
@@ -52,17 +52,16 @@ export default async function getUserCredits(
     } else {
       console.log('Invalid userId and normalizedIpAddress');
       res.status(400).json({ error: 'Invalid userId and normalizedIpAddress' });
-      return null;
+      return;
     }
 
     const [credits] = await datastore.runQuery(query);
     let response = credits.length > 0 ? credits[0].Credits : null;
     console.log('getUserCredits response: ', response);
 
-    return response;
+    res.status(200).json({ credits: response });
   } catch (e) {
     console.log('Error: ' + e);
     res.status(500).json({ error: 'Internal Server Error' });
-    return null;
   }
 }
