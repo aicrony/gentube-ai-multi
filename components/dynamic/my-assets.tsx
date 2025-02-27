@@ -149,9 +149,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             ) : (
               <img
                 src={
-                  activity.AssetType === 'vid' || activity.AssetType === 'que'
+                  activity.AssetType === 'vid'
                     ? activity.AssetSource
-                    : activity.CreatedAssetUrl
+                    : activity.AssetType === 'img'
+                      ? activity.CreatedAssetUrl
+                      : activity.AssetType === 'que'
+                        ? '/logo.png'
+                        : ''
                 }
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover"
