@@ -5,7 +5,7 @@ import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 import { updateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 import generateFalVideo from '@/services/generateFalVideo';
 import { getSubscriptionTier } from '@/functions/getSubscriptionTier';
-import getUserCredits from '@/pages/api/getUserCredits';
+import { getUserCredits } from '@/pages/api/getUserCredits';
 
 export default async function handler(
   req: NextApiRequest,
