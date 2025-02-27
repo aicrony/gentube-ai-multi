@@ -10,11 +10,11 @@ const callback = {
 };
 
 export default async function generateFalVideo(
-  url: string,
-  description: string,
-  loop: boolean,
-  duration: string,
-  aspectRatio: string
+  imageUrl: string | undefined,
+  description: string | undefined,
+  loop?: boolean,
+  duration?: string,
+  aspectRatio?: string
 ) {
   try {
     if (
@@ -40,10 +40,10 @@ export default async function generateFalVideo(
       result = await fal.queue.submit(apiEndpoint, {
         input: {
           prompt: description,
-          image_url: url,
-          duration: duration, // 5,10 for Kling; 4,6 for Haiper
-          aspect_ratio: aspectRatio,
-          ...(loop && { tail_image_url: url })
+          image_url: imageUrl,
+          duration: duration ? duration : 5, // 5,10 for Kling; 4,6 for Haiper
+          aspect_ratio: aspectRatio ? aspectRatio : '16:9',
+          ...(loop && { tail_image_url: imageUrl })
         },
         webhookUrl: falApiWebhook
       });

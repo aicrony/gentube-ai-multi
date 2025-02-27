@@ -149,9 +149,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             ) : (
               <img
                 src={
-                  activity.AssetType === 'vid' || activity.AssetType === 'que'
+                  activity.AssetType === 'vid'
                     ? activity.AssetSource
-                    : activity.CreatedAssetUrl
+                    : activity.AssetType === 'img'
+                      ? activity.CreatedAssetUrl
+                      : activity.AssetType === 'que'
+                        ? '/logo.png'
+                        : '/logo.png'
                 }
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover"
@@ -178,7 +182,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             {activity.AssetType !== 'upl' && (
               <div>
                 <p>
-                  <strong>Prompt:</strong>
+                  <strong>Prompt:</strong>{' '}
                   {expandedPrompts[index] ||
                   activity.Prompt.length <= promptLength
                     ? activity.Prompt

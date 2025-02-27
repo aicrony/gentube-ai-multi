@@ -68,12 +68,7 @@ export function VideoFromUrlDynamicButton({
   }, [loop]);
 
   useEffect(() => {
-    if (
-      videoData &&
-      videoData.webhook &&
-      videoData.response &&
-      videoData.response.status
-    ) {
+    if (videoData && videoData.result === 'InQueue') {
       setMessage('Refresh your assets to see your queued video.');
       const timer = setTimeout(() => {
         setMessage('');
@@ -106,40 +101,61 @@ export function VideoFromUrlDynamicButton({
         })
       });
       if (!response.ok) {
-        setIsSubmitting(false);
+        setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {
           const errorData = await response.json();
           setErrorMessage(
             errorData.error ||
-              'VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
-            'Request Failed. Please check the image URL and try again.'
+            'Request Failed. Please check that the prompt is appropriate and try again.'
           );
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return;
       }
-      let data: { result?: any; userCredits?: any } = {};
+      let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
-        data = await response.json();
-        const { result, userCredits } = data;
-        setIsSubmitting(false);
-        console.log('Result: ', result);
-        console.log('UserCredits: ', userCredits);
-        console.log(
-          'video-from-url-button-event DATA RECEIVED:' + JSON.stringify(data)
-        );
-        setVideoData(result);
-        setUserCreditsResponse(userCredits);
-        if (onUserCreditsUpdate) {
-          onUserCreditsUpdate(userCredits);
+        dataResponse = await response.json();
+        setIsSubmitting(false); // Response is received, enable the button
+        console.log('Result:', dataResponse.result);
+        console.log('UserCredits:', dataResponse.credits);
+        if (dataResponse.error) {
+          console.log('ERROR FOUND');
+          // Set response
+          setErrorMessage(
+            dataResponse.result === 'LimitExceeded'
+              ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
+              : dataResponse.result === 'CreateAccount'
+                ? 'Create an account for free credits.'
+                : dataResponse.result === ''
+                  ? 'Error. Please try again.'
+                  : dataResponse.result
+          );
+          // Sample Image
+          setVideoData(
+            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3-fake.mp4'
+          ); // set the url of the response
+        } else {
+          console.log('NO ERROR FOUND');
+          if (dataResponse.result == 'InQueue') {
+            setMessage('Refresh your assets to see your image in queue.');
+          }
         }
+
+        setUserCreditsResponse(dataResponse.credits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(dataResponse.credits); // update parent component if callback is provided
+        }
+        // setModalVideoUrl(dataResponse.result); // Set the image URL for the modal
+        setVideoData(dataResponse);
+        console.log('dataResponse: ' + JSON.stringify(dataResponse));
+        setIsModalOpen(false); // Open the modal
       }
     } catch (error) {
-      setIsSubmitting(false);
-      console.log(error);
+      setIsSubmitting(false); // Response is received, enable the button
       console.error('There was an error with the fetch operation: ', error);
     }
   };
@@ -253,10 +269,7 @@ export function VideoFromUrlDynamicButton({
         )}
 
         {/*Display Status*/}
-        {videoData &&
-        videoData.webhook &&
-        videoData.response &&
-        videoData.response.status ? (
+        {videoData && videoData.result === 'InQueue' ? (
           <div>
             <h3>{message}</h3>
           </div>

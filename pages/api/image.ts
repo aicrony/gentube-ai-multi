@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-  processUserImageRequest,
-  updateUserCredits
-} from '@/utils/gcloud/processUserImageRequest';
+import { processUserImageRequest } from '@/utils/gcloud/processUserImageRequest';
 
 export default async function handler(
   req: NextApiRequest,
