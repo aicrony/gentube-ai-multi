@@ -238,7 +238,15 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 src={
                   activity.AssetType === 'vid'
                     ? activity.AssetSource
-                    : activity.CreatedAssetUrl
+                    : activity.AssetType === 'img'
+                      ? activity.CreatedAssetUrl
+                      : activity.AssetType === 'upl'
+                        ? activity.CreatedAssetUrl
+                        : activity.AssetType === 'que'
+                          ? '/logo.png'
+                          : activity.AssetType === 'err'
+                            ? '/logo.png'
+                            : '/logo.png'
                 }
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover"
@@ -251,9 +259,13 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 <strong>Type:</strong>{' '}
                 {activity.AssetType === 'vid'
                   ? 'Video'
-                  : activity.AssetType === 'upl'
+                  : activity.AssetType === 'img'
                     ? 'Upload'
-                    : 'Image'}
+                    : activity.AssetType === 'upl'
+                      ? 'Upload'
+                      : activity.AssetType === 'err'
+                        ? 'Error'
+                        : 'Unknown'}
               </p>
             </div>
             {activity.AssetType !== 'upl' && (

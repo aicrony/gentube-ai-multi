@@ -116,7 +116,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   }
 
   const assetTypeTitle =
-    assetType === 'vid' ? 'Video' : assetType === 'upl' ? 'Uploaded' : '';
+    assetType === 'vid'
+      ? 'Video'
+      : assetType === 'img'
+        ? 'Image'
+        : assetType === 'upl'
+          ? 'Uploads'
+          : '';
 
   return (
     <div className="my-assets-container">
@@ -153,9 +159,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     ? activity.AssetSource
                     : activity.AssetType === 'img'
                       ? activity.CreatedAssetUrl
-                      : activity.AssetType === 'que'
-                        ? '/logo.png'
-                        : '/logo.png'
+                      : activity.AssetType === 'upl'
+                        ? activity.CreatedAssetUrl
+                        : activity.AssetType === 'que'
+                          ? '/logo.png'
+                          : activity.AssetType === 'err'
+                            ? '/logo.png'
+                            : '/logo.png'
                 }
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover"
