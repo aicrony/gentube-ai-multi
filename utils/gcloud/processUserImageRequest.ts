@@ -150,7 +150,7 @@ export async function processUserImageRequest(
       Prompt: imagePrompt ? imagePrompt : '',
       SubscriptionTier: 0 /**/,
       UserId: userId,
-      UserIp: userIp
+      UserIp: normalizedIpAddress
     });
 
     console.log('Image Data saved: ', activityResponse);
@@ -186,7 +186,10 @@ export async function updateUserCredits(
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   console.log('NormalizedIpAddress: ', normalizedIpAddress);
 
-  const keyValue = [kind, userId ? userId : normalizedIpAddress];
+  const keyValue = [
+    kind,
+    userId && userId !== 'none' ? userId : normalizedIpAddress
+  ];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
     namespace,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
+import { useUserIp } from '@/context/UserIpContext';
 import {
   FaExternalLinkAlt,
   FaCopy,
@@ -23,6 +24,7 @@ interface MyAssetsProps {
 
 const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const userId = useUserId();
+  const { userIp } = useUserIp();
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -36,10 +38,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const promptLength = 100;
 
   const fetchUserActivities = async () => {
+    console.log('UserIp Context:  ' + userIp);
     if (userId) {
       try {
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
+          `/api/getUserAssets?userId=${userId}&userIp=${userIp}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch user assets');

@@ -10,11 +10,12 @@ export default async function handler(
     return;
   }
 
-  const { userId, limit = 10, offset = 0, assetType } = req.query;
+  const { userId, userIp, limit = 10, offset = 0, assetType } = req.query;
 
   try {
     const assets = await getUserAssets(
       userId as string,
+      userIp as string,
       Number(limit),
       Number(offset),
       assetType as string

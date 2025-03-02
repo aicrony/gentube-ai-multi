@@ -1,6 +1,7 @@
 import { Datastore } from '@google-cloud/datastore';
 import { GcloudUserActivity } from '@/interfaces/gcloudUserActivity';
 import { google_app_creds } from '@/interfaces/googleCredentials';
+import { localIpConfig, normalizeIp } from '@/utils/ipUtils';
 require('dotenv').config();
 
 const datastore = new Datastore({
@@ -20,6 +21,7 @@ export async function saveUserActivity(
   });
 
   console.log('Activity: ', activity);
+  const normalizedIpAddress = normalizeIp(localIpConfig(activity.UserIp));
 
   const entity = {
     key: taskKey,
@@ -41,7 +43,7 @@ export async function saveUserActivity(
       { name: 'Prompt', value: activity.Prompt },
       { name: 'SubscriptionTier', value: activity.SubscriptionTier },
       { name: 'UserId', value: activity.UserId },
-      { name: 'UserIp', value: activity.UserIp } // Add this line
+      { name: 'UserIp', value: normalizedIpAddress } // Add this line
     ]
   };
 
