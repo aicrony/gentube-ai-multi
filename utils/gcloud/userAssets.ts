@@ -21,7 +21,6 @@ interface UserActivity {
 
 export async function getUserAssets(
   userId: string | string[] | undefined,
-  userIp: string | string[] | undefined,
   limit: number,
   offset: number,
   assetType?: string | string[] | undefined
@@ -31,30 +30,12 @@ export async function getUserAssets(
     return null;
   }
 
-  let query;
-  if (userId !== 'none') {
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
-      .limit(limit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  } else if (userId === 'none' && userIp) {
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserIp', '=', userIp)
-      .limit(limit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  } else {
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
-      .filter('UserIp', '=', userIp)
-      .limit(limit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  }
+  let query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .filter('UserId', '=', userId)
+    .limit(limit)
+    .offset(offset)
+    .order('DateTime', { descending: true });
 
   if (assetType && assetType.length > 0) {
     query = query.filter('AssetType', '=', assetType);
