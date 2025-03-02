@@ -29,7 +29,7 @@ export async function processUserImageRequest(
     };
     url?: string;
   };
-  if (userId != undefined && userId.length > 0) {
+  if (userId && userId != 'none') {
     console.log('Query 1');
     query = datastore
       .createQuery(namespace, kind)
@@ -38,7 +38,8 @@ export async function processUserImageRequest(
   } else if (
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0 &&
-    (userId == undefined || userId.length == 0)
+    userId &&
+    (userId == 'none' || userId.length == 0)
   ) {
     console.log('Query 2');
     query = datastore
@@ -46,7 +47,8 @@ export async function processUserImageRequest(
       .filter('UserIp', '=', normalizedIpAddress)
       .limit(1);
   } else if (
-    userId != undefined &&
+    userId &&
+    userId != 'none' &&
     userId.length > 0 &&
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0
