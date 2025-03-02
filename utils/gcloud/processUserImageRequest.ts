@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-const defaultCredits = 110;
+const defaultCredits = 20;
 
 export async function processUserImageRequest(
   userId: string | string[] | undefined,
@@ -65,7 +65,8 @@ export async function processUserImageRequest(
   }
 
   const [userData] = await datastore.runQuery(query);
-  userResponse.credits = userData.length > 0 ? userData[0].Credits : null;
+  userResponse.credits =
+    userData.length > 0 ? userData[0].Credits : defaultCredits;
   console.log('getUserCredits response: ', userResponse.credits);
 
   // return response;
