@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-const defaultCredits = 110;
+let defaultCredits = 110;
 
 export async function processUserImageRequest(
   userId: string | string[] | undefined,
@@ -73,6 +73,7 @@ export async function processUserImageRequest(
     // console.log('Set Initial Credits: ', initialCredits);
     // await updateUserCredits(userId, userIp, initialCredits);
     userResponse.result = 'CreateAccount';
+  } else if (userResponse.credits === -1000) {
   }
 
   console.log('Check credit count: ', userResponse.credits);
@@ -131,7 +132,12 @@ export async function processUserImageRequest(
     // Update user credits
     userResponse.credits && userResponse.credits > 0
       ? (userResponse.credits -= creditCost)
-      : 0;
+      : 0
+        ? userResponse.credits <= 0
+        : 0
+          ? userResponse.credits == null
+          : (defaultCredits -= creditCost);
+
     console.log('UPDATED User Credits: ', userResponse.credits);
     await updateUserCredits(userId, userIp, userResponse.credits);
 
