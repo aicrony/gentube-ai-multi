@@ -15,6 +15,7 @@ export default async function handler(
   try {
     const assets = await getUserAssets(
       userId as string,
+      userId as string,
       Number(limit),
       Number(offset),
       assetType as string

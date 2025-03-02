@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-let defaultCredits = 110;
+let defaultCredits = 25;
 
 export async function processUserImageRequest(
   userId: string | string[] | undefined,

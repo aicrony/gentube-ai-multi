@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
+import { useUserIp } from '@/context/UserIpContext'; // Import the UserIp context
 import {
   FaExternalLinkAlt,
   FaCopy,
@@ -23,6 +24,7 @@ interface MyAssetsProps {
 
 const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const userId = useUserId();
+  const userIp = useUserIp(); // Get the userIp from the context
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -36,10 +38,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const promptLength = 100;
 
   const fetchUserActivities = async () => {
-    if (userId) {
+    const identifier = userId || userIp; // Use userIp if userId is not available
+    if (identifier) {
       try {
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
+          `/api/getUserAssets?userId=${userId}&userIp=${userIp}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch user assets');
@@ -59,7 +62,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
   useEffect(() => {
     fetchUserActivities();
-  }, [userId, page, assetType]);
+  }, [userId, userIp, page, assetType]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
