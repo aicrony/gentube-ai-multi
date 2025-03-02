@@ -39,15 +39,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
   const fetchUserActivities = async () => {
     console.log('UserIp Context:  ' + userIp);
-    if (userId) {
+    if (userId || userIp) {
       try {
         const response = await fetch(
           `/api/getUserAssets?userId=${userId}&userIp=${userIp}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
+          console.log('Error fetching user assets.');
           throw new Error('Failed to fetch user assets');
         }
         const data = await response.json();
+        console.log('Data: ' + data);
         setActivities((prev) => [...prev, ...data.assets]);
         setHasMore(data.assets.length === limit && data.assets.length > 0);
       } catch (error) {

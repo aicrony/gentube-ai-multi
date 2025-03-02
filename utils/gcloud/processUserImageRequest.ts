@@ -19,7 +19,7 @@ export async function processUserImageRequest(
   userIp: string | string[],
   imagePrompt: string | undefined
 ): Promise<{ result: string; credits: number }> {
-  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
+  const normalizedIpAddress = localIpConfig(userIp);
   let query;
   let userResponse = { result: '', credits: -1000, error: false };
   type ImageApiResult = {
@@ -183,7 +183,7 @@ export async function updateUserCredits(
   );
   console.log('UserId: ', userId);
   console.log('UserIp: ', userIp);
-  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
+  const normalizedIpAddress = localIpConfig(userIp);
   console.log('NormalizedIpAddress: ', normalizedIpAddress);
 
   const keyValue = [

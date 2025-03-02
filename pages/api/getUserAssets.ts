@@ -12,6 +12,7 @@ export default async function handler(
 
   const { userId, userIp, limit = 10, offset = 0, assetType } = req.query;
 
+  console.log('USER-IP: ' + userIp);
   try {
     const assets = await getUserAssets(
       userId as string,

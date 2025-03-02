@@ -27,15 +27,16 @@ export async function getUserAssets(
   offset: number,
   assetType?: string | string[] | undefined
 ): Promise<UserActivity[] | null> {
-  if (!userId || userId.length === 0) {
-    console.log('Invalid userId');
-    return null;
-  }
+  // if (!userId || userId.length === 0) {
+  //   console.log('Invalid userId');
+  //   return null;
+  // }
 
   let query;
-  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
+  const normalizedIpAddress = localIpConfig(userIp);
 
   if (userId && userId !== 'none') {
+    console.log('Query UA1');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserId', '=', userId)
@@ -43,6 +44,7 @@ export async function getUserAssets(
       .offset(offset)
       .order('DateTime', { descending: true });
   } else if (userIp && userIp.length > 4) {
+    console.log('Query UA2');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserIp', '=', normalizedIpAddress)
@@ -50,6 +52,7 @@ export async function getUserAssets(
       .offset(offset)
       .order('DateTime', { descending: true });
   } else {
+    console.log('Query UA3');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserId', '=', userId)

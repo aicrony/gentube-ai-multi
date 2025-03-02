@@ -21,7 +21,7 @@ export async function saveUserActivity(
   });
 
   console.log('Activity: ', activity);
-  const normalizedIpAddress = normalizeIp(localIpConfig(activity.UserIp));
+  const normalizedIpAddress = localIpConfig(activity.UserIp);
 
   const entity = {
     key: taskKey,
