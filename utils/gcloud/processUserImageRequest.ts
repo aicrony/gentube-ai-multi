@@ -130,15 +130,13 @@ export async function processUserImageRequest(
     // }
 
     // Update user credits
-    if (userResponse.credits != null) {
-      if (userResponse.credits > 0) {
-        userResponse.credits -= creditCost;
-      }
-    } else if (userResponse.credits == null) {
-      userResponse.credits = defaultCredits -= creditCost;
-    } else {
-      userResponse.credits = 0;
-    }
+    userResponse.credits && userResponse.credits > 0
+      ? (userResponse.credits -= creditCost)
+      : 0
+        ? userResponse.credits <= 0
+        : 0
+          ? userResponse.credits == null
+          : (defaultCredits -= creditCost);
 
     console.log('UPDATED User Credits: ', userResponse.credits);
     await updateUserCredits(userId, userIp, userResponse.credits);
