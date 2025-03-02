@@ -38,7 +38,7 @@ export async function processUserImageRequest(
   } else if (
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0 &&
-    userId == 'none'
+    (userId == undefined || userId.length == 0)
   ) {
     console.log('Query 2');
     query = datastore
@@ -46,7 +46,7 @@ export async function processUserImageRequest(
       .filter('UserIp', '=', normalizedIpAddress)
       .limit(1);
   } else if (
-    userId === 'none' &&
+    userId != undefined &&
     userId.length > 0 &&
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0
