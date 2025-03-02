@@ -260,7 +260,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 {activity.AssetType === 'vid'
                   ? 'Video'
                   : activity.AssetType === 'img'
-                    ? 'Upload'
+                    ? 'Image'
                     : activity.AssetType === 'upl'
                       ? 'Upload'
                       : activity.AssetType === 'err'
