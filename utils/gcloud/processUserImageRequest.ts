@@ -78,20 +78,12 @@ export async function processUserImageRequest(
   // return response;
 
   if (userResponse.credits === -1000) {
-    // const initialCredits = 10;
-    // console.log('Set Initial Credits: ', initialCredits);
-    // await updateUserCredits(userId, userIp, initialCredits);
     userResponse.result = 'CreateAccount';
   }
 
   console.log('Check credit count: ', userResponse.credits);
 
   if (userResponse.credits && userResponse.credits <= 0) {
-    // console.log('Credit limit exceeded');
-    // res.status(429).json({
-    //   error: 'Credit limit exceeded. Purchase credits on the PRICING page.'
-    // });
-    // return;
     userResponse.result = 'LimitExceeded';
   }
 
