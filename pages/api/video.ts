@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { processUserVideoRequest } from '@/utils/gcloud/processUserVideoRequest';
+import { localIpConfig } from '@/utils/ipUtils';
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,7 +19,7 @@ export default async function handler(
   try {
     // Get user credits from the new table
     console.log('userId: ', userId);
-    console.log('userIp: ', userIp);
+    console.log('userIp: ', localIpConfig(userIp));
     console.log('description: ', req.body.description);
     const videoDescription = req.body.description as string;
     const duration = req.body.duration as string;

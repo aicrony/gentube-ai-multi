@@ -10,12 +10,13 @@ import GenericModal from '@/components/ui/GenericModal/GenericModal';
 
 interface VideoFromTextDynamicButtonProps {
   userId: string;
+  userIp: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const VideoFromTextDynamicButton: React.FC<
   VideoFromTextDynamicButtonProps
-> = ({ userId, onUserCreditsUpdate }) => {
+> = ({ userId, userIp, onUserCreditsUpdate }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<any>(null);
   const [imageGalleryData, setImageGalleryData] = useState<any>(null); // State for ImageGallery
@@ -34,7 +35,8 @@ export const VideoFromTextDynamicButton: React.FC<
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': userId
+          'x-user-id': userId,
+          'x-forwarded-for': userIp
         },
         body: JSON.stringify({
           description: videoDescription

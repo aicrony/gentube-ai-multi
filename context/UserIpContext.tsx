@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface UserIpContextProps {
@@ -32,10 +34,11 @@ export const UserIpProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const useUserIp = (): UserIpContextProps => {
+export const useUserIp = (): string => {
   const context = useContext(UserIpContext);
   if (!context) {
     throw new Error('useUserIp must be used within a UserIpProvider');
   }
-  return context;
+  console.log('useUserIp IP: ' + context.userIp);
+  return context.userIp;
 };

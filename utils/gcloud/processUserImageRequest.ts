@@ -19,7 +19,8 @@ export async function processUserImageRequest(
   userIp: string | string[],
   imagePrompt: string | undefined
 ): Promise<{ result: string; credits: number }> {
-  const normalizedIpAddress = localIpConfig(userIp);
+  const localizedIpAddress = localIpConfig(userIp);
+  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let query;
   let userResponse = { result: '', credits: -1000, error: false };
   type ImageApiResult = {
@@ -30,7 +31,7 @@ export async function processUserImageRequest(
     url?: string;
   };
   if (userId && userId != 'none') {
-    console.log('Query 1');
+    console.log('Query 1I');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
@@ -41,7 +42,7 @@ export async function processUserImageRequest(
     userId &&
     (userId == 'none' || userId.length == 0)
   ) {
-    console.log('Query 2');
+    console.log('Query 2I');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserIp', '=', normalizedIpAddress)
@@ -53,7 +54,7 @@ export async function processUserImageRequest(
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0
   ) {
-    console.log('Query 3');
+    console.log('Query 3I');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
@@ -64,6 +65,11 @@ export async function processUserImageRequest(
     return userResponse;
   }
 
+  console.log(
+    '+++++++++++++++++++++++++++++ Get User Credits - processUserImageRequest.ts +++++++++++++++++++++++++++++'
+  );
+  console.log('User ID: ' + userId);
+  console.log('User IP: ' + userIp);
   const [userData] = await datastore.runQuery(query);
   userResponse.credits =
     userData.length > 0 ? userData[0].Credits : defaultCredits;
@@ -136,7 +142,11 @@ export async function processUserImageRequest(
       ? (userResponse.credits -= creditCost)
       : 0;
     console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(userId, userIp, userResponse.credits);
+    await updateUserCredits(
+      userId,
+      normalizeIp(localIpConfig(userIp)),
+      userResponse.credits
+    );
 
     // Data save
     const activityResponse = await saveUserActivity({
@@ -150,7 +160,7 @@ export async function processUserImageRequest(
       Prompt: imagePrompt ? imagePrompt : '',
       SubscriptionTier: 0 /**/,
       UserId: userId,
-      UserIp: normalizedIpAddress
+      UserIp: localizedIpAddress
     });
 
     console.log('Image Data saved: ', activityResponse);
@@ -179,16 +189,16 @@ export async function updateUserCredits(
   credits: number
 ): Promise<void> {
   console.log(
-    '+++++++++++++++++++++++++++++ Update User Credits +++++++++++++++++++++++++++++'
+    '+++++++++++++++++++++++++++++ Update User Credits - processUserImageRequest.ts +++++++++++++++++++++++++++++'
   );
   console.log('UserId: ', userId);
   console.log('UserIp: ', userIp);
-  const normalizedIpAddress = localIpConfig(userIp);
-  console.log('NormalizedIpAddress: ', normalizedIpAddress);
+  const localizedIpAddress = localIpConfig(userIp);
+  console.log('NormalizedIpAddress: ', localizedIpAddress);
 
   const keyValue = [
     kind,
-    userId && userId !== 'none' ? userId : normalizedIpAddress
+    userId && userId !== 'none' ? userId : localizedIpAddress
   ];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
@@ -200,7 +210,7 @@ export async function updateUserCredits(
     key,
     data: {
       UserId: userId,
-      UserIp: normalizedIpAddress,
+      UserIp: localizedIpAddress,
       Credits: credits
     }
   };

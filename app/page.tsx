@@ -10,7 +10,7 @@ import MyAssets from '@/components/dynamic/my-assets';
 import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useUserId } from '@/context/UserIdContext';
-import { UserIpProvider } from '@/context/UserIpContext';
+import { useUserIp } from '@/context/UserIpContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import GalleryAssets from '@/components/dynamic/gallery-assets';
@@ -22,6 +22,7 @@ const BrowserRouter = dynamic(
 
 export default function Home() {
   const [userId] = useState<string | 'none'>(useUserId() || 'none');
+  const userIp = useUserIp();
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
   const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
@@ -55,116 +56,118 @@ export default function Home() {
 
   return (
     <UserCreditsProvider>
-      <UserIpProvider>
-        <BrowserRouter>
-          <div className="w-full min-h-screen flex flex-col gap-2">
-            <main className="flex-1 items-center justify-center">
-              <div className="container grid gap-4">
-                <div className="grid gap-2 text-center">
-                  <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
-                    GenTube.ai
-                  </h1>
-                  <p className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl">
-                    Generate AI Images and Videos
-                  </p>
-                  {signInMessage && (
-                    <h1 className="text-xl font-bold">{signInMessage}</h1>
-                  )}
-                </div>
-                <div className="grid gap-4">
-                  <nav className="flex flex-wrap justify-center gap-1">
-                    <Link to="/">
-                      <Button variant="slim">Image Gen</Button>
-                    </Link>
-                    <Link to="/image-url-to-video">
-                      <Button variant="slim">URL to Video</Button>
-                    </Link>
-                    <Link to="/text-to-video">
-                      <Button variant="slim">Video Gen</Button>
-                    </Link>
-                    <Link to="/upload-to-video">
-                      <Button variant="slim">Upload Image</Button>
-                    </Link>
-                    {isLocalhost && (
-                      <Link to="/admin">
-                        <Button variant="slim">Admin</Button>
-                      </Link>
-                    )}
-                  </nav>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <>
-                          <ImageDynamicButton
-                            userId={userId}
-                            onUserCreditsUpdate={handleUserCreditsUpdate}
-                          />
-                          <MyAssets />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/image-url-to-video"
-                      element={
-                        <>
-                          <VideoFromUrlDynamicButton
-                            userId={userId}
-                            onUserCreditsUpdate={handleUserCreditsUpdate}
-                          />
-                          <MyAssets />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/text-to-video"
-                      element={
-                        <>
-                          <VideoFromTextDynamicButton
-                            userId={userId}
-                            onUserCreditsUpdate={handleUserCreditsUpdate}
-                          />
-                          <MyAssets />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/signin/signup"
-                      element={
-                        <>
-                          <VideoFromTextDynamicButton
-                            userId={userId}
-                            onUserCreditsUpdate={handleUserCreditsUpdate}
-                          />
-                          <MyAssets />
-                        </>
-                      }
-                    />
-                    <Route
-                      path="/upload-to-video"
-                      element={
-                        <>
-                          <FileInterpreter />
-                        </>
-                      }
-                    />
-                    {isLocalhost && (
-                      <Route
-                        path="/admin"
-                        element={
-                          <>
-                            <GalleryAssets />
-                          </>
-                        }
-                      />
-                    )}
-                  </Routes>
-                </div>
+      <BrowserRouter>
+        <div className="w-full min-h-screen flex flex-col gap-2">
+          <main className="flex-1 items-center justify-center">
+            <div className="container grid gap-4">
+              <div className="grid gap-2 text-center">
+                <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
+                  GenTube.ai
+                </h1>
+                <p className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl">
+                  Generate AI Images and Videos
+                </p>
+                {signInMessage && (
+                  <h1 className="text-xl font-bold">{signInMessage}</h1>
+                )}
               </div>
-            </main>
-          </div>
-        </BrowserRouter>
-      </UserIpProvider>
+              <div className="grid gap-4">
+                <nav className="flex flex-wrap justify-center gap-1">
+                  <Link to="/">
+                    <Button variant="slim">Image Gen</Button>
+                  </Link>
+                  <Link to="/image-url-to-video">
+                    <Button variant="slim">URL to Video</Button>
+                  </Link>
+                  <Link to="/text-to-video">
+                    <Button variant="slim">Video Gen</Button>
+                  </Link>
+                  <Link to="/upload-to-video">
+                    <Button variant="slim">Upload Image</Button>
+                  </Link>
+                  {isLocalhost && (
+                    <Link to="/admin">
+                      <Button variant="slim">Admin</Button>
+                    </Link>
+                  )}
+                </nav>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <>
+                        <ImageDynamicButton
+                          userId={userId}
+                          userIp={userIp}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/image-url-to-video"
+                    element={
+                      <>
+                        <VideoFromUrlDynamicButton
+                          userId={userId}
+                          userIp={userIp}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/text-to-video"
+                    element={
+                      <>
+                        <VideoFromTextDynamicButton
+                          userId={userId}
+                          userIp={userIp}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/signin/signup"
+                    element={
+                      <>
+                        <VideoFromTextDynamicButton
+                          userId={userId}
+                          userIp={userIp}
+                          onUserCreditsUpdate={handleUserCreditsUpdate}
+                        />
+                        <MyAssets />
+                      </>
+                    }
+                  />
+                  <Route
+                    path="/upload-to-video"
+                    element={
+                      <>
+                        <FileInterpreter userId={userId} userIp={userIp} />
+                      </>
+                    }
+                  />
+                  {isLocalhost && (
+                    <Route
+                      path="/admin"
+                      element={
+                        <>
+                          <GalleryAssets />
+                        </>
+                      }
+                    />
+                  )}
+                </Routes>
+              </div>
+            </div>
+          </main>
+        </div>
+      </BrowserRouter>
     </UserCreditsProvider>
   );
 }

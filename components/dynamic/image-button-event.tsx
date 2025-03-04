@@ -11,11 +11,13 @@ import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 
 interface ImageDynamicButtonProps {
   userId: string;
+  userIp: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
 }
 
 export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   userId,
+  userIp,
   onUserCreditsUpdate
 }) => {
   const [prompt, setPrompt] = useState('');
@@ -31,6 +33,8 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
   };
+
+  console.log('NEW UserIp: ' + userIp);
 
   const renderVideoButton = useCallback(() => {
     if (!imageData) {
@@ -61,12 +65,14 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setImageData(null); // clear the imageData state
     setErrorMessage(null); // clear any previous error message
     console.log('PASS userId:', userId);
+    console.log('PASS userIp:', userIp);
     try {
       const response = await fetch('/api/image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': userId
+          'x-user-id': userId,
+          'x-forwarded-for': userIp
         },
         body: JSON.stringify({ prompt: prompt })
       });

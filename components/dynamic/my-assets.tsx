@@ -24,7 +24,8 @@ interface MyAssetsProps {
 
 const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const userId = useUserId();
-  const { userIp } = useUserIp();
+  const userIp = useUserIp();
+  console.log('B UserIp: ' + userIp);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -37,7 +38,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const limit = 10;
   const promptLength = 100;
 
-  const fetchUserActivities = async () => {
+  const fetchUserActivities = async (userId: string, userIp: string) => {
     console.log('UserIp Context:  ' + userIp);
     if (userId || userIp) {
       try {
@@ -50,6 +51,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         }
         const data = await response.json();
         console.log('Data: ' + data);
+        if (page == 0) {
+          setActivities([]);
+        }
         setActivities((prev) => [...prev, ...data.assets]);
         setHasMore(data.assets.length === limit && data.assets.length > 0);
       } catch (error) {
@@ -63,8 +67,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   };
 
   useEffect(() => {
-    fetchUserActivities();
-  }, [userId, page, assetType]);
+    fetchUserActivities(userId, userIp);
+  }, [userId, userIp, page, assetType]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -76,10 +80,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   };
 
   const handleRefresh = () => {
-    setActivities([]);
-    setPage(0);
     setLoading(true);
-    fetchUserActivities();
+    setPage(0);
+    fetchUserActivities(userId, userIp);
   };
 
   const handleDelete = async (activity: UserActivity) => {

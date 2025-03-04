@@ -3,7 +3,15 @@ import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-even
 import { useUserId } from '@/context/UserIdContext';
 import { fileTypeFromBuffer } from 'file-type';
 
-const FileInterpreter: React.FC = () => {
+interface FileInterpreterProps {
+  userId: string;
+  userIp: string;
+}
+
+const FileInterpreter: React.FC<FileInterpreterProps> = ({
+  userId,
+  userIp
+}) => {
   const [base64Data, setBase64Data] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<{
     width: number;
@@ -11,7 +19,6 @@ const FileInterpreter: React.FC = () => {
   } | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
-  const userId = useUserId();
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -86,7 +93,11 @@ const FileInterpreter: React.FC = () => {
               />
             )}
           </div>
-          <UploadImageDynamicButton base64Image={base64Data} userId={userId} />
+          <UploadImageDynamicButton
+            base64Image={base64Data}
+            userId={userId}
+            userIp={userIp}
+          />
         </div>
       )}
     </div>

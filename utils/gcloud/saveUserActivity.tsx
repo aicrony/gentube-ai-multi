@@ -20,6 +20,9 @@ export async function saveUserActivity(
     path: [kind]
   });
 
+  console.log(
+    '+++++++++++++++++++++++++++++ Save User Activity - saveUserActivity.tsx +++++++++++++++++++++++++++++'
+  );
   console.log('Activity: ', activity);
   const normalizedIpAddress = localIpConfig(activity.UserIp);
 

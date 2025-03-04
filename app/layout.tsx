@@ -8,6 +8,7 @@ import { getURL } from '@/utils/helpers';
 import 'styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { UserIdProvider } from '@/context/UserIdContext';
+import { UserIpProvider } from '@/context/UserIpContext';
 
 const title = 'Gentube AI Image and Video Generator';
 const description = 'Generate images and videos with artificial intelligence.';
@@ -34,6 +35,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: PropsWithChildren) {
   const supabase = createClient();
   let userId: string = '';
+  let userIp: string = '';
 
   const {
     data: { user }
@@ -47,17 +49,19 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <body>
         <UserIdProvider userId={userId}>
-          <Navbar className="navbar" />
-          <main
-            id="skip"
-            className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)] pt-6"
-          >
-            {children}
-          </main>
-          <Footer />
-          <Suspense>
-            <Toaster />
-          </Suspense>
+          <UserIpProvider>
+            <Navbar className="navbar" />
+            <main
+              id="skip"
+              className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)] pt-6"
+            >
+              {children}
+            </main>
+            <Footer />
+            <Suspense>
+              <Toaster />
+            </Suspense>
+          </UserIpProvider>
         </UserIdProvider>
       </body>
       <GoogleAnalytics gaId="G-634FFY459F" />

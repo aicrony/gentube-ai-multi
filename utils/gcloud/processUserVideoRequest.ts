@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-const defaultCredits = 110;
+const defaultCredits = 20;
 
 export async function processUserVideoRequest(
   userId: string | string[] | undefined,
@@ -24,6 +24,7 @@ export async function processUserVideoRequest(
   loop?: string | undefined,
   motion?: string | undefined
 ): Promise<{ result: string; credits: number }> {
+  const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let query;
   let userResponse = { result: '', credits: -1000, error: false };
@@ -34,8 +35,8 @@ export async function processUserVideoRequest(
     };
     url?: string;
   };
-  if (userId != undefined && userId.length > 0) {
-    console.log('Query 1');
+  if (userId && userId != 'none') {
+    console.log('Query 1V');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
@@ -43,20 +44,22 @@ export async function processUserVideoRequest(
   } else if (
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0 &&
-    (userId == undefined || userId.length == 0)
+    userId &&
+    (userId == 'none' || userId.length == 0)
   ) {
-    console.log('Query 2');
+    console.log('Query 2V');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserIp', '=', normalizedIpAddress)
       .limit(1);
   } else if (
-    userId != undefined &&
+    userId &&
+    userId != 'none' &&
     userId.length > 0 &&
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0
   ) {
-    console.log('Query 3');
+    console.log('Query 3V');
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
@@ -67,8 +70,14 @@ export async function processUserVideoRequest(
     return userResponse;
   }
 
+  console.log(
+    '+++++++++++++++++++++++++++++ Get User Credits - processUserVideoRequest.ts +++++++++++++++++++++++++++++'
+  );
+  console.log('User ID: ' + userId);
+  console.log('User IP: ' + userIp);
   const [userData] = await datastore.runQuery(query);
-  userResponse.credits = userData.length > 0 ? userData[0].Credits : null;
+  userResponse.credits =
+    userData.length > 0 ? userData[0].Credits : defaultCredits;
   console.log('getUserCredits response: ', userResponse.credits);
 
   // return response;
@@ -108,6 +117,7 @@ export async function processUserVideoRequest(
       await new Promise((resolve) => setTimeout(resolve, 1000));
       userResponse.result =
         'https://storage.googleapis.com/gen-video-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3-fake.mp4';
+      userResponse.error = false;
     } else {
       videoResult = (await callVideoApi(imageUrl, videoPrompt)) as any;
       // Check for queued webhook response and save it
@@ -138,9 +148,12 @@ export async function processUserVideoRequest(
       ? (userResponse.credits -= creditCost)
       : 0;
     console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(userId, userIp, userResponse.credits);
+    await updateUserCredits(
+      userId,
+      normalizeIp(localIpConfig(userIp)),
+      userResponse.credits
+    );
 
-    // Data save
     const activityResponse = await saveUserActivity({
       id: undefined,
       AssetSource: imageUrl,
@@ -152,7 +165,7 @@ export async function processUserVideoRequest(
       Prompt: videoPrompt ? videoPrompt : '',
       SubscriptionTier: 0 /**/,
       UserId: userId,
-      UserIp: userIp
+      UserIp: localizedIpAddress
     });
 
     console.log('Video Data saved: ', activityResponse);
@@ -181,14 +194,17 @@ export async function updateUserCredits(
   credits: number
 ): Promise<void> {
   console.log(
-    '+++++++++++++++++++++++++++++ Update User Credits +++++++++++++++++++++++++++++'
+    '+++++++++++++++++++++++++++++ Update User Credits - processUserVideoRequest.ts +++++++++++++++++++++++++++++'
   );
+  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   console.log('UserId: ', userId);
   console.log('UserIp: ', userIp);
-  const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   console.log('NormalizedIpAddress: ', normalizedIpAddress);
 
-  const keyValue = [kind, userId ? userId : normalizedIpAddress];
+  const keyValue = [
+    kind,
+    userId && userId !== 'none' ? userId : normalizedIpAddress
+  ];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
     namespace,
@@ -205,49 +221,4 @@ export async function updateUserCredits(
   };
 
   await datastore.save(entity);
-}
-
-export async function aggregateUserCredits(
-  userId: string | string[] | undefined,
-  userIp: string | string[] | undefined,
-  credits: number
-): Promise<void> {
-  if (userId == undefined) {
-    return;
-  } else if (userId && userId.length > 0) {
-    const query = datastore
-      .createQuery(namespace, kind)
-      .filter('UserId', '=', userId)
-      .limit(1);
-    const [existingCredits] = await datastore.runQuery(query);
-    const currentCredits =
-      existingCredits.length > 0 ? existingCredits[0].Credits : 0;
-    const newCredits = currentCredits + credits;
-    await updateUserCredits(userId, '-', newCredits);
-  }
-}
-
-export async function newUserCredits(
-  userId: string | string[] | undefined
-): Promise<void> {
-  if (userId == undefined) {
-    return;
-  } else if (userId && userId.length == 36) {
-    const keyValue = [kind, userId];
-    console.log('KeyValue: ', keyValue);
-    const key = datastore.key({
-      namespace,
-      path: [kind, `${keyValue}`]
-    });
-
-    const entity = {
-      key,
-      data: {
-        UserId: userId,
-        Credits: defaultCredits
-      }
-    };
-    const response = await datastore.save(entity);
-    console.log('New User Credits response: ', JSON.stringify(response));
-  }
 }

@@ -12,12 +12,14 @@ import getFileNameFromUrl from '@/utils/stringUtils'; // Import the CSS file
 
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
+  userIp: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
   urlData?: string;
 }
 
 export function VideoFromUrlDynamicButton({
   userId,
+  userIp,
   onUserCreditsUpdate,
   urlData
 }: VideoFromUrlDynamicButtonProps) {
@@ -89,7 +91,8 @@ export function VideoFromUrlDynamicButton({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': userId
+          'x-user-id': userId,
+          'x-forwarded-for': userIp
         },
         body: JSON.stringify({
           url: imageUrl,

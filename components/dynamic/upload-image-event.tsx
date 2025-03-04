@@ -7,6 +7,7 @@ import MyAssets from '@/components/dynamic/my-assets';
 
 interface UploadImageDynamicButtonProps {
   userId: string;
+  userIp: string;
   base64Image: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
   onUploadSuccess?: () => void;
@@ -14,8 +15,7 @@ interface UploadImageDynamicButtonProps {
 
 export const UploadImageDynamicButton: React.FC<
   UploadImageDynamicButtonProps
-> = ({ userId, base64Image, onUserCreditsUpdate, onUploadSuccess }) => {
-  const { userIp } = useUserIp();
+> = ({ userId, userIp, base64Image, onUserCreditsUpdate, onUploadSuccess }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [uploadResponse, setUploadResponse] = useState<string | null>(null);
   const [base64Img, setBase64Img] = useState<string | null>(base64Image);

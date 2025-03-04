@@ -13,17 +13,21 @@ export default async function handler(
   const { userId, userIp, limit = 10, offset = 0, assetType } = req.query;
 
   console.log('USER-IP: ' + userIp);
-  try {
-    const assets = await getUserAssets(
-      userId as string,
-      userIp as string,
-      Number(limit),
-      Number(offset),
-      assetType as string
-    );
-    res.status(200).json({ assets });
-  } catch (error) {
-    console.error('Failed to fetch user assets:', error);
-    res.status(500).json({ error: 'Failed to fetch user assets' });
+  if (userIp && userIp !== 'unknown') {
+    try {
+      const assets = await getUserAssets(
+        userId as string,
+        userIp as string,
+        Number(limit),
+        Number(offset),
+        assetType as string
+      );
+      res.status(200).json({ assets });
+    } catch (error) {
+      console.error('Failed to fetch user assets:', error);
+      res.status(500).json({ error: 'Failed to fetch user assets' });
+    }
+  } else {
+    res.status(200);
   }
 }

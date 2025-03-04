@@ -13,6 +13,11 @@ export default async function handler(
   const { userId, userIp } = req.query;
 
   try {
+    console.log(
+      '+++++++++++++++++++++++++++++ Get User Credits - api/getUserCredits +++++++++++++++++++++++++++++'
+    );
+    console.log('User ID: ' + userId);
+    console.log('User IP: ' + userIp);
     const credits = await getUserCredits(userId as string, userIp as string);
     console.log('getUserCredits: ', credits);
     res.status(200).json({ credits });
