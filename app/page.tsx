@@ -7,7 +7,6 @@ import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-b
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import MyAssets from '@/components/dynamic/my-assets';
-import ImageGallery from '@/functions/getGallery';
 import Button from '@/components/ui/Button';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
@@ -33,11 +32,12 @@ export default function Home() {
 
   const signInMessage =
     userId && userId == 'none' ? (
-      <span>
-        <a href="/signin" className="font-light text-md text-blue-700">
-          Sign In for 110 free credits (1 time).
-        </a>
-      </span>
+      <button
+        onClick={() => (window.location.href = '/signin')}
+        className="font-light text-md"
+      >
+        Sign In for 110 free credits (1 time).
+      </button>
     ) : (
       ''
     );

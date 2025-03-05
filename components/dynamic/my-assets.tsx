@@ -136,9 +136,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        <button onClick={handleRefresh} className="text-blue-700">
-          Refresh Assets
-        </button>
+        <button onClick={handleRefresh}>Refresh Assets</button>
       </div>
       {activities && activities.length === 0 && (
         <p>
@@ -217,7 +215,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     onClick={() =>
                       handleCopy(activity.Prompt, 'Prompt copied!')
                     }
-                    className="text-blue-700 icon-size-small ml-2"
+                    className="icon-size-small ml-2"
                     title="Copy Prompt"
                   >
                     <FaCopy />
@@ -230,7 +228,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <button
                 onClick={() => openModal(activity.CreatedAssetUrl)}
-                className="text-blue-700 icon-size"
+                className="icon-size"
                 title="Open"
               >
                 <FaExternalLinkAlt />
@@ -244,7 +242,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     'Image URL copied!'
                   )
                 }
-                className="text-blue-700 icon-size"
+                className="icon-size"
                 title="Copy Image URL"
               >
                 <FaImage />
@@ -254,7 +252,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                   onClick={() =>
                     handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
                   }
-                  className="text-blue-700 icon-size"
+                  className="icon-size"
                   title="Copy Video URL"
                 >
                   <FaVideo />
@@ -262,7 +260,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               )}
               <button
                 onClick={() => handleDelete(activity)}
-                className="text-red-500 icon-size"
+                className="danger icon-size"
                 title="Delete Asset"
               >
                 <FaTrash />

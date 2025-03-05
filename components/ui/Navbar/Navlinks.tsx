@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { getRedirectMethod } from '@/utils/auth-helpers/settings';
 import { FaCheck } from 'react-icons/fa';
 import s from './Navbar.module.css';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 
 interface NavlinksProps {
   user: any | null;
@@ -50,7 +51,7 @@ export default function Navlinks({ user }: NavlinksProps) {
                 />
                 <button type="submit" className={s.link}>
                   <span>
-                    <FaCheck className="text-blue-700" />
+                    <FaCheck />
                   </span>
                   &nbsp; Sign out
                 </button>
@@ -63,6 +64,7 @@ export default function Navlinks({ user }: NavlinksProps) {
           </Link>
         )}
       </div>
+      <ThemeToggle />
     </div>
   );
 }

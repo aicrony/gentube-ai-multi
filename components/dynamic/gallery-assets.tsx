@@ -288,7 +288,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     onClick={() =>
                       handleCopy(activity.Prompt, 'Prompt copied!')
                     }
-                    className="text-blue-700 icon-size-small ml-2"
+                    className="icon-size-small ml-2"
                     title="Copy Prompt"
                   >
                     <FaCopy />
@@ -301,7 +301,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
               <button
                 onClick={() => openModal(activity.CreatedAssetUrl)}
-                className="text-blue-700 icon-size"
+                className="icon-size"
                 title="Open"
               >
                 <FaExternalLinkAlt />
@@ -315,7 +315,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     'Image URL copied!'
                   )
                 }
-                className="text-blue-700 icon-size"
+                className="icon-size"
                 title="Copy Image URL"
               >
                 <FaImage />
@@ -325,7 +325,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                   onClick={() =>
                     handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
                   }
-                  className="text-blue-700 icon-size"
+                  className="icon-size"
                   title="Copy Video URL"
                 >
                   <FaVideo />
@@ -340,7 +340,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                       setActivities
                     )
                   }
-                  className="text-blue-700 icon-size"
+                  className="icon-size"
                   title="Add to Gallery"
                 >
                   <FaPlus />
@@ -354,7 +354,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                       setActivities
                     )
                   }
-                  className="text-blue-700 icon-size"
+                  className="icon-size"
                   title="Remove from Gallery"
                 >
                   <FaMinus />
@@ -362,7 +362,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               ) : null}
               <button
                 onClick={() => handleDelete(activity)}
-                className="text-red-500 icon-size"
+                className="danger icon-size"
                 title="Delete Asset"
               >
                 <FaTrash />
