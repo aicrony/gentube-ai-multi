@@ -7,6 +7,7 @@ import { useUserCredits } from '@/context/UserCreditsContext';
 import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-button';
 import ImageGallery from '@/functions/getGallery';
 import GenericModal from '@/components/ui/GenericModal/GenericModal';
+import { Label } from '@/components/ui/label';
 
 interface VideoFromTextDynamicButtonProps {
   userId: string;
@@ -86,10 +87,19 @@ export const VideoFromTextDynamicButton: React.FC<
 
   return (
     <>
-      <h1 className="text-xl font-bold">Text to Video Generation</h1>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">Text to Video Generation</h1>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="video_gen">
+          Enter a description of the video you would like to generate.
+        </Label>
         <Input
+          id="video_gen"
           type="text"
           placeholder={'What will happen in the video?'}
           className="min-h-[25px] text-xl"

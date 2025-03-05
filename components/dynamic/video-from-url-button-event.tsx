@@ -173,9 +173,11 @@ export function VideoFromUrlDynamicButton({
 
   return (
     <>
-      <h1 className="text-xl font-bold">Image URL to Video Generation</h1>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      <div className={'pt-5'}>
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-bold">Image URL to Video Generation</h1>
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="imageUrl">
             Enter a URL of an image to start creating your video.

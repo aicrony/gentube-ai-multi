@@ -198,9 +198,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Gallery {assetTypeName} Assets</h1>
-        <button onClick={handleRefresh} className="text-blue-700">
-          Refresh Assets
-        </button>
+        <button onClick={handleRefresh}>Refresh Assets</button>
       </div>
       <div className="flex items-center mb-4">
         <label className="mr-2">Removable Assets Only:</label>
@@ -269,7 +267,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               </p>
             </div>
             {activity.AssetType !== 'upl' && (
-              <div>
+              <div className="flex flex-wrap w-full max-w-full">
                 <p>
                   <strong>Prompt:</strong>
                   {expandedPrompts[index] ||
@@ -277,10 +275,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     ? activity.Prompt
                     : `${activity.Prompt.substring(0, promptLength)}... `}
                   {activity.Prompt.length > promptLength && (
-                    <button
-                      onClick={() => togglePrompt(index)}
-                      className="text-blue-700"
-                    >
+                    <button onClick={() => togglePrompt(index)}>
                       {expandedPrompts[index] ? 'less' : 'more'}
                     </button>
                   )}

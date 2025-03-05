@@ -196,7 +196,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               </p>
             </div>
             {activity.AssetType !== 'upl' && (
-              <div>
+              <div className="flex flex-wrap w-full max-w-full">
                 <p>
                   <strong>Prompt:</strong>{' '}
                   {expandedPrompts[index] ||

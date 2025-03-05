@@ -48,6 +48,22 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
+      </head>
       <body>
         <UserIdProvider userId={userId}>
           <UserIpProvider>

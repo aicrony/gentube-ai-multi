@@ -145,8 +145,10 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      <div className="float-left">
-        <h1 className="text-xl font-bold">Image Generation</h1>
+      <div className="my-assets-container">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-bold">Image Generation</h1>
+        </div>
         <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input
           as="textarea"
