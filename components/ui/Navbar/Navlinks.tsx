@@ -49,7 +49,7 @@ export default function Navlinks({ user }: NavlinksProps) {
                   name="pathName"
                   value={usePathname() ?? ''}
                 />
-                <button type="submit" className={s.link}>
+                <button type="submit" className={s.signOutButton}>
                   <span>
                     <FaCheck />
                   </span>

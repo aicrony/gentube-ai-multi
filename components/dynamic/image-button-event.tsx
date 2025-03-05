@@ -156,17 +156,17 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           value={prompt}
           onChange={handleInputChange}
         />
-      </div>
-      <div>
         <Button
           variant="slim"
           type="submit"
-          className="mt-1"
+          className="mt-3"
           loading={isSubmitting}
           onClick={handleGenerateImage}
         >
           Generate Image
         </Button>
+      </div>
+      <div>
         {isSubmitting && (
           <div className="pt-4">
             <Button onClick={handleGalleryClick}>
