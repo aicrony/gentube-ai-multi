@@ -39,6 +39,5 @@ export const useUserIp = (): string => {
   if (!context) {
     throw new Error('useUserIp must be used within a UserIpProvider');
   }
-  console.log('useUserIp IP: ' + context.userIp);
   return context.userIp;
 };

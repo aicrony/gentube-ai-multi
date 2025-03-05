@@ -25,7 +25,6 @@ interface MyAssetsProps {
 const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const userId = useUserId();
   const userIp = useUserIp();
-  console.log('B UserIp: ' + userIp);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -39,7 +38,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
-    console.log('UserIp Context:  ' + userIp);
     if (userId || userIp) {
       try {
         const response = await fetch(
@@ -50,7 +48,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           throw new Error('Failed to fetch user assets');
         }
         const data = await response.json();
-        console.log('Data: ' + data);
         if (page == 0) {
           setActivities([]);
         }

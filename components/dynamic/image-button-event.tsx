@@ -34,8 +34,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setPrompt(event.target.value);
   };
 
-  console.log('NEW UserIp: ' + userIp);
-
   const renderVideoButton = useCallback(() => {
     if (!imageData) {
       return null;
