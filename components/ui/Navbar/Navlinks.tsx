@@ -19,9 +19,6 @@ export default function Navlinks({ user }: NavlinksProps) {
   return (
     <div className="relative flex flex-row justify-between py-1 align-center md:py-6">
       <div className="flex items-center flex-1">
-        {/*<Link href="/" className={s.logo} aria-label="Logo">*/}
-        {/*  <Logo />*/}
-        {/*</Link>*/}
         <nav className="ml-4 space-x-1 lg:block">
           <Link href="/" target="_parent" className={s.link}>
             Home
@@ -39,9 +36,9 @@ export default function Navlinks({ user }: NavlinksProps) {
           </Link>
         </nav>
       </div>
-      <div className="flex justify-end space-x-8">
-        {user ? (
-          <div>
+      <div className="flex items-center">
+        <div>
+          {user ? (
             <div>
               <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
                 <input
@@ -57,14 +54,16 @@ export default function Navlinks({ user }: NavlinksProps) {
                 </button>
               </form>
             </div>
-          </div>
-        ) : (
-          <Link href="/signin" className={s.link}>
-            Sign In
-          </Link>
-        )}
+          ) : (
+            <Link href="/signin" className={s.link}>
+              Sign In
+            </Link>
+          )}
+        </div>
+        <div className="absolute right-[0%] top-[140%] transform -translate-y-1/2">
+          <ThemeToggle />
+        </div>
       </div>
-      <ThemeToggle />
     </div>
   );
 }
