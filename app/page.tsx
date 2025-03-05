@@ -58,7 +58,7 @@ export default function Home() {
     <UserCreditsProvider>
       <BrowserRouter>
         <div className="w-full min-h-screen flex flex-col gap-2">
-          <main className="flex-1 items-center justify-center">
+          <main className="flex-1 items-center justify-center mt-16 pt-4">
             <div className="container grid gap-4">
               <div className="grid gap-2 text-center">
                 <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">

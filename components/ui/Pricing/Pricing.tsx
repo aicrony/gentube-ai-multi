@@ -83,7 +83,7 @@ export default function Pricing({ user, products, subscription }: Props) {
   if (!products.length) {
     return (
       <section>
-        <div className="max-w-6xl px-4 mx-auto sm:py-24 sm:px-6 lg:px-8">
+        <div className="mt-8 max-w-6xl px-4 mx-auto sm:py-24 sm:px-6 lg:px-8">
           <div className="sm:flex sm:flex-col sm:align-center"></div>
           <p className="text-4xl font-extrabold sm:text-center sm:text-6xl">
             No subscription pricing plans found. Create them in your{' '}
@@ -103,7 +103,7 @@ export default function Pricing({ user, products, subscription }: Props) {
   } else {
     return (
       <section>
-        <div className="max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
+        <div className="mt-8 max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
           <div className="sm:flex sm:flex-col sm:align-center">
             <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
               GenTube.ai Pricing Plans
