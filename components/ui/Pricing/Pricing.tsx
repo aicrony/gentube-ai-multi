@@ -103,10 +103,10 @@ export default function Pricing({ user, products, subscription }: Props) {
   } else {
     return (
       <section>
-        <div className="mt-8 max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
+        <div className="mt-20 max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
           <div className="sm:flex sm:flex-col sm:align-center">
             <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
-              GenTube.ai Pricing Plans
+              Pricing Plans
             </h1>
             <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
               Choose your level of creativity.

@@ -23,7 +23,7 @@ export default async function Account() {
   }
 
   return (
-    <section className="mb-32">
+    <section className="mt-20 mb-6">
       <div className="max-w-6xl mx-auto pl-4 pr-4">
         <div className="sm:align-center sm:flex sm:flex-col">
           <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
