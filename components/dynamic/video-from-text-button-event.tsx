@@ -88,19 +88,19 @@ export const VideoFromTextDynamicButton: React.FC<
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      <div>
+      <div className="my-assets-container">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Text to Video Generation</h1>
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="video_gen">
+      <div className="my-assets-container">
+        <Label htmlFor="prompt">
           Enter a description of the video you would like to generate.
         </Label>
         <Input
-          id="video_gen"
-          type="text"
+          as="text"
+          id="prompt"
           placeholder={'What will happen in the video?'}
           className="min-h-[25px] text-xl"
           onChange={(e) => setVideoDescription(e.target.value)}

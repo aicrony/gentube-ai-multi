@@ -21,7 +21,6 @@ export async function processUserImageRequest(
 ): Promise<{ result: string; credits: number }> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
-  let query;
   let userResponse = { result: '', credits: -1000, error: false };
   type ImageApiResult = {
     error?: {
@@ -30,39 +29,37 @@ export async function processUserImageRequest(
     };
     url?: string;
   };
-  if (userId && userId != 'none') {
-    console.log('Query 1I');
-    query = datastore
-      .createQuery(namespace, kind)
-      .filter('UserId', '=', userId)
-      .limit(1);
+
+  // Determine the key to use for lookup
+  let lookupKey;
+  if (userId && userId !== 'none') {
+    console.log('Key lookup by UserId');
+    lookupKey = datastore.key({
+      namespace,
+      path: [kind, `${[kind, userId]}`]
+    });
   } else if (
-    normalizedIpAddress != undefined &&
-    normalizedIpAddress.length > 0 &&
-    userId &&
-    (userId == 'none' || userId.length == 0)
-  ) {
-    console.log('Query 2I');
-    query = datastore
-      .createQuery(namespace, kind)
-      .filter('UserIp', '=', normalizedIpAddress)
-      .limit(1);
-  } else if (
-    userId &&
-    userId != 'none' &&
-    userId.length > 0 &&
     normalizedIpAddress != undefined &&
     normalizedIpAddress.length > 0
   ) {
-    console.log('Query 3I');
-    query = datastore
-      .createQuery(namespace, kind)
-      .filter('UserId', '=', userId)
-      .filter('UserIp', '=', normalizedIpAddress)
-      .limit(1);
+    console.log('Key lookup by IP');
+    lookupKey = datastore.key({
+      namespace,
+      path: [kind, `${[kind, normalizedIpAddress]}`]
+    });
   } else {
     console.log('Invalid userId and normalizedIpAddress');
     return userResponse;
+  }
+
+  // Fetch user data directly by key
+  try {
+    const [userEntity] = await datastore.get(lookupKey);
+    userResponse.credits = userEntity ? userEntity.Credits : defaultCredits;
+    console.log('getUserCredits response: ', userResponse.credits);
+  } catch (error) {
+    console.log('Error fetching user data: ', error);
+    userResponse.credits = defaultCredits;
   }
 
   console.log(
@@ -70,10 +67,6 @@ export async function processUserImageRequest(
   );
   console.log('User ID: ' + userId);
   console.log('User IP: ' + userIp);
-  const [userData] = await datastore.runQuery(query);
-  userResponse.credits =
-    userData.length > 0 ? userData[0].Credits : defaultCredits;
-  console.log('getUserCredits response: ', userResponse.credits);
 
   // return response;
 

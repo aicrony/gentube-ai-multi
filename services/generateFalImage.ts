@@ -54,7 +54,6 @@ export default async function generateFalImage(
     }
 
     console.log('Webhook set: ', callback.webhook);
-    console.log('Result: ', result);
     callback.response = result;
     return callback;
   } catch (error) {

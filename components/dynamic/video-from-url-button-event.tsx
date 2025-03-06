@@ -174,7 +174,7 @@ export function VideoFromUrlDynamicButton({
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      <div>
+      <div className="my-assets-container">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold">Image URL to Video Generation</h1>
         </div>
@@ -183,7 +183,7 @@ export function VideoFromUrlDynamicButton({
             Enter a URL of an image to start creating your video.
           </Label>
           <Input
-            as="textarea"
+            as="text"
             id="imageUrl"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
@@ -193,9 +193,9 @@ export function VideoFromUrlDynamicButton({
         </div>
         <div className={'pt-4'}>
           <Input
-            type="text"
+            as="textarea"
             placeholder={'What will happen in the video?'}
-            className="min-h-[25px] text-xl"
+            className="min-h-[100px] text-xl"
             onChange={(e) => setVideoDescription(e.target.value)}
           />
         </div>

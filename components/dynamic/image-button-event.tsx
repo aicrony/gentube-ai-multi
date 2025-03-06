@@ -149,8 +149,8 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         </div>
         <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input
-          as="textarea"
-          className="min-h-[100px] text-xl"
+          as="text"
+          className="min-h-[50px] text-xl"
           id="prompt"
           placeholder="Enter a description of your image."
           value={prompt}
@@ -166,7 +166,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           Generate Image
         </Button>
       </div>
-      <div>
+      <div className="my-assets-container">
         {isSubmitting && (
           <div className="pt-4">
             <Button onClick={handleGalleryClick}>

@@ -5,3 +5,25 @@
 .root:focus {
   @apply outline-none;
 }
+
+textarea.root {
+  resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  width: 100%;
+}
+
+textarea.root[id="prompt"],
+textarea.root[id="imageUrl"] {
+  min-height: 40px; /* Similar to regular input height */
+  line-height: 1.5;
+  padding-top: 8px;
+  overflow-y: auto;
+}
+
+.singleLineText {
+  min-height: 40px;
+  line-height: 1.5;
+  padding-top: 8px;
+  overflow-y: auto;
+}

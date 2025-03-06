@@ -147,7 +147,8 @@ export function VideoDynamicButton({
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className={'pt-4'}>
         <Input
-          type="text"
+          as="text"
+          id="imageUrl"
           placeholder={'What will happen in the video?'}
           className="min-h-[25px] text-xl"
           onChange={(e) => setVideoDescription(e.target.value)}
