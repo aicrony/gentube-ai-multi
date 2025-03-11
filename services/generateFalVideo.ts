@@ -41,7 +41,7 @@ export default async function generateFalVideo(
         input: {
           prompt: description,
           image_url: imageUrl,
-          duration: duration ? duration : 5, // 5,10 for Kling; 4,6 for Haiper
+          duration: duration ? duration : '5', // 5,10 for Kling; 4,6 for Haiper
           aspect_ratio: aspectRatio ? aspectRatio : '16:9',
           ...(loop && { tail_image_url: imageUrl })
         },
