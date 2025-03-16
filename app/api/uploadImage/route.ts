@@ -8,12 +8,8 @@ import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60 seconds timeout
 export const runtime = 'nodejs';
-export const fetchCache = 'force-no-store';
 
-// Setting the bodySizeLimit in bytes (5mb = 5 * 1024 * 1024)
-export const bodySize = {
-  sizeLimit: '5mb' 
-};
+// Note: Request body size limits are now configured in next.config.js
 
 export async function POST(request: NextRequest) {
   try {

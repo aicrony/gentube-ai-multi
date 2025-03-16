@@ -23,6 +23,14 @@ module.exports = {
       }
     ];
   },
+  api: {
+    // Configure the body parser for API routes
+    bodyParser: {
+      sizeLimit: '5mb'
+    },
+    // Enable response compression
+    responseLimit: false
+  },
   experimental: {
     serverComponentsExternalPackages: ['@google-cloud/datastore', '@google-cloud/storage']
   }
