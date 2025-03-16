@@ -24,8 +24,6 @@ module.exports = {
     ];
   },
   experimental: {
-    images: {
-      allowFutureImage: true
-    }
+    serverComponentsExternalPackages: ['@google-cloud/datastore', '@google-cloud/storage']
   }
 };

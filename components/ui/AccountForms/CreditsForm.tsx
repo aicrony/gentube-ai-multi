@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { getUserCredits } from '@/utils/gcloud/getUserCredits';
+import { useUserIp } from '@/context/UserIpContext';
 
 interface CreditsFormProps {
   userId: string;
@@ -10,11 +11,12 @@ interface CreditsFormProps {
 
 const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
   const [credits, setCredits] = useState<number | null>(null);
+  const userIp = useUserIp();
 
   useEffect(() => {
     const fetchCredits = async () => {
       try {
-        const response = await fetch(`/api/getUserCredits?userId=${userId}`);
+        const response = await fetch(`/api/getUserCredits?userId=${userId}&userIp=${userIp}`);
         if (!response.ok) {
           throw new Error('Failed to fetch user credits');
         }
@@ -25,8 +27,10 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
       }
     };
 
-    fetchCredits();
-  }, [userId]);
+    if (userId && userIp !== 'unknown') {
+      fetchCredits();
+    }
+  }, [userId, userIp]);
 
   return (
     <Card

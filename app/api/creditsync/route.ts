@@ -1,19 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    res.status(405).end(); // Method Not Allowed
-    console.error('Method Not Allowed on /api/creditsync');
-    return;
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    console.log('Request body:', req.body);
-    const { type, table, record, schema, old_record } = req.body;
+    const body = await request.json();
+    console.log('Request body:', body);
+    const { type, table, record, schema, old_record } = body;
     console.log('Type:', type);
     console.log('Table:', table);
     console.log('Record:', record);
@@ -30,12 +22,15 @@ export default async function handler(
       console.log('Created At:', created_at);
       console.log('Credits Purchased:', credits_purchased);
       await aggregateUserCredits(user_id, '-', credits_purchased);
-      res.status(200).json({ received: true });
+      return NextResponse.json({ received: true });
     } else {
-      res.status(200).json({ received: false });
+      return NextResponse.json({ received: false });
     }
   } catch (error) {
     console.error('Sync Webhook handler failed.', error);
-    res.status(500).json({ error: 'Sync Webhook handler failed.' });
+    return NextResponse.json(
+      { error: 'Sync Webhook handler failed.' },
+      { status: 500 }
+    );
   }
 }

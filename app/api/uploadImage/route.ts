@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { fileTypeFromBuffer } from 'file-type';
 import heicConvert from 'heic-convert';
 import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
@@ -12,30 +12,26 @@ export const config = {
   }
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-    return;
-  }
-
-  const { image, userId, userIp } = req.body;
-
-  if (!image) {
-    res.status(400).json({ error: 'Image data is required' });
-    return;
-  }
-
+export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
+    const { image, userId, userIp } = body;
+
+    if (!image) {
+      return NextResponse.json(
+        { error: 'Image data is required' },
+        { status: 400 }
+      );
+    }
+
     let imageBuffer = Buffer.from(image, 'base64');
     const fileType = await fileTypeFromBuffer(imageBuffer);
 
     if (!fileType) {
-      res.status(400).json({ error: 'File type could not be determined' });
-      return;
+      return NextResponse.json(
+        { error: 'File type could not be determined' },
+        { status: 400 }
+      );
     }
 
     if (fileType.ext === 'heic') {
@@ -71,11 +67,12 @@ export default async function handler(
       UserIp: userIp
     });
 
-    res.status(200).json({ url: imageUrl, fileType: fileType.ext });
+    return NextResponse.json({ url: imageUrl, fileType: fileType.ext });
   } catch (error) {
     console.error('Conversion error:', error);
-    res
-      .status(500)
-      .json({ error: 'An error occurred while uploading the image' });
+    return NextResponse.json(
+      { error: 'An error occurred while uploading the image' },
+      { status: 500 }
+    );
   }
 }
