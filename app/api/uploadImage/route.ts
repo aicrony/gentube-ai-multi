@@ -4,12 +4,15 @@ import heicConvert from 'heic-convert';
 import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '5mb' // Set the maximum body size to 5MB
-    }
-  }
+// App Router route configuration
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // 60 seconds timeout
+export const runtime = 'nodejs';
+export const fetchCache = 'force-no-store';
+
+// Setting the bodySizeLimit in bytes (5mb = 5 * 1024 * 1024)
+export const bodySize = {
+  sizeLimit: '5mb' 
 };
 
 export async function POST(request: NextRequest) {
