@@ -14,7 +14,8 @@ export default async function generateFalVideo(
   description: string | undefined,
   loop?: boolean,
   duration?: string,
-  aspectRatio?: string
+  aspectRatio?: string,
+  motion?: string
 ) {
   try {
     if (
@@ -22,7 +23,9 @@ export default async function generateFalVideo(
       process.env.FAL_VIDEO_TEST_MODE === 'true'
     ) {
       console.log('Looping is: ' + loop);
-      console.log(typeof loop);
+      console.log('Motion is: ' + motion);
+      console.log('Duration is: ' + duration);
+      console.log('Aspect Ratio is: ' + aspectRatio);
       result = {
         status: 'IN_QUEUE',
         request_id: 'f3cdc601-9c51-4cc7-a961-23d3280599c2',
@@ -37,9 +40,17 @@ export default async function generateFalVideo(
         queue_position: 0
       };
     } else {
+      // If motion is provided and not "Static", include it in the prompt
+      let enhancedPrompt = description || '';
+      if (motion && motion !== 'Static') {
+        enhancedPrompt = `${enhancedPrompt} with ${motion.toLowerCase()} motion`;
+      }
+      
+      console.log('Enhanced prompt with motion:', enhancedPrompt);
+      
       result = await fal.queue.submit(apiEndpoint, {
         input: {
-          prompt: description,
+          prompt: enhancedPrompt,
           image_url: imageUrl,
           duration: duration ? duration : '5', // 5,10 for Kling; 4,6 for Haiper
           aspect_ratio: aspectRatio ? aspectRatio : '16:9',

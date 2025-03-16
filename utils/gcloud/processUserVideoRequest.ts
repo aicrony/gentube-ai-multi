@@ -112,7 +112,16 @@ export async function processUserVideoRequest(
         'https://storage.googleapis.com/gen-video-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3-fake.mp4';
       userResponse.error = false;
     } else {
-      videoResult = (await callVideoApi(imageUrl, videoPrompt)) as any;
+      // Pass all the parameters to callVideoApi
+      const loopParam = loop === 'true' || loop === true;
+      videoResult = (await callVideoApi(
+        imageUrl, 
+        videoPrompt, 
+        loopParam,
+        duration,
+        aspectRatio,
+        motion
+      )) as any;
       // Check for queued webhook response and save it
       if (videoResult) {
         console.log(videoResult);
