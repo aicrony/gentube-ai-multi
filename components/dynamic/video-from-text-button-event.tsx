@@ -99,7 +99,7 @@ export const VideoFromTextDynamicButton: React.FC<
           duration: duration,
           aspectRatio: aspectRatio,
           motion: motion, // Use the state value for motion
-          loop: loop === 'true'
+          loop: false
         })
       });
       if (!response.ok) {
@@ -190,6 +190,69 @@ export const VideoFromTextDynamicButton: React.FC<
           className="min-h-[25px] text-xl"
           onChange={(e) => setVideoDescription(e.target.value)}
         />
+
+        {/* VIDEO OPTIONS */}
+        <div className="flex-container pb-4 pt-4">
+          <div>
+            <Label htmlFor="duration">Duration (in sec): </Label>
+            <select
+              id="duration"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="aspectRatio">Aspect Ratio: </Label>
+            <select
+              id="aspectRatio"
+              value={aspectRatio}
+              onChange={(e) => setAspectRatio(e.target.value)}
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+            >
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="1:1">1:1</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="motion">Motion: </Label>
+            <select
+              id="motion"
+              value={motion}
+              onChange={(e) => setMotion(e.target.value)}
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+            >
+              {motionOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="loop">Loop: </Label>
+            <select
+              id="loop"
+              value={loop}
+              onChange={(e) => setLoop(e.target.value)}
+              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
+              disabled={true}
+              title={'For looping, use URL to Video.'}
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+            {duration === '10' && (
+              <div className="text-xs text-gray-500 mt-1">
+                (Disabled for 10-second videos)
+              </div>
+            )}
+          </div>
+        </div>
         <Button
           variant="slim"
           type="submit"

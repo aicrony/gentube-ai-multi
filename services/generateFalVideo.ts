@@ -44,7 +44,7 @@ export default async function generateFalVideo(
       // If motion is provided and not "Static", include it in the prompt
       let enhancedPrompt = description || '';
       if (motion && motion !== 'Static') {
-        enhancedPrompt = `${enhancedPrompt} with ${motion.toLowerCase()} motion`;
+        enhancedPrompt = `Camera will ${motion.toLowerCase()}. ${enhancedPrompt}`;
       }
 
       console.log('Enhanced prompt with motion:', enhancedPrompt);
