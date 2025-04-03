@@ -113,10 +113,10 @@ export async function processUserVideoRequest(
       userResponse.error = false;
     } else {
       // Pass all the parameters to callVideoApi
-      const loopParam = loop === 'true' || loop === true;
+      const loopParam = loop === 'true';
       videoResult = (await callVideoApi(
-        imageUrl, 
-        videoPrompt, 
+        imageUrl,
+        videoPrompt,
         loopParam,
         duration,
         aspectRatio,

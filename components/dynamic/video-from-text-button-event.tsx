@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import Downloader from '@/components/dynamic/downloader';
@@ -8,6 +8,7 @@ import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-but
 import ImageGallery from '@/functions/getGallery';
 import GenericModal from '@/components/ui/GenericModal/GenericModal';
 import { Label } from '@/components/ui/label';
+import getFileNameFromUrl from '@/utils/stringUtils';
 
 interface VideoFromTextDynamicButtonProps {
   userId: string;
@@ -20,11 +21,65 @@ export const VideoFromTextDynamicButton: React.FC<
 > = ({ userId, userIp, onUserCreditsUpdate }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<any>(null);
+  const [message, setMessage] = useState<string>('');
   const [imageGalleryData, setImageGalleryData] = useState<any>(null); // State for ImageGallery
   const [videoDescription, setVideoDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duration, setDuration] = useState<string>('5');
+  const [aspectRatio, setAspectRatio] = useState<string>('16:9');
+  const [motion, setMotion] = useState<string>('Static');
+  const [loop, setLoop] = useState<string>('false');
   const [isModalOpen, setIsModalOpen] = useState(false); // State for Modal
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+
+  let videoGenButtonLabel: string;
+  let videoGenCompleteMessage: string;
+  const motionOptions = [
+    'Static',
+    'Move Left',
+    'Move Right',
+    'Move Up',
+    'Move Down',
+    'Push In',
+    'Pull Out',
+    'Zoom In',
+    'Zoom Out',
+    'Pan Left',
+    'Pan Right',
+    'Orbit Left',
+    'Orbit Right',
+    'Crane Up',
+    'Crane Down'
+  ];
+
+  videoGenButtonLabel = 'Generate Video from Text';
+  videoGenCompleteMessage = 'Video Generation Complete';
+
+  useEffect(() => {
+    if (loop === 'true' && duration === '10') {
+      alert(
+        'Looping is not available for 10-second videos. Please choose a 5-second video for looping.'
+      );
+      setLoop('false');
+    }
+  }, [loop, duration]);
+
+  // Disable looping option when 10-second duration is selected
+  useEffect(() => {
+    if (duration === '10' && loop === 'true') {
+      setLoop('false');
+    }
+  }, [duration]);
+
+  useEffect(() => {
+    if (videoData && videoData.result === 'InQueue') {
+      setMessage('Refresh your assets to see your queued video.');
+      const timer = setTimeout(() => {
+        setMessage('');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [videoData]);
 
   const handleGenerateVideo = async () => {
     setIsSubmitting(true);
@@ -40,36 +95,66 @@ export const VideoFromTextDynamicButton: React.FC<
           'x-forwarded-for': userIp
         },
         body: JSON.stringify({
-          description: videoDescription
+          description: videoDescription,
+          duration: duration,
+          aspectRatio: aspectRatio,
+          motion: motion, // Use the state value for motion
+          loop: loop === 'true'
         })
       });
       if (!response.ok) {
-        setIsSubmitting(false);
+        setIsSubmitting(false); // Response is received, enable the button
         if (response.status === 429) {
           const errorData = await response.json();
           setErrorMessage(
             errorData.error ||
-              'VIDEO request limit exceeded. Please subscribe on the PRICING page.'
+              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
           );
         } else {
           setErrorMessage(
-            'Request Failed. Please check the description and try again.'
+            'Request Failed. Please check that the prompt is appropriate and try again.'
           );
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return;
       }
-      let data: { result?: any; userCredits?: any; images?: any } = {};
+      let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
-        data = await response.json();
-        const { result, userCredits, images } = data;
-        setIsSubmitting(false);
-        setVideoData(result);
-        setImageGalleryData(images); // Set ImageGallery data
-        setUserCreditsResponse(userCredits); // set user credits from response
-        if (onUserCreditsUpdate) {
-          onUserCreditsUpdate(userCredits); // update parent component if callback is provided
+        dataResponse = await response.json();
+        setIsSubmitting(false); // Response is received, enable the button
+        console.log('Result:', dataResponse.result);
+        console.log('UserCredits:', dataResponse.credits);
+        if (dataResponse.error) {
+          console.log('ERROR FOUND');
+          // Set response
+          setErrorMessage(
+            dataResponse.result === 'LimitExceeded'
+              ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
+              : dataResponse.result === 'CreateAccount'
+                ? 'Create an account for free credits.'
+                : dataResponse.result === ''
+                  ? 'Error. Please try again.'
+                  : dataResponse.result
+          );
+          // Sample Image
+          setVideoData(
+            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3-fake.mp4'
+          ); // set the url of the response
+        } else {
+          console.log('NO ERROR FOUND');
+          if (dataResponse.result == 'InQueue') {
+            setMessage('Refresh your assets to see your image in queue.');
+          }
         }
+
+        setUserCreditsResponse(dataResponse.credits); // set user credits from response
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(dataResponse.credits); // update parent component if callback is provided
+        }
+        // setModalVideoUrl(dataResponse.result); // Set the image URL for the modal
+        setVideoData(dataResponse);
+        console.log('dataResponse: ' + JSON.stringify(dataResponse));
+        setIsModalOpen(false); // Open the modal
       }
     } catch (error) {
       setIsSubmitting(false);
@@ -111,19 +196,31 @@ export const VideoFromTextDynamicButton: React.FC<
           className="mt-1"
           loading={isSubmitting}
           onClick={handleGenerateVideo}
+          disabled={isSubmitting || message !== ''}
         >
           Generate Video
         </Button>
-        {isSubmitting && (
-          <div className="pt-4">
-            <Button onClick={handleGalleryClick}>
-              Check out the gallery while you wait for your video to generate...
-            </Button>
-          </div>
+
+        {/*Display Status*/}
+        {videoData && videoData.result === 'InQueue' ? (
+          <>
+            <div>
+              <h3>{message}</h3>
+            </div>
+            <div className="pt-4">
+              <Button onClick={handleGalleryClick}>
+                Check out the gallery while you wait for your video to
+                generate...
+              </Button>
+            </div>
+          </>
+        ) : (
+          ''
         )}
-        {videoData && (
+
+        {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
-            <p>Video Generation Complete</p>
+            <p>{videoGenCompleteMessage}</p>
             <div>
               <video width="600" controls>
                 <source src={videoData} type="video/mp4" />
@@ -131,6 +228,7 @@ export const VideoFromTextDynamicButton: React.FC<
               </video>
             </div>
             <div>
+              {JSON.stringify(videoData)}
               <Downloader fileUrl={videoData} />
             </div>
           </div>

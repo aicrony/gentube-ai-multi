@@ -41,7 +41,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     if (userId || userIp) {
       try {
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId}&userIp=${userIp}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
+          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
         );
         if (!response.ok) {
           console.log('Error fetching user assets.');

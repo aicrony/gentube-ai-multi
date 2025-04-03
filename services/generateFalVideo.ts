@@ -1,7 +1,8 @@
 import { fal, InProgressQueueStatus, QueueStatus } from '@fal-ai/client';
 require('dotenv').config();
 
-const apiEndpoint = process.env.KLING_API_ENDPOINT as string;
+let apiEndpoint = process.env.KLING_API_ENDPOINT as string;
+const apiTextToVideoEndpoint = process.env.KLING_API_TTV_ENDPOINT as string;
 const falApiWebhook = process.env.FAL_API_WEBHOOK as string;
 let result: any = null;
 const callback = {
@@ -45,13 +46,17 @@ export default async function generateFalVideo(
       if (motion && motion !== 'Static') {
         enhancedPrompt = `${enhancedPrompt} with ${motion.toLowerCase()} motion`;
       }
-      
+
       console.log('Enhanced prompt with motion:', enhancedPrompt);
-      
+
+      if (imageUrl == 'none') {
+        apiEndpoint = apiTextToVideoEndpoint;
+      }
+
       result = await fal.queue.submit(apiEndpoint, {
         input: {
           prompt: enhancedPrompt,
-          image_url: imageUrl,
+          ...(imageUrl && imageUrl !== 'none' && { image_url: imageUrl }),
           duration: duration ? duration : '5', // 5,10 for Kling; 4,6 for Haiper
           aspect_ratio: aspectRatio ? aspectRatio : '16:9',
           ...(loop && { tail_image_url: imageUrl })

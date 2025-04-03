@@ -287,19 +287,20 @@ export function VideoFromUrlDynamicButton({
             {videoGenButtonLabel}
           </Button>
         </div>
-        {isSubmitting && (
-          <div className="pt-4">
-            <Button onClick={handleGalleryClick}>
-              Check out the gallery while you wait for your video to generate...
-            </Button>
-          </div>
-        )}
 
         {/*Display Status*/}
         {videoData && videoData.result === 'InQueue' ? (
-          <div>
-            <h3>{message}</h3>
-          </div>
+          <>
+            <div>
+              <h3>{message}</h3>
+            </div>
+            <div className="pt-4">
+              <Button onClick={handleGalleryClick}>
+                Check out the gallery while you wait for your video to
+                generate...
+              </Button>
+            </div>
+          </>
         ) : (
           ''
         )}

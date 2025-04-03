@@ -167,17 +167,18 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         </Button>
       </div>
       <div className="my-assets-container">
-        {isSubmitting && (
-          <div className="pt-4">
-            <Button onClick={handleGalleryClick}>
-              Check out the gallery while you wait for your image to generate...
-            </Button>
-          </div>
-        )}
         {userCreditsResponse !== null && (
-          <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCreditsResponse}</p>
-          </div>
+          <>
+            <div className="pt-4">
+              <Button onClick={handleGalleryClick}>
+                Check out the gallery while you wait for your image to
+                generate...
+              </Button>
+            </div>
+            <div className={'padding-top-4'}>
+              <p>Remaining Credits: {userCreditsResponse}</p>
+            </div>
+          </>
         )}
         {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>

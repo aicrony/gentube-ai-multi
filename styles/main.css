@@ -183,7 +183,7 @@ a.disabled {
   min-width: 10px; /* Adjust the minimum width as needed */
 }
 
-@media (max-width: 853px) {
+@media (max-width: 885px) {
   .flex-container {
     flex-direction: column;
   }
