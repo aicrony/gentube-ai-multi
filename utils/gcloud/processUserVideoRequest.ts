@@ -137,7 +137,15 @@ export async function processUserVideoRequest(
       // userResponse.result =
       //   videoResult && videoResult.url ? videoResult.url : '';
     }
-    creditCost = 50;
+
+    if (duration == '10') {
+      creditCost = 100;
+    } else if (duration == '5') {
+      creditCost = 50;
+    } else {
+      creditCost = 500;
+    }
+
     // console.log('****** IMAGE RESULT: ********');
     // console.log(JSON.stringify(userResponse.result));
     // if (userResponse.result === '') {
