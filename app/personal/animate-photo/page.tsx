@@ -24,7 +24,7 @@ interface UserAsset {
 function AnimatePhotoContent() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { userCreditsResponse } = useUserCredits();
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
@@ -35,6 +35,7 @@ function AnimatePhotoContent() {
     2: false,
     3: false
   });
+  const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -51,6 +52,32 @@ function AnimatePhotoContent() {
 
     checkUser();
   }, [router]);
+
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        if (!userId || userIp === 'unknown') return;
+
+        const response = await fetch(
+          `/api/getUserCredits?userId=${userId}&userIp=${userIp}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch user credits');
+        }
+        const data = await response.json();
+        setCredits(data.credits);
+        if (setUserCreditsResponse) {
+          setUserCreditsResponse(data.credits);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user credits:', error);
+      }
+    };
+
+    if (userId && userIp !== 'unknown') {
+      fetchCredits();
+    }
+  }, [userId, userIp, setUserCreditsResponse]);
 
   // Auto-expand Step 2 when upload is complete
   useEffect(() => {
@@ -84,7 +111,11 @@ function AnimatePhotoContent() {
         <p className="text-lg">
           Transform your still images into dynamic videos
         </p>
-        <p className="mt-2">Available credits: {userCreditsResponse || 0}</p>
+        <p className="mt-2">
+          {credits !== null
+            ? `Available credits: ${credits}`
+            : 'Loading credits...'}
+        </p>
       </div>
 
       {error && (
