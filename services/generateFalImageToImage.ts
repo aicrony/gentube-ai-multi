@@ -21,7 +21,7 @@ export default async function generateFalImageToImage(
 ) {
   let result: any = null;
   const callback = {
-    webhook: falApiWebhook,
+    webhookUrl: falApiWebhook,
     response: result
   };
 

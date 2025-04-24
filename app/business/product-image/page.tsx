@@ -287,7 +287,7 @@ function ProductImageContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets assetType="img" />
+            <MyAssets />
           </div>
         )}
       </div>

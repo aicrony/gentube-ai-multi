@@ -99,6 +99,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     setIsSubmitting(true);
     setErrorMessage(null);
     setResultImageUrl(null);
+    setMessage(null); // Clear any previous messages
 
     // Add this before the fetch call
     console.log('Sending API request with:', {
@@ -325,35 +326,9 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
         {/* Result Image */}
         {resultImageUrl && (
-          <div
-            className="border rounded-md p-3"
-            style={{ backgroundColor: 'var(--card-bg-color)' }}
-          >
-            <h3 className="font-semibold text-lg mb-3">Your Product Image</h3>
-            <div className="relative aspect-square">
-              <img
-                src={resultImageUrl}
-                alt="Generated product image"
-                className="w-full h-full object-contain rounded"
-              />
-            </div>
-            <div className="flex justify-between mt-3">
-              <a
-                href={resultImageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-                style={{ color: 'var(--primary-color)' }}
-              >
-                Open in New Tab
-              </a>
-              <button
-                onClick={() => navigator.clipboard.writeText(resultImageUrl)}
-              >
-                Copy URL
-              </button>
-            </div>
-          </div>
+          <h3 className="font-semibold text-lg mb-3">
+            Your Product Image is Generating
+          </h3>
         )}
       </div>
 

@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: true,
-          result: 'Missing required parameters: product_image_url, background_image_url, or scene_description'
+          result:
+            'Missing required parameters: product_image_url, background_image_url, or scene_description'
         },
         { status: 400 }
       );
@@ -34,9 +35,9 @@ export async function POST(request: NextRequest) {
 
     // Get user credits
     const userCredits = await getUserCredits(userId, userIp);
-    
+
     // Check if user has enough credits (10 for product image)
-    if (userCredits < 10) {
+    if (userCredits && userCredits < 10) {
       return NextResponse.json(
         {
           error: true,
@@ -60,14 +61,16 @@ export async function POST(request: NextRequest) {
       manual_placement_selection: manual_placement_selection || 'bottom_center'
     });
 
+    console.log('ProductImageResult: ' + JSON.stringify(productImageResult));
+
     // Save user activity
     await saveUserActivity({
       id: undefined,
       AssetSource: product_image_url,
-      AssetType: 'img',
-      CountedAssetPreviousState: userCredits,
-      CountedAssetState: userCredits - 10,
-      CreatedAssetUrl: productImageResult.response.response_url || 'InQueue',
+      AssetType: 'que',
+      CountedAssetPreviousState: userCredits || 0,
+      CountedAssetState: typeof userCredits == 'number' ? userCredits - 10 : 0,
+      CreatedAssetUrl: productImageResult.response.request_id || 'InQueue',
       DateTime: new Date().toISOString(),
       Prompt: scene_description,
       SubscriptionTier: 0,
@@ -79,7 +82,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       error: false,
       result: productImageResult.response.response_url || 'InQueue',
-      credits: userCredits - 10
+      credits: typeof userCredits == 'number' ? userCredits - 10 : 0
     });
   } catch (error) {
     console.error('Product image generation error:', error);
