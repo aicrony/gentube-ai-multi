@@ -385,3 +385,23 @@ select {
 [data-theme='dark'] .text-gray-500 {
   color: #b0b0b0 !important;
 }
+
+/* Add to styles/main.css */
+button.red, .button-red {
+  background-color: #f13c4d; /* Same as danger button bg */
+  color: #ffffff;
+  padding: 0.40rem 0.40rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.red:hover, .button-red:hover {
+  background-color: #d8172a; /* Same as danger button hover bg */
+  color: #ffffff;
+}
+
+/* For Tailwind class-based application */
+.btn-red {
+  @apply bg-red-600 hover:bg-red-700 text-white;
+}

@@ -392,7 +392,7 @@ function SocialMediaContent() {
           onClick={() => toggleStep(3)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">Step 3: View Your Assets</h2>
+          <h2 className="text-xl font-bold">Step 3: Refresh Your Assets</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[3] ? (
               <FaChevronDown size={18} />
@@ -404,7 +404,7 @@ function SocialMediaContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets assetType="img" />
+            <MyAssets />
           </div>
         )}
       </div>

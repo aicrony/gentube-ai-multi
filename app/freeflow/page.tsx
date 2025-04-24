@@ -171,10 +171,7 @@ export default function Home() {
                   </Link>
                 )}
                 <Link href="/start">
-                  <Button
-                    variant="slim"
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
+                  <Button variant="slim" className="btn-red">
                     Guide Me Now
                   </Button>
                 </Link>

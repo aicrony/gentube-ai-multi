@@ -38,7 +38,7 @@ export default function HomePage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link href="/start">
-                    <Button variant="slim" className="px-8 py-3 text-lg">
+                    <Button variant="slim" className="btn-red">
                       Guide Me Now
                     </Button>
                   </Link>

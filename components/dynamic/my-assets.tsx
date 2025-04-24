@@ -257,7 +257,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
               )}
               <button
                 onClick={() => handleDelete(activity)}
-                className="danger icon-size"
+                className="red icon-size"
                 title="Delete Asset"
               >
                 <FaTrash />
