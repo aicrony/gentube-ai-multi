@@ -9,7 +9,7 @@ import {
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import Uploader from '@/components/dynamic/uploader';
-import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
+import { VideoFromUploadedImage } from '@/components/dynamic/video-from-uploaded-image';
 import '@/styles/main.css';
 import MyAssets from '@/components/dynamic/my-assets';
 
@@ -30,6 +30,11 @@ function AnimatePhotoContent() {
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
   const [userAssets, setUserAssets] = useState<UserAsset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openSteps, setOpenSteps] = useState<{ [key: number]: boolean }>({
+    1: true,
+    2: false,
+    3: false
+  });
 
   useEffect(() => {
     const checkUser = async () => {
@@ -47,15 +52,29 @@ function AnimatePhotoContent() {
     checkUser();
   }, [router]);
 
+  // Auto-expand Step 2 when upload is complete
+  useEffect(() => {
+    if (uploadedImageUrl) {
+      setOpenSteps((prev) => ({ ...prev, 2: true }));
+    }
+  }, [uploadedImageUrl]);
+
   const handleImageUploaded = (imageUrl: string) => {
     setUploadedImageUrl(imageUrl);
     setError(null);
   };
 
   const handleUserCreditsUpdate = (newCredits: number | null) => {
-    // This function will be passed to the VideoFromUrlDynamicButton
-    // and will be called when credits are updated
     console.log('Credits updated:', newCredits);
+    // After animation is complete, expand step 3
+    setOpenSteps((prev) => ({ ...prev, 3: true }));
+  };
+
+  const toggleStep = (stepNumber: number) => {
+    setOpenSteps((prev) => ({
+      ...prev,
+      [stepNumber]: !prev[stepNumber]
+    }));
   };
 
   return (
@@ -78,16 +97,27 @@ function AnimatePhotoContent() {
         className="p-6 rounded-lg mb-8"
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
-        <h2 className="text-xl font-bold mb-4">Step 1: Upload Your Photo</h2>
-        <div className="upload-dropzone">
-          <Uploader
-            onImageUploaded={handleImageUploaded}
-            userId={userId || undefined}
-          />
-        </div>
-        {uploadedImageUrl && (
-          <div className="mt-4 text-green-600">
-            Image uploaded successfully! Proceed to Step 2.
+        <button
+          onClick={() => toggleStep(1)}
+          className="w-full text-left flex justify-between items-center"
+        >
+          <h2 className="text-xl font-bold">Step 1: Upload Your Photo</h2>
+          <span>{openSteps[1] ? '▼' : '▶'}</span>
+        </button>
+
+        {openSteps[1] && (
+          <div className="mt-4">
+            <div className="upload-dropzone">
+              <Uploader
+                onImageUploaded={handleImageUploaded}
+                userId={userId || undefined}
+              />
+            </div>
+            {uploadedImageUrl && (
+              <div className="mt-4 text-green-600">
+                Image uploaded successfully! Proceed to Step 2.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -97,13 +127,24 @@ function AnimatePhotoContent() {
           className="p-6 rounded-lg mb-8"
           style={{ backgroundColor: 'var(--secondary-color)' }}
         >
-          <h2 className="text-xl font-bold mb-4">Step 2: Animate Your Photo</h2>
-          <VideoFromUrlDynamicButton
-            userId={userId}
-            userIp={userIp}
-            onUserCreditsUpdate={handleUserCreditsUpdate}
-            urlData={uploadedImageUrl || ''}
-          />
+          <button
+            onClick={() => toggleStep(2)}
+            className="w-full text-left flex justify-between items-center"
+          >
+            <h2 className="text-xl font-bold">Step 2: Animate Your Photo</h2>
+            <span>{openSteps[2] ? '▼' : '▶'}</span>
+          </button>
+
+          {openSteps[2] && (
+            <div className="mt-4">
+              <VideoFromUploadedImage
+                userId={userId}
+                userIp={userIp}
+                onUserCreditsUpdate={handleUserCreditsUpdate}
+                urlData={uploadedImageUrl || ''}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -111,10 +152,19 @@ function AnimatePhotoContent() {
         className="p-6 rounded-lg mb-8"
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
-        <h2 className="text-xl font-bold mb-4">Step 3: Refresh Your Assets</h2>
-        <div>
-          <MyAssets />
-        </div>
+        <button
+          onClick={() => toggleStep(3)}
+          className="w-full text-left flex justify-between items-center"
+        >
+          <h2 className="text-xl font-bold">Step 3: Refresh Your Assets</h2>
+          <span>{openSteps[3] ? '▼' : '▶'}</span>
+        </button>
+
+        {openSteps[3] && (
+          <div className="mt-4">
+            <MyAssets />
+          </div>
+        )}
       </div>
 
       <div className="mt-8 text-center">
