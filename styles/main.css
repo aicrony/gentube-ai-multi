@@ -249,3 +249,45 @@ a.disabled {
   border-color: var(--card-border-selected);
   background-color: var(--card-selected-bg);
 }
+
+/* Input fields styling with theme awareness */
+input[type="text"],
+input[type="file"]::file-selector-button,
+input[type="file"],
+textarea,
+select {
+  color: var(--text-color);
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+/* Focus state for inputs */
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+/* Placeholder text color */
+::placeholder {
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+/* File input specific styling */
+input[type="file"]::file-selector-button {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  border: none;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}
