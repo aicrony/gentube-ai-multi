@@ -145,12 +145,10 @@ function AnimatePhotoContent() {
 
         {openSteps[1] && (
           <div className="mt-4">
-            <div className="upload-dropzone">
-              <Uploader
-                onImageUploaded={handleImageUploaded}
-                userId={userId || undefined}
-              />
-            </div>
+            <Uploader
+              onImageUploaded={handleImageUploaded}
+              userId={userId || undefined}
+            />
             {uploadedImageUrl && (
               <div className="mt-4 text-green-600">
                 Image uploaded successfully! Proceed to Step 2.

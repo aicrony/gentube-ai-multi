@@ -21,9 +21,10 @@ interface UserActivity {
 
 interface MyAssetsProps {
   assetType?: string;
+  onSelectAsset?: (url: string) => void;
 }
 
-const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
+const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
   const userId = useUserId();
   const userIp = useUserIp();
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -174,15 +175,36 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         </p>
       )}
       {activities.map((activity, index) => (
-        <div key={index} className="border p-4 flex items-center">
-          <a
-            href={activity.CreatedAssetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+        <div 
+          key={index} 
+          className={`border p-4 flex items-center ${onSelectAsset ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+          onClick={(e) => {
+            if (onSelectAsset) {
+              // If in selection mode, make the whole row clickable
+              e.preventDefault();
+              if (activity.AssetType === 'vid') {
+                onSelectAsset(activity.AssetSource || activity.CreatedAssetUrl);
+              } else {
+                onSelectAsset(activity.CreatedAssetUrl);
+              }
+            }
+          }}
+        >
+          <div
             className={`w-16 h-16 flex items-center justify-center bg-gray-200 mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
             onClick={(e) => {
               e.preventDefault();
-              openModal(activity.CreatedAssetUrl);
+              if (onSelectAsset) {
+                // If in selection mode, call the selection callback
+                if (activity.AssetType === 'vid') {
+                  onSelectAsset(activity.AssetSource || activity.CreatedAssetUrl);
+                } else {
+                  onSelectAsset(activity.CreatedAssetUrl);
+                }
+              } else {
+                // Otherwise, open the modal as usual
+                openModal(activity.CreatedAssetUrl);
+              }
             }}
           >
             {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
@@ -206,7 +228,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 className="w-16 h-16 object-cover"
               />
             )}
-          </a>
+          </div>
           <div className="flex flex-wrap w-full max-w-full">
             <div className="pr-2">
               <p>

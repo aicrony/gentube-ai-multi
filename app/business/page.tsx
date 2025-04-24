@@ -41,7 +41,16 @@ export default function BusinessWorkflow() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mt-8">
+              <Link href="/business/logo-animation" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">Logo Animation</h3>
+                  <p className="">
+                    Turn your logo into a dynamic animated video
+                  </p>
+                </div>
+              </Link>
+
               <Link href="/business/brand-image" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">Brand Image</h3>
@@ -51,20 +60,22 @@ export default function BusinessWorkflow() {
                 </div>
               </Link>
 
+              <Link href="/business/product-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Product Placement
+                  </h3>
+                  <p className="">
+                    Place your products in professional, custom scenes
+                  </p>
+                </div>
+              </Link>
+
               <Link href="/business/product-demo" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">Product Demo</h3>
                   <p className="">
                     Showcase your products with engaging video demos
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/business/logo-animation" className="no-underline">
-                <div className="theme-card">
-                  <h3 className="text-xl font-semibold mb-2">Logo Animation</h3>
-                  <p className="">
-                    Turn your logo into a dynamic animated video
                   </p>
                 </div>
               </Link>
