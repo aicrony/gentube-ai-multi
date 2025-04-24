@@ -33,5 +33,20 @@ module.exports = {
   },
   experimental: {
     serverComponentsExternalPackages: ['@google-cloud/datastore', '@google-cloud/storage']
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't resolve 'fs', 'child_process' and other node modules on the client
+      config.resolve.fallback = {
+        fs: false,
+        child_process: false,
+        net: false,
+        tls: false,
+        dns: false,
+        os: false,
+        path: false
+      };
+    }
+    return config;
   }
 };

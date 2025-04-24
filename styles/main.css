@@ -291,3 +291,97 @@ input[type="file"]::file-selector-button:hover {
   background-color: var(--primary-color);
   color: var(--background-color);
 }
+
+/* Update input fields styling with better dark mode contrast */
+input[type="text"],
+input[type="file"],
+textarea,
+select {
+  color: var(--text-color);
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+/* Specific styling for dark mode inputs */
+[data-theme='dark'] input[type="text"],
+[data-theme='dark'] input[type="file"],
+[data-theme='dark'] textarea,
+[data-theme='dark'] select {
+  color: #f0f0f0; /* Brighter text for dark mode */
+  background-color: #333333; /* Consistent with card background */
+}
+
+/* Style the file input button properly in dark mode */
+[data-theme='dark'] input[type="file"]::file-selector-button {
+  background-color: var(--primary-color);
+  color: #222222; /* Dark text on light button for contrast */
+  border: none;
+}
+
+/* Placeholder text color with better contrast in dark mode */
+[data-theme='dark'] ::placeholder {
+  color: #b0b0b0; /* Lighter placeholder for dark mode */
+  opacity: 0.8;
+}
+
+/* Add these styles to your main.css file */
+
+/* Fix select elements with hardcoded gray-text class */
+.gray-text {
+  color: var(--text-color) !important; /* Override the hardcoded color */
+}
+
+/* Fix elements with hardcoded border colors */
+[data-theme='dark'] .border-black {
+  border-color: var(--border-color) !important;
+}
+
+/* Ensure all form elements follow theme */
+[data-theme='dark'] select,
+[data-theme='dark'] input {
+  border-color: var(--border-color);
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+}
+
+/* Specific fix for option elements in dark mode */
+[data-theme='dark'] option {
+  background-color: #333333;
+  color: #f0f0f0;
+}
+
+/* Improve focus states in dark mode */
+[data-theme='dark'] select:focus,
+[data-theme='dark'] input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(146, 187, 237, 0.4);
+}
+
+
+/* Add this to main.css */
+.upload-dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.upload-dropzone:hover {
+  background-color: var(--card-bg-hover);
+}
+
+/* Fix text visibility in upload zone for dark mode */
+[data-theme='dark'] .upload-dropzone p {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .upload-dropzone:hover p {
+  color: var(--text-color);
+}
+
+/* Fix the gray text inside the uploader */
+[data-theme='dark'] .text-gray-500 {
+  color: #b0b0b0 !important;
+}

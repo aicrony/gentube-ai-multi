@@ -36,9 +36,11 @@ export function VideoFromUrlDynamicButton({
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
   const [message, setMessage] = useState<string>('');
 
-  if (urlData && urlData.length > 0) {
-    setImageUrl(urlData);
-  }
+  useEffect(() => {
+    if (urlData && urlData.length > 0) {
+      setImageUrl(urlData);
+    }
+  }, [urlData]);
 
   let videoGenButtonLabel: string;
   let videoGenCompleteMessage: string;
