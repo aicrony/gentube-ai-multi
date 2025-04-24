@@ -12,6 +12,7 @@ import Uploader from '@/components/dynamic/uploader';
 import { VideoFromUploadedImage } from '@/components/dynamic/video-from-uploaded-image';
 import '@/styles/main.css';
 import MyAssets from '@/components/dynamic/my-assets';
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 interface UserAsset {
   CreatedAssetUrl: string;
@@ -133,7 +134,13 @@ function AnimatePhotoContent() {
           className="w-full text-left flex justify-between items-center"
         >
           <h2 className="text-xl font-bold">Step 1: Upload Your Photo</h2>
-          <span>{openSteps[1] ? '▼' : '▶'}</span>
+          <span>
+            {openSteps[1] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
         </button>
 
         {openSteps[1] && (
@@ -163,7 +170,13 @@ function AnimatePhotoContent() {
             className="w-full text-left flex justify-between items-center"
           >
             <h2 className="text-xl font-bold">Step 2: Animate Your Photo</h2>
-            <span>{openSteps[2] ? '▼' : '▶'}</span>
+            <span>
+              {openSteps[2] ? (
+                <FaChevronDown size={18} />
+              ) : (
+                <FaChevronRight size={18} />
+              )}
+            </span>
           </button>
 
           {openSteps[2] && (
@@ -188,7 +201,13 @@ function AnimatePhotoContent() {
           className="w-full text-left flex justify-between items-center"
         >
           <h2 className="text-xl font-bold">Step 3: Refresh Your Assets</h2>
-          <span>{openSteps[3] ? '▼' : '▶'}</span>
+          <span>
+            {openSteps[3] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
         </button>
 
         {openSteps[3] && (
