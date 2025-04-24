@@ -39,12 +39,17 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link href="/start">
                     <Button variant="slim" className="px-8 py-3 text-lg">
-                      Get Started Now
+                      Guide Me Now
                     </Button>
                   </Link>
                   <Link href="/pricing">
                     <Button variant="slim" className="px-8 py-3 text-lg">
                       View Pricing
+                    </Button>
+                  </Link>
+                  <Link href="/freeflow">
+                    <Button variant="slim" className="px-8 py-3 text-lg">
+                      I got this
                     </Button>
                   </Link>
                 </div>
