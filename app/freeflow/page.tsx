@@ -149,6 +149,9 @@ export default function Home() {
                     <Button variant="slim">Admin</Button>
                   </Link>
                 )}
+                <Link href="/">
+                  <Button variant="slim">Guide Me</Button>
+                </Link>
               </nav>
               {renderContent()}
             </div>
