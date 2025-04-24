@@ -1,0 +1,303 @@
+'use client';
+import React, { useState, useCallback, useEffect } from 'react';
+import Button from '@/components/ui/Button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useUserCredits } from '@/context/UserCreditsContext';
+import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice-button';
+import GenericModal from '@/components/ui/GenericModal';
+import ImageGallery from '@/functions/getGallery';
+import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
+
+interface SocialMediaImageButtonProps {
+  userId: string;
+  userIp: string;
+  onUserCreditsUpdate?: (credits: number | null) => void;
+  selectedStyles: string[];
+  selectedEffects: string[];
+  styleItems: { id: string; name: string; desc: string }[];
+  effectItems: { id: string; name: string; desc: string }[];
+}
+
+export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
+  userId,
+  userIp,
+  onUserCreditsUpdate,
+  selectedStyles,
+  selectedEffects,
+  styleItems,
+  effectItems
+}) => {
+  const [basePrompt, setBasePrompt] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [imageData, setImageData] = React.useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imageGalleryData, setImageGalleryData] = useState<any>(null);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+
+  // Build the full prompt from base prompt, styles, and effects
+  const getFullPrompt = useCallback(() => {
+    let fullPrompt = basePrompt;
+
+    // Add selected styles
+    const styleTexts: string[] = [];
+    selectedStyles.forEach((styleId) => {
+      const style = styleItems.find((s) => s.id === styleId);
+      if (style) styleTexts.push(style.desc);
+    });
+
+    // Add selected effects
+    const effectTexts: string[] = [];
+    selectedEffects.forEach((effectId) => {
+      const effect = effectItems.find((e) => e.id === effectId);
+      if (effect) effectTexts.push(effect.desc);
+    });
+
+    // Combine everything
+    const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
+    if (stylesAndEffects && fullPrompt) {
+      fullPrompt += ', ' + stylesAndEffects;
+    } else if (stylesAndEffects) {
+      fullPrompt = stylesAndEffects;
+    }
+
+    return fullPrompt;
+  }, [basePrompt, selectedStyles, selectedEffects, styleItems, effectItems]);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBasePrompt(event.target.value);
+  };
+
+  const renderVideoButton = useCallback(() => {
+    if (!imageData) {
+      return null;
+    } else {
+      let url = '';
+      if (imageData && imageData.url) {
+        url = imageData.url;
+      } else if (imageData && typeof imageData === 'string') {
+        url = imageData;
+      }
+
+      return (
+        <VideoDynamicButton
+          urlData={url}
+          userId={userId}
+          onUserCreditsUpdate={onUserCreditsUpdate}
+        />
+      );
+    }
+  }, [imageData, userId, onUserCreditsUpdate]);
+
+  const handleGenerateImage = async () => {
+    const finalPrompt = getFullPrompt();
+    if (!finalPrompt.trim()) {
+      setErrorMessage('Please enter a description or select styles/effects');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setImageData(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': userId,
+          'x-forwarded-for': userIp
+        },
+        body: JSON.stringify({ prompt: finalPrompt })
+      });
+
+      if (!response.ok) {
+        setIsSubmitting(false);
+        if (response.status === 429) {
+          const errorData = await response.json();
+          setErrorMessage(
+            errorData.error ||
+              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
+          );
+        } else {
+          setErrorMessage(
+            'Request Failed. Please check that the prompt is appropriate and try again.'
+          );
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return;
+      }
+
+      let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        dataResponse = await response.json();
+        setIsSubmitting(false);
+
+        if (dataResponse.error) {
+          setErrorMessage(
+            dataResponse.result === 'LimitExceeded'
+              ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
+              : dataResponse.result === 'CreateAccount'
+                ? 'Create an account for free credits.'
+                : dataResponse.result === ''
+                  ? 'Error. Please try again.'
+                  : dataResponse.result
+          );
+          setImageData(
+            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
+          );
+        } else if (!dataResponse.error) {
+          if (dataResponse.result == 'InQueue') {
+            setMessage('Refresh your assets to see your image in queue.');
+          }
+        }
+
+        setUserCreditsResponse(dataResponse.credits);
+        if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(dataResponse.credits);
+        }
+        setModalImageUrl(dataResponse.result);
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      console.error('There was an error with the fetch operation:', error);
+    }
+  };
+
+  const handleGalleryClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalImageUrl(null);
+  };
+
+  return (
+    <>
+      <CreditLimitNoticeButton errorMessage={errorMessage} />
+      <div className="social-media-container">
+        <div className="mb-4">
+          <Label htmlFor="prompt" className="text-base font-medium mb-2 block">
+            Describe your image
+          </Label>
+          <Input
+            as="text"
+            className="min-h-[50px] text-xl mb-2"
+            id="prompt"
+            placeholder="Enter a description of your image"
+            value={basePrompt}
+            onChange={handleInputChange}
+          />
+          <div className="text-sm text-gray-500 mt-1">
+            {selectedStyles.length > 0 || selectedEffects.length > 0 ? (
+              <div>
+                <p>Your image will include:</p>
+                <ul className="list-disc ml-5 mt-1">
+                  {selectedStyles.length > 0 && (
+                    <li>
+                      Styles:{' '}
+                      {selectedStyles
+                        .map((id) => styleItems.find((s) => s.id === id)?.name)
+                        .join(', ')}
+                    </li>
+                  )}
+                  {selectedEffects.length > 0 && (
+                    <li>
+                      Effects:{' '}
+                      {selectedEffects
+                        .map((id) => effectItems.find((e) => e.id === id)?.name)
+                        .join(', ')}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            ) : (
+              <p>
+                Select styles and effects from the options above to enhance your
+                image.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <Button
+          variant="slim"
+          type="submit"
+          className="mt-3"
+          loading={isSubmitting}
+          onClick={handleGenerateImage}
+        >
+          Generate Social Media Image
+        </Button>
+      </div>
+
+      <div className="my-assets-container">
+        {/*{userCreditsResponse !== null && (*/}
+        {/*  <>*/}
+        {/*    <div className="pt-4">*/}
+        {/*      <Button onClick={handleGalleryClick}>*/}
+        {/*        Check out the gallery while you wait for your image to generate...*/}
+        {/*      </Button>*/}
+        {/*    </div>*/}
+        {/*  </>*/}
+        {/*)}*/}
+
+        {message && (
+          <div className="padding-top-4">
+            <h3>{message}</h3>
+          </div>
+        )}
+
+        {imageData &&
+          imageData !== '[object%20Object]' &&
+          imageData.code !== 'ERR_NON_2XX_3XX_RESPONSE' && (
+            <div className="margin-top-8">
+              <div className="text-green-600 font-semibold mb-3">
+                Your social media image is ready!
+              </div>
+              <div className="relative border rounded overflow-hidden">
+                <img
+                  src={imageData}
+                  alt="Generated Social Media Image"
+                  className="w-full"
+                />
+                <div className="mt-3 flex justify-between items-center">
+                  <a
+                    href={imageData}
+                    target="_blank"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Open in New Tab
+                  </a>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(imageData)}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    Copy URL
+                  </button>
+                </div>
+              </div>
+              {renderVideoButton()}
+            </div>
+          )}
+
+        {imageData && imageData.code === 'ERR_NON_2XX_3XX_RESPONSE' && (
+          <div className="margin-top-8">
+            <div>
+              <h3>Error. Please try again by refining your prompt.</h3>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <GenericModal isOpen={isModalOpen} onClose={closeModal}>
+        <ImageGallery />
+      </GenericModal>
+    </>
+  );
+};

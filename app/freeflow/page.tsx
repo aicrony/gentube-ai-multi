@@ -13,6 +13,7 @@ import { useUserIp } from '@/context/UserIpContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import GalleryAssets from '@/components/dynamic/gallery-assets';
+import { Label } from '@/components/ui/label';
 
 export default function Home() {
   const [userId] = useState<string | 'none'>(useUserId() || 'none');
@@ -57,6 +58,16 @@ export default function Home() {
     if (pathname === '/freeflow' || pathname === '/freeflow/') {
       return (
         <>
+          <div className="my-assets-container">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-xl font-bold">Image Generation</h1>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">
+                Describe an image to start your video.
+              </Label>
+            </div>
+          </div>
           <ImageDynamicButton
             userId={userId}
             userIp={userIp}
@@ -79,6 +90,16 @@ export default function Home() {
     } else if (pathname === '/freeflow/text-to-video') {
       return (
         <>
+          <div className="my-assets-container">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-xl font-bold">Video Generation</h1>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">
+                Describe the video, be as detailed as possible.
+              </Label>
+            </div>
+          </div>
           <VideoFromTextDynamicButton
             userId={userId}
             userIp={userIp}
@@ -149,8 +170,13 @@ export default function Home() {
                     <Button variant="slim">Admin</Button>
                   </Link>
                 )}
-                <Link href="/">
-                  <Button variant="slim">Guide Me</Button>
+                <Link href="/start">
+                  <Button
+                    variant="slim"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Guide Me Now
+                  </Button>
                 </Link>
               </nav>
               {renderContent()}

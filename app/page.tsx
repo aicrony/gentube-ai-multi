@@ -49,7 +49,7 @@ export default function HomePage() {
                   </Link>
                   <Link href="/freeflow">
                     <Button variant="slim" className="px-8 py-3 text-lg">
-                      I got this
+                      No Guide Needed
                     </Button>
                   </Link>
                 </div>

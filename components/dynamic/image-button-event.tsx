@@ -144,10 +144,6 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className="my-assets-container">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-bold">Image Generation</h1>
-        </div>
-        <Label htmlFor="prompt">Describe an image to start your video.</Label>
         <Input
           as="text"
           className="min-h-[50px] text-xl"
@@ -167,19 +163,19 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         </Button>
       </div>
       <div className="my-assets-container">
-        {userCreditsResponse !== null && (
-          <>
-            <div className="pt-4">
-              <Button onClick={handleGalleryClick}>
-                Check out the gallery while you wait for your image to
-                generate...
-              </Button>
-            </div>
-            <div className={'padding-top-4'}>
-              <p>Remaining Credits: {userCreditsResponse}</p>
-            </div>
-          </>
-        )}
+        {/*{userCreditsResponse !== null && (*/}
+        {/*  <>*/}
+        {/*    <div className="pt-4">*/}
+        {/*      <Button onClick={handleGalleryClick}>*/}
+        {/*        Check out the gallery while you wait for your image to*/}
+        {/*        generate...*/}
+        {/*      </Button>*/}
+        {/*    </div>*/}
+        {/*    <div className={'padding-top-4'}>*/}
+        {/*      <p>Remaining Credits: {userCreditsResponse}</p>*/}
+        {/*    </div>*/}
+        {/*  </>*/}
+        {/*)}*/}
         {userCreditsResponse !== null && (
           <div className={'padding-top-4'}>
             <h3>{message}</h3>

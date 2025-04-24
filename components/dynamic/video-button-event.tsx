@@ -240,13 +240,13 @@ export function VideoDynamicButton({
         >
           {videoGenButtonLabel}
         </Button>
-        {isSubmitting && (
-          <div className="pt-4">
-            <Button onClick={handleGalleryClick}>
-              Check out the gallery while you wait for your video to generate...
-            </Button>
-          </div>
-        )}
+        {/*{isSubmitting && (*/}
+        {/*  <div className="pt-4">*/}
+        {/*    <Button onClick={handleGalleryClick}>*/}
+        {/*      Check out the gallery while you wait for your video to generate...*/}
+        {/*    </Button>*/}
+        {/*  </div>*/}
+        {/*)}*/}
         {videoData &&
         videoData.webhook &&
         videoData.response &&

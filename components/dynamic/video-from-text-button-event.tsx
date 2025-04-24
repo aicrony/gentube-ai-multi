@@ -173,20 +173,12 @@ export const VideoFromTextDynamicButton: React.FC<
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      <div className="my-assets-container">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">Text to Video Generation</h1>
-        </div>
-      </div>
 
       <div className="my-assets-container">
-        <Label htmlFor="prompt">
-          Enter a description of the video you would like to generate.
-        </Label>
         <Input
           as="text"
           id="prompt"
-          placeholder={'What will happen in the video?'}
+          placeholder={'Explain what should happen in the video.'}
           className="min-h-[25px] text-xl"
           onChange={(e) => setVideoDescription(e.target.value)}
         />
@@ -265,21 +257,21 @@ export const VideoFromTextDynamicButton: React.FC<
         </Button>
 
         {/*Display Status*/}
-        {videoData && videoData.result === 'InQueue' ? (
-          <>
-            <div>
-              <h3>{message}</h3>
-            </div>
-            <div className="pt-4">
-              <Button onClick={handleGalleryClick}>
-                Check out the gallery while you wait for your video to
-                generate...
-              </Button>
-            </div>
-          </>
-        ) : (
-          ''
-        )}
+        {/*{videoData && videoData.result === 'InQueue' ? (*/}
+        {/*  <>*/}
+        {/*    <div>*/}
+        {/*      <h3>{message}</h3>*/}
+        {/*    </div>*/}
+        {/*    <div className="pt-4">*/}
+        {/*      <Button onClick={handleGalleryClick}>*/}
+        {/*        Check out the gallery while you wait for your video to*/}
+        {/*        generate...*/}
+        {/*      </Button>*/}
+        {/*    </div>*/}
+        {/*  </>*/}
+        {/*) : (*/}
+        {/*  ''*/}
+        {/*)}*/}
 
         {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
@@ -296,11 +288,11 @@ export const VideoFromTextDynamicButton: React.FC<
             </div>
           </div>
         )}
-        {userCreditsResponse !== null && (
-          <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCreditsResponse}</p>
-          </div>
-        )}
+        {/*{userCreditsResponse !== null && (*/}
+        {/*  <div className={'padding-top-4'}>*/}
+        {/*    <p>Remaining Credits: {userCreditsResponse}</p>*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
       <GenericModal isOpen={isModalOpen} onClose={closeModal}>
         <ImageGallery />
