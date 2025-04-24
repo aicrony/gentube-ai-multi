@@ -25,34 +25,39 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   // State for image selection
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isBackgroundModalOpen, setIsBackgroundModalOpen] = useState(false);
-  const [selectedProductImage, setSelectedProductImage] = useState<string | null>(null);
-  const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<string | null>(null);
-  
+  const [selectedProductImage, setSelectedProductImage] = useState<
+    string | null
+  >(null);
+  const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<
+    string | null
+  >(null);
+
   // State for form inputs
   const [sceneDescription, setSceneDescription] = useState('');
   const [placementType, setPlacementType] = useState('manual_placement');
   const [placement, setPlacement] = useState('bottom_center');
-  
+
   // State for request handling
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resultImageUrl, setResultImageUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  
+
   // Credits
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   // Placement options
   const placementOptions = [
-    { value: 'bottom_center', label: 'Bottom Center' },
+    { value: 'upper_left', label: 'Upper Left' },
+    { value: 'upper_right', label: 'Upper Right' },
     { value: 'bottom_left', label: 'Bottom Left' },
     { value: 'bottom_right', label: 'Bottom Right' },
-    { value: 'center', label: 'Center' },
-    { value: 'center_left', label: 'Center Left' },
-    { value: 'center_right', label: 'Center Right' },
-    { value: 'top_center', label: 'Top Center' },
-    { value: 'top_left', label: 'Top Left' },
-    { value: 'top_right', label: 'Top Right' }
+    { value: 'right_center', label: 'Right Center' },
+    { value: 'left_center', label: 'Left Center' },
+    { value: 'upper_center', label: 'Upper Center' },
+    { value: 'bottom_center', label: 'Bottom Center' },
+    { value: 'center_vertical', label: 'Center Vertical' },
+    { value: 'center_horizontal', label: 'Center Horizontal' }
   ];
 
   // Use uploadedImageUrl when provided
@@ -76,6 +81,8 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   // Generate product image
   const handleGenerateProductImage = async () => {
     // Validate inputs
+    const trimmedDescription = sceneDescription.trim();
+
     if (!selectedProductImage) {
       setErrorMessage('Please select a product image');
       return;
@@ -84,7 +91,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       setErrorMessage('Please select a background image');
       return;
     }
-    if (!sceneDescription.trim()) {
+    if (!trimmedDescription) {
       setErrorMessage('Please enter a scene description');
       return;
     }
@@ -92,6 +99,15 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     setIsSubmitting(true);
     setErrorMessage(null);
     setResultImageUrl(null);
+
+    // Add this before the fetch call
+    console.log('Sending API request with:', {
+      product_image_url: selectedProductImage,
+      background_image_url: selectedBackgroundImage,
+      scene_description: trimmedDescription,
+      placement_type: placementType,
+      manual_placement_selection: placement
+    });
 
     try {
       const response = await fetch('/api/product-image', {
@@ -104,7 +120,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         body: JSON.stringify({
           product_image_url: selectedProductImage,
           background_image_url: selectedBackgroundImage,
-          scene_description: sceneDescription,
+          scene_description: trimmedDescription, // Use the trimmed version
           placement_type: placementType,
           manual_placement_selection: placement
         })
@@ -129,7 +145,9 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         );
       } else {
         if (data.result === 'InQueue') {
-          setMessage('Your product image is in queue. Refresh your assets to see it when ready.');
+          setMessage(
+            'Your product image is in queue. Refresh your assets to see it when ready.'
+          );
         } else {
           setResultImageUrl(data.result);
         }
@@ -148,7 +166,17 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   };
 
   // Asset Selection Modal
-  const AssetSelectionModal = ({ isOpen, onClose, onSelect, title }: { isOpen: boolean, onClose: () => void, onSelect: (url: string) => void, title: string }) => {
+  const AssetSelectionModal = ({
+    isOpen,
+    onClose,
+    onSelect,
+    title
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSelect: (url: string) => void;
+    title: string;
+  }) => {
     if (!isOpen) return null;
 
     return (
@@ -166,21 +194,29 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   return (
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
-      
+
       <div className="space-y-6">
         {/* Product Image Selection */}
         <div className="space-y-2">
-          <Label htmlFor="productImage" className="font-medium">Product Image</Label>
+          <Label htmlFor="productImage" className="font-medium">
+            Product Image
+          </Label>
           <div className="flex items-center space-x-3">
-            <div 
+            <div
               className="border p-2 rounded w-24 h-24 flex items-center justify-center cursor-pointer"
               style={{ backgroundColor: 'var(--card-bg-color)' }}
               onClick={() => setIsProductModalOpen(true)}
             >
               {selectedProductImage ? (
-                <img src={selectedProductImage} alt="Selected product" className="max-w-full max-h-full object-contain" />
+                <img
+                  src={selectedProductImage}
+                  alt="Selected product"
+                  className="max-w-full max-h-full object-contain"
+                />
               ) : (
-                <div className="text-sm text-center">Click to select product</div>
+                <div className="text-sm text-center">
+                  Click to select product
+                </div>
               )}
             </div>
             <Button onClick={() => setIsProductModalOpen(true)}>
@@ -191,28 +227,40 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
         {/* Background Image Selection */}
         <div className="space-y-2">
-          <Label htmlFor="backgroundImage" className="font-medium">Background Image</Label>
+          <Label htmlFor="backgroundImage" className="font-medium">
+            Background Image
+          </Label>
           <div className="flex items-center space-x-3">
-            <div 
+            <div
               className="border p-2 rounded w-24 h-24 flex items-center justify-center cursor-pointer"
               style={{ backgroundColor: 'var(--card-bg-color)' }}
               onClick={() => setIsBackgroundModalOpen(true)}
             >
               {selectedBackgroundImage ? (
-                <img src={selectedBackgroundImage} alt="Selected background" className="max-w-full max-h-full object-contain" />
+                <img
+                  src={selectedBackgroundImage}
+                  alt="Selected background"
+                  className="max-w-full max-h-full object-contain"
+                />
               ) : (
-                <div className="text-sm text-center">Click to select background</div>
+                <div className="text-sm text-center">
+                  Click to select background
+                </div>
               )}
             </div>
             <Button onClick={() => setIsBackgroundModalOpen(true)}>
-              {selectedBackgroundImage ? 'Change Background' : 'Select Background'}
+              {selectedBackgroundImage
+                ? 'Change Background'
+                : 'Select Background'}
             </Button>
           </div>
         </div>
 
         {/* Scene Description */}
         <div className="space-y-2">
-          <Label htmlFor="sceneDescription" className="font-medium">Scene Description</Label>
+          <Label htmlFor="sceneDescription" className="font-medium">
+            Scene Description
+          </Label>
           <Input
             as="textarea"
             id="sceneDescription"
@@ -225,19 +273,21 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
         {/* Placement Options */}
         <div className="space-y-2">
-          <Label htmlFor="placement" className="font-medium">Product Placement</Label>
+          <Label htmlFor="placement" className="font-medium">
+            Product Placement
+          </Label>
           <select
             id="placement"
             value={placement}
             onChange={(e) => setPlacement(e.target.value)}
             className="w-full p-2 border rounded-md text-base"
-            style={{ 
-              backgroundColor: 'var(--card-bg-color)', 
+            style={{
+              backgroundColor: 'var(--card-bg-color)',
               borderColor: 'var(--border-color)',
               color: 'var(--text-color)'
             }}
           >
-            {placementOptions.map(option => (
+            {placementOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -252,39 +302,46 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
           className="w-full"
           loading={isSubmitting}
           onClick={handleGenerateProductImage}
-          disabled={isSubmitting || !selectedProductImage || !selectedBackgroundImage}
+          disabled={
+            isSubmitting || !selectedProductImage || !selectedBackgroundImage
+          }
         >
           Generate Product Image (10 credits)
         </Button>
 
         {/* Status Messages */}
         {message && (
-          <div className="border p-3 rounded" 
-               style={{ 
-                 backgroundColor: 'rgba(74, 144, 226, 0.1)', 
-                 borderColor: 'rgba(74, 144, 226, 0.3)',
-                 color: 'var(--primary-color)' 
-               }}>
+          <div
+            className="border p-3 rounded"
+            style={{
+              backgroundColor: 'rgba(74, 144, 226, 0.1)',
+              borderColor: 'rgba(74, 144, 226, 0.3)',
+              color: 'var(--primary-color)'
+            }}
+          >
             {message}
           </div>
         )}
 
         {/* Result Image */}
         {resultImageUrl && (
-          <div className="border rounded-md p-3" style={{ backgroundColor: 'var(--card-bg-color)' }}>
+          <div
+            className="border rounded-md p-3"
+            style={{ backgroundColor: 'var(--card-bg-color)' }}
+          >
             <h3 className="font-semibold text-lg mb-3">Your Product Image</h3>
             <div className="relative aspect-square">
-              <img 
-                src={resultImageUrl} 
-                alt="Generated product image" 
+              <img
+                src={resultImageUrl}
+                alt="Generated product image"
                 className="w-full h-full object-contain rounded"
               />
             </div>
             <div className="flex justify-between mt-3">
-              <a 
-                href={resultImageUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={resultImageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:underline"
                 style={{ color: 'var(--primary-color)' }}
               >
@@ -301,14 +358,14 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       </div>
 
       {/* Asset Selection Modals */}
-      <AssetSelectionModal 
+      <AssetSelectionModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onSelect={handleProductSelect}
         title="Select Product Image"
       />
-      
-      <AssetSelectionModal 
+
+      <AssetSelectionModal
         isOpen={isBackgroundModalOpen}
         onClose={() => setIsBackgroundModalOpen(false)}
         onSelect={handleBackgroundSelect}

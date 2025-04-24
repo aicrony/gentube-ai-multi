@@ -16,7 +16,9 @@ interface ProductImageParams {
   manual_placement_selection?: string;
 }
 
-export default async function generateFalImageToImage(params: ProductImageParams) {
+export default async function generateFalImageToImage(
+  params: ProductImageParams
+) {
   let result: any = null;
   const callback = {
     webhook: falApiWebhook,
@@ -47,15 +49,17 @@ export default async function generateFalImageToImage(params: ProductImageParams
       // Make the actual API call
       result = await fal.queue.submit(apiEndpoint, {
         input: {
+          prompt: params.scene_description,
           image_url: params.image_url,
           scene_description: params.scene_description,
           ref_image_url: params.ref_image_url,
           optimize_description: params.optimize_description ?? true,
           num_results: params.num_results ?? 1,
           fast: params.fast ?? true,
-          placement_type: params.placement_type ?? "manual_placement",
+          placement_type: params.placement_type ?? 'manual_placement',
           shot_size: params.shot_size ?? [1000, 1000],
-          manual_placement_selection: params.manual_placement_selection ?? "bottom_center"
+          manual_placement_selection:
+            params.manual_placement_selection ?? 'bottom_center'
         },
         webhookUrl: falApiWebhook
       });
