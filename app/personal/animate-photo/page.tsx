@@ -11,6 +11,15 @@ import Link from 'next/link';
 import Uploader from '@/components/dynamic/uploader';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import '@/styles/main.css';
+import MyAssets from '@/components/dynamic/my-assets';
+
+interface UserAsset {
+  CreatedAssetUrl: string;
+  Prompt: string;
+  AssetSource: string;
+  AssetType?: string | string[] | undefined;
+  DateTime: Date;
+}
 
 function AnimatePhotoContent() {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
@@ -19,6 +28,8 @@ function AnimatePhotoContent() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
+  const [userAssets, setUserAssets] = useState<UserAsset[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -95,6 +106,16 @@ function AnimatePhotoContent() {
           />
         </div>
       )}
+
+      <div
+        className="p-6 rounded-lg mb-8"
+        style={{ backgroundColor: 'var(--secondary-color)' }}
+      >
+        <h2 className="text-xl font-bold mb-4">Step 3: Refresh Your Assets</h2>
+        <div>
+          <MyAssets />
+        </div>
+      </div>
 
       <div className="mt-8 text-center">
         <Link href="/personal" className="text-blue-600 hover:underline">
