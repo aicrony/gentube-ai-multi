@@ -7,7 +7,8 @@ import {
   FaImage,
   FaVideo,
   FaTrash,
-  FaPlay
+  FaPlay,
+  FaDownload
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
@@ -106,6 +107,37 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     }
   };
 
+  const handleDownload = async (url: string, assetType: string) => {
+    try {
+      // For videos and images, determine file extension
+      const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
+      const fileName = `asset${fileExtension}`;
+
+      // Fetch the file as a blob
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // Create an object URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+
+      // Append to the document, click, and remove
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error downloading asset:', error);
+      alert('Failed to download the asset');
+    }
+  };
+
   const openModal = (url: string) => {
     setModalMediaUrl(url);
     setIsModalOpen(true);
@@ -126,7 +158,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       : assetType === 'img'
         ? 'Image'
         : assetType === 'upl'
-          ? 'Uploads'
+          ? 'Uploaded'
           : '';
 
   return (
@@ -255,6 +287,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                   <FaVideo />
                 </button>
               )}
+              <button
+                onClick={() =>
+                  handleDownload(
+                    activity.AssetType === 'vid'
+                      ? activity.CreatedAssetUrl
+                      : activity.CreatedAssetUrl,
+                    activity.AssetType
+                  )
+                }
+                className="icon-size"
+                title="Download Asset"
+              >
+                <FaDownload />
+              </button>
               <button
                 onClick={() => handleDelete(activity)}
                 className="red icon-size"

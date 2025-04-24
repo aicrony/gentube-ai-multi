@@ -97,17 +97,52 @@ export const UploadImageDynamicButton: React.FC<
         {uploadResponse && (
           <>
             <div className={'margin-top-8'}>
-              <p>Image Uploaded</p>
-              <a
-                href={uploadResponse}
-                target={'_blank'}
-                className={'textUnderline'}
-              >
-                {uploadResponse}
-              </a>
-            </div>
-            <div>
-              <MyAssets assetType={'upl'} />
+              {uploadResponse && (
+                <>
+                  <div className="margin-top-8">
+                    <p>Image Uploaded</p>
+                    <div
+                      onClick={() => {
+                        navigator.clipboard
+                          .writeText(uploadResponse)
+                          .then(() => {
+                            // Create and show notification
+                            const notification = document.createElement('div');
+                            notification.textContent =
+                              'URL copied to clipboard!';
+                            notification.style.position = 'fixed';
+                            notification.style.bottom = '20px';
+                            notification.style.right = '20px';
+                            notification.style.padding = '10px 15px';
+                            notification.style.backgroundColor = '#4CAF50';
+                            notification.style.color = 'white';
+                            notification.style.borderRadius = '4px';
+                            notification.style.zIndex = '1000';
+                            notification.style.boxShadow =
+                              '0 2px 5px rgba(0,0,0,0.2)';
+                            document.body.appendChild(notification);
+
+                            setTimeout(() => {
+                              document.body.removeChild(notification);
+                            }, 1500);
+                          })
+                          .catch((err) => {
+                            console.error('Failed to copy URL: ', err);
+                          });
+                      }}
+                      className="underline cursor-pointer text-blue-600"
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Copy URL to clipboard"
+                    >
+                      {uploadResponse}
+                    </div>
+                  </div>
+                  <div>
+                    <MyAssets assetType={'upl'} />
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
