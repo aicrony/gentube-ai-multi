@@ -1,6 +1,6 @@
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
-import { localIpConfig, normalizeIp } from '@/utils/ipUtils';
+import { localIpConfig } from '@/utils/ipUtils';
 
 require('dotenv').config();
 
@@ -66,7 +66,9 @@ export async function getUserAssets(
   if (assetType && assetType.length > 0) {
     if (assetType.includes(',')) {
       // For multiple asset types, use an 'IN' filter
-      const assetTypes = assetType.split(',').map(type => type.trim());
+      const assetTypes = (
+        typeof assetType === 'string' ? assetType.split(',') : assetType
+      ).map((type: string) => type.trim());
       query = query.filter('AssetType', 'IN', assetTypes);
     } else {
       // For a single asset type, use the '=' filter
@@ -100,7 +102,9 @@ export async function getPublicAssets(
   if (assetType && assetType.length > 0) {
     if (assetType.includes(',')) {
       // For multiple asset types, use an 'IN' filter
-      const assetTypes = assetType.split(',').map(type => type.trim());
+      const assetTypes = (
+        typeof assetType === 'string' ? assetType.split(',') : assetType
+      ).map((type: string) => type.trim());
       query = query.filter('AssetType', 'IN', assetTypes);
     } else {
       // For a single asset type, use the '=' filter
@@ -134,7 +138,9 @@ export async function getGalleryAssets(
   if (assetType && assetType.length > 0) {
     if (assetType.includes(',')) {
       // For multiple asset types, use an 'IN' filter
-      const assetTypes = assetType.split(',').map(type => type.trim());
+      const assetTypes = (
+        typeof assetType === 'string' ? assetType.split(',') : assetType
+      ).map((type: string) => type.trim());
       query = query.filter('AssetType', 'IN', assetTypes);
     } else {
       // For a single asset type, use the '=' filter
