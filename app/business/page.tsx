@@ -104,6 +104,8 @@ export default function BusinessWorkflow() {
                   </p>
                 </div>
               </Link>
+
+              {/* Manage Assets */}
             </div>
           </div>
         </main>
