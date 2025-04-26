@@ -109,7 +109,7 @@ export default function HomePage() {
                 <h3 className="text-2xl font-semibold mb-4">
                   Personal Workflow
                 </h3>
-                <p className="mb-6">
+                <p className="text-left mb-6">
                   Perfect for content creators, social media enthusiasts, and
                   anyone looking to create stunning visuals for personal
                   projects.
@@ -138,13 +138,14 @@ export default function HomePage() {
                 <h3 className="text-2xl font-semibold mb-4">
                   Business Workflow
                 </h3>
-                <p className="mb-6">
+                <p className="text-left mb-6">
                   Tailored for marketing teams, small businesses, and
                   entrepreneurs who need professional-grade visual content.
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
                   <li>✓ Brand image generation</li>
-                  <li>✓ Product demo videos</li>
+                  <li>✓ Product placement images</li>
+                  <li>✓ Product videos</li>
                   <li>✓ Logo animation</li>
                 </ul>
                 <Link href="/business" className="mt-auto">
@@ -164,7 +165,7 @@ export default function HomePage() {
                 }}
               >
                 <h3 className="text-2xl font-semibold mb-4">Free Flow</h3>
-                <p className="mb-6">
+                <p className="text-left mb-6">
                   For advanced users who want direct access to all tools without
                   guided workflows for maximum flexibility.
                 </p>
