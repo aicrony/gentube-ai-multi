@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
 import '@/styles/main.css';
 import MyAssets from '@/components/dynamic/my-assets';
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 interface UserAsset {
   CreatedAssetUrl: string;
@@ -96,7 +97,7 @@ function StoryVideoContent() {
           <Link href="/personal" className="back-button">
             ←
           </Link>
-          Create Story Videos
+          Story Videos
         </h1>
         <p className="text-lg">
           Transform your text descriptions into captivating videos
@@ -123,7 +124,13 @@ function StoryVideoContent() {
           className="w-full text-left flex justify-between items-center"
         >
           <h2 className="text-xl font-bold">Step 1: Describe The Scene</h2>
-          <span>{openSteps[1] ? '▼' : '▶'}</span>
+          <span>
+            {openSteps[1] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
         </button>
 
         {openSteps[1] && (
@@ -148,7 +155,13 @@ function StoryVideoContent() {
           className="w-full text-left flex justify-between items-center"
         >
           <h2 className="text-xl font-bold">Step 2: Refresh Your Assets</h2>
-          <span>{openSteps[2] ? '▼' : '▶'}</span>
+          <span>
+            {openSteps[2] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
         </button>
 
         {openSteps[2] && (

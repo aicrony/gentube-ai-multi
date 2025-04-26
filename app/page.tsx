@@ -25,16 +25,19 @@ export default function HomePage() {
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
               <div className="lg:w-1/2 text-center lg:text-left">
-                <h1 className="text-3xl md:text-4xl font-extrabold mb-6">
-                  Easily Generate AI Images and Videos with GenTube.ai Workflows
+                <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl mb-6">
+                  GenTube.ai
                 </h1>
+                <h2 className="text-2xl sm:text-center sm:text-4xl font-extrabold mb-6">
+                  AI Workflows Make You Unstoppable
+                </h2>
                 <p className="text-xl mb-8">
                   GenTube.ai Workflows will guide you through generating AI
                   images and videos for your business and personal success.
                 </p>
                 <p className="text-xl mb-8">
-                  And for those quick wins, Kai has your back if you have
-                  questions. He'll get you out of a jam at deadline time.
+                  3-Step guided workflows are your answer for fast and easy
+                  results for social and professional AI images and videos.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link href="/start">

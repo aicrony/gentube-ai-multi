@@ -222,13 +222,13 @@ function SocialMediaContent() {
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold mb-2 pr-6">
-          <Link href="/personal" className="back-button">
+          <Link href="/business" className="back-button">
             ←
           </Link>
           Social Media Post
         </h1>
         <p className="text-lg">
-          Create stunning images to share on your favorite platforms
+          Create stunning images for social business platforms
         </p>
         <p className="mt-2">
           {credits !== null

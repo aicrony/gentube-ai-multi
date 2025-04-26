@@ -175,8 +175,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
         </p>
       )}
       {activities.map((activity, index) => (
-        <div 
-          key={index} 
+        <div
+          key={index}
           className={`border p-4 flex items-center ${onSelectAsset ? 'cursor-pointer hover:bg-gray-50' : ''}`}
           onClick={(e) => {
             if (onSelectAsset) {
@@ -197,7 +197,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
               if (onSelectAsset) {
                 // If in selection mode, call the selection callback
                 if (activity.AssetType === 'vid') {
-                  onSelectAsset(activity.AssetSource || activity.CreatedAssetUrl);
+                  onSelectAsset(
+                    activity.AssetSource || activity.CreatedAssetUrl
+                  );
                 } else {
                   onSelectAsset(activity.CreatedAssetUrl);
                 }
@@ -240,7 +242,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
                     : activity.AssetType === 'upl'
                       ? 'Upload'
                       : activity.AssetType === 'que'
-                        ? 'In Queue'
+                        ? 'In Queue (click Refresh Assets every 20 seconds)'
                         : activity.AssetType === 'err'
                           ? 'ERROR'
                           : activity.AssetType}
