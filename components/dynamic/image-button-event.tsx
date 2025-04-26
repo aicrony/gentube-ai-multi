@@ -115,6 +115,11 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
             setMessage('Refresh your assets to see your image in queue.');
+            
+            // Auto-clear the message after 30 seconds
+            setTimeout(() => {
+              setMessage('');
+            }, 30000);
           }
         }
 

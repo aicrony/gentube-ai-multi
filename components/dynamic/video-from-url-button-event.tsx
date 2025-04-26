@@ -156,7 +156,12 @@ export function VideoFromUrlDynamicButton({
         } else {
           console.log('NO ERROR FOUND');
           if (dataResponse.result == 'InQueue') {
-            setMessage('Refresh your assets to see your image in queue.');
+            setMessage('Refresh your assets to see your video in queue.');
+            
+            // Auto-clear the message after 30 seconds
+            setTimeout(() => {
+              setMessage('');
+            }, 30000);
           }
         }
 

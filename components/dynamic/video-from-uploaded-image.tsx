@@ -86,7 +86,7 @@ export function VideoFromUploadedImage({
       setMessage('Refresh your assets to see your queued video.');
       const timer = setTimeout(() => {
         setMessage('');
-      }, 10000);
+      }, 30000); // Changed from 10 seconds to 30 seconds
       return () => clearTimeout(timer);
     }
   }, [videoData]);
@@ -287,7 +287,7 @@ export function VideoFromUploadedImage({
         {videoData && videoData.result === 'InQueue' ? (
           <>
             <div className="mt-4 text-green-600">
-              Refresh your assets below to see your image in queue.
+              Refresh your assets below to see your video in queue.
             </div>
             {/*<div className="pt-4">*/}
             {/*  <Button onClick={handleGalleryClick}>*/}

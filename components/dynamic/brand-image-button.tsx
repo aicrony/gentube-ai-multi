@@ -154,6 +154,11 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
             setMessage(
               'Refresh your assets below in Step 3 to see your image in queue.'
             );
+            
+            // Auto-clear the message after 30 seconds
+            setTimeout(() => {
+              setMessage('');
+            }, 30000);
           }
         }
 

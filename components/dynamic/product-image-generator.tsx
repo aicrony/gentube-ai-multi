@@ -157,6 +157,11 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
           setMessage(
             'Your product image is in queue. Refresh your assets to see it when ready.'
           );
+          
+          // Auto-clear the message after 30 seconds
+          setTimeout(() => {
+            setMessage(null);
+          }, 30000);
         } else {
           setResultImageUrl(data.result);
         }

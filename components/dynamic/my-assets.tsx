@@ -42,6 +42,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   const [autoRefreshTimer, setAutoRefreshTimer] = useState<NodeJS.Timeout | null>(null);
   const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<number | null>(null);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0); // Track number of refreshes
+  const [nextRefreshIn, setNextRefreshIn] = useState<number | null>(null); // Countdown to next refresh in seconds
   const limit = 10;
   const promptLength = 100;
 
@@ -115,18 +117,53 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
         return;
       }
       
-      // Set a new timer to refresh after 20 seconds
-      const timer = setTimeout(() => {
-        console.log('Auto-refreshing assets due to queued items');
-        fetchUserActivities(userId, userIp);
-      }, 20000); // 20 seconds
+      // Determine refresh interval based on refresh count
+      // First refresh: 10 seconds, Second refresh: 20 seconds, Subsequent refreshes: 30 seconds
+      let refreshInterval;
+      if (refreshCount === 0) {
+        refreshInterval = 10000; // 10 seconds for first refresh
+      } else if (refreshCount === 1) {
+        refreshInterval = 20000; // 20 seconds for second refresh
+      } else {
+        refreshInterval = 30000; // 30 seconds for all subsequent refreshes
+      }
       
+      console.log(`Setting up refresh in ${refreshInterval/1000} seconds (refresh #${refreshCount + 1})`);
+      
+      // Set initial countdown value
+      setNextRefreshIn(Math.floor(refreshInterval / 1000));
+      
+      // Create countdown timer that updates every second
+      const countdownInterval = setInterval(() => {
+        setNextRefreshIn(prev => {
+          if (prev === null || prev <= 1) {
+            // Clear this interval when we reach zero
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      // Set a new timer with the calculated interval
+      const timer = setTimeout(() => {
+        console.log(`Auto-refreshing assets due to queued items (refresh #${refreshCount + 1})`);
+        fetchUserActivities(userId, userIp);
+        // Increment refresh count
+        setRefreshCount(prevCount => prevCount + 1);
+        // Clear the countdown interval
+        clearInterval(countdownInterval);
+      }, refreshInterval);
+      
+      // Store the timer so we can clear it if needed
       setAutoRefreshTimer(timer);
     } else {
       // No more queued items, reset the state
       if (autoRefreshStartTime) {
         setAutoRefreshStartTime(null);
         setIsAutoRefreshing(false);
+        setRefreshCount(0); // Reset the refresh count when no more queued items
+        setNextRefreshIn(null); // Clear the countdown timer
       }
     }
     
@@ -137,7 +174,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activities, userId, userIp, autoRefreshQueued, autoRefreshStartTime]);
+  }, [activities, userId, userIp, autoRefreshQueued, autoRefreshStartTime, refreshCount]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -152,6 +189,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
     setLoading(true);
     setPage(0);
     fetchUserActivities(userId, userIp);
+    // Reset refresh count for auto-refresh timing to start over
+    setRefreshCount(0);
   };
 
   const handleDelete = async (activity: UserActivity) => {
@@ -265,7 +304,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
         <div className="flex items-center">
           {isAutoRefreshing && (
             <span className="text-xs mr-2" style={{ color: 'var(--primary-color)' }}>
-              Auto-refreshing...
+              Auto-refreshing {nextRefreshIn !== null ? `(${nextRefreshIn}s)` : '...'}
             </span>
           )}
           <button onClick={handleRefresh}>
