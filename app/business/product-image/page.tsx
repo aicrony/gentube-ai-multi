@@ -160,8 +160,8 @@ function ProductImageContent() {
         {openSteps[1] && (
           <div className="mt-4">
             <p className="mb-4">
-              Upload your product and background images. You'll need at least
-              one of each for Step 2.
+              Upload your product and background images if you have not already.
+              You'll need at least one of each for Step 2.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -223,9 +223,9 @@ function ProductImageContent() {
               </div>
             )}
 
-            <div className="mt-6">
-              <MyAssets assetType="upl" />
-            </div>
+            {/*<div className="mt-6">*/}
+            {/*  <MyAssets assetType="upl" />*/}
+            {/*</div>*/}
           </div>
         )}
       </div>

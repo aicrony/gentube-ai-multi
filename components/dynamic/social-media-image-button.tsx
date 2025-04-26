@@ -40,8 +40,9 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
 
   // Build the full prompt from base prompt, styles, and effects
   const getFullPrompt = useCallback(() => {
-    let fullPrompt = basePrompt;
-
+    // Process the base prompt to handle punctuation correctly
+    let processedBasePrompt = basePrompt.trim();
+    
     // Add selected styles
     const styleTexts: string[] = [];
     selectedStyles.forEach((styleId) => {
@@ -56,14 +57,45 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       if (effect) effectTexts.push(effect.desc);
     });
 
-    // Combine everything
+    // Combine all styles and effects
     const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
-    if (stylesAndEffects && fullPrompt) {
-      fullPrompt += ', ' + stylesAndEffects;
-    } else if (stylesAndEffects) {
-      fullPrompt = stylesAndEffects;
+    
+    // No styles or effects selected, just return the base prompt
+    if (!stylesAndEffects) {
+      return processedBasePrompt;
     }
-
+    
+    // Handle empty base prompt case
+    if (!processedBasePrompt) {
+      return stylesAndEffects;
+    }
+    
+    // Check the ending punctuation of the base prompt
+    const endsWithPunctuation = /[.!?;]$/.test(processedBasePrompt);
+    const endsWithComma = /,$/.test(processedBasePrompt);
+    
+    // Combine based on the punctuation
+    let fullPrompt;
+    if (endsWithPunctuation) {
+      // If ends with sentence-ending punctuation, start a new sentence for styles
+      fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
+    } else if (endsWithComma) {
+      // If already ends with a comma, just add the styles without comma
+      fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
+    } else {
+      // No ending punctuation, add with a comma
+      fullPrompt = `${processedBasePrompt}, ${stylesAndEffects}`;
+    }
+    
+    // Log for debugging
+    console.log('Social media prompt construction:', {
+      basePrompt: processedBasePrompt,
+      endsWithPunctuation: /[.!?;]$/.test(processedBasePrompt),
+      endsWithComma: /,$/.test(processedBasePrompt),
+      stylesAndEffects,
+      fullPrompt
+    });
+    
     return fullPrompt;
   }, [basePrompt, selectedStyles, selectedEffects, styleItems, effectItems]);
 

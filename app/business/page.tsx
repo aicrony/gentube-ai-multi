@@ -45,20 +45,23 @@ export default function BusinessWorkflow() {
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto mt-4">
-              <Link href="/business/logo-animation" className="no-underline">
+              <Link href="/business/logo-creation" className="no-underline">
                 <div className="theme-card">
-                  <h3 className="text-xl font-semibold mb-2">Logo Animation</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Logo & Asset Creation
+                  </h3>
                   <p className="">
-                    Turn your logo into a dynamic animated video
+                    Create professional logos, icons, and digital assets.
                   </p>
                 </div>
               </Link>
 
-              <Link href="/business/brand-image" className="no-underline">
+              <Link href="/business/business-image" className="no-underline">
                 <div className="theme-card">
-                  <h3 className="text-xl font-semibold mb-2">Brand Image</h3>
+                  <h3 className="text-xl font-semibold mb-2">Business Image</h3>
                   <p className="">
-                    Create professional images aligned with your brand identity
+                    {/*Create professional images aligned with your brand identity*/}
+                    Create professional images for commercial use.
                   </p>
                 </div>
               </Link>
@@ -89,6 +92,15 @@ export default function BusinessWorkflow() {
                   <p className="">
                     Create business social posts for LinkedIn, Facebook, and
                     more
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/business/brand-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">Brand Image</h3>
+                  <p className="">
+                    Combine logo with images to create professional mashups.
                   </p>
                 </div>
               </Link>
