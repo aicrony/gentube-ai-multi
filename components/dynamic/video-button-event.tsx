@@ -206,29 +206,29 @@ export function VideoDynamicButton({
             ))}
           </select>
         </div>
-        <div>
-          <label htmlFor="loop">Loop: </label>
-          <select
-            id="loop"
-            value={loop}
-            onChange={(e) => setLoop(e.target.value)}
-            className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
-            disabled={duration === '10'}
-            title={
-              duration === '10'
-                ? 'Looping is not available for 10-second videos'
-                : 'Enable or disable video looping'
-            }
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-          {duration === '10' && (
-            <div className="text-xs text-gray-500 mt-1">
-              (Disabled for 10-second videos)
-            </div>
-          )}
-        </div>
+        {/*<div>*/}
+        {/*  <label htmlFor="loop">Loop: </label>*/}
+        {/*  <select*/}
+        {/*    id="loop"*/}
+        {/*    value={loop}*/}
+        {/*    onChange={(e) => setLoop(e.target.value)}*/}
+        {/*    className="min-h-[25px] text-xl gray-text rounded-corners border border-black"*/}
+        {/*    disabled={duration === '10'}*/}
+        {/*    title={*/}
+        {/*      duration === '10'*/}
+        {/*        ? 'Looping is not available for 10-second videos'*/}
+        {/*        : 'Enable or disable video looping'*/}
+        {/*    }*/}
+        {/*  >*/}
+        {/*    <option value="true">Yes</option>*/}
+        {/*    <option value="false">No</option>*/}
+        {/*  </select>*/}
+        {/*  {duration === '10' && (*/}
+        {/*    <div className="text-xs text-gray-500 mt-1">*/}
+        {/*      (Disabled for 10-second videos)*/}
+        {/*    </div>*/}
+        {/*  )}*/}
+        {/*</div>*/}
       </div>
       <div className={'pt-4'}>
         <Button

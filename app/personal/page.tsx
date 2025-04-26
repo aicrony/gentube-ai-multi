@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function PersonalWorkflow() {
@@ -40,7 +40,10 @@ export default function PersonalWorkflow() {
               <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
                 GenTube.ai
               </h1>
-              <h2 className="text-2xl font-bold mt-6">
+              <h2 className="text-2xl font-bold mt-6 pr-6">
+                <Link href="/start" className="back-button">
+                  ←
+                </Link>
                 Personal Content Workflow
               </h2>
               <p className="max-w-2xl m-auto mt-2 text-xl sm:text-center">
@@ -50,8 +53,7 @@ export default function PersonalWorkflow() {
                 <h3 className="text-xl font-bold mt-4">{signInMessage}</h3>
               )}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-4">
               <Link href="/personal/social-media" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">
@@ -81,12 +83,6 @@ export default function PersonalWorkflow() {
                     Turn your still images into stunning videos
                   </p>
                 </div>
-              </Link>
-            </div>
-
-            <div className="text-center mt-8">
-              <Link href="/start" className="hover:underline">
-                ← Back to Workflow Selection
               </Link>
             </div>
           </div>

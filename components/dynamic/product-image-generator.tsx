@@ -34,6 +34,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
   // State for form inputs
   const [sceneDescription, setSceneDescription] = useState('');
+  const [prompt, setPrompt] = useState('');
   const [placementType, setPlacementType] = useState('manual_placement');
   const [placement, setPlacement] = useState('bottom_center');
 
@@ -82,6 +83,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   const handleGenerateProductImage = async () => {
     // Validate inputs
     const trimmedDescription = sceneDescription.trim();
+    const trimmedPrompt = prompt.trim();
 
     if (!selectedProductImage) {
       setErrorMessage('Please select a product image');
@@ -89,6 +91,10 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     }
     if (!selectedBackgroundImage) {
       setErrorMessage('Please select a background image');
+      return;
+    }
+    if (!trimmedPrompt) {
+      setErrorMessage('Please enter a prompt');
       return;
     }
     if (!trimmedDescription) {
@@ -105,6 +111,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     console.log('Sending API request with:', {
       product_image_url: selectedProductImage,
       background_image_url: selectedBackgroundImage,
+      prompt: trimmedPrompt,
       scene_description: trimmedDescription,
       placement_type: placementType,
       manual_placement_selection: placement
@@ -121,7 +128,8 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         body: JSON.stringify({
           product_image_url: selectedProductImage,
           background_image_url: selectedBackgroundImage,
-          scene_description: trimmedDescription, // Use the trimmed version
+          prompt: trimmedPrompt,
+          scene_description: trimmedDescription,
           placement_type: placementType,
           manual_placement_selection: placement
         })
@@ -257,11 +265,33 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
           </div>
         </div>
 
+        {/* Prompt */}
+        <div className="space-y-2">
+          <Label htmlFor="prompt" className="font-medium">
+            Prompt / Product Description
+          </Label>
+          {/*<p className="instruction-text">*/}
+          {/*  Enter a detailed prompt describing how you want your product to appear (e.g., professional product photo of a shoe with soft lighting on a wooden desk)*/}
+          {/*</p>*/}
+          <Input
+            as="textarea"
+            id="prompt"
+            placeholder="Enter a detailed prompt for the AI (e.g., photo of a [product] on a desk with soft lighting, professional product photography)"
+            className="min-h-[100px] text-base"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+        </div>
+
         {/* Scene Description */}
         <div className="space-y-2">
           <Label htmlFor="sceneDescription" className="font-medium">
             Scene Description
           </Label>
+          {/*<p className="instruction-text">*/}
+          {/*  Describe the specific scene or setting where your product should be*/}
+          {/*  placed (e.g., on a beach, in a modern kitchen, on a mountain)*/}
+          {/*</p>*/}
           <Input
             as="textarea"
             id="sceneDescription"

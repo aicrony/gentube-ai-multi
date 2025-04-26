@@ -359,7 +359,7 @@ select {
 }
 
 
-/* 
+/*
  * Global Styles for File Upload Components
  * These styles should be used for all file upload components across the app
  * to maintain consistency. The Uploader component uses these styles by default.
@@ -508,4 +508,24 @@ button.red:hover, .button-red:hover {
   color: var(--text-color);
   opacity: 0.8;
   line-height: 1.5;
+}
+
+/* Back button styling */
+.back-button {
+  color: var(--primary-color);
+  font-size: 1.25rem; /* text-xl */
+  padding-right: 0.75rem; /* pr-3 */
+  padding-left: 0.75rem; /* pl-3 */
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.back-button:hover {
+  color: var(--primary-color-dark, #2c5282); /* hover:text-blue-800 equivalent */
+}
+
+/* Add a dark mode variation if needed */
+[data-theme='dark'] .back-button:hover {
+  opacity: 0.8;
 }

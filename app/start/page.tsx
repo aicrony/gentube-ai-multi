@@ -45,8 +45,13 @@ export default function WorkflowSelection() {
               )}
             </div>
 
-            <div className="grid gap-6 text-center max-w-3xl mx-auto mt-8">
-              <h2 className="text-2xl font-bold">Choose Your Workflow</h2>
+            <div className="grid gap-6 text-center max-w-3xl mx-auto mt-4">
+              <h2 className="text-2xl font-bold pr-6">
+                <Link href="/" className="back-button">
+                  ←
+                </Link>
+                Choose Your Workflow
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div
                   className={`workflow-option ${selectedWorkflow === WORKFLOWS.PERSONAL ? 'selected' : ''}`}
@@ -76,12 +81,6 @@ export default function WorkflowSelection() {
                   <p className="">Access all tools without guided workflows</p>
                 </div>
               </div>
-            </div>
-
-            <div className="text-center mt-12">
-              <Link href="/" className="hover:underline">
-                ← Back to Home
-              </Link>
             </div>
           </div>
         </main>

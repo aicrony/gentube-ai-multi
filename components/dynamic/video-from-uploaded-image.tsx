@@ -248,29 +248,29 @@ export function VideoFromUploadedImage({
               ))}
             </select>
           </div>
-          <div>
-            <Label htmlFor="loop">Loop: </Label>
-            <select
-              id="loop"
-              value={loop}
-              onChange={(e) => setLoop(e.target.value)}
-              className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
-              disabled={duration === '10'}
-              title={
-                duration === '10'
-                  ? 'Looping is not available for 10-second videos'
-                  : 'Enable or disable video looping'
-              }
-            >
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
-            {duration === '10' && (
-              <div className="text-xs text-gray-500 mt-1">
-                (Disabled for 10-second videos)
-              </div>
-            )}
-          </div>
+          {/*<div>*/}
+          {/*  <Label htmlFor="loop">Loop: </Label>*/}
+          {/*  <select*/}
+          {/*    id="loop"*/}
+          {/*    value={loop}*/}
+          {/*    onChange={(e) => setLoop(e.target.value)}*/}
+          {/*    className="min-h-[25px] text-xl gray-text rounded-corners border border-black"*/}
+          {/*    disabled={duration === '10'}*/}
+          {/*    title={*/}
+          {/*      duration === '10'*/}
+          {/*        ? 'Looping is not available for 10-second videos'*/}
+          {/*        : 'Enable or disable video looping'*/}
+          {/*    }*/}
+          {/*  >*/}
+          {/*    <option value="true">Yes</option>*/}
+          {/*    <option value="false">No</option>*/}
+          {/*  </select>*/}
+          {/*  {duration === '10' && (*/}
+          {/*    <div className="text-xs text-gray-500 mt-1">*/}
+          {/*      (Disabled for 10-second videos)*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</div>*/}
         </div>
         <div className={'pt-4'}>
           <Button
@@ -284,24 +284,21 @@ export function VideoFromUploadedImage({
             {videoGenButtonLabel}
           </Button>
         </div>
-
-        {/*Display Status*/}
-        {/*{videoData && videoData.result === 'InQueue' ? (*/}
-        {/*  <>*/}
-        {/*    <div>*/}
-        {/*      <h3>{message}</h3>*/}
-        {/*    </div>*/}
-        {/*    <div className="pt-4">*/}
-        {/*      <Button onClick={handleGalleryClick}>*/}
-        {/*        Check out the gallery while you wait for your video to*/}
-        {/*        generate...*/}
-        {/*      </Button>*/}
-        {/*    </div>*/}
-        {/*  </>*/}
-        {/*) : (*/}
-        {/*  ''*/}
-        {/*)}*/}
-
+        {videoData && videoData.result === 'InQueue' ? (
+          <>
+            <div className="mt-4 text-green-600">
+              Refresh your assets below to see your image in queue.
+            </div>
+            {/*<div className="pt-4">*/}
+            {/*  <Button onClick={handleGalleryClick}>*/}
+            {/*    Check out the gallery while you wait for your video to*/}
+            {/*    generate...*/}
+            {/*  </Button>*/}
+            {/*</div>*/}
+          </>
+        ) : (
+          ''
+        )}
         {videoData && getFileNameFromUrl(videoData) !== '' && (
           <div className={'padding-top-4'}>
             <p>{videoGenCompleteMessage}</p>
@@ -317,11 +314,11 @@ export function VideoFromUploadedImage({
             </div>
           </div>
         )}
-        {userCreditsResponse !== null && (
-          <div className={'padding-top-4'}>
-            <p>Remaining Credits: {userCreditsResponse}</p>
-          </div>
-        )}
+        {/*{userCreditsResponse !== null && (*/}
+        {/*  <div className={'padding-top-4'}>*/}
+        {/*    <p>Remaining Credits: {userCreditsResponse}</p>*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
       <GenericModal isOpen={isModalOpen} onClose={closeModal}>
         <ImageGallery />

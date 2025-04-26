@@ -16,18 +16,19 @@ export async function POST(request: NextRequest) {
     const {
       product_image_url,
       background_image_url,
+      prompt,
       scene_description,
       placement_type,
       manual_placement_selection
     } = body;
 
     // Validate required fields
-    if (!product_image_url || !background_image_url || !scene_description) {
+    if (!product_image_url || !background_image_url || !prompt || !scene_description) {
       return NextResponse.json(
         {
           error: true,
           result:
-            'Missing required parameters: product_image_url, background_image_url, or scene_description'
+            'Missing required parameters: product_image_url, background_image_url, prompt, or scene_description'
         },
         { status: 400 }
       );
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
     const productImageResult = await generateFalImageToImage({
       image_url: product_image_url,
       ref_image_url: background_image_url,
+      prompt: prompt,
       scene_description: scene_description,
       optimize_description: true,
       num_results: 1,
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
       CountedAssetState: typeof userCredits == 'number' ? userCredits - 10 : 0,
       CreatedAssetUrl: productImageResult.response.request_id || 'InQueue',
       DateTime: new Date().toISOString(),
-      Prompt: scene_description,
+      Prompt: `Prompt: ${prompt} | Scene: ${scene_description}`,
       SubscriptionTier: 0,
       UserId: userId,
       UserIp: userIp

@@ -6,6 +6,7 @@ const falApiWebhook = process.env.FAL_IMAGE_API_WEBHOOK as string;
 
 interface ProductImageParams {
   image_url: string;
+  prompt: string;
   scene_description: string;
   ref_image_url: string;
   optimize_description?: boolean;
@@ -49,7 +50,7 @@ export default async function generateFalImageToImage(
       // Make the actual API call
       result = await fal.queue.submit(apiEndpoint, {
         input: {
-          prompt: params.scene_description,
+          prompt: params.prompt,
           image_url: params.image_url,
           scene_description: params.scene_description,
           ref_image_url: params.ref_image_url,

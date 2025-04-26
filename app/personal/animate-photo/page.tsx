@@ -108,7 +108,12 @@ function AnimatePhotoContent() {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Animate Your Photo</h1>
+        <h1 className="text-3xl font-bold mb-2 pr-6">
+          <Link href="/business" className="back-button">
+            ←
+          </Link>
+          Animate Your Photo
+        </h1>
         <p className="text-lg">
           Transform your still images into dynamic videos
         </p>
@@ -213,12 +218,6 @@ function AnimatePhotoContent() {
             <MyAssets />
           </div>
         )}
-      </div>
-
-      <div className="mt-8 text-center">
-        <Link href="/personal" className="text-blue-600 hover:underline">
-          ← Back to Personal Workflow
-        </Link>
       </div>
     </div>
   );

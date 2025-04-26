@@ -234,7 +234,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
           loading={isSubmitting}
           onClick={handleGenerateImage}
         >
-          Generate Social Media Image
+          Generate Brand Image
         </Button>
       </div>
 
