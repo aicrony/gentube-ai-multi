@@ -48,10 +48,10 @@ export default function BusinessWorkflow() {
               <Link href="/business/logo-creation" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">
-                    Logo & Asset Creation
+                    Logo & Meme Creation
                   </h3>
                   <p className="">
-                    Create professional logos, icons, and digital assets.
+                    Create professional logos, memes, and digital assets.
                   </p>
                 </div>
               </Link>
