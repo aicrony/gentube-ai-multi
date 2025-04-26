@@ -188,6 +188,7 @@ function ProductVideoContent() {
                   assetType="upl,img"
                   selectedUrl={uploadedImageUrl || undefined}
                   onSelectAsset={(url) => handleImageUploaded(url)}
+                  autoRefreshQueued={true}
                 />
               )}
             </div>
@@ -255,7 +256,7 @@ function ProductVideoContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets />
+            <MyAssets autoRefreshQueued={true} />
           </div>
         )}
       </div>

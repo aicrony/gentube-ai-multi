@@ -23,9 +23,10 @@ interface MyAssetsProps {
   assetType?: string;
   onSelectAsset?: (url: string) => void;
   selectedUrl?: string;
+  autoRefreshQueued?: boolean; // New prop to trigger auto-refresh for queued items
 }
 
-const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedUrl }) => {
+const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedUrl, autoRefreshQueued = false }) => {
   const userId = useUserId();
   const userIp = useUserIp();
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -38,6 +39,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(selectedUrl);
+  const [autoRefreshTimer, setAutoRefreshTimer] = useState<NodeJS.Timeout | null>(null);
+  const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<number | null>(null);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const limit = 10;
   const promptLength = 100;
 
@@ -78,6 +82,62 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   useEffect(() => {
     setSelectedAssetUrl(selectedUrl);
   }, [selectedUrl]);
+  
+  // Auto-refresh logic for queued items
+  useEffect(() => {
+    // Only proceed if autoRefreshQueued is true
+    if (!autoRefreshQueued) {
+      return;
+    }
+    
+    // Clear any existing timer
+    if (autoRefreshTimer) {
+      clearTimeout(autoRefreshTimer);
+      setAutoRefreshTimer(null);
+    }
+    
+    // Check if any assets are in queue
+    const hasQueuedItems = activities.some(activity => activity.AssetType === 'que');
+    
+    if (hasQueuedItems) {
+      // Start auto-refresh only if we haven't exceeded the 10-minute limit
+      const currentTime = Date.now();
+      const tenMinutesInMs = 10 * 60 * 1000;
+      
+      if (!autoRefreshStartTime) {
+        // First time seeing queued items, start the timer
+        setAutoRefreshStartTime(currentTime);
+        setIsAutoRefreshing(true);
+      } else if (currentTime - autoRefreshStartTime > tenMinutesInMs) {
+        // We've been refreshing for over 10 minutes, stop auto-refresh
+        console.log('Auto-refresh timeout reached after 10 minutes');
+        setIsAutoRefreshing(false);
+        return;
+      }
+      
+      // Set a new timer to refresh after 20 seconds
+      const timer = setTimeout(() => {
+        console.log('Auto-refreshing assets due to queued items');
+        fetchUserActivities(userId, userIp);
+      }, 20000); // 20 seconds
+      
+      setAutoRefreshTimer(timer);
+    } else {
+      // No more queued items, reset the state
+      if (autoRefreshStartTime) {
+        setAutoRefreshStartTime(null);
+        setIsAutoRefreshing(false);
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      if (autoRefreshTimer) {
+        clearTimeout(autoRefreshTimer);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activities, userId, userIp, autoRefreshQueued, autoRefreshStartTime]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -202,7 +262,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        <button onClick={handleRefresh}>Refresh Assets</button>
+        <div className="flex items-center">
+          {isAutoRefreshing && (
+            <span className="text-xs mr-2" style={{ color: 'var(--primary-color)' }}>
+              Auto-refreshing...
+            </span>
+          )}
+          <button onClick={handleRefresh}>
+            {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
+          </button>
+        </div>
       </div>
       {activities && activities.length === 0 && (
         <p>
