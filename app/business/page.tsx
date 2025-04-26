@@ -65,9 +65,7 @@ export default function BusinessWorkflow() {
 
               <Link href="/business/product-image" className="no-underline">
                 <div className="theme-card">
-                  <h3 className="text-xl font-semibold mb-2">
-                    Product Placement
-                  </h3>
+                  <h3 className="text-xl font-semibold mb-2">Product Image</h3>
                   <p className="">
                     Place your products in professional, custom scenes
                   </p>

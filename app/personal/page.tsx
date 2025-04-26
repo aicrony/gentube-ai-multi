@@ -54,6 +54,17 @@ export default function PersonalWorkflow() {
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-4">
+              <Link href="/personal/animate-photo" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Animate Your Photo
+                  </h3>
+                  <p className="">
+                    Turn your still images into stunning videos
+                  </p>
+                </div>
+              </Link>
+
               <Link href="/personal/social-media" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">
@@ -70,17 +81,6 @@ export default function PersonalWorkflow() {
                   <h3 className="text-xl font-semibold mb-2">Story Video</h3>
                   <p className="">
                     Generate engaging videos from your text descriptions
-                  </p>
-                </div>
-              </Link>
-
-              <Link href="/personal/animate-photo" className="no-underline">
-                <div className="theme-card">
-                  <h3 className="text-xl font-semibold mb-2">
-                    Animate Your Photo
-                  </h3>
-                  <p className="">
-                    Turn your still images into stunning videos
                   </p>
                 </div>
               </Link>

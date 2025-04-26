@@ -114,7 +114,7 @@ function ProductImageContent() {
           <Link href="/business" className="back-button">
             ←
           </Link>
-          Product Image Generator
+          Product Image
         </h1>
         <p className="text-lg">
           Place your product in beautiful scenes and backgrounds
