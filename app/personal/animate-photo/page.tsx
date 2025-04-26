@@ -31,10 +31,11 @@ function AnimatePhotoContent() {
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
   const [userAssets, setUserAssets] = useState<UserAsset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [openSteps, setOpenSteps] = useState<{ [key: number]: boolean }>({
+  const [openSteps, setOpenSteps] = useState<{ [key: string | number]: boolean }>({
     1: true,
     2: false,
-    3: false
+    3: false,
+    'assets': false // Default to hidden assets
   });
   const [credits, setCredits] = useState<number | null>(null);
 
@@ -88,7 +89,12 @@ function AnimatePhotoContent() {
   }, [uploadedImageUrl]);
 
   const handleImageUploaded = (imageUrl: string) => {
-    setUploadedImageUrl(imageUrl);
+    // If empty string is passed, it means deselection
+    if (imageUrl === '') {
+      setUploadedImageUrl(null);
+    } else {
+      setUploadedImageUrl(imageUrl);
+    }
     setError(null);
   };
 
@@ -109,7 +115,7 @@ function AnimatePhotoContent() {
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold mb-2 pr-6">
-          <Link href="/business" className="back-button">
+          <Link href="/personal" className="back-button">
             ←
           </Link>
           Animate Your Photo
@@ -138,7 +144,7 @@ function AnimatePhotoContent() {
           onClick={() => toggleStep(1)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">Step 1: Upload Your Photo</h2>
+          <h2 className="text-xl font-bold">Step 1: Select Your Photo</h2>
           <span>
             {openSteps[1] ? (
               <FaChevronDown size={18} />
@@ -150,13 +156,43 @@ function AnimatePhotoContent() {
 
         {openSteps[1] && (
           <div className="mt-4">
-            <Uploader
-              onImageUploaded={handleImageUploaded}
-              userId={userId || undefined}
-            />
+            {!openSteps['assets'] && (
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">Upload a new photo:</h3>
+                <Uploader
+                  onImageUploaded={handleImageUploaded}
+                  userId={userId || undefined}
+                />
+              </div>
+            )}
+
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium">
+                  {openSteps['assets'] ? 'Select from your assets:' : 'Or select from your assets:'}
+                </h3>
+                <button 
+                  onClick={() => setOpenSteps(prev => ({
+                    ...prev, 
+                    'assets': !prev['assets']
+                  }))}
+                  className="text-sm px-3 py-1 rounded-md toggle-button"
+                >
+                  {openSteps['assets'] ? 'Upload Image Instead ↑' : 'Select From Assets ↓'}
+                </button>
+              </div>
+              {openSteps['assets'] && (
+                <MyAssets
+                  assetType="upl,img"
+                  selectedUrl={uploadedImageUrl || undefined}
+                  onSelectAsset={(url) => handleImageUploaded(url)}
+                />
+              )}
+            </div>
+
             {uploadedImageUrl && (
               <div className="mt-4 text-green-600">
-                Image uploaded successfully! Proceed to Step 2.
+                Image selected successfully! Proceed to Step 2.
               </div>
             )}
           </div>

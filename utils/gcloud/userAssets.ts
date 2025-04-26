@@ -62,8 +62,16 @@ export async function getUserAssets(
       .order('DateTime', { descending: true });
   }
 
+  // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
-    query = query.filter('AssetType', '=', assetType);
+    if (assetType.includes(',')) {
+      // For multiple asset types, use an 'IN' filter
+      const assetTypes = assetType.split(',').map(type => type.trim());
+      query = query.filter('AssetType', 'IN', assetTypes);
+    } else {
+      // For a single asset type, use the '=' filter
+      query = query.filter('AssetType', '=', assetType);
+    }
   }
 
   const [results] = await datastore.runQuery(query);
@@ -88,8 +96,16 @@ export async function getPublicAssets(
     .offset(offset)
     .order('DateTime', { descending: true });
 
+  // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
-    query = query.filter('AssetType', '=', assetType);
+    if (assetType.includes(',')) {
+      // For multiple asset types, use an 'IN' filter
+      const assetTypes = assetType.split(',').map(type => type.trim());
+      query = query.filter('AssetType', 'IN', assetTypes);
+    } else {
+      // For a single asset type, use the '=' filter
+      query = query.filter('AssetType', '=', assetType);
+    }
   }
 
   const [results] = await datastore.runQuery(query);
@@ -114,8 +130,16 @@ export async function getGalleryAssets(
     .offset(offset)
     .order('DateTime', { descending: true });
 
+  // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
-    query = query.filter('AssetType', '=', assetType);
+    if (assetType.includes(',')) {
+      // For multiple asset types, use an 'IN' filter
+      const assetTypes = assetType.split(',').map(type => type.trim());
+      query = query.filter('AssetType', 'IN', assetTypes);
+    } else {
+      // For a single asset type, use the '=' filter
+      query = query.filter('AssetType', '=', assetType);
+    }
   }
 
   const [results] = await datastore.runQuery(query);

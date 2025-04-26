@@ -22,9 +22,10 @@ interface UserActivity {
 interface MyAssetsProps {
   assetType?: string;
   onSelectAsset?: (url: string) => void;
+  selectedUrl?: string;
 }
 
-const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
+const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedUrl }) => {
   const userId = useUserId();
   const userIp = useUserIp();
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -36,14 +37,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
+  const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(selectedUrl);
   const limit = 10;
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
     if (userId || userIp) {
       try {
+        // Support comma-separated asset types
+        const assetTypeParam = assetType || '';
+        
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetType || ''}`
+          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
         );
         if (!response.ok) {
           console.log('Error fetching user assets.');
@@ -68,6 +73,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
   useEffect(() => {
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, assetType]);
+  
+  // Update internal state when selectedUrl prop changes
+  useEffect(() => {
+    setSelectedAssetUrl(selectedUrl);
+  }, [selectedUrl]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -153,14 +163,40 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
     return <p>Loading...</p>;
   }
 
-  const assetTypeTitle =
-    assetType === 'vid'
+  // Create a descriptive title for asset types
+  const getAssetTypeTitle = (type: string | undefined): string => {
+    if (!type) return '';
+    
+    if (type.includes(',')) {
+      // Handle multiple types
+      const types = type.split(',').map(t => t.trim());
+      
+      // Map specific combinations to friendly titles
+      if (types.includes('upl') && types.includes('img') && types.length === 2) {
+        return 'Image';
+      }
+      
+      // For other combinations, create a combined title
+      const typeTitles = types.map(t => 
+        t === 'vid' ? 'Video' :
+        t === 'img' ? 'Image' :
+        t === 'upl' ? 'Uploaded' : t
+      );
+      
+      return typeTitles.join(' & ');
+    }
+    
+    // Single type
+    return type === 'vid'
       ? 'Video'
-      : assetType === 'img'
+      : type === 'img'
         ? 'Image'
-        : assetType === 'upl'
+        : type === 'upl'
           ? 'Uploaded'
-          : '';
+          : type;
+  };
+  
+  const assetTypeTitle = getAssetTypeTitle(assetType);
 
   return (
     <div className="my-assets-container">
@@ -177,31 +213,64 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
       {activities.map((activity, index) => (
         <div
           key={index}
-          className={`border p-4 flex items-center ${onSelectAsset ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+          className={`border p-4 flex items-center ${
+            onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
+          } ${
+            (selectedAssetUrl === activity.CreatedAssetUrl || 
+             selectedAssetUrl === activity.AssetSource) ? 
+            'asset-item-selected' : ''
+          }`}
           onClick={(e) => {
             if (onSelectAsset) {
               // If in selection mode, make the whole row clickable
               e.preventDefault();
-              if (activity.AssetType === 'vid') {
-                onSelectAsset(activity.AssetSource || activity.CreatedAssetUrl);
+              const urlToSelect = activity.AssetType === 'vid' 
+                ? activity.AssetSource || activity.CreatedAssetUrl
+                : activity.CreatedAssetUrl;
+              
+              // Check if this asset is already selected
+              const isAlreadySelected = (
+                selectedAssetUrl === activity.CreatedAssetUrl || 
+                selectedAssetUrl === activity.AssetSource
+              );
+              
+              if (isAlreadySelected) {
+                // If already selected, deselect it
+                setSelectedAssetUrl(undefined);
+                onSelectAsset(''); // Pass empty string to deselect
               } else {
-                onSelectAsset(activity.CreatedAssetUrl);
+                // Otherwise select it
+                setSelectedAssetUrl(urlToSelect);
+                onSelectAsset(urlToSelect);
               }
             }
           }}
         >
           <div
-            className={`w-16 h-16 flex items-center justify-center bg-gray-200 mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
+            className={`w-16 h-16 flex items-center justify-center mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
+            style={{ backgroundColor: 'var(--card-bg-hover)' }}
             onClick={(e) => {
               e.preventDefault();
               if (onSelectAsset) {
                 // If in selection mode, call the selection callback
-                if (activity.AssetType === 'vid') {
-                  onSelectAsset(
-                    activity.AssetSource || activity.CreatedAssetUrl
-                  );
+                const urlToSelect = activity.AssetType === 'vid' 
+                  ? activity.AssetSource || activity.CreatedAssetUrl
+                  : activity.CreatedAssetUrl;
+                
+                // Check if this asset is already selected
+                const isAlreadySelected = (
+                  selectedAssetUrl === activity.CreatedAssetUrl || 
+                  selectedAssetUrl === activity.AssetSource
+                );
+                
+                if (isAlreadySelected) {
+                  // If already selected, deselect it
+                  setSelectedAssetUrl(undefined);
+                  onSelectAsset(''); // Pass empty string to deselect
                 } else {
-                  onSelectAsset(activity.CreatedAssetUrl);
+                  // Otherwise select it
+                  setSelectedAssetUrl(urlToSelect);
+                  onSelectAsset(urlToSelect);
                 }
               } else {
                 // Otherwise, open the modal as usual
@@ -259,7 +328,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset }) => {
                   {activity.Prompt.length > promptLength && (
                     <button
                       onClick={() => togglePrompt(index)}
-                      className="text-blue-700"
+                      style={{ color: 'var(--primary-color)' }}
                     >
                       {expandedPrompts[index] ? 'less' : 'more'}
                     </button>

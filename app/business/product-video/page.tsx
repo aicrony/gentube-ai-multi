@@ -31,10 +31,11 @@ function ProductVideoContent() {
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
   const [userAssets, setUserAssets] = useState<UserAsset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [openSteps, setOpenSteps] = useState<{ [key: number]: boolean }>({
+  const [openSteps, setOpenSteps] = useState<{ [key: string | number]: boolean }>({
     1: true,
     2: false,
-    3: false
+    3: false,
+    'assets': false // Default to hidden assets
   });
   const [credits, setCredits] = useState<number | null>(null);
 
@@ -88,7 +89,12 @@ function ProductVideoContent() {
   }, [uploadedImageUrl]);
 
   const handleImageUploaded = (imageUrl: string) => {
-    setUploadedImageUrl(imageUrl);
+    // If empty string is passed, it means deselection
+    if (imageUrl === '') {
+      setUploadedImageUrl(null);
+    } else {
+      setUploadedImageUrl(imageUrl);
+    }
     setError(null);
   };
 
@@ -139,7 +145,7 @@ function ProductVideoContent() {
           className="w-full text-left flex justify-between items-center"
         >
           <h2 className="text-xl font-bold">
-            Step 1: Upload Your Product Image
+            Step 1: Select Your Product Image
           </h2>
           <span>
             {openSteps[1] ? (
@@ -152,13 +158,43 @@ function ProductVideoContent() {
 
         {openSteps[1] && (
           <div className="mt-4">
-            <Uploader
-              onImageUploaded={handleImageUploaded}
-              userId={userId || undefined}
-            />
+            {!openSteps['assets'] && (
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">Upload a new image:</h3>
+                <Uploader
+                  onImageUploaded={handleImageUploaded}
+                  userId={userId || undefined}
+                />
+              </div>
+            )}
+
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium">
+                  {openSteps['assets'] ? 'Select from your assets:' : 'Or select from your assets:'}
+                </h3>
+                <button 
+                  onClick={() => setOpenSteps(prev => ({
+                    ...prev, 
+                    'assets': !prev['assets']
+                  }))}
+                  className="text-sm px-3 py-1 rounded-md toggle-button"
+                >
+                  {openSteps['assets'] ? 'Upload Image Instead ↑' : 'Select From Assets ↓'}
+                </button>
+              </div>
+              {openSteps['assets'] && (
+                <MyAssets
+                  assetType="upl,img"
+                  selectedUrl={uploadedImageUrl || undefined}
+                  onSelectAsset={(url) => handleImageUploaded(url)}
+                />
+              )}
+            </div>
+
             {uploadedImageUrl && (
               <div className="mt-4 text-green-600">
-                Image uploaded successfully! Proceed to Step 2.
+                Image selected successfully! Proceed to Step 2.
               </div>
             )}
           </div>
