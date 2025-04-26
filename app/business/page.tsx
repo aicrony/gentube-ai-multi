@@ -44,7 +44,7 @@ export default function BusinessWorkflow() {
                 <h3 className="text-xl font-bold mt-4">{signInMessage}</h3>
               )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mt-4">
               <Link href="/business/logo-animation" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">Logo Animation</h3>
@@ -74,14 +74,14 @@ export default function BusinessWorkflow() {
                 </div>
               </Link>
 
-              {/*<Link href="/business/product-demo" className="no-underline">*/}
-              {/*  <div className="theme-card">*/}
-              {/*    <h3 className="text-xl font-semibold mb-2">Product Demo</h3>*/}
-              {/*    <p className="">*/}
-              {/*      Showcase your products with engaging video demos*/}
-              {/*    </p>*/}
-              {/*  </div>*/}
-              {/*</Link>*/}
+              <Link href="/business/product-video" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">Product Video</h3>
+                  <p className="">
+                    Showcase your products with engaging videos
+                  </p>
+                </div>
+              </Link>
             </div>
           </div>
         </main>
