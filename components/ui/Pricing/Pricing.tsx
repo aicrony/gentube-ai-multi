@@ -87,7 +87,7 @@ export default function Pricing({ user, products, subscription }: Props) {
         onClick={() => (window.location.href = '/signin')}
         className="font-light text-md"
       >
-        Sign In for free credits (1 time).
+        Sign In for Freemium and free credits (1 time).
       </button>
     ) : null;
 
@@ -152,11 +152,11 @@ export default function Pricing({ user, products, subscription }: Props) {
             </div>
             <div className="max-w-2xl m-auto text-center sm:text-center sm:text-2xl mt-3">
               {signInMessage && (
-                <p className="text-lg font-bold">{signInMessage}</p>
+                <span className="text-lg font-bold">{signInMessage}</span>
               )}
             </div>
           </div>
-          <div className="mt-12 space-y-0 sm:mt-16 flex flex-wrap justify-center gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
+          <div className="mt-6 space-y-0 sm:mt-8 flex flex-wrap justify-center gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
             {products.map((product) => {
               const price = product?.prices?.find(
                 (price) => price.interval === billingInterval
@@ -209,10 +209,217 @@ export default function Pricing({ user, products, subscription }: Props) {
               );
             })}
           </div>
+
+          {/* Plan Feature Comparison Table */}
+          <div className="mt-16 max-w-6xl mx-auto px-4">
+            <h2 className="text-2xl font-bold text-center mb-6">
+              Plan Features
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-transparent divide-y divide-gray-700">
+                <thead>
+                  <tr>
+                    <th className="py-3 px-4 text-left">Features</th>
+                    <th className="py-3 px-4 text-center">Freemium</th>
+                    <th className="py-3 px-4 text-center">Personal</th>
+                    <th className="py-3 px-4 text-center">Business & Team</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {/* Asset Management */}
+                  <tr>
+                    <td colSpan={4} className="py-3 px-4 font-bold">
+                      Asset Management
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;View & Manage Assets
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Upload Multiple Images
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Asset Queue Auto-Refresh
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+
+                  {/* Workflow Options */}
+                  <tr>
+                    <td colSpan={4} className="py-3 px-4 font-bold">
+                      Workflows
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;FreeFlow (Direct Tools)
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Personal Workflows
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Business Workflows
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+
+                  {/* Image Generation Features */}
+                  <tr>
+                    <td colSpan={4} className="py-3 px-4 font-bold">
+                      Image Creation
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Basic Image Generation
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Social Media Image Templates
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Product Image Scenes
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Brand Image Creation
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Logo & Meme Creation
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+
+                  {/* Video Generation Features */}
+                  <tr>
+                    <td colSpan={4} className="py-3 px-4 font-bold">
+                      Video Creation
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Basic Text-to-Video
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Image URL to Video
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Animate Your Photo
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Story Video Creation
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Product Video Showcase
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+
+                  {/* Credits and Usage */}
+                  <tr>
+                    <td colSpan={4} className="py-3 px-4 font-bold">
+                      Credits and Usage
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Free Credits (New Users)
+                    </td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Higher Quality Generations
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">
+                      &nbsp;&nbsp;&nbsp;&nbsp;Commercial Usage Rights
+                    </td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">❌</td>
+                    <td className="py-2 px-4 text-center">✅</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/*<div className="pt-8">*/}
           {/*  <p className="m-auto mt-5 text-xl text-center sm:text-center sm:text-xl">*/}
-          {/*    Currently, image generations are 4-6 credits, video is 40-80*/}
-          {/*    credits based on quality and length.*/}
+          {/*    Image generations cost 4-6 credits, videos cost 40-80 credits based on quality and length.*/}
           {/*  </p>*/}
           {/*</div>*/}
         </div>
