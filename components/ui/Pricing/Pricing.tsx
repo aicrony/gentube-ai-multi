@@ -122,16 +122,34 @@ export default function Pricing({ user, products, subscription }: Props) {
             <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
               Choose the plan that will save you the most time.
             </p>
-            <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
+            <div
+              className="relative self-center mt-6 rounded-lg p-0.5 flex sm:mt-8 "
+              style={{ backgroundColor: 'var(--secondary-color)' }}
+            >
               {intervals.includes('month') && (
                 <button
                   onClick={() => setBillingInterval('month')}
                   type="button"
                   className={`${
                     billingInterval === 'month'
-                      ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                      : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                  } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                      ? 'relative w-1/2 shadow-sm'
+                      : 'ml-0.5 relative w-1/2 border border-transparent'
+                  } rounded-md m-1 py-2 text-sm font-semibold text-center uppercase whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                  style={{
+                    backgroundColor:
+                      billingInterval === 'month'
+                        ? 'var(--card-selected-bg)'
+                        : 'transparent',
+                    color:
+                      billingInterval === 'month'
+                        ? 'var(--primary-color)'
+                        : 'var(--text-color)',
+                    borderColor:
+                      billingInterval === 'month'
+                        ? 'var(--primary-color)'
+                        : 'transparent',
+                    borderWidth: billingInterval === 'month' ? '1px' : '0'
+                  }}
                 >
                   Monthly billing
                 </button>
@@ -142,9 +160,24 @@ export default function Pricing({ user, products, subscription }: Props) {
                   type="button"
                   className={`${
                     billingInterval === 'day'
-                      ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                      : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                  } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                      ? 'relative w-1/2 shadow-sm'
+                      : 'ml-0.5 relative w-1/2 border border-transparent'
+                  } rounded-md m-1 py-2 text-sm font-semibold text-center uppercase whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
+                  style={{
+                    backgroundColor:
+                      billingInterval === 'day'
+                        ? 'var(--card-selected-bg)'
+                        : 'transparent',
+                    color:
+                      billingInterval === 'day'
+                        ? 'var(--primary-color)'
+                        : 'var(--text-color)',
+                    borderColor:
+                      billingInterval === 'day'
+                        ? 'var(--primary-color)'
+                        : 'transparent',
+                    borderWidth: billingInterval === 'day' ? '1px' : '0'
+                  }}
                 >
                   One-Time billing
                 </button>
