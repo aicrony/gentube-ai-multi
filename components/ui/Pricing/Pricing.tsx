@@ -120,7 +120,7 @@ export default function Pricing({ user, products, subscription }: Props) {
               Pricing Plans
             </h1>
             <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
-              Choose your level of creativity.
+              Choose the plan that will save you the most time.
             </p>
             <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
               {intervals.includes('month') && (
