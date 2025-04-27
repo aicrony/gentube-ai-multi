@@ -54,6 +54,14 @@ export default function WorkflowSelection() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div
+                  className={`workflow-option ${selectedWorkflow === WORKFLOWS.FREEFLOW ? 'selected' : ''}`}
+                  onClick={() => (window.location.href = '/freeflow')}
+                >
+                  <h3 className="text-xl font-semibold mb-2">Free Flow</h3>
+                  <p className="">Access all tools without guided workflows</p>
+                </div>
+
+                <div
                   className={`workflow-option ${selectedWorkflow === WORKFLOWS.PERSONAL ? 'selected' : ''}`}
                   onClick={() => (window.location.href = '/personal')}
                 >
@@ -67,18 +75,12 @@ export default function WorkflowSelection() {
                   className={`workflow-option ${selectedWorkflow === WORKFLOWS.BUSINESS ? 'selected' : ''}`}
                   onClick={() => (window.location.href = '/business')}
                 >
-                  <h3 className="text-xl font-semibold mb-2">Business</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Business & Team
+                  </h3>
                   <p className="">
                     Create marketing videos, product demos and brand content
                   </p>
-                </div>
-
-                <div
-                  className={`workflow-option ${selectedWorkflow === WORKFLOWS.FREEFLOW ? 'selected' : ''}`}
-                  onClick={() => (window.location.href = '/freeflow')}
-                >
-                  <h3 className="text-xl font-semibold mb-2">Free Flow</h3>
-                  <p className="">Access all tools without guided workflows</p>
                 </div>
               </div>
             </div>

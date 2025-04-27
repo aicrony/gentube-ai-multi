@@ -101,7 +101,35 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
               Choose Your Workflow
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div
+                className="flex flex-col items-center text-center p-6 rounded-lg transition duration-300"
+                style={{
+                  backgroundColor: 'var(--card-bg-color)',
+                  borderColor: 'var(--border-color)',
+                  borderWidth: '1px',
+                  boxShadow: '0 4px 6px var(--shadow-color)'
+                }}
+              >
+                <h3 className="text-2xl font-semibold mb-4">Free Flows</h3>
+                <p className="text-left mb-6">
+                  For advanced users who want direct access to all tools without
+                  guided workflows for maximum flexibility.
+                </p>
+                <ul className="text-left space-y-2 mb-6 w-full">
+                  <li>✓ Open access to tools (no flows)</li>
+                  <li>✓ Direct image generation</li>
+                  <li>✓ Generate video from URL</li>
+                  <li>✓ Custom image upload</li>
+                </ul>
+                <Link href="/freeflow" className="mt-auto">
+                  <Button variant="slim" className="w-full">
+                    Explore Free
+                  </Button>
+                </Link>
+              </div>
+
               <div
                 className="flex flex-col items-center text-center p-6 rounded-lg transition duration-300"
                 style={{
@@ -123,7 +151,7 @@ export default function HomePage() {
                   <li>✓ Make old photos move (animate)</li>
                   <li>✓ Generate images and post to social</li>
                   <li>✓ Create story videos</li>
-                  <li>✓ Manage your assets online</li>
+                  <li>✓ Download and manage your assets</li>
                 </ul>
                 <Link href="/personal" className="mt-auto">
                   <Button variant="slim" className="w-full">
@@ -159,33 +187,6 @@ export default function HomePage() {
                 <Link href="/business" className="mt-auto">
                   <Button variant="slim" className="w-full">
                     Explore Business
-                  </Button>
-                </Link>
-              </div>
-
-              <div
-                className="flex flex-col items-center text-center p-6 rounded-lg transition duration-300"
-                style={{
-                  backgroundColor: 'var(--card-bg-color)',
-                  borderColor: 'var(--border-color)',
-                  borderWidth: '1px',
-                  boxShadow: '0 4px 6px var(--shadow-color)'
-                }}
-              >
-                <h3 className="text-2xl font-semibold mb-4">Free Flow</h3>
-                <p className="text-left mb-6">
-                  For advanced users who want direct access to all tools without
-                  guided workflows for maximum flexibility.
-                </p>
-                <ul className="text-left space-y-2 mb-6 w-full">
-                  <li>✓ Open access to tools (no flows)</li>
-                  <li>✓ Direct image generation</li>
-                  <li>✓ Generate video from URL</li>
-                  <li>✓ Custom image upload</li>
-                </ul>
-                <Link href="/freeflow" className="mt-auto">
-                  <Button variant="slim" className="w-full">
-                    Explore Free Flow
                   </Button>
                 </Link>
               </div>

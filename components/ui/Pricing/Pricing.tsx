@@ -87,7 +87,7 @@ export default function Pricing({ user, products, subscription }: Props) {
         onClick={() => (window.location.href = '/signin')}
         className="font-light text-md"
       >
-        Sign In for Freemium and free credits (1 time).
+        $0 Freemium and 1-time free credits
       </button>
     ) : null;
 
