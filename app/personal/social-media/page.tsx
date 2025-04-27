@@ -245,6 +245,77 @@ function SocialMediaContent() {
         </div>
       )}
 
+      {/*<div*/}
+      {/*  className="p-6 rounded-lg mb-8"*/}
+      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
+      {/*>*/}
+      {/*  <button*/}
+      {/*    onClick={() => toggleStep(1)}*/}
+      {/*    className="w-full text-left flex justify-between items-center"*/}
+      {/*  >*/}
+      {/*    <h2 className="text-xl font-bold">*/}
+      {/*      Step 1: Choose Your Platform (optional)*/}
+      {/*    </h2>*/}
+      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
+      {/*      {openSteps[1] ? (*/}
+      {/*        <FaChevronDown size={18} />*/}
+      {/*      ) : (*/}
+      {/*        <FaChevronRight size={18} />*/}
+      {/*      )}*/}
+      {/*    </span>*/}
+      {/*  </button>*/}
+
+      {/*  {openSteps[1] && (*/}
+      {/*    <div className="mt-4">*/}
+      {/*      <p className="mb-4">*/}
+      {/*        Select the platform where you'll share your image:*/}
+      {/*      </p>*/}
+      {/*      <div className="flex flex-wrap gap-3 justify-center">*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Facebook')}*/}
+      {/*        >*/}
+      {/*          <FaFacebook size={20} /> Facebook*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Instagram')}*/}
+      {/*        >*/}
+      {/*          <FaInstagram size={20} /> Instagram*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Twitter')}*/}
+      {/*        >*/}
+      {/*          <FaTwitter size={20} /> X (Twitter)*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('TikTok')}*/}
+      {/*        >*/}
+      {/*          <FaTiktok size={20} /> TikTok*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Pinterest')}*/}
+      {/*        >*/}
+      {/*          <FaPinterest size={20} /> Pinterest*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('LinkedIn')}*/}
+      {/*        >*/}
+      {/*          <FaLinkedin size={20} /> LinkedIn*/}
+      {/*        </Button>*/}
+      {/*      </div>*/}
+      {/*      <p className="mt-4 text-sm text-center text-gray-500">*/}
+      {/*        Login is optional. You can still create images without logging in*/}
+      {/*        to these platforms.*/}
+      {/*      </p>*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*</div>*/}
+
       <div
         className="p-6 rounded-lg mb-8"
         style={{ backgroundColor: 'var(--secondary-color)' }}
@@ -253,9 +324,7 @@ function SocialMediaContent() {
           onClick={() => toggleStep(1)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">
-            Step 1: Choose Your Platform (optional)
-          </h2>
+          <h2 className="text-xl font-bold">Step 1: Design Your Image</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[1] ? (
               <FaChevronDown size={18} />
@@ -266,75 +335,6 @@ function SocialMediaContent() {
         </button>
 
         {openSteps[1] && (
-          <div className="mt-4">
-            <p className="mb-4">
-              Select the platform where you'll share your image:
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Facebook')}
-              >
-                <FaFacebook size={20} /> Facebook
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Instagram')}
-              >
-                <FaInstagram size={20} /> Instagram
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Twitter')}
-              >
-                <FaTwitter size={20} /> X (Twitter)
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('TikTok')}
-              >
-                <FaTiktok size={20} /> TikTok
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Pinterest')}
-              >
-                <FaPinterest size={20} /> Pinterest
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('LinkedIn')}
-              >
-                <FaLinkedin size={20} /> LinkedIn
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-center text-gray-500">
-              Login is optional. You can still create images without logging in
-              to these platforms.
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div
-        className="p-6 rounded-lg mb-8"
-        style={{ backgroundColor: 'var(--secondary-color)' }}
-      >
-        <button
-          onClick={() => toggleStep(2)}
-          className="w-full text-left flex justify-between items-center"
-        >
-          <h2 className="text-xl font-bold">Step 2: Design Your Image</h2>
-          <span className="flex items-center justify-center w-8 h-8">
-            {openSteps[2] ? (
-              <FaChevronDown size={18} />
-            ) : (
-              <FaChevronRight size={18} />
-            )}
-          </span>
-        </button>
-
-        {openSteps[2] && (
           <div className="mt-4">
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Choose Style:</h3>
@@ -396,12 +396,12 @@ function SocialMediaContent() {
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
         <button
-          onClick={() => toggleStep(3)}
+          onClick={() => toggleStep(2)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">Step 3: Manage Your Assets</h2>
+          <h2 className="text-xl font-bold">Step 2: Refresh Your Assets</h2>
           <span className="flex items-center justify-center w-8 h-8">
-            {openSteps[3] ? (
+            {openSteps[2] ? (
               <FaChevronDown size={18} />
             ) : (
               <FaChevronRight size={18} />
@@ -409,7 +409,7 @@ function SocialMediaContent() {
           </span>
         </button>
 
-        {openSteps[3] && (
+        {openSteps[2] && (
           <div className="mt-4">
             <MyAssets autoRefreshQueued={true} />
           </div>
@@ -421,12 +421,10 @@ function SocialMediaContent() {
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
         <button
-          onClick={() => toggleStep(4)}
+          onClick={() => toggleStep(3)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">
-            Step 4: Create & Share Social Post
-          </h2>
+          <h2 className="text-xl font-bold">Step 3: Share Social Post</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[4] ? (
               <FaChevronDown size={18} />
@@ -436,7 +434,7 @@ function SocialMediaContent() {
           </span>
         </button>
 
-        {openSteps[4] && userId && (
+        {openSteps[3] && userId && (
           <div className="mt-4">
             <SocialMediaPostCreator userId={userId} userIp={userIp} />
           </div>

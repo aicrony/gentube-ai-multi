@@ -33,11 +33,13 @@ export default function HomePage() {
                 </h2>
                 <p className="text-xl mb-8">
                   GenTube.ai Workflows will guide you through generating AI
-                  images and videos for your business and personal success.
+                  images and videos for your business and personal projects.
                 </p>
                 <p className="text-xl mb-8">
-                  3-Step guided workflows are your answer for fast and easy
-                  results for social and professional AI images and videos.
+                  {/*3-Step guided workflows are your answer for fast and easy*/}
+                  {/*results for social and professional AI images and videos.*/}
+                  3-Step guided AI workflows are your answer to get back
+                  precious time for the important things in your life.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link href="/start">
@@ -110,7 +112,7 @@ export default function HomePage() {
                 }}
               >
                 <h3 className="text-2xl font-semibold mb-4">
-                  Personal Workflow
+                  Personal Workflows
                 </h3>
                 <p className="text-left mb-6">
                   Perfect for content creators, social media enthusiasts, and
@@ -118,9 +120,10 @@ export default function HomePage() {
                   projects.
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
-                  <li>✓ Make old (and new) photos move</li>
-                  <li>✓ Create videos from text descriptions</li>
-                  <li>✓ Share your creations on social media</li>
+                  <li>✓ Make old photos move (animate)</li>
+                  <li>✓ Generate images and post to social</li>
+                  <li>✓ Create story videos</li>
+                  <li>✓ Manage your assets online</li>
                 </ul>
                 <Link href="/personal" className="mt-auto">
                   <Button variant="slim" className="w-full">
@@ -139,7 +142,7 @@ export default function HomePage() {
                 }}
               >
                 <h3 className="text-2xl font-semibold mb-4">
-                  Business Workflow
+                  Business Workflows
                 </h3>
                 <p className="text-left mb-6">
                   Tailored for marketing teams, small businesses, and
@@ -147,9 +150,11 @@ export default function HomePage() {
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
                   <li>✓ Brand image generation</li>
-                  <li>✓ Product placement images</li>
-                  <li>✓ Product videos</li>
-                  <li>✓ Logo animation</li>
+                  <li>✓ Layer or combine product images</li>
+                  <li>✓ Product and brand videos</li>
+                  <li>✓ Logo and meme creation</li>
+                  <li>✓ Animate still images</li>
+                  <li>✓ Post to social media</li>
                 </ul>
                 <Link href="/business" className="mt-auto">
                   <Button variant="slim" className="w-full">
@@ -173,8 +178,9 @@ export default function HomePage() {
                   guided workflows for maximum flexibility.
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
+                  <li>✓ Open access to tools (no flows)</li>
                   <li>✓ Direct image generation</li>
-                  <li>✓ Video from URL</li>
+                  <li>✓ Generate video from URL</li>
                   <li>✓ Custom image upload</li>
                 </ul>
                 <Link href="/freeflow" className="mt-auto">

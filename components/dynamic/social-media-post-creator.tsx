@@ -16,6 +16,7 @@ import {
   FaTimesCircle,
   FaPaperPlane
 } from 'react-icons/fa';
+import GuidedMessage from '@/components/ui/GuidedMessage/GuidedMessage';
 
 interface SocialMediaPostCreatorProps {
   userId: string;
@@ -184,30 +185,6 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
 
   return (
     <div className="social-media-post-creator">
-      {/* Guide message */}
-      <div
-        className="mb-6 p-4 rounded-md"
-        style={{
-          backgroundColor: 'var(--card-bg-hover)',
-          color: 'var(--text-color)',
-          borderLeft: '4px solid var(--primary-color)'
-        }}
-      >
-        {/*<h3 className="font-bold mb-2">Create & Share Your Posts</h3>*/}
-        <p>
-          Select an image from your assets, write your post content, and share
-          directly to your connected social media platforms.{' '}
-          <a
-            href="/business"
-            style={{ color: 'var(--primary-color)' }}
-            className="underline"
-          >
-            Create your assets
-          </a>{' '}
-          and return here to share.
-        </p>
-      </div>
-
       {/* Error messages */}
       {errorMessage && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">

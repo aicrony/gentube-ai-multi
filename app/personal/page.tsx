@@ -44,7 +44,7 @@ export default function PersonalWorkflow() {
                 <Link href="/start" className="back-button">
                   ←
                 </Link>
-                Personal Workflow
+                Personal Workflows
               </h2>
               <p className="max-w-2xl m-auto mt-2 text-xl sm:text-center">
                 Create amazing content for your personal projects

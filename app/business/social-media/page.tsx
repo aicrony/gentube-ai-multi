@@ -23,6 +23,7 @@ import {
   FaChevronDown,
   FaChevronRight
 } from 'react-icons/fa';
+import GuidedMessage from '@/components/ui/GuidedMessage/GuidedMessage';
 
 interface UserAsset {
   CreatedAssetUrl: string;
@@ -230,7 +231,7 @@ function SocialMediaContent() {
           Share Social Post
         </h1>
         <p className="text-lg">
-          Create stunning images for social business platforms
+          Create stunning images to share on your favorite platforms
         </p>
         <p className="mt-2">
           {credits !== null
@@ -316,115 +317,15 @@ function SocialMediaContent() {
       {/*  )}*/}
       {/*</div>*/}
 
-      {/*<div*/}
-      {/*  className="p-6 rounded-lg mb-8"*/}
-      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
-      {/*>*/}
-      {/*  <button*/}
-      {/*    onClick={() => toggleStep(2)}*/}
-      {/*    className="w-full text-left flex justify-between items-center"*/}
-      {/*  >*/}
-      {/*    <h2 className="text-xl font-bold">Step 2: Design Your Image</h2>*/}
-      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
-      {/*      {openSteps[2] ? (*/}
-      {/*        <FaChevronDown size={18} />*/}
-      {/*      ) : (*/}
-      {/*        <FaChevronRight size={18} />*/}
-      {/*      )}*/}
-      {/*    </span>*/}
-      {/*  </button>*/}
-
-      {/*  {openSteps[2] && (*/}
-      {/*    <div className="mt-4">*/}
-      {/*      <div className="mb-6">*/}
-      {/*        <h3 className="text-lg font-semibold mb-2">Choose Style:</h3>*/}
-      {/*        <div className="flex flex-wrap gap-2">*/}
-      {/*          {styles.map((style) => (*/}
-      {/*            <button*/}
-      {/*              key={style.id}*/}
-      {/*              onClick={() => toggleStyle(style.id)}*/}
-      {/*              className={`px-3 py-1.5 rounded-full text-sm font-medium ${*/}
-      {/*                selectedStyles.includes(style.id)*/}
-      {/*                  ? 'bg-blue-600 text-white'*/}
-      {/*                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'*/}
-      {/*              }`}*/}
-      {/*            >*/}
-      {/*              {style.name}*/}
-      {/*            </button>*/}
-      {/*          ))}*/}
-      {/*        </div>*/}
-      {/*      </div>*/}
-
-      {/*      <div className="mb-6">*/}
-      {/*        <h3 className="text-lg font-semibold mb-2">Choose Effects:</h3>*/}
-      {/*        <div className="flex flex-wrap gap-2">*/}
-      {/*          {effects.map((effect) => (*/}
-      {/*            <button*/}
-      {/*              key={effect.id}*/}
-      {/*              onClick={() => toggleEffect(effect.id)}*/}
-      {/*              className={`px-3 py-1.5 rounded-full text-sm font-medium ${*/}
-      {/*                selectedEffects.includes(effect.id)*/}
-      {/*                  ? 'bg-green-600 text-white'*/}
-      {/*                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'*/}
-      {/*              }`}*/}
-      {/*            >*/}
-      {/*              {effect.name}*/}
-      {/*            </button>*/}
-      {/*          ))}*/}
-      {/*        </div>*/}
-      {/*      </div>*/}
-
-      {/*      <div className="mt-6" ref={imageGenerationRef}>*/}
-      {/*        {userId && (*/}
-      {/*          <SocialMediaImageButton*/}
-      {/*            userId={userId}*/}
-      {/*            userIp={userIp}*/}
-      {/*            onUserCreditsUpdate={handleUserCreditsUpdate}*/}
-      {/*            selectedStyles={selectedStyles}*/}
-      {/*            selectedEffects={selectedEffects}*/}
-      {/*            styleItems={styles}*/}
-      {/*            effectItems={effects}*/}
-      {/*          />*/}
-      {/*        )}*/}
-      {/*      </div>*/}
-      {/*    </div>*/}
-      {/*  )}*/}
-      {/*</div>*/}
-
-      {/*<div*/}
-      {/*  className="p-6 rounded-lg mb-8"*/}
-      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
-      {/*>*/}
-      {/*  <button*/}
-      {/*    onClick={() => toggleStep(3)}*/}
-      {/*    className="w-full text-left flex justify-between items-center"*/}
-      {/*  >*/}
-      {/*    <h2 className="text-xl font-bold">Step 3: Manage Your Assets</h2>*/}
-      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
-      {/*      {openSteps[3] ? (*/}
-      {/*        <FaChevronDown size={18} />*/}
-      {/*      ) : (*/}
-      {/*        <FaChevronRight size={18} />*/}
-      {/*      )}*/}
-      {/*    </span>*/}
-      {/*  </button>*/}
-
-      {/*  {openSteps[3] && (*/}
-      {/*    <div className="mt-4">*/}
-      {/*      <MyAssets autoRefreshQueued={true} />*/}
-      {/*    </div>*/}
-      {/*  )}*/}
-      {/*</div>*/}
-
       <div
         className="p-6 rounded-lg mb-8"
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
         <button
-          onClick={() => toggleStep(4)}
+          onClick={() => toggleStep(1)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">Share Social Post</h2>
+          <h2 className="text-xl font-bold">Step 1: Design Your Image</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[1] ? (
               <FaChevronDown size={18} />
@@ -434,7 +335,136 @@ function SocialMediaContent() {
           </span>
         </button>
 
-        {openSteps[1] && userId && (
+        <div>
+          <GuidedMessage>
+            Skip to step 3 if you have already created or uploaded what you want
+            to post.
+          </GuidedMessage>
+        </div>
+
+        {openSteps[1] && (
+          <div className="mt-4">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Choose Style:</h3>
+              <div className="flex flex-wrap gap-2">
+                {styles.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => toggleStyle(style.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                      selectedStyles.includes(style.id)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    }`}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Choose Effects:</h3>
+              <div className="flex flex-wrap gap-2">
+                {effects.map((effect) => (
+                  <button
+                    key={effect.id}
+                    onClick={() => toggleEffect(effect.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                      selectedEffects.includes(effect.id)
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    }`}
+                  >
+                    {effect.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6" ref={imageGenerationRef}>
+              {userId && (
+                <SocialMediaImageButton
+                  userId={userId}
+                  userIp={userIp}
+                  onUserCreditsUpdate={handleUserCreditsUpdate}
+                  selectedStyles={selectedStyles}
+                  selectedEffects={selectedEffects}
+                  styleItems={styles}
+                  effectItems={effects}
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div
+        className="p-6 rounded-lg mb-8"
+        style={{ backgroundColor: 'var(--secondary-color)' }}
+      >
+        <button
+          onClick={() => toggleStep(2)}
+          className="w-full text-left flex justify-between items-center"
+        >
+          <h2 className="text-xl font-bold">Step 2: Refresh Your Assets</h2>
+          <span className="flex items-center justify-center w-8 h-8">
+            {openSteps[2] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
+        </button>
+
+        <GuidedMessage>
+          After you create your image in step 1, wait here as it generates. The
+          queue will auto-fresh.
+        </GuidedMessage>
+
+        {openSteps[2] && (
+          <div className="mt-4">
+            <MyAssets autoRefreshQueued={true} />
+          </div>
+        )}
+      </div>
+
+      <div
+        className="p-6 rounded-lg mb-8"
+        style={{ backgroundColor: 'var(--secondary-color)' }}
+      >
+        <button
+          onClick={() => toggleStep(3)}
+          className="w-full text-left flex justify-between items-center"
+        >
+          <h2 className="text-xl font-bold">Step 3: Share Social Post</h2>
+          <span className="flex items-center justify-center w-8 h-8">
+            {openSteps[4] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
+        </button>
+
+        <GuidedMessage>
+          <p>
+            Below you will select social platforms to share on, select an image
+            from your assets, write your post content, and post directly to the
+            platforms.
+            {/*{' '}*/}
+            {/*<a*/}
+            {/*  href="/business"*/}
+            {/*  style={{ color: 'var(--primary-color)' }}*/}
+            {/*  className="underline"*/}
+            {/*>*/}
+            {/*  Create your assets*/}
+            {/*</a>{' '}*/}
+            {/*and return here to share.*/}
+          </p>
+        </GuidedMessage>
+
+        {openSteps[3] && userId && (
           <div className="mt-4">
             <SocialMediaPostCreator userId={userId} userIp={userIp} />
           </div>

@@ -35,7 +35,7 @@ export default function BusinessWorkflow() {
                 <Link href="/start" className="back-button">
                   ←
                 </Link>
-                Business Workflow
+                Business Workflows
               </h2>
               <p className="max-w-2xl m-auto mt-2 text-xl sm:text-center">
                 Professional videos and images for your brand
