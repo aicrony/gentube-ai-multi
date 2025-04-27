@@ -12,6 +12,7 @@ import { SocialMediaImageButton } from '@/components/dynamic/social-media-image-
 import '@/styles/main.css';
 import MyAssets from '@/components/dynamic/my-assets';
 import Button from '@/components/ui/Button';
+import { SocialMediaPostCreator } from '@/components/dynamic/social-media-post-creator';
 import {
   FaFacebook,
   FaInstagram,
@@ -54,7 +55,8 @@ function SocialMediaContent() {
   const [openSteps, setOpenSteps] = useState<{ [key: number]: boolean }>({
     1: true,
     2: false,
-    3: false
+    3: false,
+    4: false
   });
   const [credits, setCredits] = useState<number | null>(null);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
@@ -201,8 +203,8 @@ function SocialMediaContent() {
   const handleUserCreditsUpdate = (newCredits: number | null) => {
     console.log('Credits updated:', newCredits);
     setImageGenerated(true);
-    // After image generation is complete, expand step 3
-    setOpenSteps((prev) => ({ ...prev, 3: true }));
+    // After image generation is complete, expand steps 3 and 4
+    setOpenSteps((prev) => ({ ...prev, 3: true, 4: true }));
   };
 
   const toggleStep = (stepNumber: number) => {
@@ -225,7 +227,7 @@ function SocialMediaContent() {
           <Link href="/business" className="back-button">
             ←
           </Link>
-          Social Media Post
+          Share Social Post
         </h1>
         <p className="text-lg">
           Create stunning images for social business platforms
@@ -243,17 +245,186 @@ function SocialMediaContent() {
         </div>
       )}
 
+      {/*<div*/}
+      {/*  className="p-6 rounded-lg mb-8"*/}
+      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
+      {/*>*/}
+      {/*  <button*/}
+      {/*    onClick={() => toggleStep(1)}*/}
+      {/*    className="w-full text-left flex justify-between items-center"*/}
+      {/*  >*/}
+      {/*    <h2 className="text-xl font-bold">*/}
+      {/*      Step 1: Choose Your Platform (optional)*/}
+      {/*    </h2>*/}
+      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
+      {/*      {openSteps[1] ? (*/}
+      {/*        <FaChevronDown size={18} />*/}
+      {/*      ) : (*/}
+      {/*        <FaChevronRight size={18} />*/}
+      {/*      )}*/}
+      {/*    </span>*/}
+      {/*  </button>*/}
+
+      {/*  {openSteps[1] && (*/}
+      {/*    <div className="mt-4">*/}
+      {/*      <p className="mb-4">*/}
+      {/*        Select the platform where you'll share your image:*/}
+      {/*      </p>*/}
+      {/*      <div className="flex flex-wrap gap-3 justify-center">*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Facebook')}*/}
+      {/*        >*/}
+      {/*          <FaFacebook size={20} /> Facebook*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Instagram')}*/}
+      {/*        >*/}
+      {/*          <FaInstagram size={20} /> Instagram*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Twitter')}*/}
+      {/*        >*/}
+      {/*          <FaTwitter size={20} /> X (Twitter)*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('TikTok')}*/}
+      {/*        >*/}
+      {/*          <FaTiktok size={20} /> TikTok*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('Pinterest')}*/}
+      {/*        >*/}
+      {/*          <FaPinterest size={20} /> Pinterest*/}
+      {/*        </Button>*/}
+      {/*        <Button*/}
+      {/*          className="flex items-center gap-2 px-4"*/}
+      {/*          onClick={() => handleSocialLogin('LinkedIn')}*/}
+      {/*        >*/}
+      {/*          <FaLinkedin size={20} /> LinkedIn*/}
+      {/*        </Button>*/}
+      {/*      </div>*/}
+      {/*      <p className="mt-4 text-sm text-center text-gray-500">*/}
+      {/*        Login is optional. You can still create images without logging in*/}
+      {/*        to these platforms.*/}
+      {/*      </p>*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*</div>*/}
+
+      {/*<div*/}
+      {/*  className="p-6 rounded-lg mb-8"*/}
+      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
+      {/*>*/}
+      {/*  <button*/}
+      {/*    onClick={() => toggleStep(2)}*/}
+      {/*    className="w-full text-left flex justify-between items-center"*/}
+      {/*  >*/}
+      {/*    <h2 className="text-xl font-bold">Step 2: Design Your Image</h2>*/}
+      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
+      {/*      {openSteps[2] ? (*/}
+      {/*        <FaChevronDown size={18} />*/}
+      {/*      ) : (*/}
+      {/*        <FaChevronRight size={18} />*/}
+      {/*      )}*/}
+      {/*    </span>*/}
+      {/*  </button>*/}
+
+      {/*  {openSteps[2] && (*/}
+      {/*    <div className="mt-4">*/}
+      {/*      <div className="mb-6">*/}
+      {/*        <h3 className="text-lg font-semibold mb-2">Choose Style:</h3>*/}
+      {/*        <div className="flex flex-wrap gap-2">*/}
+      {/*          {styles.map((style) => (*/}
+      {/*            <button*/}
+      {/*              key={style.id}*/}
+      {/*              onClick={() => toggleStyle(style.id)}*/}
+      {/*              className={`px-3 py-1.5 rounded-full text-sm font-medium ${*/}
+      {/*                selectedStyles.includes(style.id)*/}
+      {/*                  ? 'bg-blue-600 text-white'*/}
+      {/*                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'*/}
+      {/*              }`}*/}
+      {/*            >*/}
+      {/*              {style.name}*/}
+      {/*            </button>*/}
+      {/*          ))}*/}
+      {/*        </div>*/}
+      {/*      </div>*/}
+
+      {/*      <div className="mb-6">*/}
+      {/*        <h3 className="text-lg font-semibold mb-2">Choose Effects:</h3>*/}
+      {/*        <div className="flex flex-wrap gap-2">*/}
+      {/*          {effects.map((effect) => (*/}
+      {/*            <button*/}
+      {/*              key={effect.id}*/}
+      {/*              onClick={() => toggleEffect(effect.id)}*/}
+      {/*              className={`px-3 py-1.5 rounded-full text-sm font-medium ${*/}
+      {/*                selectedEffects.includes(effect.id)*/}
+      {/*                  ? 'bg-green-600 text-white'*/}
+      {/*                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'*/}
+      {/*              }`}*/}
+      {/*            >*/}
+      {/*              {effect.name}*/}
+      {/*            </button>*/}
+      {/*          ))}*/}
+      {/*        </div>*/}
+      {/*      </div>*/}
+
+      {/*      <div className="mt-6" ref={imageGenerationRef}>*/}
+      {/*        {userId && (*/}
+      {/*          <SocialMediaImageButton*/}
+      {/*            userId={userId}*/}
+      {/*            userIp={userIp}*/}
+      {/*            onUserCreditsUpdate={handleUserCreditsUpdate}*/}
+      {/*            selectedStyles={selectedStyles}*/}
+      {/*            selectedEffects={selectedEffects}*/}
+      {/*            styleItems={styles}*/}
+      {/*            effectItems={effects}*/}
+      {/*          />*/}
+      {/*        )}*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*</div>*/}
+
+      {/*<div*/}
+      {/*  className="p-6 rounded-lg mb-8"*/}
+      {/*  style={{ backgroundColor: 'var(--secondary-color)' }}*/}
+      {/*>*/}
+      {/*  <button*/}
+      {/*    onClick={() => toggleStep(3)}*/}
+      {/*    className="w-full text-left flex justify-between items-center"*/}
+      {/*  >*/}
+      {/*    <h2 className="text-xl font-bold">Step 3: Manage Your Assets</h2>*/}
+      {/*    <span className="flex items-center justify-center w-8 h-8">*/}
+      {/*      {openSteps[3] ? (*/}
+      {/*        <FaChevronDown size={18} />*/}
+      {/*      ) : (*/}
+      {/*        <FaChevronRight size={18} />*/}
+      {/*      )}*/}
+      {/*    </span>*/}
+      {/*  </button>*/}
+
+      {/*  {openSteps[3] && (*/}
+      {/*    <div className="mt-4">*/}
+      {/*      <MyAssets autoRefreshQueued={true} />*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*</div>*/}
+
       <div
         className="p-6 rounded-lg mb-8"
         style={{ backgroundColor: 'var(--secondary-color)' }}
       >
         <button
-          onClick={() => toggleStep(1)}
+          onClick={() => toggleStep(4)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">
-            Step 1: Choose Your Platform (optional)
-          </h2>
+          <h2 className="text-xl font-bold">Share Social Post</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[1] ? (
               <FaChevronDown size={18} />
@@ -263,153 +434,9 @@ function SocialMediaContent() {
           </span>
         </button>
 
-        {openSteps[1] && (
+        {openSteps[1] && userId && (
           <div className="mt-4">
-            <p className="mb-4">
-              Select the platform where you'll share your image:
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Facebook')}
-              >
-                <FaFacebook size={20} /> Facebook
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Instagram')}
-              >
-                <FaInstagram size={20} /> Instagram
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Twitter')}
-              >
-                <FaTwitter size={20} /> X (Twitter)
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('TikTok')}
-              >
-                <FaTiktok size={20} /> TikTok
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('Pinterest')}
-              >
-                <FaPinterest size={20} /> Pinterest
-              </Button>
-              <Button
-                className="flex items-center gap-2 px-4"
-                onClick={() => handleSocialLogin('LinkedIn')}
-              >
-                <FaLinkedin size={20} /> LinkedIn
-              </Button>
-            </div>
-            <p className="mt-4 text-sm text-center text-gray-500">
-              Login is optional. You can still create images without logging in
-              to these platforms.
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div
-        className="p-6 rounded-lg mb-8"
-        style={{ backgroundColor: 'var(--secondary-color)' }}
-      >
-        <button
-          onClick={() => toggleStep(2)}
-          className="w-full text-left flex justify-between items-center"
-        >
-          <h2 className="text-xl font-bold">Step 2: Design Your Image</h2>
-          <span className="flex items-center justify-center w-8 h-8">
-            {openSteps[2] ? (
-              <FaChevronDown size={18} />
-            ) : (
-              <FaChevronRight size={18} />
-            )}
-          </span>
-        </button>
-
-        {openSteps[2] && (
-          <div className="mt-4">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Choose Style:</h3>
-              <div className="flex flex-wrap gap-2">
-                {styles.map((style) => (
-                  <button
-                    key={style.id}
-                    onClick={() => toggleStyle(style.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                      selectedStyles.includes(style.id)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    }`}
-                  >
-                    {style.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Choose Effects:</h3>
-              <div className="flex flex-wrap gap-2">
-                {effects.map((effect) => (
-                  <button
-                    key={effect.id}
-                    onClick={() => toggleEffect(effect.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                      selectedEffects.includes(effect.id)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                    }`}
-                  >
-                    {effect.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6" ref={imageGenerationRef}>
-              {userId && (
-                <SocialMediaImageButton
-                  userId={userId}
-                  userIp={userIp}
-                  onUserCreditsUpdate={handleUserCreditsUpdate}
-                  selectedStyles={selectedStyles}
-                  selectedEffects={selectedEffects}
-                  styleItems={styles}
-                  effectItems={effects}
-                />
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div
-        className="p-6 rounded-lg mb-8"
-        style={{ backgroundColor: 'var(--secondary-color)' }}
-      >
-        <button
-          onClick={() => toggleStep(3)}
-          className="w-full text-left flex justify-between items-center"
-        >
-          <h2 className="text-xl font-bold">Step 3: Refresh Your Assets</h2>
-          <span className="flex items-center justify-center w-8 h-8">
-            {openSteps[3] ? (
-              <FaChevronDown size={18} />
-            ) : (
-              <FaChevronRight size={18} />
-            )}
-          </span>
-        </button>
-
-        {openSteps[3] && (
-          <div className="mt-4">
-            <MyAssets />
+            <SocialMediaPostCreator userId={userId} userIp={userIp} />
           </div>
         )}
       </div>

@@ -68,7 +68,7 @@ export default function PersonalWorkflow() {
               <Link href="/personal/social-media" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">
-                    Social Media Post
+                    Share Social Post
                   </h3>
                   <p className="">
                     Create eye-catching images for Instagram, TikTok, and more

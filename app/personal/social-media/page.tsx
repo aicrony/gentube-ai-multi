@@ -12,6 +12,7 @@ import { SocialMediaImageButton } from '@/components/dynamic/social-media-image-
 import '@/styles/main.css';
 import MyAssets from '@/components/dynamic/my-assets';
 import Button from '@/components/ui/Button';
+import { SocialMediaPostCreator } from '@/components/dynamic/social-media-post-creator';
 import {
   FaFacebook,
   FaInstagram,
@@ -54,7 +55,8 @@ function SocialMediaContent() {
   const [openSteps, setOpenSteps] = useState<{ [key: number]: boolean }>({
     1: true,
     2: false,
-    3: false
+    3: false,
+    4: false
   });
   const [credits, setCredits] = useState<number | null>(null);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
@@ -201,8 +203,8 @@ function SocialMediaContent() {
   const handleUserCreditsUpdate = (newCredits: number | null) => {
     console.log('Credits updated:', newCredits);
     setImageGenerated(true);
-    // After image generation is complete, expand step 3
-    setOpenSteps((prev) => ({ ...prev, 3: true }));
+    // After image generation is complete, expand steps 3 and 4
+    setOpenSteps((prev) => ({ ...prev, 3: true, 4: true }));
   };
 
   const toggleStep = (stepNumber: number) => {
@@ -225,7 +227,7 @@ function SocialMediaContent() {
           <Link href="/personal" className="back-button">
             ←
           </Link>
-          Social Media Post
+          Share Social Post
         </h1>
         <p className="text-lg">
           Create stunning images to share on your favorite platforms
@@ -397,7 +399,7 @@ function SocialMediaContent() {
           onClick={() => toggleStep(3)}
           className="w-full text-left flex justify-between items-center"
         >
-          <h2 className="text-xl font-bold">Step 3: Refresh Your Assets</h2>
+          <h2 className="text-xl font-bold">Step 3: Manage Your Assets</h2>
           <span className="flex items-center justify-center w-8 h-8">
             {openSteps[3] ? (
               <FaChevronDown size={18} />
@@ -409,7 +411,34 @@ function SocialMediaContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets />
+            <MyAssets autoRefreshQueued={true} />
+          </div>
+        )}
+      </div>
+
+      <div
+        className="p-6 rounded-lg mb-8"
+        style={{ backgroundColor: 'var(--secondary-color)' }}
+      >
+        <button
+          onClick={() => toggleStep(4)}
+          className="w-full text-left flex justify-between items-center"
+        >
+          <h2 className="text-xl font-bold">
+            Step 4: Create & Share Social Post
+          </h2>
+          <span className="flex items-center justify-center w-8 h-8">
+            {openSteps[4] ? (
+              <FaChevronDown size={18} />
+            ) : (
+              <FaChevronRight size={18} />
+            )}
+          </span>
+        </button>
+
+        {openSteps[4] && userId && (
+          <div className="mt-4">
+            <SocialMediaPostCreator userId={userId} userIp={userIp} />
           </div>
         )}
       </div>

@@ -87,12 +87,9 @@ export default function BusinessWorkflow() {
               <Link href="/business/social-media" className="no-underline">
                 <div className="theme-card">
                   <h3 className="text-xl font-semibold mb-2">
-                    Social Media Post
+                    Share Social Post
                   </h3>
-                  <p className="">
-                    Create business social posts for LinkedIn, Facebook, and
-                    more
-                  </p>
+                  <p className="">Share your created assets on social sites</p>
                 </div>
               </Link>
 
