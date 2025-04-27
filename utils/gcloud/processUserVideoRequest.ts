@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-const defaultCredits = 20;
+const defaultCredits = process.env.FREE_CREDITS_VALUE;
 
 export async function processUserVideoRequest(
   userId: string | string[] | undefined,
@@ -64,7 +64,7 @@ export async function processUserVideoRequest(
     console.log('getUserCredits response: ', userResponse.credits);
   } catch (error) {
     console.log('Error fetching user data: ', error);
-    userResponse.credits = defaultCredits;
+    userResponse.credits = parseInt(process.env.FREE_CREDITS_VALUE || '0', 10);
   }
 
   console.log(

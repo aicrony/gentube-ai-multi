@@ -33,7 +33,7 @@ export default function Home() {
         onClick={() => (window.location.href = '/signin')}
         className="font-light text-md"
       >
-        Sign In for 110 free credits (1 time).
+        Sign In for free credits (1 time).
       </button>
     ) : (
       ''

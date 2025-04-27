@@ -118,9 +118,9 @@ export default function HomePage() {
                   projects.
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
-                  <li>✓ Social media content generation</li>
-                  <li>✓ Story video creation</li>
-                  <li>✓ Photo animation tools</li>
+                  <li>✓ Make old (and new) photos move</li>
+                  <li>✓ Create videos from text descriptions</li>
+                  <li>✓ Share your creations on social media</li>
                 </ul>
                 <Link href="/personal" className="mt-auto">
                   <Button variant="slim" className="w-full">
@@ -278,11 +278,11 @@ export default function HomePage() {
                 }}
               >
                 <h3 className="text-2xl font-bold mb-4">Free Trial</h3>
-                <p className="text-4xl font-bold mb-6">110 Credits</p>
+                <p className="text-4xl font-bold mb-6">50 Credits</p>
                 <ul className="text-left space-y-2 mb-8">
                   <li>✓ One-time offer for new users</li>
-                  <li>✓ Create multiple images or videos</li>
-                  <li>✓ Access to all features, except Kai</li>
+                  <li>✓ Create multiple images</li>
+                  <li>✓ Access to all features</li>
                 </ul>
                 <Link href="/signin" className="mt-auto">
                   <Button variant="slim" className="w-full">

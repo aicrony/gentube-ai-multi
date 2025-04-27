@@ -8,7 +8,8 @@ import { getErrorRedirect } from '@/utils/helpers';
 import { User } from '@supabase/supabase-js';
 import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useUserId } from '@/context/UserIdContext';
 
 type Subscription = Tables<'subscriptions'>;
 type Product = Tables<'products'>;
@@ -79,6 +80,16 @@ export default function Pricing({ user, products, subscription }: Props) {
 
     setPriceIdLoading(undefined);
   };
+  const userId = useUserId() || 'none';
+  const signInMessage =
+    userId === 'none' ? (
+      <button
+        onClick={() => (window.location.href = '/signin')}
+        className="font-light text-md"
+      >
+        Sign In for free credits (1 time).
+      </button>
+    ) : null;
 
   if (!products.length) {
     return (
@@ -137,6 +148,11 @@ export default function Pricing({ user, products, subscription }: Props) {
                 >
                   One-Time billing
                 </button>
+              )}
+            </div>
+            <div className="max-w-2xl m-auto text-center sm:text-center sm:text-2xl mt-3">
+              {signInMessage && (
+                <p className="text-lg font-bold">{signInMessage}</p>
               )}
             </div>
           </div>

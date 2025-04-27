@@ -27,7 +27,7 @@ export default function PersonalWorkflow() {
         onClick={() => (window.location.href = '/signin')}
         className="font-light text-md"
       >
-        Sign In for 110 free credits (1 time).
+        Sign In for free credits (1 time).
       </button>
     ) : null;
 
@@ -81,6 +81,39 @@ export default function PersonalWorkflow() {
                   <h3 className="text-xl font-semibold mb-2">Story Video</h3>
                   <p className="">
                     Generate engaging videos from your text descriptions
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/personal/generate-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Generate Images
+                  </h3>
+                  <p className="">
+                    Generate amazing images from your text descriptions
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/personal/manage-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    View & Manage Assets
+                  </h3>
+                  <p className="">
+                    View, delete, and download images and videos
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/personal/upload-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Upload Multiple Images
+                  </h3>
+                  <p className="">
+                    Prepare your work by uploading multiple assets
                   </p>
                 </div>
               </Link>
