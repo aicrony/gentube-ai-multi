@@ -102,7 +102,38 @@ export default function BusinessWorkflow() {
                 </div>
               </Link>
 
-              {/* Manage Assets */}
+              <Link href="/business/manage-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    View & Manage Assets
+                  </h3>
+                  <p className="">
+                    View, delete, and download images and videos
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/business/upload-image" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Upload Multiple Images
+                  </h3>
+                  <p className="">
+                    Prepare your work by uploading multiple assets
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/business/animate-photo" className="no-underline">
+                <div className="theme-card">
+                  <h3 className="text-xl font-semibold mb-2">
+                    Animate Your Photo
+                  </h3>
+                  <p className="">
+                    Turn your still images into stunning videos
+                  </p>
+                </div>
+              </Link>
             </div>
           </div>
         </main>
