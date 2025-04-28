@@ -26,13 +26,16 @@ export default function Footer() {
               </Link>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
-              <Link href="/" className=" transition duration-150 ease-in-out">
+              <Link
+                href="/about"
+                className=" transition duration-150 ease-in-out"
+              >
                 About
               </Link>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
-              <Link href="/" className="transition duration-150 ease-in-out">
-                Careers
+              <Link href="/investors" className="transition duration-150 ease-in-out">
+                Investors
               </Link>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
@@ -54,12 +57,12 @@ export default function Footer() {
               </p>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
-              <Link href="/" className="transition duration-150 ease-in-out">
+              <Link href="/privacy" className="transition duration-150 ease-in-out">
                 Privacy Policy
               </Link>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
-              <Link href="/" className="transition duration-150 ease-in-out">
+              <Link href="/terms" className="transition duration-150 ease-in-out">
                 Terms of Use
               </Link>
             </li>

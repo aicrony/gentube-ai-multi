@@ -23,6 +23,9 @@ export default function Navlinks({ user }: NavlinksProps) {
           <Link href="/" target="_parent" className={s.link}>
             Home
           </Link>
+          <Link href="/about" className={s.link}>
+            About
+          </Link>
           <Link href="/pricing" className={s.link}>
             Pricing
           </Link>
