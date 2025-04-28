@@ -36,7 +36,11 @@ export default function Footer() {
               </Link>
             </li>
             <li className="py-3 md:py-0 md:pb-4">
-              <Link href="/" className="transition duration-150 ease-in-out">
+              <Link
+                href="https://aicrony.com"
+                className="transition duration-150 ease-in-out"
+                target={'_blank'}
+              >
                 Blog
               </Link>
             </li>
