@@ -118,7 +118,6 @@ export default function HomePage() {
                   guided workflows for maximum flexibility.
                 </p>
                 <ul className="text-left space-y-2 mb-6 w-full">
-                  <li>✓ Open access to tools (no flows)</li>
                   <li>✓ Direct image generation</li>
                   <li>✓ Generate video from URL</li>
                   <li>✓ Custom image upload</li>

@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
+import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 type Subscription = Tables<'subscriptions'>;
 type Product = Tables<'products'>;
@@ -190,7 +191,7 @@ export default function Pricing({ user, products, subscription }: Props) {
             </div>
           </div>
           <div className="mt-6 space-y-0 sm:mt-8 flex flex-wrap justify-center gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
-            {products.map((product) => {
+            {products.map((product, index) => {
               const price = product?.prices?.find(
                 (price) => price.interval === billingInterval
               );
@@ -200,21 +201,39 @@ export default function Pricing({ user, products, subscription }: Props) {
                 currency: price.currency!,
                 minimumFractionDigits: 0
               }).format((price?.unit_amount || 0) / 100);
+
+              // Determine if this product should have a special badge
+              const isBusinessPlan =
+                product.name?.toLowerCase().includes('business') || false;
+              const isTeamPlan =
+                product.name?.toLowerCase().includes('team') || false;
+
               return (
                 <div
                   key={product.id}
                   className={cn(
-                    'flex flex-col rounded-lg shadow-lg divide-y divide-black shadow-2xl shadow-black/25',
+                    'flex flex-col rounded-lg shadow-lg divide-y divide-black shadow-black/25 relative',
                     {
                       'border border-pink-500': subscription
                         ? product.name === subscription?.prices?.products?.name
-                        : product.name === 'Freelancer'
+                        : product.name === 'Freelancer',
+                      'border-2 border-primary': isBusinessPlan || isTeamPlan
                     },
                     'flex-1', // This makes the flex item grow to fill the space
                     'basis-1/3', // Assuming you want each card to take up roughly a third of the container's width
                     'max-w-xs' // Sets a maximum width to the cards to prevent them from getting too large
                   )}
+                  style={{
+                    borderColor:
+                      isBusinessPlan || isTeamPlan
+                        ? 'var(--primary-color)'
+                        : undefined
+                  }}
                 >
+                  {isBusinessPlan && <PricingBadge label="Best Value" />}
+
+                  {isTeamPlan && <PricingBadge label="Best for High Output" />}
+
                   <div className="p-6">
                     <h2 className="text-2xl font-semibold leading-6">
                       {product.name}
@@ -423,7 +442,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                   </tr>
                   <tr>
                     <td className="py-2 px-4">
-                      &nbsp;&nbsp;&nbsp;&nbsp;Free Credits (New Users)
+                      &nbsp;&nbsp;&nbsp;&nbsp;Add additional credits anytime
                     </td>
                     <td className="py-2 px-4 text-center">✅</td>
                     <td className="py-2 px-4 text-center">✅</td>
