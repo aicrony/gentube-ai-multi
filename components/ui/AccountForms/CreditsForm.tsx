@@ -16,7 +16,9 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
   useEffect(() => {
     const fetchCredits = async () => {
       try {
-        const response = await fetch(`/api/getUserCredits?userId=${userId}&userIp=${userIp}`);
+        const response = await fetch(
+          `/api/getUserCredits?userId=${userId}&userIp=${userIp}`
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch user credits');
         }
@@ -61,7 +63,7 @@ const CreditsForm: React.FC<CreditsFormProps> = ({ userId }) => {
                   variant="slim"
                   type="button"
                   className="mt-1"
-                  onClick={() => (window.location.href = '/')}
+                  onClick={() => (window.location.href = '/start')}
                 >
                   Start Generating
                 </Button>
