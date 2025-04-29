@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage() {
               </ul>
               <p>
                 To exercise these rights, please contact us at
-                privacy@gentube.ai.
+                support@eekotech.com.
               </p>
 
               <h2>7. Cookies and Tracking</h2>
@@ -146,8 +146,8 @@ export default function PrivacyPolicyPage() {
               <p>
                 <strong>Email:</strong> support@eekotech.com
                 <br />
-                <strong>Address:</strong> GenTube.ai Headquarters, New Albany,
-                OH 43054, USA
+                {/*<strong>Address:</strong> GenTube.ai Headquarters, New Albany,*/}
+                {/*OH 43054, USA*/}
               </p>
             </div>
 

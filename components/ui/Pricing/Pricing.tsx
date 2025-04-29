@@ -10,6 +10,7 @@ import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 import { useUserId } from '@/context/UserIdContext';
+import { useUserCredits } from '@/context/UserCreditsContext';
 import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 type Subscription = Tables<'subscriptions'>;
@@ -82,6 +83,7 @@ export default function Pricing({ user, products, subscription }: Props) {
     setPriceIdLoading(undefined);
   };
   const userId = useUserId() || 'none';
+  const { userCreditsResponse } = useUserCredits();
   const signInMessage =
     userId === 'none' ? (
       <button

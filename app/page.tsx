@@ -29,17 +29,15 @@ export default function HomePage() {
                   GenTube.ai
                 </h1>
                 <h2 className="text-2xl sm:text-center sm:text-4xl font-extrabold mb-6">
-                  AI Workflows Make You Unstoppable
+                  Simplify AI Images and Videos
                 </h2>
                 <p className="text-xl mb-8">
-                  GenTube.ai Workflows will guide you through generating AI
-                  images and videos for your business and personal projects.
+                  Gentube.ai turns complex AI into simple workflows, helping you
+                  avoid project delays and accelerate your business.
                 </p>
                 <p className="text-xl mb-8">
-                  {/*3-Step guided workflows are your answer for fast and easy*/}
-                  {/*results for social and professional AI images and videos.*/}
-                  3-Step guided AI workflows are your answer to get back
-                  precious time for the important things in your life.
+                  Our workflows guide you to faster and simpler AI image and
+                  video creation to help you find creative success.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link href="/start">
