@@ -26,7 +26,12 @@ interface MyAssetsProps {
   autoRefreshQueued?: boolean; // New prop to trigger auto-refresh for queued items
 }
 
-const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedUrl, autoRefreshQueued = false }) => {
+const MyAssets: React.FC<MyAssetsProps> = ({
+  assetType,
+  onSelectAsset,
+  selectedUrl,
+  autoRefreshQueued = false
+}) => {
   const userId = useUserId();
   const userIp = useUserIp();
   const [activities, setActivities] = useState<UserActivity[]>([]);
@@ -38,9 +43,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
-  const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(selectedUrl);
-  const [autoRefreshTimer, setAutoRefreshTimer] = useState<NodeJS.Timeout | null>(null);
-  const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<number | null>(null);
+  const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(
+    selectedUrl
+  );
+  const [autoRefreshTimer, setAutoRefreshTimer] =
+    useState<NodeJS.Timeout | null>(null);
+  const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<
+    number | null
+  >(null);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0); // Track number of refreshes
   const [nextRefreshIn, setNextRefreshIn] = useState<number | null>(null); // Countdown to next refresh in seconds
@@ -52,7 +62,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
       try {
         // Support comma-separated asset types
         const assetTypeParam = assetType || '';
-        
+
         const response = await fetch(
           `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
         );
@@ -79,33 +89,35 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   useEffect(() => {
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, assetType]);
-  
+
   // Update internal state when selectedUrl prop changes
   useEffect(() => {
     setSelectedAssetUrl(selectedUrl);
   }, [selectedUrl]);
-  
+
   // Auto-refresh logic for queued items
   useEffect(() => {
     // Only proceed if autoRefreshQueued is true
     if (!autoRefreshQueued) {
       return;
     }
-    
+
     // Clear any existing timer
     if (autoRefreshTimer) {
       clearTimeout(autoRefreshTimer);
       setAutoRefreshTimer(null);
     }
-    
+
     // Check if any assets are in queue
-    const hasQueuedItems = activities.some(activity => activity.AssetType === 'que');
-    
+    const hasQueuedItems = activities.some(
+      (activity) => activity.AssetType === 'que'
+    );
+
     if (hasQueuedItems) {
       // Start auto-refresh only if we haven't exceeded the 10-minute limit
       const currentTime = Date.now();
       const tenMinutesInMs = 10 * 60 * 1000;
-      
+
       if (!autoRefreshStartTime) {
         // First time seeing queued items, start the timer
         setAutoRefreshStartTime(currentTime);
@@ -116,7 +128,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
         setIsAutoRefreshing(false);
         return;
       }
-      
+
       // Determine refresh interval based on refresh count
       // First refresh: 10 seconds, Second refresh: 20 seconds, Subsequent refreshes: 30 seconds
       let refreshInterval;
@@ -127,15 +139,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
       } else {
         refreshInterval = 30000; // 30 seconds for all subsequent refreshes
       }
-      
-      console.log(`Setting up refresh in ${refreshInterval/1000} seconds (refresh #${refreshCount + 1})`);
-      
+
+      console.log(
+        `Setting up refresh in ${refreshInterval / 1000} seconds (refresh #${refreshCount + 1})`
+      );
+
       // Set initial countdown value
       setNextRefreshIn(Math.floor(refreshInterval / 1000));
-      
+
       // Create countdown timer that updates every second
       const countdownInterval = setInterval(() => {
-        setNextRefreshIn(prev => {
+        setNextRefreshIn((prev) => {
           if (prev === null || prev <= 1) {
             // Clear this interval when we reach zero
             clearInterval(countdownInterval);
@@ -144,17 +158,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
           return prev - 1;
         });
       }, 1000);
-      
+
       // Set a new timer with the calculated interval
       const timer = setTimeout(() => {
-        console.log(`Auto-refreshing assets due to queued items (refresh #${refreshCount + 1})`);
+        console.log(
+          `Auto-refreshing assets due to queued items (refresh #${refreshCount + 1})`
+        );
         fetchUserActivities(userId, userIp);
         // Increment refresh count
-        setRefreshCount(prevCount => prevCount + 1);
+        setRefreshCount((prevCount) => prevCount + 1);
         // Clear the countdown interval
         clearInterval(countdownInterval);
       }, refreshInterval);
-      
+
       // Store the timer so we can clear it if needed
       setAutoRefreshTimer(timer);
     } else {
@@ -166,15 +182,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
         setNextRefreshIn(null); // Clear the countdown timer
       }
     }
-    
+
     // Cleanup function
     return () => {
       if (autoRefreshTimer) {
         clearTimeout(autoRefreshTimer);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activities, userId, userIp, autoRefreshQueued, autoRefreshStartTime, refreshCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    activities,
+    userId,
+    userIp,
+    autoRefreshQueued,
+    autoRefreshStartTime,
+    refreshCount
+  ]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -265,26 +288,34 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
   // Create a descriptive title for asset types
   const getAssetTypeTitle = (type: string | undefined): string => {
     if (!type) return '';
-    
+
     if (type.includes(',')) {
       // Handle multiple types
-      const types = type.split(',').map(t => t.trim());
-      
+      const types = type.split(',').map((t) => t.trim());
+
       // Map specific combinations to friendly titles
-      if (types.includes('upl') && types.includes('img') && types.length === 2) {
+      if (
+        types.includes('upl') &&
+        types.includes('img') &&
+        types.length === 2
+      ) {
         return 'Image';
       }
-      
+
       // For other combinations, create a combined title
-      const typeTitles = types.map(t => 
-        t === 'vid' ? 'Video' :
-        t === 'img' ? 'Image' :
-        t === 'upl' ? 'Uploaded' : t
+      const typeTitles = types.map((t) =>
+        t === 'vid'
+          ? 'Video'
+          : t === 'img'
+            ? 'Image'
+            : t === 'upl'
+              ? 'Uploaded'
+              : t
       );
-      
+
       return typeTitles.join(' & ');
     }
-    
+
     // Single type
     return type === 'vid'
       ? 'Video'
@@ -294,7 +325,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
           ? 'Uploaded'
           : type;
   };
-  
+
   const assetTypeTitle = getAssetTypeTitle(assetType);
 
   return (
@@ -303,8 +334,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
         <div className="flex items-center">
           {isAutoRefreshing && (
-            <span className="text-xs mr-2" style={{ color: 'var(--primary-color)' }}>
-              Auto-refreshing {nextRefreshIn !== null ? `(${nextRefreshIn}s)` : '...'}
+            <span
+              className="text-xs mr-2"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              {/*Auto-refreshing {nextRefreshIn !== null ? `(${nextRefreshIn}s)` : '...'}*/}
+              Auto-refreshing...
             </span>
           )}
           <button onClick={handleRefresh}>
@@ -324,24 +359,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
           className={`border p-4 flex items-center ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
           } ${
-            (selectedAssetUrl === activity.CreatedAssetUrl || 
-             selectedAssetUrl === activity.AssetSource) ? 
-            'asset-item-selected' : ''
+            selectedAssetUrl === activity.CreatedAssetUrl ||
+            selectedAssetUrl === activity.AssetSource
+              ? 'asset-item-selected'
+              : ''
           }`}
           onClick={(e) => {
             if (onSelectAsset) {
               // If in selection mode, make the whole row clickable
               e.preventDefault();
-              const urlToSelect = activity.AssetType === 'vid' 
-                ? activity.AssetSource || activity.CreatedAssetUrl
-                : activity.CreatedAssetUrl;
-              
+              const urlToSelect =
+                activity.AssetType === 'vid'
+                  ? activity.AssetSource || activity.CreatedAssetUrl
+                  : activity.CreatedAssetUrl;
+
               // Check if this asset is already selected
-              const isAlreadySelected = (
-                selectedAssetUrl === activity.CreatedAssetUrl || 
-                selectedAssetUrl === activity.AssetSource
-              );
-              
+              const isAlreadySelected =
+                selectedAssetUrl === activity.CreatedAssetUrl ||
+                selectedAssetUrl === activity.AssetSource;
+
               if (isAlreadySelected) {
                 // If already selected, deselect it
                 setSelectedAssetUrl(undefined);
@@ -361,16 +397,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({ assetType, onSelectAsset, selectedU
               e.preventDefault();
               if (onSelectAsset) {
                 // If in selection mode, call the selection callback
-                const urlToSelect = activity.AssetType === 'vid' 
-                  ? activity.AssetSource || activity.CreatedAssetUrl
-                  : activity.CreatedAssetUrl;
-                
+                const urlToSelect =
+                  activity.AssetType === 'vid'
+                    ? activity.AssetSource || activity.CreatedAssetUrl
+                    : activity.CreatedAssetUrl;
+
                 // Check if this asset is already selected
-                const isAlreadySelected = (
-                  selectedAssetUrl === activity.CreatedAssetUrl || 
-                  selectedAssetUrl === activity.AssetSource
-                );
-                
+                const isAlreadySelected =
+                  selectedAssetUrl === activity.CreatedAssetUrl ||
+                  selectedAssetUrl === activity.AssetSource;
+
                 if (isAlreadySelected) {
                   // If already selected, deselect it
                   setSelectedAssetUrl(undefined);

@@ -8,6 +8,7 @@ import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
+import MyAssets from '@/components/dynamic/my-assets';
 
 interface SocialMediaImageButtonProps {
   userId: string;
@@ -17,6 +18,7 @@ interface SocialMediaImageButtonProps {
   selectedEffects: string[];
   styleItems: { id: string; name: string; desc: string }[];
   effectItems: { id: string; name: string; desc: string }[];
+  onInputFocus?: () => void;
 }
 
 export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
@@ -26,7 +28,8 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   selectedStyles,
   selectedEffects,
   styleItems,
-  effectItems
+  effectItems,
+  onInputFocus
 }) => {
   const [basePrompt, setBasePrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -36,13 +39,14 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageGalleryData, setImageGalleryData] = useState<any>(null);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const [showMyAssets, setShowMyAssets] = useState(false);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
   // Build the full prompt from base prompt, styles, and effects
   const getFullPrompt = useCallback(() => {
     // Process the base prompt to handle punctuation correctly
     let processedBasePrompt = basePrompt.trim();
-    
+
     // Add selected styles
     const styleTexts: string[] = [];
     selectedStyles.forEach((styleId) => {
@@ -59,21 +63,21 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
 
     // Combine all styles and effects
     const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
-    
+
     // No styles or effects selected, just return the base prompt
     if (!stylesAndEffects) {
       return processedBasePrompt;
     }
-    
+
     // Handle empty base prompt case
     if (!processedBasePrompt) {
       return stylesAndEffects;
     }
-    
+
     // Check the ending punctuation of the base prompt
     const endsWithPunctuation = /[.!?;]$/.test(processedBasePrompt);
     const endsWithComma = /,$/.test(processedBasePrompt);
-    
+
     // Combine based on the punctuation
     let fullPrompt;
     if (endsWithPunctuation) {
@@ -86,7 +90,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       // No ending punctuation, add with a comma
       fullPrompt = `${processedBasePrompt}, ${stylesAndEffects}`;
     }
-    
+
     // Log for debugging
     console.log('Prompt construction:', {
       basePrompt: processedBasePrompt,
@@ -95,7 +99,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       stylesAndEffects,
       fullPrompt
     });
-    
+
     return fullPrompt;
   }, [basePrompt, selectedStyles, selectedEffects, styleItems, effectItems]);
 
@@ -125,6 +129,10 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   }, [imageData, userId, onUserCreditsUpdate]);
 
   const handleGenerateImage = async () => {
+    if (onInputFocus) {
+      onInputFocus();
+    }
+
     const finalPrompt = getFullPrompt();
     if (!finalPrompt.trim()) {
       setErrorMessage('Please enter a description or select styles/effects');
@@ -184,9 +192,12 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
             setMessage(
-              'Refresh your assets below in Step 3 to see your image in queue.'
+              'Your image is being generated. The assets list below will refresh automatically.'
             );
-            
+
+            // Show the MyAssets component with auto refresh enabled
+            setShowMyAssets(true);
+
             // Auto-clear the message after 30 seconds
             setTimeout(() => {
               setMessage('');
@@ -271,7 +282,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
           loading={isSubmitting}
           onClick={handleGenerateImage}
         >
-          Generate Brand Image
+          Generate Image
         </Button>
       </div>
 
@@ -299,6 +310,14 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
             </div>
           </div>
         )}
+
+        {/* Show MyAssets component with auto-refresh enabled */}
+        {/*{(userId || userIp) && (*/}
+        {/*  <div className="my-assets-section mt-8">*/}
+        {/*    <h2 className="text-xl font-bold mb-4">Your Generated Images</h2>*/}
+        {/*    <MyAssets autoRefreshQueued={true} />*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
 
       <GenericModal isOpen={isModalOpen} onClose={closeModal}>

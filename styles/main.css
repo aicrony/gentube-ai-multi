@@ -552,3 +552,79 @@ button.red:hover, .button-red:hover {
 [data-theme='dark'] .back-button:hover {
   opacity: 0.8;
 }
+
+/* Warning/Error Message Styles - Light Theme (default) */
+.message-container {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+}
+
+.message-container--warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+}
+
+.message-container--error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.message-container--info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.message-container--success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+/* Dark Theme Message Styles */
+[data-theme='dark'] .message-container--warning {
+  background-color: #4d3800;
+  border: 1px solid #6b5000;
+  color: #ffd970;
+}
+
+[data-theme='dark'] .message-container--error {
+  background-color: #4c1d24;
+  border: 1px solid #6e2834;
+  color: #f8b7bd;
+}
+
+[data-theme='dark'] .message-container--info {
+  background-color: #0e3c4c;
+  border: 1px solid #145c74;
+  color: #9be4f0;
+}
+
+[data-theme='dark'] .message-container--success {
+  background-color: #0f401e;
+  border: 1px solid #176332;
+  color: #a3e9b7;
+}
+
+.message-text {
+  flex: 1;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.message-icon {
+  margin-right: 0.5rem;
+}
+
+.message-action-button {
+  margin-left: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}

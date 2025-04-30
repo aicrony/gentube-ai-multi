@@ -8,6 +8,10 @@ import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
+import {
+  PromptInputWithStyles,
+  getFormattedPrompt
+} from '@/components/dynamic/prompt-input-with-styles';
 
 interface SocialMediaImageButtonProps {
   userId: string;
@@ -17,6 +21,7 @@ interface SocialMediaImageButtonProps {
   selectedEffects: string[];
   styleItems: { id: string; name: string; desc: string }[];
   effectItems: { id: string; name: string; desc: string }[];
+  onInputFocus?: () => void; // New prop for input focus
 }
 
 export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
@@ -26,7 +31,8 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   selectedStyles,
   selectedEffects,
   styleItems,
-  effectItems
+  effectItems,
+  onInputFocus
 }) => {
   const [basePrompt, setBasePrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,7 +48,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   const getFullPrompt = useCallback(() => {
     // Process the base prompt to handle punctuation correctly
     let processedBasePrompt = basePrompt.trim();
-    
+
     // Add selected styles
     const styleTexts: string[] = [];
     selectedStyles.forEach((styleId) => {
@@ -59,21 +65,21 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
 
     // Combine all styles and effects
     const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
-    
+
     // No styles or effects selected, just return the base prompt
     if (!stylesAndEffects) {
       return processedBasePrompt;
     }
-    
+
     // Handle empty base prompt case
     if (!processedBasePrompt) {
       return stylesAndEffects;
     }
-    
+
     // Check the ending punctuation of the base prompt
     const endsWithPunctuation = /[.!?;]$/.test(processedBasePrompt);
     const endsWithComma = /,$/.test(processedBasePrompt);
-    
+
     // Combine based on the punctuation
     let fullPrompt;
     if (endsWithPunctuation) {
@@ -86,7 +92,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       // No ending punctuation, add with a comma
       fullPrompt = `${processedBasePrompt}, ${stylesAndEffects}`;
     }
-    
+
     // Log for debugging
     console.log('Social media prompt construction:', {
       basePrompt: processedBasePrompt,
@@ -95,7 +101,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       stylesAndEffects,
       fullPrompt
     });
-    
+
     return fullPrompt;
   }, [basePrompt, selectedStyles, selectedEffects, styleItems, effectItems]);
 
@@ -125,7 +131,16 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   }, [imageData, userId, onUserCreditsUpdate]);
 
   const handleGenerateImage = async () => {
-    const finalPrompt = getFullPrompt();
+    const finalPrompt = getFormattedPrompt(
+      basePrompt,
+      selectedStyles,
+      selectedEffects,
+      styleItems,
+      effectItems,
+      'Style: ',
+      'Effect: '
+    );
+
     if (!finalPrompt.trim()) {
       setErrorMessage('Please enter a description or select styles/effects');
       return;
@@ -215,49 +230,17 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
     <>
       <CreditLimitNoticeButton errorMessage={errorMessage} />
       <div className="social-media-container">
-        <div className="mb-4">
-          <Label htmlFor="prompt" className="text-base font-medium mb-2 block">
-            Describe your image
-          </Label>
-          <Input
-            as="text"
-            className="min-h-[50px] text-xl mb-2"
-            id="prompt"
-            placeholder="Enter a description of your image"
-            value={basePrompt}
-            onChange={handleInputChange}
-          />
-          <div className="text-sm text-gray-500 mt-1">
-            {selectedStyles.length > 0 || selectedEffects.length > 0 ? (
-              <div>
-                <p>Your image will include:</p>
-                <ul className="list-disc ml-5 mt-1">
-                  {selectedStyles.length > 0 && (
-                    <li>
-                      Styles:{' '}
-                      {selectedStyles
-                        .map((id) => styleItems.find((s) => s.id === id)?.name)
-                        .join(', ')}
-                    </li>
-                  )}
-                  {selectedEffects.length > 0 && (
-                    <li>
-                      Effects:{' '}
-                      {selectedEffects
-                        .map((id) => effectItems.find((e) => e.id === id)?.name)
-                        .join(', ')}
-                    </li>
-                  )}
-                </ul>
-              </div>
-            ) : (
-              <p>
-                Select styles and effects from the options above to enhance your
-                image.
-              </p>
-            )}
-          </div>
-        </div>
+        <PromptInputWithStyles
+          promptValue={basePrompt}
+          onPromptChange={handleInputChange}
+          selectedStyles={selectedStyles}
+          selectedEffects={selectedEffects}
+          styleItems={styleItems}
+          effectItems={effectItems}
+          stylePrefix="Style: "
+          effectPrefix="Effect: "
+          onFocus={onInputFocus}
+        />
 
         <Button
           variant="slim"

@@ -211,6 +211,11 @@ function GenerateImageContent() {
     }));
   };
 
+  const handleInputFocus = () => {
+    // Close step 2 when input field gets focus
+    setOpenSteps((prev) => ({ ...prev, 2: false }));
+  };
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
@@ -302,6 +307,7 @@ function GenerateImageContent() {
                   selectedEffects={selectedEffects}
                   styleItems={styles}
                   effectItems={effects}
+                  onInputFocus={handleInputFocus}
                 />
               )}
             </div>
@@ -329,7 +335,7 @@ function GenerateImageContent() {
 
         {openSteps[2] && (
           <div className="mt-4">
-            <MyAssets />
+            <MyAssets autoRefreshQueued={true} />
           </div>
         )}
       </div>

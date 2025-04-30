@@ -10,7 +10,9 @@ export const CreditLimitNoticeButton: React.FC<
 > = ({ errorMessage }) => {
   ``;
   return (
-    <>
+    <div
+      className={`message-container message-container--error ${!errorMessage ? 'hidden' : ''}`}
+    >
       {errorMessage &&
         (errorMessage ===
         'Credit limit exceeded. Purchase credits on the PRICING page.' ? (
@@ -25,7 +27,7 @@ export const CreditLimitNoticeButton: React.FC<
         ) : (
           <p className="text-lg">{errorMessage}</p>
         ))}
-    </>
+    </div>
   );
 };
 
