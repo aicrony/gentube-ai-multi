@@ -204,8 +204,8 @@ function SocialMediaContent() {
   const handleUserCreditsUpdate = (newCredits: number | null) => {
     console.log('Credits updated:', newCredits);
     setImageGenerated(true);
-    // After image generation is complete, expand steps 3 and 4
-    setOpenSteps((prev) => ({ ...prev, 3: true, 4: true }));
+    // After image generation is complete, expand step 2
+    setOpenSteps((prev) => ({ ...prev, 2: true }));
   };
 
   const toggleStep = (stepNumber: number) => {
@@ -215,10 +215,9 @@ function SocialMediaContent() {
     }));
   };
 
-  const handleSocialLogin = (platform: string) => {
-    // This would normally redirect to the platform's OAuth login
-    alert(`Redirecting to ${platform} login...`);
-    // In a real app, you would implement OAuth
+  const handleInputFocus = () => {
+    // Close step 2 when input field gets focus
+    setOpenSteps((prev) => ({ ...prev, 2: false }));
   };
 
   return (
@@ -392,6 +391,7 @@ function SocialMediaContent() {
                   selectedEffects={selectedEffects}
                   styleItems={styles}
                   effectItems={effects}
+                  onInputFocus={handleInputFocus}
                 />
               )}
             </div>

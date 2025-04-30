@@ -133,19 +133,26 @@ export const getFormattedPrompt = (
   }
 
   // Check the ending punctuation of the base prompt
-  const endsWithPunctuation = /[.!?;]$/.test(processedBasePrompt);
+  const endsWithTerminalPunctuation = /[.!?]$/.test(processedBasePrompt);
+  const endsWithSemicolon = /;$/.test(processedBasePrompt);
   const endsWithComma = /,$/.test(processedBasePrompt);
+  const endsWithColon = /:$/.test(processedBasePrompt);
+  const endsWithQuotes = /['""]$/.test(processedBasePrompt);
 
-  // Combine based on the punctuation
+  // Combine based on the punctuation type
   let fullPrompt;
-  if (endsWithPunctuation) {
-    // If ends with sentence-ending punctuation, start a new segment for styles
+  if (endsWithTerminalPunctuation || endsWithSemicolon || endsWithColon) {
+    // For terminal punctuation, semicolons, and colons: start a new segment
     fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
   } else if (endsWithComma) {
-    // If already ends with a comma, just add the styles without comma
+    // If already ends with a comma, just add the styles with a space
     fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
+  } else if (endsWithQuotes) {
+    // If ends with quotes, add styles outside the quotes with a comma
+    // Remove the ending quote, add comma + styles, then add quote back
+    fullPrompt = `${processedBasePrompt.slice(0, -1)}, ${stylesAndEffects}${processedBasePrompt.slice(-1)}`;
   } else {
-    // No ending punctuation, add with a comma
+    // No special ending punctuation, add with a comma
     fullPrompt = `${processedBasePrompt}, ${stylesAndEffects}`;
   }
 
