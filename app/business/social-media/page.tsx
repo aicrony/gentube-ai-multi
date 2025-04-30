@@ -45,6 +45,13 @@ interface EffectItem {
   desc: string;
 }
 
+// Add this new interface after the existing EffectItem interface
+interface EmotionItem {
+  id: string;
+  name: string;
+  desc: string;
+}
+
 function SocialMediaContent() {
   const [error, setError] = useState<string | null>(null);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
@@ -107,6 +114,43 @@ function SocialMediaContent() {
     { id: 'ethereal', name: 'Ethereal', desc: 'ethereal glow' },
     { id: 'cyberpunk', name: 'Cyberpunk', desc: 'cyberpunk lighting' }
   ];
+
+  // Add this new emotions array after the existing effects array
+  const emotions: EmotionItem[] = [
+    { id: 'happy', name: 'Happy', desc: 'joyful and uplifting mood' },
+    { id: 'calm', name: 'Calm', desc: 'peaceful and serene atmosphere' },
+    { id: 'energetic', name: 'Energetic', desc: 'dynamic and vibrant energy' },
+    { id: 'nostalgic', name: 'Nostalgic', desc: 'warm nostalgic feeling' },
+    { id: 'dramatic', name: 'Dramatic', desc: 'intense dramatic mood' },
+    {
+      id: 'mysterious',
+      name: 'Mysterious',
+      desc: 'enigmatic mysterious atmosphere'
+    },
+    { id: 'romantic', name: 'Romantic', desc: 'romantic atmosphere' },
+    { id: 'melancholy', name: 'Melancholy', desc: 'subtle melancholic mood' },
+    { id: 'playful', name: 'Playful', desc: 'playful lighthearted feeling' },
+    { id: 'elegant', name: 'Elegant', desc: 'elegant sophisticated ambiance' },
+    { id: 'cozy', name: 'Cozy', desc: 'warm and cozy feeling' },
+    { id: 'dreamy', name: 'Dreamy', desc: 'dreamy ethereal atmosphere' },
+    { id: 'inspiring', name: 'Inspiring', desc: 'inspirational mood' },
+    { id: 'intimate', name: 'Intimate', desc: 'intimate personal feeling' },
+    { id: 'bold', name: 'Bold', desc: 'bold and confident expression' }
+  ];
+
+  // Add this state for emotions
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+
+  // Add this function to handle emotion selection
+  const toggleEmotion = (emotionId: string) => {
+    setSelectedEmotions((prev) => {
+      if (prev.includes(emotionId)) {
+        return prev.filter((id) => id !== emotionId);
+      } else {
+        return [...prev, emotionId];
+      }
+    });
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -192,14 +236,25 @@ function SocialMediaContent() {
       if (effect) effectTexts.push(effect.desc);
     });
 
+    // Add selected emotions
+    const emotionTexts: string[] = [];
+    selectedEmotions.forEach((emotionId) => {
+      const emotion = emotions.find((e) => e.id === emotionId);
+      if (emotion) emotionTexts.push(emotion.desc);
+    });
+
     // Add to input field - this will be handled by the ImageDynamicButton component
-    const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
+    const stylesAndEffects = [
+      ...styleTexts,
+      ...effectTexts,
+      ...emotionTexts
+    ].join(', ');
 
     // For display purpose only - not directly setting the input field
     console.log(
       `Full prompt would be: ${basePrompt}${stylesAndEffects ? ', ' + stylesAndEffects : ''}`
     );
-  }, [customPrompt, selectedStyles, selectedEffects]);
+  }, [customPrompt, selectedStyles, selectedEffects, selectedEmotions]);
 
   const handleUserCreditsUpdate = (newCredits: number | null) => {
     console.log('Credits updated:', newCredits);
@@ -381,6 +436,26 @@ function SocialMediaContent() {
               </div>
             </div>
 
+            {/* Add this new Emotions section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Choose Emotion:</h3>
+              <div className="flex flex-wrap gap-2">
+                {emotions.map((emotion) => (
+                  <button
+                    key={emotion.id}
+                    onClick={() => toggleEmotion(emotion.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                      selectedEmotions.includes(emotion.id)
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    }`}
+                  >
+                    {emotion.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="mt-6" ref={imageGenerationRef}>
               {userId && (
                 <SocialMediaImageButton
@@ -389,8 +464,10 @@ function SocialMediaContent() {
                   onUserCreditsUpdate={handleUserCreditsUpdate}
                   selectedStyles={selectedStyles}
                   selectedEffects={selectedEffects}
+                  selectedEmotions={selectedEmotions}
                   styleItems={styles}
                   effectItems={effects}
+                  emotionItems={emotions}
                   onInputFocus={handleInputFocus}
                 />
               )}

@@ -21,7 +21,9 @@ interface SocialMediaImageButtonProps {
   selectedEffects: string[];
   styleItems: { id: string; name: string; desc: string }[];
   effectItems: { id: string; name: string; desc: string }[];
-  onInputFocus?: () => void; // New prop for input focus
+  emotionItems?: { id: string; name: string; desc: string }[];
+  onInputFocus?: () => void;
+  selectedEmotions?: string[];
 }
 
 export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
@@ -32,7 +34,9 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   selectedEffects,
   styleItems,
   effectItems,
-  onInputFocus
+  emotionItems = [],
+  onInputFocus,
+  selectedEmotions = []
 }) => {
   const [basePrompt, setBasePrompt] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,67 +47,6 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   const [imageGalleryData, setImageGalleryData] = useState<any>(null);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
-
-  // Build the full prompt from base prompt, styles, and effects
-  const getFullPrompt = useCallback(() => {
-    // Process the base prompt to handle punctuation correctly
-    let processedBasePrompt = basePrompt.trim();
-
-    // Add selected styles
-    const styleTexts: string[] = [];
-    selectedStyles.forEach((styleId) => {
-      const style = styleItems.find((s) => s.id === styleId);
-      if (style) styleTexts.push(style.desc);
-    });
-
-    // Add selected effects
-    const effectTexts: string[] = [];
-    selectedEffects.forEach((effectId) => {
-      const effect = effectItems.find((e) => e.id === effectId);
-      if (effect) effectTexts.push(effect.desc);
-    });
-
-    // Combine all styles and effects
-    const stylesAndEffects = [...styleTexts, ...effectTexts].join(', ');
-
-    // No styles or effects selected, just return the base prompt
-    if (!stylesAndEffects) {
-      return processedBasePrompt;
-    }
-
-    // Handle empty base prompt case
-    if (!processedBasePrompt) {
-      return stylesAndEffects;
-    }
-
-    // Check the ending punctuation of the base prompt
-    const endsWithPunctuation = /[.!?;]$/.test(processedBasePrompt);
-    const endsWithComma = /,$/.test(processedBasePrompt);
-
-    // Combine based on the punctuation
-    let fullPrompt;
-    if (endsWithPunctuation) {
-      // If ends with sentence-ending punctuation, start a new sentence for styles
-      fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
-    } else if (endsWithComma) {
-      // If already ends with a comma, just add the styles without comma
-      fullPrompt = `${processedBasePrompt} ${stylesAndEffects}`;
-    } else {
-      // No ending punctuation, add with a comma
-      fullPrompt = `${processedBasePrompt}, ${stylesAndEffects}`;
-    }
-
-    // Log for debugging
-    console.log('Social media prompt construction:', {
-      basePrompt: processedBasePrompt,
-      endsWithPunctuation: /[.!?;]$/.test(processedBasePrompt),
-      endsWithComma: /,$/.test(processedBasePrompt),
-      stylesAndEffects,
-      fullPrompt
-    });
-
-    return fullPrompt;
-  }, [basePrompt, selectedStyles, selectedEffects, styleItems, effectItems]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBasePrompt(event.target.value);
@@ -131,6 +74,10 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
   }, [imageData, userId, onUserCreditsUpdate]);
 
   const handleGenerateImage = async () => {
+    if (onInputFocus) {
+      onInputFocus();
+    }
+
     const finalPrompt = getFormattedPrompt(
       basePrompt,
       selectedStyles,
@@ -138,11 +85,14 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       styleItems,
       effectItems,
       'Style: ',
-      'Effect: '
+      'Effect: ',
+      selectedEmotions,
+      emotionItems,
+      'Emotion: '
     );
 
     if (!finalPrompt.trim()) {
-      setErrorMessage('Please enter a description or select styles/effects');
+      setErrorMessage('Please enter a description or select styles/effects/emotions');
       return;
     }
 
@@ -199,7 +149,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
             setMessage(
-              'Refresh your assets below in Step 3 to see your image in queue.'
+              'Your image is being generated. The assets list below will refresh automatically.'
             );
           }
         }
@@ -235,10 +185,13 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
           onPromptChange={handleInputChange}
           selectedStyles={selectedStyles}
           selectedEffects={selectedEffects}
+          selectedEmotions={selectedEmotions}
           styleItems={styleItems}
           effectItems={effectItems}
+          emotionItems={emotionItems}
           stylePrefix="Style: "
           effectPrefix="Effect: "
+          emotionPrefix="Emotion: "
           onFocus={onInputFocus}
         />
 
@@ -254,16 +207,6 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       </div>
 
       <div className="my-assets-container">
-        {/*{userCreditsResponse !== null && (*/}
-        {/*  <>*/}
-        {/*    <div className="pt-4">*/}
-        {/*      <Button onClick={handleGalleryClick}>*/}
-        {/*        Check out the gallery while you wait for your image to generate...*/}
-        {/*      </Button>*/}
-        {/*    </div>*/}
-        {/*  </>*/}
-        {/*)}*/}
-
         {message && (
           <div className="mt-3">
             <div className="text-green-600 font-semibold mb-3">{message}</div>
