@@ -8,7 +8,7 @@ import { getErrorRedirect } from '@/utils/helpers';
 import { User } from '@supabase/supabase-js';
 import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserCredits } from '@/context/UserCreditsContext';
 import PricingBadge from '@/components/ui/Pricing/PricingBadge';
@@ -26,15 +26,34 @@ interface SubscriptionWithProduct extends Subscription {
   prices: PriceWithProduct | null;
 }
 
-interface Props {
-  user: User | null | undefined;
+interface PricingProps {
+  user: User | null;
   products: ProductWithPrices[];
   subscription: SubscriptionWithProduct | null;
+  initialTab?: string | null;
 }
 
 type BillingInterval = 'lifetime' | 'year' | 'month' | 'day';
 
-export default function Pricing({ user, products, subscription }: Props) {
+export default function Pricing({
+  user,
+  products,
+  subscription,
+  initialTab
+}: PricingProps) {
+  const [activeTab, setActiveTab] = useState<'monthly' | 'one-time'>(
+    initialTab === 'one-time' ? 'one-time' : 'monthly'
+  );
+
+  // Set the appropriate billing interval based on the active tab
+  useEffect(() => {
+    if (activeTab === 'monthly') {
+      setBillingInterval('month');
+    } else if (activeTab === 'one-time') {
+      setBillingInterval('day'); // Assuming 'day' is used for one-time billing
+    }
+  }, [activeTab]);
+
   const intervals = Array.from(
     new Set(
       products.flatMap((product) =>
@@ -276,7 +295,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                     <th className="py-3 px-4 text-left">Features</th>
                     <th className="py-3 px-4 text-center">Freemium</th>
                     <th className="py-3 px-4 text-center">Personal</th>
-                    <th className="py-3 px-4 text-center">Business & Team</th>
+                    <th className="py-3 px-4 text-center">Business & Plus</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">

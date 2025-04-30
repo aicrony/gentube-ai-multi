@@ -5,6 +5,7 @@ import Pricing from '@/components/ui/Pricing/Pricing';
 import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/types_db';
 import { User } from '@supabase/supabase-js';
+import { useSearchParams } from 'next/navigation';
 
 type Product = Tables<'products'>;
 type Price = Tables<'prices'>;
@@ -25,18 +26,23 @@ interface SubscriptionWithProduct extends Subscription {
 export default function PricingContainer() {
   const [user, setUser] = useState<User | null>(null);
   const [products, setProducts] = useState<ProductWithPrices[]>([]);
-  const [subscription, setSubscription] = useState<SubscriptionWithProduct | null>(null);
+  const [subscription, setSubscription] =
+    useState<SubscriptionWithProduct | null>(null);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const initialTab = searchParams?.get('tab') || null;
 
   useEffect(() => {
     async function fetchData() {
       try {
         const supabase = createClient();
-        
+
         // Get user
-        const { data: { user: userData } } = await supabase.auth.getUser();
+        const {
+          data: { user: userData }
+        } = await supabase.auth.getUser();
         setUser(userData);
-        
+
         // Get products
         const { data: productsData } = await supabase
           .from('products')
@@ -44,9 +50,9 @@ export default function PricingContainer() {
           .eq('active', true)
           .order('metadata->index')
           .order('unit_amount', { foreignTable: 'prices' });
-        
+
         if (productsData) setProducts(productsData as ProductWithPrices[]);
-        
+
         // Get subscription if user is logged in
         if (userData) {
           const { data: subscriptionData } = await supabase
@@ -55,7 +61,7 @@ export default function PricingContainer() {
             .eq('user_id', userData.id)
             .in('status', ['trialing', 'active'])
             .maybeSingle();
-          
+
           setSubscription(subscriptionData as SubscriptionWithProduct);
         }
       } catch (error) {
@@ -64,10 +70,10 @@ export default function PricingContainer() {
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, []);
-  
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -75,12 +81,13 @@ export default function PricingContainer() {
       </div>
     );
   }
-  
+
   return (
-    <Pricing 
-      user={user} 
-      products={products} 
-      subscription={subscription} 
+    <Pricing
+      user={user}
+      products={products}
+      subscription={subscription}
+      initialTab={initialTab}
     />
   );
 }

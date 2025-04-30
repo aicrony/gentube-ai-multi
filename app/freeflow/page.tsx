@@ -144,9 +144,12 @@ export default function Home() {
               <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl">
                 GenTube.ai
               </h1>
-              <p className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl">
-                Generate AI Images and Videos
-              </p>
+              <h2 className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl pr-6">
+                <Link href="/start" className="back-button">
+                  ←
+                </Link>
+                Generate AI Images and Videos - Free Flow
+              </h2>
               {signInMessage && (
                 <h1 className="text-xl font-bold">{signInMessage}</h1>
               )}

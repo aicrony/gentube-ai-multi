@@ -283,9 +283,9 @@ function HomePageContent() {
                 <li>✓ Create multiple images</li>
                 <li>✓ Access to all features</li>
               </ul>
-              <Link href="/signin" className="mt-auto">
+              <Link href={userId ? '/start' : '/signin'} className="mt-auto">
                 <Button variant="slim" className="w-full">
-                  Sign Up Now
+                  {userId ? 'Get Started' : 'Sign Up Now'}
                 </Button>
               </Link>
             </div>
@@ -306,7 +306,7 @@ function HomePageContent() {
                 <li>✓ No subscription required</li>
                 <li>✓ Keep the credits you pay for</li>
               </ul>
-              <Link href="/pricing" className="mt-auto">
+              <Link href="/pricing?tab=one-time" className="mt-auto">
                 <Button variant="slim" className="w-full">
                   View Packages
                 </Button>

@@ -74,9 +74,7 @@ function WorkflowSelectionContent() {
                 className={`workflow-option ${selectedWorkflow === WORKFLOWS.BUSINESS ? 'selected' : ''}`}
                 onClick={() => (window.location.href = '/business')}
               >
-                <h3 className="text-xl font-semibold mb-2">
-                  Business & Team
-                </h3>
+                <h3 className="text-xl font-semibold mb-2">Business & Plus</h3>
                 <p className="">
                   Create marketing videos, product demos and brand content
                 </p>
