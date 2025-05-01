@@ -10,15 +10,16 @@ const storage = new Storage({
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    let { userId, assetUrl, assetType } = body;
+    let { userId, assetUrl, assetType, entityId } = body;
 
     console.log('DELETE userId:', userId);
     console.log('DELETE assetUrl:', assetUrl);
     console.log('DELETE assetType:', assetType);
+    console.log('DELETE entityId:', entityId);
 
-    if (!userId || !assetUrl || !assetType) {
+    if (!userId || !assetType || (!assetUrl && !entityId)) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: need userId, assetType, and either assetUrl or entityId' },
         { status: 400 }
       );
     }
@@ -40,24 +41,37 @@ export async function DELETE(request: NextRequest) {
       const error = JSON.parse(JSON.stringify(assetUrl)).error
         ? JSON.parse(JSON.stringify(assetUrl)).error
         : null;
-      const bucket = storage.bucket(bucketName);
-      console.log('DELETE bucketname:', bucketName);
-      if (!error) {
-        const fileName = assetUrl.split('/').pop();
-        console.log('DELETE fileName:', fileName);
-        await bucket.file(fileName).delete();
+      
+      // Only attempt to delete from storage if it's a physical asset (not a queued item)
+      if (assetType !== 'que' && assetType !== 'err' && bucketName !== 'none') {
+        const bucket = storage.bucket(bucketName);
+        console.log('DELETE bucketname:', bucketName);
+        if (!error) {
+          const fileName = assetUrl.split('/').pop();
+          console.log('DELETE fileName:', fileName);
+          await bucket.file(fileName).delete();
+        }
+      } else {
+        console.log('Skipping physical file deletion for queued or error item');
       }
     } catch (error) {
       console.log('Error deleting asset:', error);
+      // Continue anyway since we still want to delete the database entry
     }
 
     try {
-      if (typeof assetUrl !== 'string') {
+      if (assetUrl && typeof assetUrl !== 'string') {
         assetUrl = JSON.stringify(assetUrl);
       }
-      await deleteUserActivity(userId, assetUrl);
-      console.log('DELETE deleteUserActivity id:', userId);
-      console.log('DELETE deleteUserActivity url:', assetUrl);
+      
+      // Prefer entity ID for deletion if available, fall back to assetUrl
+      if (entityId) {
+        await deleteUserActivity(userId, undefined, entityId);
+        console.log('DELETE deleteUserActivity by entityId:', entityId);
+      } else {
+        await deleteUserActivity(userId, assetUrl);
+        console.log('DELETE deleteUserActivity by url:', assetUrl);
+      }
       
       return NextResponse.json({ message: 'Asset deleted successfully' });
     } catch (error) {

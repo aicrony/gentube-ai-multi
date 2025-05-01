@@ -213,7 +213,7 @@ export default function InvestorsPage() {
               </p>
               <div className="flex justify-center">
                 <a
-                  href="mailto:support@eekotech.com"
+                  href="mailto:support@gentube.ai"
                   className="py-3 px-6 rounded-lg font-semibold"
                   style={{
                     backgroundColor: 'var(--primary-color)',

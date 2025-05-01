@@ -204,7 +204,7 @@ export default function TermsOfUsePage() {
                 please contact us at:
               </p>
               <p>
-                <strong>Email:</strong> support@eekotech.com
+                <strong>Email:</strong> support@gentube.ai
                 <br />
                 <strong>Address:</strong> GenTube.ai Headquarters, New Albany,
                 OH 43054, USA

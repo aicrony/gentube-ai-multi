@@ -13,6 +13,7 @@ import {
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
 interface UserActivity {
+  id?: string;
   CreatedAssetUrl: string;
   Prompt: string;
   AssetSource: string;
@@ -226,7 +227,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           },
           body: JSON.stringify({
             userId,
-            assetUrl: activity.CreatedAssetUrl,
+            entityId: activity.id, // Send the Datastore entity ID
+            assetUrl: activity.CreatedAssetUrl, // Keep for backward compatibility
             assetType: activity.AssetType
           })
         });

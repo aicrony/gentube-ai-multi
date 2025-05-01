@@ -13,6 +13,7 @@ const USER_ACTIVITY_KIND = 'UserActivity';
 const NAMESPACE = 'GenTube';
 
 interface UserActivity {
+  id?: string;          // Datastore entity ID
   CreatedAssetUrl: string;
   Prompt: string;
   AssetSource: string;
@@ -78,6 +79,7 @@ export async function getUserAssets(
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
+    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
@@ -114,6 +116,7 @@ export async function getPublicAssets(
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
+    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
@@ -150,6 +153,7 @@ export async function getGalleryAssets(
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
+    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
