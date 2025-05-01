@@ -18,9 +18,17 @@ export default async function generateStabilityVideo(url: string) {
     const data = new FormData();
     // const imageName = await extractImageName(url);
 
+    if (!url) {
+      throw new Error('URL is required');
+    }
+    
     const urlParts = new URL(url);
+    if (!urlParts || !urlParts.pathname) {
+      throw new Error('Invalid URL: pathname not found');
+    }
+    
     const pathParts = urlParts.pathname.split('/');
-    const imageName = pathParts[pathParts.length - 1];
+    const imageName = pathParts.length > 0 ? pathParts[pathParts.length - 1] : null;
 
     if (!imageName) {
       throw new Error('Image name is required');

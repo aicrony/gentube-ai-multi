@@ -114,8 +114,17 @@ export async function processUserVideoRequest(
     } else {
       // Pass all the parameters to callVideoApi
       const loopParam = loop === 'true';
+      
+      // Validate inputs before passing to callVideoApi
+      if (!videoPrompt) {
+        throw new Error('Video prompt is required');
+      }
+      
+      // If imageUrl is undefined but expected, provide a fallback value
+      const validatedImageUrl = imageUrl || 'none';
+      
       videoResult = (await callVideoApi(
-        imageUrl,
+        validatedImageUrl,
         videoPrompt,
         loopParam,
         duration,
@@ -124,15 +133,25 @@ export async function processUserVideoRequest(
       )) as any;
       // Check for queued webhook response and save it
       if (videoResult) {
-        console.log(videoResult);
+        console.log('Video result:', videoResult);
         if (videoResult.webhook) {
           const webhook = videoResult.webhook;
           console.log('Webhook: ', webhook);
-          requestId = videoResult.response.request_id;
+          
+          // Safely access nested properties
+          requestId = videoResult.response && videoResult.response.request_id 
+            ? videoResult.response.request_id 
+            : '';
+            
+          console.log('Request ID:', requestId);
           // Continue here
         } else {
           requestId = '';
+          console.log('No webhook found in video result');
         }
+      } else {
+        console.log('No video result returned from API call');
+        requestId = '';
       }
       // userResponse.result =
       //   videoResult && videoResult.url ? videoResult.url : '';
