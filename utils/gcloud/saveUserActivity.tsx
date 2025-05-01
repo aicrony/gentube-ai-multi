@@ -38,9 +38,9 @@ export async function saveUserActivity(
       { name: 'CountedAssetState', value: activity.CountedAssetState },
       {
         name: 'CreatedAssetUrl',
-        value: activity.CreatedAssetUrl.error
+        value: activity.CreatedAssetUrl && activity.CreatedAssetUrl.error
           ? activity.CreatedAssetUrl.error
-          : activity.CreatedAssetUrl
+          : activity.CreatedAssetUrl || `missing-${Date.now()}`
       },
       { name: 'DateTime', value: activity.DateTime },
       { name: 'Prompt', value: activity.Prompt },

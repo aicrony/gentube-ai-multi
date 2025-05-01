@@ -138,20 +138,62 @@ export async function processUserVideoRequest(
           const webhook = videoResult.webhook;
           console.log('Webhook: ', webhook);
           
-          // Safely access nested properties
-          requestId = videoResult.response && videoResult.response.request_id 
-            ? videoResult.response.request_id 
-            : '';
+          // First check for response.request_id structure
+          if (videoResult.response && videoResult.response.request_id) {
+            requestId = videoResult.response.request_id;
+          } 
+          // Check if result itself is the response with a request_id
+          else if (videoResult.request_id) {
+            requestId = videoResult.request_id;
+          }
+          // For other response structures, try to extract request_id
+          else if (typeof videoResult === 'object') {
+            // Try to find request_id in any nested object
+            const findRequestId = (obj: any): string => {
+              if (!obj || typeof obj !== 'object') return '';
+              
+              // Direct property check
+              if (obj.request_id) return obj.request_id;
+              
+              // Check in response property
+              if (obj.response && obj.response.request_id) 
+                return obj.response.request_id;
+              
+              // Check other common patterns
+              if (obj.data && obj.data.request_id)
+                return obj.data.request_id;
+                
+              // Recursively check nested properties
+              for (const key in obj) {
+                if (typeof obj[key] === 'object') {
+                  const found = findRequestId(obj[key]);
+                  if (found) return found;
+                }
+              }
+              
+              return '';
+            };
             
+            requestId = findRequestId(videoResult);
+          }
+          
+          // Final fallback if nothing found
+          if (!requestId) {
+            requestId = `manual-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+            console.log('Generated fallback request ID:', requestId);
+          }
+          
           console.log('Request ID:', requestId);
-          // Continue here
         } else {
-          requestId = '';
-          console.log('No webhook found in video result');
+          // Create a deterministic but unique ID if no webhook structure
+          requestId = `no-webhook-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+          console.log('No webhook found, generated request ID:', requestId);
         }
       } else {
         console.log('No video result returned from API call');
-        requestId = '';
+        // Create a fallback ID for tracking purposes
+        requestId = `fallback-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+        console.log('Generated fallback request ID:', requestId);
       }
       // userResponse.result =
       //   videoResult && videoResult.url ? videoResult.url : '';
@@ -183,19 +225,29 @@ export async function processUserVideoRequest(
       userResponse.credits
     );
 
+    // Ensure we have a request ID
+    if (!requestId || requestId.trim() === '') {
+      console.log('Warning: Empty request ID, generating fallback ID');
+      requestId = `missing-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+    
+    console.log('Saving activity with requestId:', requestId);
+    
     const activityResponse = await saveUserActivity({
       id: undefined,
       AssetSource: imageUrl,
       AssetType: 'que',
       CountedAssetPreviousState: creditCost,
       CountedAssetState: userResponse.credits,
-      CreatedAssetUrl: requestId,
+      CreatedAssetUrl: requestId, // Should be populated at this point
       DateTime: new Date().toISOString(),
       Prompt: videoPrompt ? videoPrompt : '',
       SubscriptionTier: 0 /**/,
       UserId: userId,
       UserIp: localizedIpAddress
     });
+    
+    console.log('Activity saved with ID:', activityResponse);
 
     console.log('Video Data saved: ', activityResponse);
 

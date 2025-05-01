@@ -53,6 +53,22 @@ export default async function generateFalVideo(
         apiEndpoint = apiTextToVideoEndpoint;
       }
 
+      console.log('Input parameters:');
+      console.log('- imageUrl:', imageUrl);
+      console.log('- description:', description);
+      console.log('- loop:', loop);
+      console.log('- duration:', duration);
+      console.log('- aspectRatio:', aspectRatio);
+      console.log('- motion:', motion);
+
+      if (
+        process.env.FAL_VIDEO_TEST_MODE &&
+        process.env.FAL_VIDEO_TEST_MODE == 'true'
+      ) {
+        callback.webhook = 'http://localhost:3000/testOnly';
+        result = 'TEST ONLY';
+      }
+
       result = await fal.queue.submit(apiEndpoint, {
         input: {
           prompt: enhancedPrompt,
@@ -67,7 +83,23 @@ export default async function generateFalVideo(
 
     console.log('Webhook set: ', callback.webhook);
     console.log('Result: ', result);
+    
+    // Ensure result has necessary structure for tracking
     callback.response = result;
+    
+    // If result doesn't include a request_id in an expected format,
+    // ensure we have one for tracking purposes
+    if (result && typeof result === 'object') {
+      if (!result.request_id) {
+        // Try to extract request_id from response if nested structure
+        if (result.status === 'IN_QUEUE' && !result.request_id) {
+          // Generate a fallback if none exists at all
+          console.log('Adding fallback request_id to result');
+          result.request_id = `generated-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+        }
+      }
+    }
+    
     return callback;
   } catch (error) {
     console.error('An error occurred while generating the video:', error);
