@@ -6,29 +6,18 @@ import Button from '@/components/ui/Button';
 import MyAssets from '@/components/dynamic/my-assets';
 import GenericModal from '@/components/ui/GenericModal';
 import {
-  FaFacebook,
-  FaInstagram,
-  FaTwitter,
-  FaTiktok,
-  FaPinterest,
-  FaLinkedin,
   FaImage,
   FaTimesCircle,
-  FaPaperPlane
+  FaExclamationTriangle
 } from 'react-icons/fa';
 import GuidedMessage from '@/components/ui/GuidedMessage/GuidedMessage';
+import SocialMediaAuthButton, { SocialPlatform } from './social-media-auth-button';
+import SocialMediaPostButton from './social-media-post-button';
+import PlatformSelectionGrid from './platform-selection-grid';
 
 interface SocialMediaPostCreatorProps {
   userId: string;
   userIp: string;
-}
-
-interface PlatformType {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  connected: boolean;
-  color: string;
 }
 
 export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
@@ -41,63 +30,53 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [postResult, setPostResult] = useState<string | null>(null);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>([]);
+  const [connectedPlatforms, setConnectedPlatforms] = useState<SocialPlatform[]>(['facebook']); // For demo purposes, assume Facebook is connected
   const [postCharCount, setPostCharCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Define available platforms
-  const platforms: PlatformType[] = [
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      icon: <FaFacebook size={24} />,
-      connected: false,
-      color: '#1877F2'
-    },
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      icon: <FaInstagram size={24} />,
-      connected: false,
-      color: '#E1306C'
-    },
-    {
-      id: 'twitter',
-      name: 'Twitter',
-      icon: <FaTwitter size={24} />,
-      connected: false,
-      color: '#1DA1F2'
-    },
-    {
-      id: 'tiktok',
-      name: 'TikTok',
-      icon: <FaTiktok size={24} />,
-      connected: false,
-      color: '#000000'
-    },
-    {
-      id: 'pinterest',
-      name: 'Pinterest',
-      icon: <FaPinterest size={24} />,
-      connected: false,
-      color: '#E60023'
-    },
-    {
-      id: 'linkedin',
-      name: 'LinkedIn',
-      icon: <FaLinkedin size={24} />,
-      connected: false,
-      color: '#0A66C2'
-    }
-  ];
+  const [link, setLink] = useState<string>(''); // For posts with links (Pinterest, etc.)
+  const [isLinkInputOpen, setIsLinkInputOpen] = useState(false);
 
   // Update character count whenever post text changes
   useEffect(() => {
     setPostCharCount(postText.length);
   }, [postText]);
+  
+  // Fetch connected platforms when component mounts
+  useEffect(() => {
+    // Get all platforms the user has connected to
+    const fetchConnectedPlatforms = async () => {
+      try {
+        const response = await fetch('/api/social/connected-platforms');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.platforms && Array.isArray(data.platforms)) {
+            setConnectedPlatforms(data.platforms);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching connected platforms:', error);
+      }
+    };
+    
+    fetchConnectedPlatforms();
+    
+    // Also check the URL for error parameters (from OAuth redirects)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const error = url.searchParams.get('error');
+      if (error) {
+        setErrorMessage(`Authentication failed: ${error.replace(/_/g, ' ')}`);
+        
+        // Remove the error parameter from the URL
+        url.searchParams.delete('error');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }, []);
 
   // Handle selecting/deselecting platforms
-  const togglePlatform = (platformId: string) => {
+  const togglePlatform = (platformId: SocialPlatform) => {
     setSelectedPlatforms((prev) => {
       if (prev.includes(platformId)) {
         return prev.filter((p) => p !== platformId);
@@ -108,11 +87,37 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
   };
 
   // Handle platform connection
-  const connectToPlatform = (platformId: string) => {
-    // In a real implementation, this would initiate OAuth flow
-    alert(`Connecting to ${platformId}...`);
-    // For demonstration purposes, we'll just pretend it's connected
-    // In a real app, you would save the OAuth tokens
+  const handleConnectPlatform = async (platform: SocialPlatform) => {
+    // In a real implementation, this would initiate OAuth flow with the platform
+    // For demo purposes, we'll just simulate a successful connection
+    
+    // Simulate API call delay
+    setIsCreatingPost(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Add platform to connected list
+    if (!connectedPlatforms.includes(platform)) {
+      setConnectedPlatforms(prev => [...prev, platform]);
+    }
+    
+    setIsCreatingPost(false);
+  };
+
+  // Handle platform disconnection
+  const handleDisconnectPlatform = async (platform: SocialPlatform) => {
+    // In a real implementation, this would revoke OAuth tokens
+    
+    // Simulate API call delay
+    setIsCreatingPost(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Remove platform from connected list
+    setConnectedPlatforms(prev => prev.filter(p => p !== platform));
+    
+    // Also remove from selected platforms if present
+    setSelectedPlatforms(prev => prev.filter(p => p !== platform));
+    
+    setIsCreatingPost(false);
   };
 
   // Handle image selection from assets
@@ -126,50 +131,45 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
     setSelectedImage(null);
   };
 
-  // Handle post submission
-  const handleSubmitPost = async () => {
-    // Validate post content
-    if (!postText.trim()) {
-      setErrorMessage('Please enter some text for your post');
-      return;
-    }
-
-    if (selectedPlatforms.length === 0) {
-      setErrorMessage('Please select at least one platform to post to');
-      return;
-    }
-
-    setIsCreatingPost(true);
+  // Handle successful post
+  const handlePostSuccess = (result: any) => {
+    console.log('Post success:', result);
+    
+    // Generate success message
+    const successfulPlatforms = result.results
+      .filter((r: any) => r.success)
+      .map((r: any) => r.platform);
+    
+    const platformNames = successfulPlatforms.map((p: string) => {
+      const nameMap: Record<string, string> = {
+        facebook: 'Facebook',
+        instagram: 'Instagram',
+        twitter: 'X (Twitter)',
+        tiktok: 'TikTok',
+        pinterest: 'Pinterest',
+        linkedin: 'LinkedIn'
+      };
+      return nameMap[p] || p;
+    }).join(', ');
+    
+    setPostResult(`Your post has been successfully shared to ${platformNames}!`);
+    
+    // Reset form
+    setPostText('');
+    setSelectedImage(null);
+    setSelectedPlatforms([]);
+    setLink('');
+    setIsLinkInputOpen(false);
     setErrorMessage(null);
-
-    try {
-      // In a real implementation, this would call your backend API
-      // which would then use the social media platform APIs
-
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Success message
-      const platformNames = selectedPlatforms
-        .map((id) => platforms.find((p) => p.id === id)?.name)
-        .join(', ');
-
-      setPostResult(
-        `Your post has been successfully shared to ${platformNames}!`
-      );
-
-      // Reset form after successful post
-      setPostText('');
-      setSelectedImage(null);
-      setSelectedPlatforms([]);
-    } catch (error) {
-      console.error('Error posting to social media:', error);
-      setErrorMessage('Failed to post to social media. Please try again.');
-    } finally {
-      setIsCreatingPost(false);
-    }
   };
 
+  // Handle post error
+  const handlePostError = (error: any) => {
+    console.error('Post error:', error);
+    setErrorMessage(error.message || 'Failed to post to social media. Please try again.');
+  };
+
+  // Get character limit warning based on selected platforms
   const getCharacterLimitWarning = () => {
     // Check different platform character limits
     if (selectedPlatforms.includes('twitter') && postCharCount > 280) {
@@ -199,32 +199,65 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
         </div>
       )}
 
+      {/* Platform Authentication Section */}
+      <div className="mb-6">
+        <Label className="block mb-2 font-medium">
+          Connect to social platforms:
+        </Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <SocialMediaAuthButton 
+            platform="facebook" 
+            isConnected={connectedPlatforms.includes('facebook')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+          <SocialMediaAuthButton 
+            platform="instagram" 
+            isConnected={connectedPlatforms.includes('instagram')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+          <SocialMediaAuthButton 
+            platform="twitter" 
+            isConnected={connectedPlatforms.includes('twitter')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+          <SocialMediaAuthButton 
+            platform="linkedin" 
+            isConnected={connectedPlatforms.includes('linkedin')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+          <SocialMediaAuthButton 
+            platform="pinterest" 
+            isConnected={connectedPlatforms.includes('pinterest')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+          <SocialMediaAuthButton 
+            platform="tiktok" 
+            isConnected={connectedPlatforms.includes('tiktok')}
+            onConnect={handleConnectPlatform}
+            onDisconnect={handleDisconnectPlatform}
+          />
+        </div>
+        <div className="mt-2 text-sm text-gray-500">
+          Connect to your social media accounts to enable posting.
+        </div>
+      </div>
+
       {/* Platform Selection */}
       <div className="mb-6">
         <Label className="block mb-2 font-medium">
           Select platforms to post to:
         </Label>
-        <div className="flex flex-wrap gap-3">
-          {platforms.map((platform) => (
-            <div key={platform.id} className="platform-selection">
-              <button
-                onClick={() => togglePlatform(platform.id)}
-                className={`flex items-center gap-2 p-2 rounded-md border transition-all ${
-                  selectedPlatforms.includes(platform.id)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
-                style={{ color: platform.color }}
-              >
-                {platform.icon}
-                <span>{platform.name}</span>
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="mt-2 text-sm text-gray-500">
-          Note: Social media integrations are simulated in this demo.
-        </div>
+        <PlatformSelectionGrid 
+          selectedPlatforms={selectedPlatforms}
+          onTogglePlatform={togglePlatform}
+          connectedPlatforms={connectedPlatforms}
+          disabled={isCreatingPost}
+        />
       </div>
 
       {/* Image Selection */}
@@ -249,11 +282,32 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
           <Button
             onClick={() => setIsAssetModalOpen(true)}
             className="flex items-center gap-2"
+            disabled={isCreatingPost}
           >
             <FaImage /> Select from your assets
           </Button>
         )}
       </div>
+
+      {/* Link Input - shows when Pinterest is selected */}
+      {(selectedPlatforms.includes('pinterest') || isLinkInputOpen) && (
+        <div className="mb-6">
+          <Label htmlFor="linkInput" className="block mb-2 font-medium">
+            Add a link (optional):
+          </Label>
+          <Input
+            id="linkInput"
+            type="url"
+            placeholder="https://example.com/my-page"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            disabled={isCreatingPost}
+          />
+          <div className="mt-1 text-sm text-gray-500">
+            Adding a link is recommended for Pinterest and useful for other platforms.
+          </div>
+        </div>
+      )}
 
       {/* Post Text */}
       <div className="mb-6">
@@ -267,27 +321,55 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
           placeholder="What would you like to share?"
           value={postText}
           onChange={(e) => setPostText(e.target.value)}
+          disabled={isCreatingPost}
+          maxLength={selectedPlatforms.includes('twitter') ? 280 : 2200}
         />
         <div className="mt-1 flex justify-between text-sm">
-          <span>{postCharCount} characters</span>
+          <span>
+            {postCharCount} / {selectedPlatforms.includes('twitter') ? 280 : 2200} characters
+          </span>
           {getCharacterLimitWarning() && (
             <span className="text-red-500">{getCharacterLimitWarning()}</span>
           )}
         </div>
+        
+        {/* Platform-specific character limits */}
+        {selectedPlatforms.length > 0 && (
+          <div className="mt-2 text-xs text-gray-500">
+            <p>Character limits:</p>
+            <ul className="mt-1 list-disc ml-5">
+              {selectedPlatforms.includes('twitter') && (
+                <li>Twitter: 280 characters</li>
+              )}
+              {selectedPlatforms.includes('instagram') && (
+                <li>Instagram: 2,200 characters</li>
+              )}
+              {selectedPlatforms.includes('facebook') && (
+                <li>Facebook: 63,206 characters</li>
+              )}
+              {selectedPlatforms.includes('linkedin') && (
+                <li>LinkedIn: 3,000 characters</li>
+              )}
+              {selectedPlatforms.includes('pinterest') && (
+                <li>Pinterest: 500 characters</li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}
       <div className="mt-6">
-        <Button
-          onClick={handleSubmitPost}
-          loading={isCreatingPost}
-          disabled={
-            isCreatingPost || !postText.trim() || selectedPlatforms.length === 0
-          }
-          className="w-full py-3 flex items-center justify-center gap-2"
-        >
-          <FaPaperPlane /> Post to Selected Platforms
-        </Button>
+        <SocialMediaPostButton
+          platforms={selectedPlatforms}
+          message={postText}
+          imageUrl={selectedImage || undefined}
+          link={link || undefined}
+          userId={userId}
+          className="w-full py-3"
+          onSuccess={handlePostSuccess}
+          onError={handlePostError}
+        />
       </div>
 
       {/* Asset Selection Modal */}
