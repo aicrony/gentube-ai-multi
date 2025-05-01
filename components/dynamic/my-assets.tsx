@@ -457,7 +457,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     : activity.AssetType === 'upl'
                       ? 'Upload'
                       : activity.AssetType === 'que'
-                        ? 'In Queue (click Refresh Assets every 20 seconds)'
+                        ? 'In Queue'
                         : activity.AssetType === 'err'
                           ? 'ERROR'
                           : activity.AssetType}

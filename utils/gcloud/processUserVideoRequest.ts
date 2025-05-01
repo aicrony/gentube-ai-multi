@@ -114,15 +114,15 @@ export async function processUserVideoRequest(
     } else {
       // Pass all the parameters to callVideoApi
       const loopParam = loop === 'true';
-      
+
       // Validate inputs before passing to callVideoApi
       if (!videoPrompt) {
         throw new Error('Video prompt is required');
       }
-      
+
       // If imageUrl is undefined but expected, provide a fallback value
       const validatedImageUrl = imageUrl || 'none';
-      
+
       videoResult = (await callVideoApi(
         validatedImageUrl,
         videoPrompt,
@@ -133,15 +133,17 @@ export async function processUserVideoRequest(
       )) as any;
       // Check for queued webhook response and save it
       if (videoResult) {
+        console.log('*****************************');
         console.log('Video result:', videoResult);
+        console.log('*****************************');
         if (videoResult.webhook) {
           const webhook = videoResult.webhook;
           console.log('Webhook: ', webhook);
-          
+
           // First check for response.request_id structure
           if (videoResult.response && videoResult.response.request_id) {
             requestId = videoResult.response.request_id;
-          } 
+          }
           // Check if result itself is the response with a request_id
           else if (videoResult.request_id) {
             requestId = videoResult.request_id;
@@ -151,18 +153,17 @@ export async function processUserVideoRequest(
             // Try to find request_id in any nested object
             const findRequestId = (obj: any): string => {
               if (!obj || typeof obj !== 'object') return '';
-              
+
               // Direct property check
               if (obj.request_id) return obj.request_id;
-              
+
               // Check in response property
-              if (obj.response && obj.response.request_id) 
+              if (obj.response && obj.response.request_id)
                 return obj.response.request_id;
-              
+
               // Check other common patterns
-              if (obj.data && obj.data.request_id)
-                return obj.data.request_id;
-                
+              if (obj.data && obj.data.request_id) return obj.data.request_id;
+
               // Recursively check nested properties
               for (const key in obj) {
                 if (typeof obj[key] === 'object') {
@@ -170,19 +171,19 @@ export async function processUserVideoRequest(
                   if (found) return found;
                 }
               }
-              
+
               return '';
             };
-            
+
             requestId = findRequestId(videoResult);
           }
-          
+
           // Final fallback if nothing found
           if (!requestId) {
             requestId = `manual-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
             console.log('Generated fallback request ID:', requestId);
           }
-          
+
           console.log('Request ID:', requestId);
         } else {
           // Create a deterministic but unique ID if no webhook structure
@@ -230,9 +231,9 @@ export async function processUserVideoRequest(
       console.log('Warning: Empty request ID, generating fallback ID');
       requestId = `missing-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     }
-    
+
     console.log('Saving activity with requestId:', requestId);
-    
+
     const activityResponse = await saveUserActivity({
       id: undefined,
       AssetSource: imageUrl,
@@ -246,7 +247,7 @@ export async function processUserVideoRequest(
       UserId: userId,
       UserIp: localizedIpAddress
     });
-    
+
     console.log('Activity saved with ID:', activityResponse);
 
     console.log('Video Data saved: ', activityResponse);
