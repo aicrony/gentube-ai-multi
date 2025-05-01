@@ -23,9 +23,26 @@ export const postToLinkedIn = async ({
     // LinkedIn API endpoints
     const baseUrl = 'https://api.linkedin.com/v2';
     const authorId = organizationId ? `urn:li:organization:${organizationId}` : 'urn:li:person:{person_id}';
-    
+
     // Prepare the base post content
-    const postContent = {
+    const postContent: {
+      author: string;
+      lifecycleState: string;
+      specificContent: {
+        'com.linkedin.ugc.ShareContent': {
+          shareCommentary: { text: string };
+          shareMediaCategory: string;
+          media?: Array<{
+            status: string;
+            description: { text: string };
+            media: string;
+          }>;
+        }
+      };
+      visibility: {
+        'com.linkedin.ugc.MemberNetworkVisibility': string;
+      }
+    } = {
       author: authorId,
       lifecycleState: 'PUBLISHED',
       specificContent: {
@@ -40,7 +57,7 @@ export const postToLinkedIn = async ({
         'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC'
       }
     };
-    
+
     // If we have an image, upload it first
     if (imageUrl) {
       // Step 1: Register the image for upload
@@ -63,10 +80,10 @@ export const postToLinkedIn = async ({
           }
         }
       );
-      
+
       const uploadUrl = registerResponse.data.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl;
       const asset = registerResponse.data.value.asset;
-      
+
       // Step 2: Upload the image
       // In a real implementation, you would fetch the image and upload it as binary data
       await axios.put(uploadUrl, imageUrl, {
@@ -75,9 +92,10 @@ export const postToLinkedIn = async ({
           'Content-Type': 'image/jpeg'
         }
       });
-      
+
       // Add the image to the post content
       postContent.specificContent['com.linkedin.ugc.ShareContent'].shareMediaCategory = 'IMAGE';
+      // Initialize media array if it doesn't exist
       postContent.specificContent['com.linkedin.ugc.ShareContent'].media = [{
         status: 'READY',
         description: {
@@ -86,7 +104,7 @@ export const postToLinkedIn = async ({
         media: asset
       }];
     }
-    
+
     // Step 3: Create the post
     const postResponse = await axios.post(
       `${baseUrl}/ugcPosts`,
@@ -99,7 +117,7 @@ export const postToLinkedIn = async ({
         }
       }
     );
-    
+
     return {
       success: true,
       postId: postResponse.data.id
