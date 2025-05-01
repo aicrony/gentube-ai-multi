@@ -24,6 +24,7 @@ import {
   FaChevronRight
 } from 'react-icons/fa';
 import GuidedMessage from '@/components/ui/GuidedMessage/GuidedMessage';
+import { StyleItem, EffectItem, EmotionItem, styles, effects, emotions } from '@/constants';
 
 interface UserAsset {
   CreatedAssetUrl: string;
@@ -31,25 +32,6 @@ interface UserAsset {
   AssetSource: string;
   AssetType?: string | string[] | undefined;
   DateTime: Date;
-}
-
-interface StyleItem {
-  id: string;
-  name: string;
-  desc: string;
-}
-
-interface EffectItem {
-  id: string;
-  name: string;
-  desc: string;
-}
-
-// Add this new interface after the existing EffectItem interface
-interface EmotionItem {
-  id: string;
-  name: string;
-  desc: string;
 }
 
 function SocialMediaContent() {
@@ -74,69 +56,7 @@ function SocialMediaContent() {
 
   const imageGenerationRef = React.useRef<HTMLDivElement>(null);
 
-  // Define styles and effects
-  const styles: StyleItem[] = [
-    { id: 'photo', name: 'Photography', desc: 'high-resolution photography' },
-    { id: 'cartoon', name: 'Cartoon', desc: 'cartoon style' },
-    { id: 'digital', name: 'Digital Art', desc: 'digital art style' },
-    { id: 'watercolor', name: 'Watercolor', desc: 'watercolor painting' },
-    { id: 'oil', name: 'Oil Paint', desc: 'oil painting' },
-    { id: 'retro', name: 'Retro', desc: 'retro style from the 80s' },
-    { id: 'anime', name: 'Anime', desc: 'anime art style' },
-    { id: 'pixel', name: 'Pixel Art', desc: 'pixel art style' },
-    { id: 'minimalist', name: 'Minimalist', desc: 'minimalist design' },
-    {
-      id: 'impressionist',
-      name: 'Impressionist',
-      desc: 'impressionist painting style'
-    },
-    { id: 'vector', name: 'Vector', desc: 'vector graphic' },
-    { id: 'pop', name: 'Pop Art', desc: 'pop art style' },
-    { id: 'abstract', name: '3D Abstract', desc: '3D abstract art' },
-    { id: 'cinematic', name: 'Cinematic', desc: 'cinematic shot' },
-    { id: 'vaporwave', name: 'Vaporwave', desc: 'vaporwave aesthetic' }
-  ];
-
-  const effects: EffectItem[] = [
-    { id: 'hdr', name: 'HDR', desc: 'HDR lighting' },
-    { id: 'vibrant', name: 'Vibrant', desc: 'vibrant colors' },
-    { id: 'glow', name: 'Neon Glow', desc: 'neon glow effect' },
-    { id: 'bokeh', name: 'Bokeh', desc: 'bokeh background' },
-    { id: 'dramatic', name: 'Dramatic', desc: 'dramatic lighting' },
-    { id: 'sunset', name: 'Sunset', desc: 'sunset lighting' },
-    { id: 'blur', name: 'Blur', desc: 'background blur' },
-    { id: 'grainy', name: 'Grainy', desc: 'grainy texture' },
-    { id: 'sharp', name: 'Ultra Sharp', desc: 'ultra sharp details' },
-    { id: 'fog', name: 'Fog', desc: 'light fog effect' },
-    { id: 'gritty', name: 'Gritty', desc: 'gritty texture' },
-    { id: 'motion', name: 'Motion Blur', desc: 'motion blur effect' },
-    { id: 'shadow', name: 'Long Shadow', desc: 'long shadow effect' },
-    { id: 'ethereal', name: 'Ethereal', desc: 'ethereal glow' },
-    { id: 'cyberpunk', name: 'Cyberpunk', desc: 'cyberpunk lighting' }
-  ];
-
-  // Add this new emotions array after the existing effects array
-  const emotions: EmotionItem[] = [
-    { id: 'happy', name: 'Happy', desc: 'joyful and uplifting mood' },
-    { id: 'calm', name: 'Calm', desc: 'peaceful and serene atmosphere' },
-    { id: 'energetic', name: 'Energetic', desc: 'dynamic and vibrant energy' },
-    { id: 'nostalgic', name: 'Nostalgic', desc: 'warm nostalgic feeling' },
-    { id: 'dramatic', name: 'Dramatic', desc: 'intense dramatic mood' },
-    {
-      id: 'mysterious',
-      name: 'Mysterious',
-      desc: 'enigmatic mysterious atmosphere'
-    },
-    { id: 'romantic', name: 'Romantic', desc: 'romantic atmosphere' },
-    { id: 'melancholy', name: 'Melancholy', desc: 'subtle melancholic mood' },
-    { id: 'playful', name: 'Playful', desc: 'playful lighthearted feeling' },
-    { id: 'elegant', name: 'Elegant', desc: 'elegant sophisticated ambiance' },
-    { id: 'cozy', name: 'Cozy', desc: 'warm and cozy feeling' },
-    { id: 'dreamy', name: 'Dreamy', desc: 'dreamy ethereal atmosphere' },
-    { id: 'inspiring', name: 'Inspiring', desc: 'inspirational mood' },
-    { id: 'intimate', name: 'Intimate', desc: 'intimate personal feeling' },
-    { id: 'bold', name: 'Bold', desc: 'bold and confident expression' }
-  ];
+  // Using styles, effects, and emotions from constants
 
   // Add this state for emotions
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
