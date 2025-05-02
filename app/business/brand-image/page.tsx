@@ -37,7 +37,8 @@ function BrandImageContent() {
   });
   const [credits, setCredits] = useState<number | null>(null);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [uploadedProductImageUrl, setUploadedProductImageUrl] = useState<string | null>(null);
+  const [uploadedBackgroundImageUrl, setUploadedBackgroundImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -81,15 +82,20 @@ function BrandImageContent() {
     }
   }, [userId, userIp, setUserCreditsResponse]);
 
-  // Auto-expand Step 2 when upload is complete
+  // Auto-expand Step 2 when either image is uploaded
   useEffect(() => {
-    if (uploadedImageUrl) {
+    if (uploadedProductImageUrl || uploadedBackgroundImageUrl) {
       setOpenSteps((prev) => ({ ...prev, 2: true }));
     }
-  }, [uploadedImageUrl]);
+  }, [uploadedProductImageUrl, uploadedBackgroundImageUrl]);
 
-  const handleImageUploaded = (imageUrl: string) => {
-    setUploadedImageUrl(imageUrl);
+  const handleProductImageUploaded = (imageUrl: string) => {
+    setUploadedProductImageUrl(imageUrl);
+    setError(null);
+  };
+
+  const handleBackgroundImageUploaded = (imageUrl: string) => {
+    setUploadedBackgroundImageUrl(imageUrl);
     setError(null);
   };
 
@@ -177,9 +183,14 @@ function BrandImageContent() {
                   image with transparent background for best results.
                 </p>
                 <Uploader
-                  onImageUploaded={handleImageUploaded}
+                  onImageUploaded={handleProductImageUploaded}
                   userId={userId || undefined}
                 />
+                {uploadedProductImageUrl && (
+                  <div className="mt-2 p-2 text-sm bg-green-50 text-green-700 rounded">
+                    ✓ Product image uploaded successfully
+                  </div>
+                )}
               </div>
 
               <div
@@ -194,34 +205,17 @@ function BrandImageContent() {
                   high-quality image that complements your product.
                 </p>
                 <Uploader
-                  onImageUploaded={handleImageUploaded}
+                  onImageUploaded={handleBackgroundImageUploaded}
                   userId={userId || undefined}
                 />
+                {uploadedBackgroundImageUrl && (
+                  <div className="mt-2 p-2 text-sm bg-green-50 text-green-700 rounded">
+                    ✓ Background image uploaded successfully
+                  </div>
+                )}
               </div>
             </div>
 
-            {uploadedImageUrl && (
-              <div className="mt-4 p-3 border rounded-md upload-success">
-                <div className="flex items-center">
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>Image uploaded successfully!</span>
-                </div>
-                <p className="mt-1 text-sm">
-                  Your image has been added to your assets. Proceed to Step 2 to
-                  create your product image.
-                </p>
-              </div>
-            )}
 
             {/*<div className="mt-6">*/}
             {/*  <MyAssets assetType="upl" />*/}
@@ -263,7 +257,8 @@ function BrandImageContent() {
                 userId={userId}
                 userIp={userIp}
                 onUserCreditsUpdate={handleUserCreditsUpdate}
-                uploadedImageUrl={uploadedImageUrl}
+                uploadedProductImageUrl={uploadedProductImageUrl}
+                uploadedBackgroundImageUrl={uploadedBackgroundImageUrl}
               />
             )}
           </div>

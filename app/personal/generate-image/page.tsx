@@ -170,10 +170,10 @@ function GenerateImageContent() {
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold mb-2 pr-8">
-          <Link href="/business" className="back-button">
+          <Link href="/personal" className="back-button">
             ←
           </Link>
-          Generate Images
+          Generate Image
         </h1>
         <p className="text-lg">Create stunning images for your personal use</p>
         <p className="mt-2">

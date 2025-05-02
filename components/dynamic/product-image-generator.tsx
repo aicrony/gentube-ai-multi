@@ -163,7 +163,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       } else {
         if (data.result === 'InQueue') {
           setMessage(
-            'Your product image is in queue. Refresh your assets to see it when ready.'
+            'Your product image is in queue. It will appear in Step 3 when ready.'
           );
 
           // Auto-clear the message after 30 seconds
@@ -177,6 +177,12 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         // Update credits
         setUserCreditsResponse(data.credits);
         if (onUserCreditsUpdate) {
+          onUserCreditsUpdate(data.credits);
+        }
+        
+        // Open step 3 and trigger auto-refresh for queued items
+        if (onUserCreditsUpdate) {
+          // onUserCreditsUpdate already sets openSteps[3] to true in the parent component
           onUserCreditsUpdate(data.credits);
         }
       }
@@ -369,9 +375,9 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
         {/* Result Image */}
         {resultImageUrl && (
-          <h3 className="font-semibold text-lg mb-3">
-            Your Product Image is Generating
-          </h3>
+          <div className="mt-2 p-3 text-sm bg-green-50 text-green-700 rounded">
+            ✓ Your product image is generating. Check Step 3 for your final image.
+          </div>
         )}
       </div>
 

@@ -173,7 +173,7 @@ function BusinessImageContent() {
           <Link href="/business" className="back-button">
             ←
           </Link>
-          Business Images
+          Business Image
         </h1>
         <p className="text-lg">Create stunning images for your business</p>
         <p className="mt-2">

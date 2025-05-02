@@ -26,13 +26,16 @@ module.exports = {
   api: {
     // Configure the body parser for API routes
     bodyParser: {
-      sizeLimit: '5mb'
+      sizeLimit: '7mb'
     },
     // Enable response compression
     responseLimit: false
   },
   experimental: {
-    serverComponentsExternalPackages: ['@google-cloud/datastore', '@google-cloud/storage']
+    serverComponentsExternalPackages: [
+      '@google-cloud/datastore',
+      '@google-cloud/storage'
+    ]
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
