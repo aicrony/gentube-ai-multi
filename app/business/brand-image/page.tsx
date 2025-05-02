@@ -292,7 +292,7 @@ function BrandImageContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets />
+            <MyAssets autoRefreshQueued={true} />
           </div>
         )}
       </div>

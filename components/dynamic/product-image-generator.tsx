@@ -13,14 +13,16 @@ interface ProductImageGeneratorProps {
   userId: string;
   userIp: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
-  uploadedImageUrl?: string | null;
+  uploadedProductImageUrl?: string | null;
+  uploadedBackgroundImageUrl?: string | null;
 }
 
 export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   userId,
   userIp,
   onUserCreditsUpdate,
-  uploadedImageUrl
+  uploadedProductImageUrl,
+  uploadedBackgroundImageUrl
 }) => {
   // State for image selection
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -61,12 +63,18 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     { value: 'center_horizontal', label: 'Center Horizontal' }
   ];
 
-  // Use uploadedImageUrl when provided
+  // Use uploaded images when provided
   useEffect(() => {
-    if (uploadedImageUrl && !selectedProductImage) {
-      setSelectedProductImage(uploadedImageUrl);
+    if (uploadedProductImageUrl && !selectedProductImage) {
+      setSelectedProductImage(uploadedProductImageUrl);
     }
-  }, [uploadedImageUrl]);
+  }, [uploadedProductImageUrl]);
+
+  useEffect(() => {
+    if (uploadedBackgroundImageUrl && !selectedBackgroundImage) {
+      setSelectedBackgroundImage(uploadedBackgroundImageUrl);
+    }
+  }, [uploadedBackgroundImageUrl]);
 
   // Handle asset selection
   const handleProductSelect = (assetUrl: string) => {

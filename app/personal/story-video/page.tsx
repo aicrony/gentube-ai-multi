@@ -166,7 +166,7 @@ function StoryVideoContent() {
 
         {openSteps[2] && (
           <div className="mt-4">
-            <MyAssets />
+            <MyAssets autoRefreshQueued={true} />
           </div>
         )}
       </div>
