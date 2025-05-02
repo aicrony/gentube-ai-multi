@@ -2,17 +2,19 @@ export function getCreditsValue(purchaseTotal: number = 0) {
   let purchasedCredits: number = 0;
 
   if (purchaseTotal === 700) {
-    purchasedCredits = 500;
-  } else if (purchaseTotal === 1400) {
+    purchasedCredits = 400;
+  } else if (purchaseTotal === 1900) {
     purchasedCredits = 1000;
-  } else if (purchaseTotal === 2100) {
-    purchasedCredits = 1500;
-  } else if (purchaseTotal === 4200) {
+  } else if (purchaseTotal === 4900) {
     purchasedCredits = 3000;
-  } else if (purchaseTotal === 14000) {
-    purchasedCredits = 10000;
+  } else if (purchaseTotal === 1000) {
+    purchasedCredits = 500;
+  } else if (purchaseTotal === 3000) {
+    purchasedCredits = 1500;
+  } else if (purchaseTotal === 6000) {
+    purchasedCredits = 3000;
   } else {
-    purchasedCredits = Math.round(purchaseTotal * 0.71428571);
+    purchasedCredits = Math.round(purchaseTotal * 0.5);
   }
 
   return purchasedCredits;

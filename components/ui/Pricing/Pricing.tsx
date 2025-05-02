@@ -142,7 +142,7 @@ export default function Pricing({
               Pricing Plans
             </h1>
             <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
-              Choose the plan that will save you the most time.
+              Choose a plan to simplify your workflow.
             </p>
             <div
               className="relative self-center mt-6 rounded-lg p-0.5 flex sm:mt-8 "
