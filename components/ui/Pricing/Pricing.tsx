@@ -224,6 +224,8 @@ export default function Pricing({
               }).format((price?.unit_amount || 0) / 100);
 
               // Determine if this product should have a special badge
+              const isPlusPlan =
+                product.name?.toLowerCase().includes('plus') || false;
               const isBusinessPlan =
                 product.name?.toLowerCase().includes('business') || false;
               const isTeamPlan =
@@ -238,7 +240,8 @@ export default function Pricing({
                       'border border-pink-500': subscription
                         ? product.name === subscription?.prices?.products?.name
                         : product.name === 'Freelancer',
-                      'border-2 border-primary': isBusinessPlan || isTeamPlan
+                      'border-2 border-primary':
+                        isPlusPlan || isTeamPlan || isBusinessPlan
                     },
                     'flex-1', // This makes the flex item grow to fill the space
                     'basis-1/3', // Assuming you want each card to take up roughly a third of the container's width
@@ -246,14 +249,16 @@ export default function Pricing({
                   )}
                   style={{
                     borderColor:
-                      isBusinessPlan || isTeamPlan
+                      isPlusPlan || isTeamPlan || isBusinessPlan
                         ? 'var(--primary-color)'
                         : undefined
                   }}
                 >
-                  {isBusinessPlan && <PricingBadge label="Best Value" />}
+                  {isPlusPlan && <PricingBadge label="Best for High Output" />}
 
                   {isTeamPlan && <PricingBadge label="Best for High Output" />}
+
+                  {isBusinessPlan && <PricingBadge label="Best Value" />}
 
                   <div className="p-6">
                     <h2 className="text-2xl font-semibold leading-6">
