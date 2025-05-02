@@ -157,7 +157,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
           setMessage(
             'Your product image is in queue. Refresh your assets to see it when ready.'
           );
-          
+
           // Auto-clear the message after 30 seconds
           setTimeout(() => {
             setMessage(null);
@@ -342,7 +342,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
             isSubmitting || !selectedProductImage || !selectedBackgroundImage
           }
         >
-          Generate Product Image (10 credits)
+          Generate Product Image
         </Button>
 
         {/* Status Messages */}
