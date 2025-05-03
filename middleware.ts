@@ -6,8 +6,8 @@ export async function middleware(request: NextRequest) {
 
   // Comment out the following function to enable Preview apps in Vercel
   if (
-    request.nextUrl.hostname.endsWith('.vercel.app') ||
-    request.nextUrl.hostname === 'test.gentube.ai'
+    request.nextUrl.hostname.endsWith('.vercel.app')
+    // || request.nextUrl.hostname === 'test.gentube.ai'
   ) {
     return NextResponse.redirect(mainUrl);
   }
