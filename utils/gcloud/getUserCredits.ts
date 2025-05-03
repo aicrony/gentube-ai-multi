@@ -19,6 +19,7 @@ export async function getUserCredits(
   let query;
   if (userId && userId != 'none' && userId.length > 0) {
     console.log('Query 1');
+    console.log('userId: ' + userId);
     query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
