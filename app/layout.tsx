@@ -1,11 +1,13 @@
+/// <reference path="../types/layout.d.ts" />
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Metadata } from 'next';
 import Footer from '@/components/ui/Footer';
 import Navbar from '@/components/ui/Navbar';
 import { Toaster } from '@/components/ui/Toasts/toaster';
-import { PropsWithChildren, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
-import 'styles/main.css';
+import type { ReactNode } from 'react';
+import '@/styles/main.css';
 import { createClient } from '@/utils/supabase/server';
 import { UserIdProvider } from '@/context/UserIdContext';
 import { UserIpProvider } from '@/context/UserIpContext';
@@ -33,7 +35,11 @@ export const metadata: Metadata = {
   }
 };
 
-export default async function RootLayout({ children }: PropsWithChildren) {
+export default async function RootLayout({
+  children
+}: {
+  children: ReactNode;
+}) {
   const supabase = createClient();
   let userId: string = '';
   let userIp: string = '';
@@ -71,7 +77,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
               <Navbar className="navbar" />
               <main
                 id="skip"
-                className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)] pt-6"
+                className="min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)] pt-6"
               >
                 {children}
               </main>
@@ -82,8 +88,8 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             </ThemeProvider>
           </UserIpProvider>
         </UserIdProvider>
+        <GoogleAnalytics gaId="G-634FFY459F" />
       </body>
-      <GoogleAnalytics gaId="G-634FFY459F" />
     </html>
   );
 }

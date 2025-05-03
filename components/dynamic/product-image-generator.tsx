@@ -213,7 +213,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         <div className="p-4">
           <h2 className="text-xl font-bold mb-4">{title}</h2>
           <div className="asset-selection">
-            <MyAssets assetType="upl" onSelectAsset={onSelect} />
+            <MyAssets assetType="upl,img" onSelectAsset={onSelect} />
           </div>
         </div>
       </GenericModal>
