@@ -38,16 +38,16 @@ export default async function SignIn({
     const preferredSignInView =
       cookies().get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
-    
+
     // Preserve query parameters when redirecting
     const queryString = Object.entries(searchParams)
       .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
       .join('&');
-      
-    const redirectUrl = queryString 
-      ? `/signin/${viewProp}?${queryString}` 
+
+    const redirectUrl = queryString
+      ? `/signin/${viewProp}?${queryString}`
       : `/signin/${viewProp}`;
-      
+
     return redirect(redirectUrl);
   }
 
@@ -67,12 +67,27 @@ export default async function SignIn({
   return (
     <div className="flex justify-center height-screen-helper">
       <div className="flex flex-col justify-between max-w-lg p-3 m-auto w-80 ">
-        <div className="mt-8 flex justify-center pb-2 ">
+        <div className="mt-12 flex justify-center pb-2 ">
           <Logo width="90px" height="90px" />
         </div>
         {searchParams.new_user_prompt && (
-          <div className="mb-4 p-3 rounded-md border border-blue-500 text-center" style={{ backgroundColor: 'var(--primary-2)', color: 'var(--text-color)' }}>
-            <p className="font-medium">New users <a href="/signin/signup" className="underline font-semibold" style={{ color: 'var(--primary-color)' }}>sign up for your Free Credits</a></p>
+          <div
+            className="mb-1 p-2 rounded-md border border-blue-500 text-center"
+            style={{
+              backgroundColor: 'var(--primary-2)',
+              color: 'var(--text-color)'
+            }}
+          >
+            <p className="font-medium">
+              New users{' '}
+              <a
+                href="/signin/signup"
+                className="underline font-semibold"
+                style={{ color: 'var(--primary-color)' }}
+              >
+                sign up for your Free Credits
+              </a>
+            </p>
           </div>
         )}
         <Card
