@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 export default function PersonalWorkflow() {
   const [userId, setUserId] = useState<string>('none');
@@ -66,7 +67,8 @@ export default function PersonalWorkflow() {
               </Link>
 
               <Link href="/personal/social-media" className="no-underline">
-                <div className="theme-card">
+                <div className="theme-card relative">
+                  <PricingBadge label="Coming Soon!" />
                   <h3 className="text-xl font-semibold mb-2">
                     Share Social Post
                   </h3>

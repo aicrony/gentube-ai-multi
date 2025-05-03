@@ -7,6 +7,7 @@ import { useUserIp } from '@/context/UserIpContext';
 import Button from '@/components/ui/Button';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import React from 'react';
+import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 export default function BusinessWorkflow() {
   const userId = useUserId() || 'none';
@@ -85,7 +86,8 @@ export default function BusinessWorkflow() {
               </Link>
 
               <Link href="/business/social-media" className="no-underline">
-                <div className="theme-card">
+                <div className="theme-card relative">
+                  <PricingBadge label="Coming Soon!" />
                   <h3 className="text-xl font-semibold mb-2">
                     Share Social Post
                   </h3>

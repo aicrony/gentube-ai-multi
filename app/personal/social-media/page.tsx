@@ -24,6 +24,7 @@ import {
   FaChevronRight
 } from 'react-icons/fa';
 import { StyleItem, EffectItem, styles, effects } from '@/constants';
+import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 interface UserAsset {
   CreatedAssetUrl: string;
@@ -173,12 +174,15 @@ function SocialMediaContent() {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2 pr-6">
-          <Link href="/personal" className="back-button">
-            ←
-          </Link>
-          Share Social Post
-        </h1>
+        <div className="relative inline-block">
+          <h1 className="text-3xl font-bold mb-2 pr-6">
+            <Link href="/personal" className="back-button">
+              ←
+            </Link>
+            Share Social Post
+          </h1>
+          <PricingBadge label="Coming Soon!" />
+        </div>
         <p className="text-lg">
           Create stunning images to share on your favorite platforms
         </p>
