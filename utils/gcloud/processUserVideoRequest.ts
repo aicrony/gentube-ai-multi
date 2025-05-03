@@ -26,7 +26,12 @@ export async function processUserVideoRequest(
 ): Promise<{ result: string; credits: number }> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
-  let userResponse = { result: '', credits: -1000, error: false };
+  let userResponse = {
+    result: '',
+    credits: -1000,
+    error: false,
+    statusCode: 200
+  };
   type VideoApiResult = {
     error?: {
       code: number;
@@ -45,7 +50,8 @@ export async function processUserVideoRequest(
     });
   } else {
     console.log('Invalid userId - user must be signed in');
-    userResponse.result = 'AuthRequired';
+    userResponse.result = 'Please sign in for free credits.';
+    userResponse.statusCode = 430;
     userResponse.error = true;
     return userResponse;
   }
@@ -281,7 +287,7 @@ export async function updateUserCredits(
     console.log('Cannot update credits: User ID is required');
     return;
   }
-  
+
   const keyValue = [kind, userId];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({

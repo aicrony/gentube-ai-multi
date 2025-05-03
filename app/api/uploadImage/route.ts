@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
     // Require both userId and userIp
     if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required. Please sign in.' }, 
-        { status: 401 }
+        { error: 'User ID is required. Please sign in for free credits.' }, 
+        { status: 430 } // Custom status code for sign-in required
       );
     }
     

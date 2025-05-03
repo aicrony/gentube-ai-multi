@@ -8,6 +8,7 @@ import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice
 import GenericModal from '@/components/ui/GenericModal';
 import MyAssets from '@/components/dynamic/my-assets';
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { handleApiError } from '@/utils/apiErrorHandler';
 
 interface ProductImageGeneratorProps {
   userId: string;
@@ -143,10 +144,10 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         })
       });
 
-      if (!response.ok) {
+      // Use centralized error handler
+      if (await handleApiError(response, { setErrorMessage })) {
         setIsSubmitting(false);
-        setErrorMessage('Request failed. Please try again.');
-        return;
+        return; // Error was handled, exit the function
       }
 
       const data = await response.json();

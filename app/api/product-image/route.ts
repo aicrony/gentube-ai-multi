@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: true,
-          result: 'User ID is required. Please sign in.'
+          result: 'User ID is required. Please sign in for free credits.'
         }, 
-        { status: 401 }
+        { status: 430 } // Custom status code for sign-in required
       );
     }
     

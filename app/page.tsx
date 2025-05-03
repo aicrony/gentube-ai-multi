@@ -49,7 +49,7 @@ function HomePageContent() {
                     View Pricing
                   </Button>
                 </Link>
-                <Link href="/freeflow">
+                <Link href="/start">
                   <Button variant="slim" className="px-8 py-3 text-lg">
                     Try for Free
                   </Button>

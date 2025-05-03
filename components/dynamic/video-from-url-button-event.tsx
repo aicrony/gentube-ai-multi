@@ -8,7 +8,8 @@ import CreditLimitNoticeButton from '@/components/static/credit-limit-notice-but
 import ImageGallery from '@/functions/getGallery';
 import GenericModal from '@/components/ui/GenericModal/GenericModal';
 import '@/styles/main.css';
-import getFileNameFromUrl from '@/utils/stringUtils'; // Import the CSS file
+import getFileNameFromUrl from '@/utils/stringUtils';
+import { handleApiError } from '@/utils/apiErrorHandler'; // Import the CSS file
 
 interface VideoFromUrlDynamicButtonProps {
   userId: string;
@@ -115,20 +116,10 @@ export function VideoFromUrlDynamicButton({
           loop: loop === 'true'
         })
       });
-      if (!response.ok) {
-        setIsSubmitting(false); // Response is received, enable the button
-        if (response.status === 429) {
-          const errorData = await response.json();
-          setErrorMessage(
-            errorData.error ||
-              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
-          );
-        } else {
-          setErrorMessage(
-            'Request Failed. Please check that the prompt is appropriate and try again.'
-          );
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      setIsSubmitting(false); // Response is received, enable the button
+      
+      // Use centralized error handler
+      if (await handleApiError(response, { setErrorMessage })) {
         return;
       }
       let dataResponse: { result?: any; credits?: any; error?: boolean } = {};

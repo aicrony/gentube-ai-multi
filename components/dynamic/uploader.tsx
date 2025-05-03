@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { handleApiError } from '@/utils/apiErrorHandler';
 
 interface UploaderProps {
   onImageUploaded?: (imageUrl: string) => void;
@@ -55,8 +56,11 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
             })
           });
 
-          if (!response.ok) {
-            throw new Error('Failed to upload image');
+          // Use centralized error handler
+          if (await handleApiError(response, { 
+            setErrorMessage: (msg) => setUploadError(msg) 
+          })) {
+            return; // Error was handled, exit the function
           }
 
           const data = await response.json();

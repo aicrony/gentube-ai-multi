@@ -8,6 +8,7 @@ import { CreditLimitNoticeButton } from '@/components/static/credit-limit-notice
 import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
+import { handleApiError } from '@/utils/apiErrorHandler';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -75,21 +76,11 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         body: JSON.stringify({ prompt: prompt })
       });
 
-      if (!response.ok) {
-        setIsSubmitting(false); // Response is received, enable the button
-        if (response.status === 429) {
-          const errorData = await response.json();
-          setErrorMessage(
-            errorData.error ||
-              'IMAGE request limit exceeded. Please subscribe on the PRICING page.'
-          );
-        } else {
-          setErrorMessage(
-            'Request Failed. Please check that the prompt is appropriate and try again.'
-          );
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return;
+      setIsSubmitting(false); // Response is received, enable the button
+      
+      // Use the centralized error handler
+      if (await handleApiError(response, { setErrorMessage })) {
+        return; // Error was handled, exit the function
       }
       let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
