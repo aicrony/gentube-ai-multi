@@ -42,16 +42,16 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
       const base64data = reader.result?.toString().split(',')[1];
       if (base64data) {
         try {
-          // Call the API endpoint to upload the image
+          // Call the API endpoint to upload the image with proper authentication headers
           const response = await fetch('/api/uploadImage', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'x-user-id': userId || 'none',
+              'x-forwarded-for': '127.0.0.1' // This would be handled by the server in production
             },
             body: JSON.stringify({
-              image: base64data,
-              userId: userId || '',
-              userIp: '127.0.0.1' // This would be handled by the server in production
+              image: base64data
             })
           });
 

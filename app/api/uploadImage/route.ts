@@ -13,8 +13,27 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    // Get userId from headers instead of body for security
+    const userId = request.headers.get('x-user-id');
+    const userIp = request.headers.get('x-forwarded-for') || 'unknown';
+    
     const body = await request.json();
-    const { image, userId, userIp } = body;
+    const { image } = body;
+
+    // Require both userId and userIp
+    if (!userId || userId === 'none') {
+      return NextResponse.json(
+        { error: 'User ID is required. Please sign in.' }, 
+        { status: 401 }
+      );
+    }
+    
+    if (!userIp || userIp === 'unknown') {
+      return NextResponse.json(
+        { error: 'User IP is required' }, 
+        { status: 400 }
+      );
+    }
 
     if (!image) {
       return NextResponse.json(

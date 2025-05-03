@@ -14,9 +14,17 @@ export async function POST(request: NextRequest) {
     const prompt = body.prompt ? body.prompt : '';
     console.log('Prompt OK');
 
-    if (!userId) {
+    // Require both userId and userIp
+    if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required' }, 
+        { error: 'User ID is required. Please sign in.' }, 
+        { status: 401 }
+      );
+    }
+    
+    if (!userIp || userIp === 'unknown') {
+      return NextResponse.json(
+        { error: 'User IP is required' }, 
         { status: 400 }
       );
     }

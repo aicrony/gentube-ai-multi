@@ -25,9 +25,17 @@ export async function POST(request: NextRequest) {
     const motion = body.motion as string;
     const imageUrl = (body.url as string) || 'none';
 
-    if (!userId) {
+    // Require both userId and userIp
+    if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required' },
+        { error: 'User ID is required. Please sign in.' },
+        { status: 401 }
+      );
+    }
+    
+    if (!userIp || userIp === 'unknown') {
+      return NextResponse.json(
+        { error: 'User IP is required' },
         { status: 400 }
       );
     }

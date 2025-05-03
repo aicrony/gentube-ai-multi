@@ -35,7 +35,7 @@ export async function processUserVideoRequest(
     url?: string;
   };
 
-  // Determine the key to use for lookup
+  // Determine the key to use for lookup - now requiring userId
   let lookupKey;
   if (userId && userId !== 'none') {
     console.log('Key lookup by UserId');
@@ -43,17 +43,10 @@ export async function processUserVideoRequest(
       namespace,
       path: [kind, `${[kind, userId]}`]
     });
-  } else if (
-    normalizedIpAddress != undefined &&
-    normalizedIpAddress.length > 0
-  ) {
-    console.log('Key lookup by IP');
-    lookupKey = datastore.key({
-      namespace,
-      path: [kind, `${[kind, normalizedIpAddress]}`]
-    });
   } else {
-    console.log('Invalid userId and normalizedIpAddress');
+    console.log('Invalid userId - user must be signed in');
+    userResponse.result = 'AuthRequired';
+    userResponse.error = true;
     return userResponse;
   }
 
@@ -283,10 +276,13 @@ export async function updateUserCredits(
   console.log('UserIp: ', userIp);
   console.log('NormalizedIpAddress: ', normalizedIpAddress);
 
-  const keyValue = [
-    kind,
-    userId && userId !== 'none' ? userId : normalizedIpAddress
-  ];
+  // Only allow userId-based lookups
+  if (!userId || userId === 'none') {
+    console.log('Cannot update credits: User ID is required');
+    return;
+  }
+  
+  const keyValue = [kind, userId];
   console.log('KeyValue: ', keyValue);
   const key = datastore.key({
     namespace,
