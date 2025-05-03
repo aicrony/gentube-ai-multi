@@ -28,11 +28,11 @@ function HomePageContent() {
                 GenTube.ai
               </h1>
               <h2 className="text-2xl sm:text-center sm:text-4xl font-extrabold mb-6">
-                Simplify AI Images and Videos
+                Simplify AI Creation
               </h2>
               <p className="text-xl mb-8">
-                Gentube.ai turns complex AI into simple workflows, helping you
-                avoid project delays and accelerate your business.
+                Gentube.ai turns complex AI image and video creation into simple
+                workflows, helping you accelerate your projects.
               </p>
               <p className="text-xl mb-8">
                 Our workflows guide you to faster and simpler AI image and video
@@ -299,14 +299,14 @@ function HomePageContent() {
                 boxShadow: '0 8px 16px var(--shadow-color)'
               }}
             >
-              <h3 className="text-2xl font-bold mb-4">Pay As You Go</h3>
-              <p className="text-4xl font-bold mb-6">From $10</p>
+              <h3 className="text-2xl font-bold mb-4">Subscribe and Save</h3>
+              <p className="text-4xl font-bold mb-6">From $9</p>
               <ul className="text-left space-y-2 mb-8">
-                <li>✓ Purchase credits as needed</li>
-                <li>✓ No subscription required</li>
-                <li>✓ Keep the credits you pay for</li>
+                <li>✓ Choose Personal or Business Plans</li>
+                <li>✓ Monthly renewable credits</li>
+                <li>✓ Full plan features</li>
               </ul>
-              <Link href="/pricing?tab=one-time" className="mt-auto">
+              <Link href="/pricing" className="mt-auto">
                 <Button variant="slim" className="w-full">
                   View Packages
                 </Button>
@@ -322,14 +322,14 @@ function HomePageContent() {
                 boxShadow: '0 8px 16px var(--shadow-color)'
               }}
             >
-              <h3 className="text-2xl font-bold mb-4">Subscribe and Save</h3>
-              <p className="text-4xl font-bold mb-6">From $20</p>
+              <h3 className="text-2xl font-bold mb-4">Pay As You Go</h3>
+              <p className="text-4xl font-bold mb-6">From $10</p>
               <ul className="text-left space-y-2 mb-8">
-                <li>✓ Choose Personal or Business Plans</li>
-                <li>✓ Monthly renewable credits</li>
-                <li>✓ Full plan features</li>
+                <li>✓ Purchase credits as needed</li>
+                <li>✓ No subscription required</li>
+                <li>✓ Available under any plan</li>
               </ul>
-              <Link href="/pricing" className="mt-auto">
+              <Link href="/pricing?tab=one-time" className="mt-auto">
                 <Button variant="slim" className="w-full">
                   View Packages
                 </Button>

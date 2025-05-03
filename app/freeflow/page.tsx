@@ -19,27 +19,29 @@ export default function Home() {
   // Safely use context hooks with error handling
   let initialUserId: string | 'none' = 'none';
   let initialUserIp: string = 'unknown';
-  
+
   try {
     initialUserId = useUserId() || 'none';
   } catch (error) {
     console.error('Error accessing UserIdContext:', error);
   }
-  
+
   try {
     initialUserIp = useUserIp();
   } catch (error) {
     console.error('Error accessing UserIpContext:', error);
   }
-  
+
   const [userId, setUserId] = useState<string | 'none'>(initialUserId);
   const [userIp, setUserIp] = useState<string>(initialUserIp);
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
   const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
-  const [contextError, setContextError] = useState<boolean>(initialUserId === 'none' || initialUserIp === 'unknown');
+  const [contextError, setContextError] = useState<boolean>(
+    initialUserId === 'none' || initialUserIp === 'unknown'
+  );
   const pathname = usePathname();
-  
+
   // If we couldn't get the userIp from context, try to fetch it directly
   useEffect(() => {
     if (userIp === 'unknown') {
@@ -53,7 +55,7 @@ export default function Home() {
           console.error('Error fetching user IP:', error);
         }
       };
-      
+
       fetchUserIp();
     }
   }, [userIp]);
@@ -177,12 +179,15 @@ export default function Home() {
         <div className="text-center p-8 max-w-lg">
           <h1 className="text-4xl font-extrabold mb-6">GenTube.ai</h1>
           <div className="bg-red-50 border border-red-200 rounded-md p-6 mb-6">
-            <h2 className="text-xl font-semibold text-red-700 mb-2">Connection Issue</h2>
+            <h2 className="text-xl font-semibold text-red-700 mb-2">
+              Loading your session...
+            </h2>
             <p className="text-gray-700 mb-4">
-              We encountered a temporary issue loading your session. This can happen after the application restarts or during development.
+              We are preparing your session. If the page does not load, try
+              clicking 'Reload Page' or 'Return to Home' to restart the session.
             </p>
-            <Button 
-              variant="slim" 
+            <Button
+              variant="slim"
               onClick={() => window.location.reload()}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
