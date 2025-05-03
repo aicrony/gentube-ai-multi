@@ -62,7 +62,7 @@ export function VideoFromUploadedImage({
     'Crane Down'
   ];
 
-  videoGenButtonLabel = 'Generate Video from Image URL';
+  videoGenButtonLabel = 'Generate Video';
   videoGenCompleteMessage = 'Video Generation Complete';
 
   useEffect(() => {

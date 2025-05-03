@@ -45,9 +45,9 @@ export async function handleApiError(
         setErrorMessage(errorMessage || 'Please sign in for free credits.');
       }
       
-      // Redirect to sign in page after a short delay
+      // Redirect to sign in page after a short delay with new user prompt
       setTimeout(() => {
-        window.location.href = redirectPath;
+        window.location.href = `${redirectPath}?new_user_prompt=true`;
       }, redirectDelay);
       break;
       
@@ -64,7 +64,7 @@ export async function handleApiError(
       
       // Only redirect if it's a general 401, not our custom 430
       setTimeout(() => {
-        window.location.href = redirectPath;
+        window.location.href = `${redirectPath}?new_user_prompt=true`;
       }, redirectDelay);
       break;
       
@@ -97,6 +97,6 @@ export function showSignInRequiredError(
   }
   
   setTimeout(() => {
-    window.location.href = '/signin';
+    window.location.href = '/signin?new_user_prompt=true';
   }, 1500);
 }

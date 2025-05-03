@@ -22,7 +22,7 @@ export default async function SignIn({
   searchParams
 }: {
   params: { id: string };
-  searchParams: { disable_button: boolean };
+  searchParams: { disable_button: boolean; new_user_prompt?: string };
 }) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
@@ -38,7 +38,17 @@ export default async function SignIn({
     const preferredSignInView =
       cookies().get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
-    return redirect(`/signin/${viewProp}`);
+    
+    // Preserve query parameters when redirecting
+    const queryString = Object.entries(searchParams)
+      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+      .join('&');
+      
+    const redirectUrl = queryString 
+      ? `/signin/${viewProp}?${queryString}` 
+      : `/signin/${viewProp}`;
+      
+    return redirect(redirectUrl);
   }
 
   // Check if the user is already logged in and redirect to the account page if so
@@ -60,6 +70,11 @@ export default async function SignIn({
         <div className="mt-8 flex justify-center pb-2 ">
           <Logo width="90px" height="90px" />
         </div>
+        {searchParams.new_user_prompt && (
+          <div className="mb-4 p-3 rounded-md border border-blue-500 text-center" style={{ backgroundColor: 'var(--primary-2)', color: 'var(--text-color)' }}>
+            <p className="font-medium">New users <a href="/signin/signup" className="underline font-semibold" style={{ color: 'var(--primary-color)' }}>sign up for your Free Credits</a></p>
+          </div>
+        )}
         <Card
           title={
             viewProp === 'forgot_password'

@@ -63,7 +63,7 @@ export function VideoFromUrlDynamicButton({
     'Crane Down'
   ];
 
-  videoGenButtonLabel = 'Generate Video from Image URL';
+  videoGenButtonLabel = 'Generate Video';
   videoGenCompleteMessage = 'Video Generation Complete';
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function VideoFromUrlDynamicButton({
         })
       });
       setIsSubmitting(false); // Response is received, enable the button
-      
+
       // Use centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
         return;
@@ -148,7 +148,7 @@ export function VideoFromUrlDynamicButton({
           console.log('NO ERROR FOUND');
           if (dataResponse.result == 'InQueue') {
             setMessage('Refresh your assets to see your video in queue.');
-            
+
             // Auto-clear the message after 30 seconds
             setTimeout(() => {
               setMessage('');

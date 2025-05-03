@@ -113,7 +113,7 @@ function HomePageContent() {
               </p>
               <ul className="text-left space-y-2 mb-6 w-full">
                 <li>✓ Direct image generation</li>
-                <li>✓ Generate video from URL</li>
+                <li>✓ Generate video from URL or text</li>
                 <li>✓ Custom image upload</li>
               </ul>
               <Link href="/freeflow" className="mt-auto">
