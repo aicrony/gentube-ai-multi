@@ -51,7 +51,7 @@ function HomePageContent() {
                 </Link>
                 <Link href="/freeflow">
                   <Button variant="slim" className="px-8 py-3 text-lg">
-                    No Guide Needed
+                    Try for Free
                   </Button>
                 </Link>
               </div>

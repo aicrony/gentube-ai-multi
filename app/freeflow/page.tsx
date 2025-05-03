@@ -16,49 +16,15 @@ import GalleryAssets from '@/components/dynamic/gallery-assets';
 import { Label } from '@/components/ui/label';
 
 export default function Home() {
-  // Safely use context hooks with error handling
-  let initialUserId: string | 'none' = 'none';
-  let initialUserIp: string = 'unknown';
-
-  try {
-    initialUserId = useUserId() || 'none';
-  } catch (error) {
-    console.error('Error accessing UserIdContext:', error);
-  }
-
-  try {
-    initialUserIp = useUserIp();
-  } catch (error) {
-    console.error('Error accessing UserIpContext:', error);
-  }
-
-  const [userId, setUserId] = useState<string | 'none'>(initialUserId);
-  const [userIp, setUserIp] = useState<string>(initialUserIp);
+  // Now we can safely use contexts since we have error handling at the layout level
+  const userId = useUserId() || 'none';
+  const userIp = useUserIp();
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [displayName, setDisplayName] = useState<string>('');
   const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
-  const [contextError, setContextError] = useState<boolean>(
-    initialUserId === 'none' || initialUserIp === 'unknown'
-  );
   const pathname = usePathname();
 
-  // If we couldn't get the userIp from context, try to fetch it directly
-  useEffect(() => {
-    if (userIp === 'unknown') {
-      const fetchUserIp = async () => {
-        try {
-          const response = await fetch('https://api.ipify.org?format=json');
-          const data = await response.json();
-          setUserIp(data.ip);
-          setContextError(false);
-        } catch (error) {
-          console.error('Error fetching user IP:', error);
-        }
-      };
-
-      fetchUserIp();
-    }
-  }, [userIp]);
+  // IP fetching and error handling is now done at the layout level
 
   const handleUserCreditsUpdate = useCallback((credits: number | null) => {
     setUserCredits(credits);
@@ -172,37 +138,7 @@ export default function Home() {
     return null;
   };
 
-  // If there's a context error, show a recovery UI
-  if (contextError) {
-    return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center">
-        <div className="text-center p-8 max-w-lg">
-          <h1 className="text-4xl font-extrabold mb-6">GenTube.ai</h1>
-          <div className="bg-red-50 border border-red-200 rounded-md p-6 mb-6">
-            <h2 className="text-xl font-semibold text-red-700 mb-2">
-              Loading your session...
-            </h2>
-            <p className="text-gray-700 mb-4">
-              We are preparing your session. If the page does not load, try
-              clicking 'Reload Page' or 'Return to Home' to restart the session.
-            </p>
-            <Button
-              variant="slim"
-              onClick={() => window.location.reload()}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Reload Page
-            </Button>
-          </div>
-          <div className="mt-4">
-            <Link href="/start">
-              <Button variant="slim">Return to Home</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Error handling is now done at the layout level
 
   return (
     <UserCreditsProvider>
