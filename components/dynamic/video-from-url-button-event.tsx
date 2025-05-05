@@ -218,7 +218,7 @@ export function VideoFromUrlDynamicButton({
               className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
             >
               <option value="5">5</option>
-              <option value="10">10</option>
+              {/*<option value="10">10</option>*/}
             </select>
           </div>
           <div>

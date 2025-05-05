@@ -109,7 +109,7 @@ export function VideoDynamicButton({
         })
       });
       setIsSubmitting(false); // Response is received, enable the button
-      
+
       // Use centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
         return; // Error was handled, exit the function
@@ -166,7 +166,7 @@ export function VideoDynamicButton({
             className="min-h-[25px] text-xl gray-text rounded-corners border border-black"
           >
             <option value="5">5</option>
-            <option value="10">10</option>
+            {/*<option value="10">10</option>*/}
           </select>
         </div>
         <div>
