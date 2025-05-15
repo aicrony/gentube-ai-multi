@@ -240,8 +240,7 @@ export default function Pricing({
                       'border border-pink-500': subscription
                         ? product.name === subscription?.prices?.products?.name
                         : product.name === 'Freelancer',
-                      'border-2 border-primary':
-                        isPlusPlan || isTeamPlan || isBusinessPlan
+                      'border-2 border-primary': isTeamPlan || isBusinessPlan
                     },
                     'flex-1', // This makes the flex item grow to fill the space
                     'basis-1/3', // Assuming you want each card to take up roughly a third of the container's width
@@ -254,9 +253,9 @@ export default function Pricing({
                         : undefined
                   }}
                 >
-                  {isPlusPlan && <PricingBadge label="Best for High Output" />}
+                  {/*{isPlusPlan && <PricingBadge label="Best for High Output" />}*/}
 
-                  {isTeamPlan && <PricingBadge label="Best for High Output" />}
+                  {/*{isTeamPlan && <PricingBadge label="Best for High Output" />}*/}
 
                   {isBusinessPlan && <PricingBadge label="Best Value" />}
 
