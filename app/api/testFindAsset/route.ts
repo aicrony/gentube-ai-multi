@@ -74,10 +74,10 @@ export async function GET(request: NextRequest) {
     };
     
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error finding asset:', error);
     return NextResponse.json(
-      { error: 'Failed to find asset', details: error.message },
+      { error: 'Failed to find asset', details: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }

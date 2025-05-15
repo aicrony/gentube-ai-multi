@@ -55,7 +55,15 @@ export async function GET(request: NextRequest) {
 }
 
 async function tryFindAsset(assetId: string) {
-  const results = {
+  const results: {
+    methods: Array<{
+      method: string;
+      key?: any;
+      error?: string;
+    }>;
+    found: boolean;
+    asset: any;
+  } = {
     methods: [],
     found: false,
     asset: null
@@ -118,10 +126,10 @@ async function tryFindAsset(assetId: string) {
           results.asset = assetBigInt;
           return results;
         }
-      } catch (e) {
+      } catch (e: any) {
         results.methods.push({ 
           method: "BigInt ID", 
-          error: e.message
+          error: e?.message || 'Error converting BigInt'
         });
       }
     }

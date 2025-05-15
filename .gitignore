@@ -43,3 +43,7 @@ certificates
 /.idea/
 /local-cedar-324921-5c8f531afb2e.json
 /supabase/login_response.json
+
+# debugging endpoints
+/app/api/debugDatastore/
+/app/api/testFindAsset/
