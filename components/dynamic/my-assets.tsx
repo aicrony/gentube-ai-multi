@@ -8,7 +8,9 @@ import {
   FaVideo,
   FaTrash,
   FaPlay,
-  FaDownload
+  FaDownload,
+  FaHeart,
+  FaStar
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
@@ -18,6 +20,12 @@ interface UserActivity {
   Prompt: string;
   AssetSource: string;
   AssetType: string;
+  SubscriptionTier?: number;
+}
+
+interface AssetLikeInfo {
+  likesCount: number;
+  isLiked: boolean;
 }
 
 interface MyAssetsProps {
@@ -55,6 +63,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0); // Track number of refreshes
   const [nextRefreshIn, setNextRefreshIn] = useState<number | null>(null); // Countdown to next refresh in seconds
+  const [assetLikes, setAssetLikes] = useState<{
+    [key: string]: AssetLikeInfo;
+  }>({});
+  const [galleryActionAssetId, setGalleryActionAssetId] = useState<
+    string | null
+  >(null); // Track which asset is being updated
   const limit = 10;
   const promptLength = 100;
 
@@ -90,6 +104,50 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   useEffect(() => {
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, assetType]);
+
+  // Fetch likes for all displayed assets
+  useEffect(() => {
+    const fetchLikes = async () => {
+      if (!userId || !activities.length) return;
+
+      try {
+        // Fetch all likes for this user
+        const response = await fetch(`/api/getAssetLikes?userId=${userId}`);
+        const likedAssets = await response.json();
+
+        // Fetch individual like counts for each asset
+        const likesPromises = activities.map(async (activity) => {
+          if (!activity.id) return null;
+
+          const response = await fetch(
+            `/api/getAssetLikes?assetId=${activity.id}&userId=${userId}`
+          );
+          const likeInfo = await response.json();
+
+          return {
+            assetId: activity.id,
+            likeInfo
+          };
+        });
+
+        const likesResults = await Promise.all(likesPromises);
+
+        // Update the asset likes state
+        const newAssetLikes = { ...assetLikes };
+        likesResults.forEach((result) => {
+          if (result && result.assetId) {
+            newAssetLikes[result.assetId] = result.likeInfo;
+          }
+        });
+
+        setAssetLikes(newAssetLikes);
+      } catch (error) {
+        console.error('Error fetching likes:', error);
+      }
+    };
+
+    fetchLikes();
+  }, [userId, activities]);
 
   // Update internal state when selectedUrl prop changes
   useEffect(() => {
@@ -273,6 +331,118 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
+  // Handle liking/unliking an asset
+  const handleToggleLike = async (activity: UserActivity) => {
+    if (!userId || !activity.id) return;
+
+    try {
+      const assetId = activity.id;
+      const currentLikeInfo = assetLikes[assetId] || {
+        likesCount: 0,
+        isLiked: false
+      };
+      const action = currentLikeInfo.isLiked ? 'unlike' : 'like';
+
+      const response = await fetch('/api/toggleAssetLike', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          assetId,
+          action
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update the local state with the new like info
+        setAssetLikes({
+          ...assetLikes,
+          [assetId]: {
+            likesCount: result.likesCount,
+            isLiked: result.isLiked
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  // Handle adding/removing an asset to/from the gallery
+  const handleToggleGallery = async (activity: UserActivity) => {
+    if (!userId || !activity.id) {
+      if (!userId) {
+        alert('You must be signed in to add items to the gallery.');
+      } else {
+        alert('Cannot add this item to the gallery: Missing item ID.');
+      }
+      return;
+    }
+
+    try {
+      const assetId = activity.id;
+      setGalleryActionAssetId(assetId); // Set this specific asset as being processed
+
+      const isInGallery = activity.SubscriptionTier === 3;
+      const action = isInGallery ? 'remove' : 'add';
+
+      // Don't allow uploaded images to be added to gallery
+      if (action === 'add' && activity.AssetType === 'upl') {
+        alert('Uploaded images cannot be added to the gallery.');
+        setGalleryActionAssetId(null);
+        return;
+      }
+
+      console.log(`Toggling gallery status: ${action} for asset ${assetId}`);
+
+      const response = await fetch('/api/toggleGalleryAsset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          assetId,
+          action
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Refresh the user activities to show the updated gallery status
+        handleRefresh();
+        alert(
+          isInGallery
+            ? 'Asset has been removed from the gallery.'
+            : 'Asset has been added to the gallery!'
+        );
+      } else {
+        console.error('Gallery toggle API error:', result);
+        // Show detailed error message for debugging
+        if (result.error) {
+          alert(`Error: ${result.error}\n${result.details || ''}`);
+        } else {
+          alert(
+            'Failed to update gallery status. Please try again.\nCheck browser console for details.'
+          );
+        }
+        console.log('Full error details:', result);
+      }
+    } catch (error) {
+      console.error('Error toggling gallery status:', error);
+      alert(
+        'An error occurred while updating gallery status. Please try again.'
+      );
+    } finally {
+      setGalleryActionAssetId(null); // Clear the processing state
+    }
+  };
+
   const openModal = (url: string) => {
     setModalMediaUrl(url);
     setIsModalOpen(true);
@@ -334,6 +504,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
+        <p>
+          <strong>*New:</strong> Star your asset to add it to the{' '}
+          <a href={'/gallery'}>public gallery</a>. Heart your asset to be first
+          to love it.
+        </p>
         <div className="flex items-center">
           {isAutoRefreshing && (
             <span
@@ -540,6 +715,46 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               >
                 <FaDownload />
               </button>
+              {/* Heart/Like button */}
+              {activity.AssetType !== 'upl' && activity.id && (
+                <button
+                  onClick={() => handleToggleLike(activity)}
+                  className={`icon-size ${assetLikes[activity.id]?.isLiked ? 'text-red-500' : ''}`}
+                  title={assetLikes[activity.id]?.isLiked ? 'Unlike' : 'Like'}
+                >
+                  <div className="flex items-center">
+                    {assetLikes[activity.id]?.likesCount > 0 && (
+                      <span className="mr-1 text-xs">
+                        {assetLikes[activity.id]?.likesCount}
+                      </span>
+                    )}
+                    <FaHeart />
+                  </div>
+                </button>
+              )}
+
+              {/* Gallery toggle button */}
+              {activity.AssetType !== 'upl' && (
+                <button
+                  onClick={() => handleToggleGallery(activity)}
+                  className={`icon-size ${activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                  title={
+                    activity.SubscriptionTier === 3
+                      ? 'Remove from Gallery'
+                      : 'Add to Gallery'
+                  }
+                  disabled={galleryActionAssetId !== null} // Disable all gallery buttons while any operation is in progress
+                >
+                  <FaStar
+                    className={
+                      galleryActionAssetId === activity.id
+                        ? 'animate-pulse'
+                        : ''
+                    }
+                  />
+                </button>
+              )}
+
               <button
                 onClick={() => handleDelete(activity)}
                 className="red icon-size"

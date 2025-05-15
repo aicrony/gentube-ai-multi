@@ -152,7 +152,7 @@ export async function signInWithPassword(formData: FormData) {
   } else if (data.user) {
     cookieStore.set('preferredSignInView', 'password_signin', { path: '/' });
     redirectPath = getStatusRedirect(
-      '/start',
+      '/gallery',
       'Success!',
       'You are now signed in.'
     );
@@ -199,7 +199,7 @@ export async function signUp(formData: FormData) {
     );
   } else if (data.session) {
     redirectPath = getStatusRedirect(
-      '/start',
+      '/gallery',
       'Success!',
       'You are now signed in.'
     );

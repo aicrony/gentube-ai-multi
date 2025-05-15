@@ -112,13 +112,14 @@ function AboutPageContent() {
                 guided workflows for maximum flexibility.
               </p>
               <ul className="text-left space-y-2 mb-6 w-full">
-                <li>✓ Direct image generation</li>
+                <li>✓ Community gallery sharing and liking</li>
+                <li>✓ Direct image and video generation</li>
                 <li>✓ Generate video from URL or text</li>
                 <li>✓ Custom image upload</li>
               </ul>
               <Link href="/" className="mt-auto">
                 <Button variant="slim" className="w-full">
-                  Explore Free
+                  Explore Free Flow
                 </Button>
               </Link>
             </div>
