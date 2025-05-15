@@ -42,10 +42,13 @@ export async function GET(request: NextRequest) {
         }))
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Debug datastore error:', error);
     return NextResponse.json(
-      { error: 'Failed to debug datastore', details: error.message },
+      { 
+        error: 'Failed to debug datastore', 
+        details: error?.message || 'Unknown error' 
+      },
       { status: 500 }
     );
   }
@@ -140,10 +143,10 @@ async function tryFindAsset(assetId: string) {
     
     return results;
     
-  } catch (error) {
+  } catch (error: any) {
     results.methods.push({ 
       method: "Error", 
-      error: error.message
+      error: error?.message || 'Unknown error'
     });
     return results;
   }
