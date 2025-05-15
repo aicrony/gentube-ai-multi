@@ -312,12 +312,12 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
         )}
 
         {/* Show MyAssets component with auto-refresh enabled */}
-        {/*{(userId || userIp) && (*/}
-        {/*  <div className="my-assets-section mt-8">*/}
-        {/*    <h2 className="text-xl font-bold mb-4">Your Generated Images</h2>*/}
-        {/*    <MyAssets autoRefreshQueued={true} />*/}
-        {/*  </div>*/}
-        {/*)}*/}
+        {(userId || userIp) && showMyAssets && (
+          <div className="my-assets-section mt-8">
+            <h2 className="text-xl font-bold mb-4">Your Generated Images</h2>
+            <MyAssets autoRefreshQueued={true} />
+          </div>
+        )}
       </div>
 
       <GenericModal isOpen={isModalOpen} onClose={closeModal}>

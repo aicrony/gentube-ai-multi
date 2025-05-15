@@ -379,7 +379,7 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
       >
         <div className="p-4">
           <h2 className="text-xl font-bold mb-4">Select an Image</h2>
-          <MyAssets assetType="img,upl" onSelectAsset={handleSelectImage} />
+          <MyAssets assetType="img,upl" onSelectAsset={handleSelectImage} autoRefreshQueued={true} />
         </div>
       </GenericModal>
     </div>

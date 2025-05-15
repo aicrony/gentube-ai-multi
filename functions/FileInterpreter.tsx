@@ -6,11 +6,13 @@ import { fileTypeFromBuffer } from 'file-type';
 interface FileInterpreterProps {
   userId: string;
   userIp: string;
+  onImageUploaded?: (imageUrl: string) => void;
 }
 
 const FileInterpreter: React.FC<FileInterpreterProps> = ({
   userId,
-  userIp
+  userIp,
+  onImageUploaded
 }) => {
   const [base64Data, setBase64Data] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<{
@@ -99,6 +101,11 @@ const FileInterpreter: React.FC<FileInterpreterProps> = ({
             base64Image={base64Data}
             userId={userId}
             userIp={userIp}
+            onUploadSuccess={(imageUrl) => {
+              if (onImageUploaded) {
+                onImageUploaded(imageUrl);
+              }
+            }}
           />
         </div>
       )}

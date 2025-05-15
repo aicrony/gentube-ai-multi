@@ -15,6 +15,7 @@ interface VideoFromUrlDynamicButtonProps {
   userId: string;
   userIp: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
+  onVideoGenerated?: (result: string) => void;
   urlData?: string;
 }
 
@@ -22,6 +23,7 @@ export function VideoFromUrlDynamicButton({
   userId,
   userIp,
   onUserCreditsUpdate,
+  onVideoGenerated,
   urlData
 }: VideoFromUrlDynamicButtonProps) {
   const [videoData, setVideoData] = useState<any>(null);
@@ -153,6 +155,16 @@ export function VideoFromUrlDynamicButton({
             setTimeout(() => {
               setMessage('');
             }, 30000);
+            
+            // Notify parent component about queued video
+            if (onVideoGenerated) {
+              onVideoGenerated('InQueue');
+            }
+          } else if (typeof dataResponse.result === 'string') {
+            // Notify parent component about generated video
+            if (onVideoGenerated) {
+              onVideoGenerated(dataResponse.result);
+            }
           }
         }
 
@@ -188,7 +200,7 @@ export function VideoFromUrlDynamicButton({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="imageUrl">
-            Enter a URL of an image to start creating your video.
+            Web location of an image to turn into a video:
           </Label>
           <Input
             as="text"

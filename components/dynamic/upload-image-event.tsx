@@ -10,7 +10,7 @@ interface UploadImageDynamicButtonProps {
   userIp: string;
   base64Image: string;
   onUserCreditsUpdate?: (credits: number | null) => void;
-  onUploadSuccess?: () => void;
+  onUploadSuccess?: (imageUrl: string) => void;
 }
 
 export const UploadImageDynamicButton: React.FC<
@@ -57,13 +57,15 @@ export const UploadImageDynamicButton: React.FC<
       }
       const dataResponse = await response.json();
       setIsSubmitting(false);
-      setUploadResponse(
-        JSON.stringify(dataResponse.url, null, 2).replace(/^"|"$/g, '')
+      const imageUrl = JSON.stringify(dataResponse.url, null, 2).replace(
+        /^"|"$/g,
+        ''
       );
+      setUploadResponse(imageUrl);
 
       // Call the onUploadSuccess function if provided
       if (onUploadSuccess) {
-        onUploadSuccess();
+        onUploadSuccess(imageUrl);
       }
     } catch (error) {
       setIsSubmitting(false);
@@ -99,48 +101,8 @@ export const UploadImageDynamicButton: React.FC<
             <div className={'margin-top-8'}>
               {uploadResponse && (
                 <>
-                  <div className="margin-top-8">
-                    <p>Image Uploaded</p>
-                    <div
-                      onClick={() => {
-                        navigator.clipboard
-                          .writeText(uploadResponse)
-                          .then(() => {
-                            // Create and show notification
-                            const notification = document.createElement('div');
-                            notification.textContent =
-                              'URL copied to clipboard!';
-                            notification.style.position = 'fixed';
-                            notification.style.bottom = '20px';
-                            notification.style.right = '20px';
-                            notification.style.padding = '10px 15px';
-                            notification.style.backgroundColor = '#4CAF50';
-                            notification.style.color = 'white';
-                            notification.style.borderRadius = '4px';
-                            notification.style.zIndex = '1000';
-                            notification.style.boxShadow =
-                              '0 2px 5px rgba(0,0,0,0.2)';
-                            document.body.appendChild(notification);
-
-                            setTimeout(() => {
-                              document.body.removeChild(notification);
-                            }, 1500);
-                          })
-                          .catch((err) => {
-                            console.error('Failed to copy URL: ', err);
-                          });
-                      }}
-                      className="underline cursor-pointer text-blue-600"
-                      role="button"
-                      tabIndex={0}
-                      aria-label="Copy URL to clipboard"
-                    >
-                      {uploadResponse}
-                    </div>
-                  </div>
-                  <div>
-                    <MyAssets assetType={'upl'} />
-                  </div>
+                  <h3>Image uploaded successfully</h3>
+                  <p>Enter your video description below.</p>
                 </>
               )}
             </div>

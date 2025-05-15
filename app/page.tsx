@@ -67,7 +67,7 @@ export default function Home() {
             userIp={userIp}
             onUserCreditsUpdate={handleUserCreditsUpdate}
           />
-          <MyAssets />
+          <MyAssets autoRefreshQueued={true} />
         </>
       );
     } else if (pathname === '/text-to-video') {
@@ -88,7 +88,7 @@ export default function Home() {
             userIp={userIp}
             onUserCreditsUpdate={handleUserCreditsUpdate}
           />
-          <MyAssets />
+          <MyAssets autoRefreshQueued={true} />
         </>
       );
     } else if (pathname === '/upload-to-video') {
@@ -122,7 +122,7 @@ export default function Home() {
             userIp={userIp}
             onUserCreditsUpdate={handleUserCreditsUpdate}
           />
-          <MyAssets />
+          <MyAssets autoRefreshQueued={true} />
         </>
       );
     }
