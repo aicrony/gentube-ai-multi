@@ -58,27 +58,74 @@ export default function Home() {
   }, []);
 
   const renderContent = () => {
-    // Main home page (previously freeflow)
-    return (
-      <>
-        <div className="my-assets-container">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold">Image Generation</h1>
+    // Switch content based on pathname
+    if (pathname === '/image-url-to-video') {
+      return (
+        <>
+          <VideoFromUrlDynamicButton
+            userId={userId}
+            userIp={userIp}
+            onUserCreditsUpdate={handleUserCreditsUpdate}
+          />
+          <MyAssets />
+        </>
+      );
+    } else if (pathname === '/text-to-video') {
+      return (
+        <>
+          <div className="my-assets-container">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-xl font-bold">Video Generation</h1>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">
+                Describe the video, be as detailed as possible.
+              </Label>
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="imageUrl">
-              Describe an image to start your video.
-            </Label>
+          <VideoFromTextDynamicButton
+            userId={userId}
+            userIp={userIp}
+            onUserCreditsUpdate={handleUserCreditsUpdate}
+          />
+          <MyAssets />
+        </>
+      );
+    } else if (pathname === '/upload-to-video') {
+      return (
+        <>
+          <FileInterpreter userId={userId} userIp={userIp} />
+        </>
+      );
+    } else if (isLocalhost && pathname === '/admin') {
+      return (
+        <>
+          <GalleryAssets />
+        </>
+      );
+    } else {
+      // Default home page (image generation)
+      return (
+        <>
+          <div className="my-assets-container">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-xl font-bold">Image Generation</h1>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">
+                Describe an image to start your video.
+              </Label>
+            </div>
           </div>
-        </div>
-        <ImageDynamicButton
-          userId={userId}
-          userIp={userIp}
-          onUserCreditsUpdate={handleUserCreditsUpdate}
-        />
-        <MyAssets />
-      </>
-    );
+          <ImageDynamicButton
+            userId={userId}
+            userIp={userIp}
+            onUserCreditsUpdate={handleUserCreditsUpdate}
+          />
+          <MyAssets />
+        </>
+      );
+    }
   };
 
   // Error handling is now done at the layout level
@@ -104,17 +151,17 @@ export default function Home() {
                 <Link href="/">
                   <Button variant="slim">Image Gen</Button>
                 </Link>
-                <Link href="/freeflow/image-url-to-video">
+                <Link href="/image-url-to-video">
                   <Button variant="slim">URL to Video</Button>
                 </Link>
-                <Link href="/freeflow/text-to-video">
+                <Link href="/text-to-video">
                   <Button variant="slim">Video Gen</Button>
                 </Link>
-                <Link href="/freeflow/upload-to-video">
+                <Link href="/upload-to-video">
                   <Button variant="slim">Upload Image</Button>
                 </Link>
                 {isLocalhost && (
-                  <Link href="/freeflow/admin">
+                  <Link href="/admin">
                     <Button variant="slim">Admin</Button>
                   </Link>
                 )}
