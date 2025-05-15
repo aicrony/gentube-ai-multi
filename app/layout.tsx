@@ -1,4 +1,5 @@
 /// <reference path="../types/layout.d.ts" />
+import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Metadata } from 'next';
 import Footer from '@/components/ui/Footer';
@@ -88,6 +89,7 @@ export default async function RootLayout({
             </ThemeProvider>
           </UserIpProvider>
         </UserIdProvider>
+        <Analytics />
         <GoogleAnalytics gaId="G-634FFY459F" />
       </body>
     </html>
