@@ -36,12 +36,12 @@ export async function POST(request: NextRequest) {
       } else {
         result = await removeAssetFromGallery(userId, assetId);
       }
-    } catch (functionError) {
+    } catch (functionError: any) {
       console.error('Gallery toggle function error:', functionError);
       return NextResponse.json(
         { 
           error: 'Gallery operation failed', 
-          details: functionError.message
+          details: functionError?.message || 'Unknown gallery operation error'
         },
         { status: 500 }
       );
@@ -67,12 +67,12 @@ export async function POST(request: NextRequest) {
         ? 'Asset successfully added to gallery' 
         : 'Asset successfully removed from gallery'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to toggle gallery status:', error);
     return NextResponse.json(
       { 
         error: 'Failed to toggle gallery status',
-        details: error.message || 'Unknown error' 
+        details: error?.message || 'Unknown error' 
       },
       { status: 500 }
     );
