@@ -149,24 +149,24 @@ export default function Home() {
             <div className="grid gap-4">
               <nav className="flex flex-wrap justify-center gap-1">
                 <Link href="/">
-                  <Button variant="slim">Image Gen</Button>
+                  <Button variant="slim" className={pathname === '/' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}>Image Gen</Button>
                 </Link>
                 <Link href="/image-url-to-video">
-                  <Button variant="slim">URL to Video</Button>
+                  <Button variant="slim" className={pathname === '/image-url-to-video' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}>URL to Video</Button>
                 </Link>
                 <Link href="/text-to-video">
-                  <Button variant="slim">Video Gen</Button>
+                  <Button variant="slim" className={pathname === '/text-to-video' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}>Video Gen</Button>
                 </Link>
                 <Link href="/upload-to-video">
-                  <Button variant="slim">Upload Image</Button>
+                  <Button variant="slim" className={pathname === '/upload-to-video' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}>Upload Image</Button>
                 </Link>
                 {isLocalhost && (
                   <Link href="/admin">
-                    <Button variant="slim">Admin</Button>
+                    <Button variant="slim" className={pathname === '/admin' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}>Admin</Button>
                   </Link>
                 )}
                 <Link href="/start">
-                  <Button variant="slim" className="btn-red">
+                  <Button variant="slim" className={`btn-red ${pathname === '/start' ? "bg-blue-500 text-white hover:bg-blue-600" : ""}`}>
                     Guide Me Now
                   </Button>
                 </Link>

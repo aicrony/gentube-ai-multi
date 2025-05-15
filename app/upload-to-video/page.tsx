@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import MyAssets from '@/components/dynamic/my-assets';
+import Button from '@/components/ui/Button';
 
 export default function UploadToVideoPage() {
   const userId = useUserId() || 'none';
@@ -15,6 +17,7 @@ export default function UploadToVideoPage() {
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [showQueuedAssets, setShowQueuedAssets] = useState<boolean>(false);
   const [videoGenerated, setVideoGenerated] = useState<boolean>(false);
+  const [isLocalhost, setIsLocalhost] = useState<boolean>(false);
 
   const handleImageUploaded = (imageUrl: string) => {
     setUploadedImageUrl(imageUrl);
@@ -28,6 +31,15 @@ export default function UploadToVideoPage() {
     setVideoGenerated(true);
     setShowQueuedAssets(true);
   };
+  
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname === 'localhost'
+    ) {
+      setIsLocalhost(true);
+    }
+  }, []);
 
   return (
     <UserCreditsProvider>
@@ -41,9 +53,43 @@ export default function UploadToVideoPage() {
               <h2 className="max-w-2xl m-auto mt-5 text-xl sm:text-center sm:text-2xl">
                 Upload Image to Create Video
               </h2>
+              {userId && userId === 'none' && (
+                <h1 className="text-xl font-bold">
+                  <button
+                    onClick={() => (window.location.href = '/signin')}
+                    className="font-light text-md"
+                  >
+                    Sign In for free credits (1 time).
+                  </button>
+                </h1>
+              )}
             </div>
 
             <div className="grid gap-4">
+              <nav className="flex flex-wrap justify-center gap-1">
+                <Link href="/">
+                  <Button variant="slim">Image Gen</Button>
+                </Link>
+                <Link href="/image-url-to-video">
+                  <Button variant="slim">URL to Video</Button>
+                </Link>
+                <Link href="/text-to-video">
+                  <Button variant="slim">Video Gen</Button>
+                </Link>
+                <Link href="/upload-to-video">
+                  <Button variant="slim" className="bg-blue-500 text-white hover:bg-blue-600">Upload Image</Button>
+                </Link>
+                {userId && userId !== 'none' && isLocalhost && (
+                  <Link href="/admin">
+                    <Button variant="slim">Admin</Button>
+                  </Link>
+                )}
+                <Link href="/start">
+                  <Button variant="slim" className="btn-red">
+                    Guide Me Now
+                  </Button>
+                </Link>
+              </nav>
               {/* Upload section */}
               <FileInterpreter
                 userId={userId}
