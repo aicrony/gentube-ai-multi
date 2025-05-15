@@ -373,7 +373,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Handle adding/removing an asset to/from the gallery
-  const handleToggleGallery = async (activity: UserActivity) => {
+  const handleToggleGallery = async (activity: UserActivity, event: React.MouseEvent) => {
+    // Prevent event propagation to avoid any parent handlers
+    event.preventDefault();
+    event.stopPropagation();
+    
     if (!userId || !activity.id) {
       if (!userId) {
         alert('You must be signed in to add items to the gallery.');
@@ -414,13 +418,50 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Refresh the user activities to show the updated gallery status
-        handleRefresh();
-        alert(
-          isInGallery
-            ? 'Asset has been removed from the gallery.'
-            : 'Asset has been added to the gallery!'
-        );
+        // Optimistically update the UI state without a full refresh
+        setActivities(activities.map(item => {
+          if (item.id === assetId) {
+            return {
+              ...item,
+              SubscriptionTier: isInGallery ? 0 : 3
+            };
+          }
+          return item;
+        }));
+        
+        // Show a subtle notification instead of an alert
+        const message = isInGallery
+          ? 'Asset removed from gallery'
+          : 'Asset added to gallery!';
+        
+        // Create and show a toast-like notification
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.right = '20px';
+        notification.style.padding = '10px 15px';
+        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        notification.style.color = 'white';
+        notification.style.borderRadius = '4px';
+        notification.style.zIndex = '1000';
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease-in-out';
+        
+        document.body.appendChild(notification);
+        
+        // Fade in
+        setTimeout(() => {
+          notification.style.opacity = '1';
+        }, 10);
+        
+        // Fade out and remove after 3 seconds
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
       } else {
         console.error('Gallery toggle API error:', result);
         // Show detailed error message for debugging
@@ -502,13 +543,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   return (
     <div className="my-assets-container">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        <p>
-          <strong>*New:</strong> Star your asset to add it to the{' '}
-          <a href={'/gallery'}>public gallery</a>. Heart your asset to be first
-          to love it.
-        </p>
         <div className="flex items-center">
           {isAutoRefreshing && (
             <span
@@ -524,6 +560,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </button>
         </div>
       </div>
+      <div className="flex justify-between items-center mb-2">
+        <p>
+          <strong>*New:</strong> Star your asset to add it to the{' '}
+          <a href={'/gallery'}>public gallery</a>. Heart your asset to be first
+          to love it.
+        </p>
+      </div>
+      <div className="flex justify-between items-center mb-2">
+        <p>
+          <strong>*WIN:</strong> 500 Credits EVERY MONTH for the most hearts in
+          the <a href={'/gallery'}>GenTube.ai gallery</a>. Next winner: June 30,
+          2025.
+        </p>
+      </div>
+
       {activities && activities.length === 0 && (
         <p>
           No assets found. You may need to <a href="/signin">sign in</a> to see
@@ -736,7 +787,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               {/* Gallery toggle button */}
               {activity.AssetType !== 'upl' && (
                 <button
-                  onClick={() => handleToggleGallery(activity)}
+                  onClick={(e) => handleToggleGallery(activity, e)}
                   className={`icon-size ${activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                   title={
                     activity.SubscriptionTier === 3

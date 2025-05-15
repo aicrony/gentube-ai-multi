@@ -21,6 +21,8 @@ interface GalleryItem {
   Prompt: string;
   AssetSource: string;
   AssetType: string;
+  UserId?: string | null;
+  CreatorName?: string | null;
 }
 
 interface AssetLikeInfo {
@@ -467,6 +469,21 @@ const ImageGallery: React.FC = () => {
           <h3 className="font-bold text-center mb-2">Prompt:</h3>
 
           <p className="mb-4">{mediaItem.Prompt || 'No prompt available'}</p>
+          
+          {/* Creator Name Display */}
+          <p className="text-sm text-gray-600 mb-2">
+            Created by: {mediaItem.CreatorName ? (
+              mediaItem.CreatorName
+            ) : (
+              mediaItem.UserId === userId ? (
+                <a href="/account" title="Set your name in your account settings" className="text-blue-500 hover:underline">
+                  Anonymous
+                </a>
+              ) : (
+                "Anonymous"
+              )
+            )}
+          </p>
 
           {/* Debug Info - only show in development */}
           {process.env.NODE_ENV === 'development' && (

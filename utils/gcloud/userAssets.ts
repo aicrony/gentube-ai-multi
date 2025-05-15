@@ -19,6 +19,8 @@ interface UserActivity {
   AssetSource: string;
   AssetType?: string | string[] | undefined;
   DateTime: Date;
+  UserId?: string | null; // Added for creator info
+  CreatorName?: string | null; // Added for creator display
 }
 
 export async function getUserAssets(
@@ -159,6 +161,23 @@ export async function getGalleryAssets(
     console.log('First gallery asset raw data:', JSON.stringify(results[0]));
   }
   
+  // Get all unique user IDs from the results to fetch creator names in one batch
+  const userIds = results
+    .map((activity: any) => activity.UserId)
+    .filter((userId: string | undefined) => userId && userId !== 'none');
+  
+  // Fetch creator names for all user IDs
+  let creatorNames: {[key: string]: string} = {};
+  try {
+    // Dynamically import to avoid circular dependency
+    const { getCreatorNames } = await import('./getUserCreator');
+    if (userIds.length > 0) {
+      creatorNames = await getCreatorNames([...new Set(userIds)]);
+    }
+  } catch (error) {
+    console.error('Error fetching creator names:', error);
+  }
+  
   return results.map((activity: any) => {
     // Provide fallbacks for missing data
     let prompt = activity.Prompt;
@@ -168,13 +187,20 @@ export async function getGalleryAssets(
       prompt = '';
     }
     
+    // Get creator name if available
+    const creatorName = activity.UserId && creatorNames[activity.UserId] 
+      ? creatorNames[activity.UserId] 
+      : null;
+    
     return {
       id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
       CreatedAssetUrl: activity.CreatedAssetUrl || '',
       Prompt: prompt,
       AssetSource: activity.AssetSource || '',
       AssetType: activity.AssetType || 'unknown',
-      DateTime: activity.DateTime
+      DateTime: activity.DateTime,
+      UserId: activity.UserId || null,
+      CreatorName: creatorName
     };
   });
 }
