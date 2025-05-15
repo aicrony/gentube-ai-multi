@@ -60,6 +60,7 @@ export default async function generateFalVideo(
       console.log('- duration:', duration);
       console.log('- aspectRatio:', aspectRatio);
       console.log('- motion:', motion);
+      console.log('- apiEndpoint:', apiEndpoint);
 
       if (
         process.env.FAL_VIDEO_TEST_MODE &&
@@ -83,10 +84,10 @@ export default async function generateFalVideo(
 
     console.log('Webhook set: ', callback.webhook);
     console.log('Result: ', result);
-    
+
     // Ensure result has necessary structure for tracking
     callback.response = result;
-    
+
     // If result doesn't include a request_id in an expected format,
     // ensure we have one for tracking purposes
     if (result && typeof result === 'object') {
@@ -99,7 +100,7 @@ export default async function generateFalVideo(
         }
       }
     }
-    
+
     return callback;
   } catch (error) {
     console.error('An error occurred while generating the video:', error);
