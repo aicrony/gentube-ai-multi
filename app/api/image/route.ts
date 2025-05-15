@@ -11,7 +11,21 @@ export async function POST(request: NextRequest) {
     console.log('userId: ', userId);
     console.log('userIp: ', userIp);
     console.log('prompt: ', body.prompt);
+    
+    // Validate prompt length - Google Cloud Datastore has limits
+    const MAX_PROMPT_LENGTH = 1500; // Setting a reasonable limit
     const prompt = body.prompt ? body.prompt : '';
+    
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return NextResponse.json(
+        { 
+          error: `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.`,
+          promptLength: prompt.length
+        }, 
+        { status: 400 }
+      );
+    }
+    
     console.log('Prompt OK');
 
     // Require both userId and userIp

@@ -77,14 +77,15 @@ const ImageGallery: React.FC = () => {
   // Fetch likes for the current media item
   useEffect(() => {
     const fetchLikesForCurrentItem = async () => {
-      if (!userId || !media.length || !media[currentIndex].id) return;
+      if (!media.length || !media[currentIndex].id) return;
 
       try {
         const assetId = media[currentIndex].id;
         if (!assetId) return;
 
+        // Fetch likes with or without userId - we'll still get the count even if user isn't logged in
         const response = await fetch(
-          `/api/getAssetLikes?assetId=${assetId}&userId=${userId}`
+          `/api/getAssetLikes?assetId=${assetId}${userId ? `&userId=${userId}` : ''}`
         );
         const likeInfo = await response.json();
 
@@ -126,12 +127,12 @@ const ImageGallery: React.FC = () => {
       localStorage.setItem('mediaUrls', JSON.stringify(processedMedia));
       localStorage.setItem('mediaUrlsTimestamp', new Date().toISOString());
 
-      // If we have a user ID, fetch likes for these items
-      if (userId && processedMedia.length > 0) {
+      // Always fetch likes for the first item, even if user is not logged in
+      if (processedMedia.length > 0) {
         const currentItem = processedMedia[0];
         if (currentItem.id) {
           const likeResponse = await fetch(
-            `/api/getAssetLikes?assetId=${currentItem.id}&userId=${userId}`
+            `/api/getAssetLikes?assetId=${currentItem.id}${userId ? `&userId=${userId}` : ''}`
           );
           const likeInfo = await likeResponse.json();
 
@@ -195,11 +196,13 @@ const ImageGallery: React.FC = () => {
 
   // Handle liking/unliking from the gallery
   const handleToggleLike = async (mediaItem: GalleryItem) => {
-    if (!userId || !mediaItem.id) {
-      if (!userId) {
-        alert('Please sign in to like items');
-        router.push('/signin');
-      }
+    if (!mediaItem.id) {
+      return;
+    }
+    
+    // If user is not logged in, redirect to sign in page
+    if (!userId) {
+      router.push('/signin');
       return;
     }
 
@@ -257,6 +260,12 @@ const ImageGallery: React.FC = () => {
       alert('Cannot create image: No prompt available');
       return;
     }
+    
+    const MAX_PROMPT_LENGTH = 1500;
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      alert(`Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${prompt.length} characters.`);
+      return;
+    }
 
     setRegenerateInProgress(true);
     setShowMyAssets(true);
@@ -278,7 +287,11 @@ const ImageGallery: React.FC = () => {
 
       if (!response.ok) {
         console.error('Failed to create image:', data);
-        alert('Failed to create image. Please try again.');
+        if (data.error && data.error.includes('too long')) {
+          alert(data.error);
+        } else {
+          alert('Failed to create image. Please try again.');
+        }
       } else {
         console.log('Image creation response:', data);
         if (data.result === 'InQueue') {
@@ -299,6 +312,15 @@ const ImageGallery: React.FC = () => {
     if (!userId) {
       router.push('/signin');
       return;
+    }
+
+    // Check prompt length before proceeding
+    if (item.Prompt) {
+      const MAX_PROMPT_LENGTH = 1500;
+      if (item.Prompt.length > MAX_PROMPT_LENGTH) {
+        alert(`Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${item.Prompt.length} characters.`);
+        return;
+      }
     }
 
     setRegenerateInProgress(true);
@@ -345,7 +367,11 @@ const ImageGallery: React.FC = () => {
 
       if (!response.ok) {
         console.error('Failed to create video:', data);
-        alert('Failed to create video. Please try again.');
+        if (data.error && data.error.includes('too long')) {
+          alert(data.error);
+        } else {
+          alert('Failed to create video. Please try again.');
+        }
       } else {
         console.log('Video creation response:', data);
         if (data.result === 'InQueue') {
@@ -434,11 +460,11 @@ const ImageGallery: React.FC = () => {
               <FaExternalLinkAlt className="text-lg" />
             </button>
 
-            {/* Like/Heart button */}
+            {/* Like/Heart button - always show likes count */}
             {mediaItem.id && (
               <button
                 onClick={() => handleToggleLike(mediaItem)}
-                disabled={isLiking || !userId}
+                disabled={isLiking}
                 className={`flex items-center gap-1 p-1 ${
                   assetLikes[mediaItem.id]?.isLiked
                     ? 'text-red-500 hover:text-red-600'

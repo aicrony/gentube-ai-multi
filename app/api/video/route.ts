@@ -18,7 +18,20 @@ export async function POST(request: NextRequest) {
     console.log('motion: ', body.motion);
     console.log('imageUrl: ', body.url);
 
+    // Validate prompt length - Google Cloud Datastore has limits
+    const MAX_PROMPT_LENGTH = 1500; // Setting a reasonable limit
     const videoDescription = body.description as string;
+    
+    if (videoDescription && videoDescription.length > MAX_PROMPT_LENGTH) {
+      return NextResponse.json(
+        { 
+          error: `Video description is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.`,
+          promptLength: videoDescription.length
+        }, 
+        { status: 400 }
+      );
+    }
+    
     const duration = body.duration as string;
     const aspectRatio = body.aspectRatio as string;
     const loop = body.loop;
