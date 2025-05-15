@@ -152,12 +152,29 @@ export async function getGalleryAssets(
   }
 
   const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => ({
-    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
-    CreatedAssetUrl: activity.CreatedAssetUrl,
-    Prompt: activity.Prompt,
-    AssetSource: activity.AssetSource,
-    AssetType: activity.AssetType,
-    DateTime: activity.DateTime
-  }));
+  
+  // Log the raw results to debug missing prompts
+  console.log(`Found ${results.length} gallery assets`);
+  if (results.length > 0) {
+    console.log('First gallery asset raw data:', JSON.stringify(results[0]));
+  }
+  
+  return results.map((activity: any) => {
+    // Provide fallbacks for missing data
+    let prompt = activity.Prompt;
+    if (!prompt && activity.description) {
+      prompt = activity.description;
+    } else if (!prompt) {
+      prompt = '';
+    }
+    
+    return {
+      id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
+      CreatedAssetUrl: activity.CreatedAssetUrl || '',
+      Prompt: prompt,
+      AssetSource: activity.AssetSource || '',
+      AssetType: activity.AssetType || 'unknown',
+      DateTime: activity.DateTime
+    };
+  });
 }
