@@ -83,11 +83,21 @@ const ImageGallery: React.FC = () => {
         const assetId = media[currentIndex].id;
         if (!assetId) return;
 
+        // Add a cache buster only when necessary (changing user or first fetch)
+        const cacheBusterValue = `${userId || 'anonymous'}-${new Date().getDate()}`;
+        const cacheBuster =
+          localStorage.getItem(`like-cache-${assetId}`) !== cacheBusterValue
+            ? `&cache=${Date.now()}`
+            : '';
+
         // Fetch likes with or without userId - we'll still get the count even if user isn't logged in
         const response = await fetch(
-          `/api/getAssetLikes?assetId=${assetId}${userId ? `&userId=${userId}` : ''}`
+          `/api/getAssetLikes?assetId=${assetId}${userId ? `&userId=${userId}` : ''}${cacheBuster}`
         );
         const likeInfo = await response.json();
+
+        // Store cache validation value
+        localStorage.setItem(`like-cache-${assetId}`, cacheBusterValue);
 
         setAssetLikes((prev) => ({
           ...prev,
@@ -199,7 +209,7 @@ const ImageGallery: React.FC = () => {
     if (!mediaItem.id) {
       return;
     }
-    
+
     // If user is not logged in, redirect to sign in page
     if (!userId) {
       router.push('/signin');
@@ -260,10 +270,12 @@ const ImageGallery: React.FC = () => {
       alert('Cannot create image: No prompt available');
       return;
     }
-    
+
     const MAX_PROMPT_LENGTH = 1500;
     if (prompt.length > MAX_PROMPT_LENGTH) {
-      alert(`Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${prompt.length} characters.`);
+      alert(
+        `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${prompt.length} characters.`
+      );
       return;
     }
 
@@ -318,7 +330,9 @@ const ImageGallery: React.FC = () => {
     if (item.Prompt) {
       const MAX_PROMPT_LENGTH = 1500;
       if (item.Prompt.length > MAX_PROMPT_LENGTH) {
-        alert(`Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${item.Prompt.length} characters.`);
+        alert(
+          `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${item.Prompt.length} characters.`
+        );
         return;
       }
     }
@@ -414,7 +428,12 @@ const ImageGallery: React.FC = () => {
               src={url}
               controls
               autoPlay
+              preload="auto"
               className="w-full cursor-pointer md:w-full max-w-2xl mx-auto"
+              onLoadStart={() => console.log(`Started loading video: ${url}`)}
+              onLoadedData={() =>
+                console.log(`Video loaded and cached: ${url}`)
+              }
             />
 
             {/* Show source image if available for videos and not empty or "none" */}
@@ -426,7 +445,14 @@ const ImageGallery: React.FC = () => {
                   <img
                     src={sourceImageUrl}
                     alt="Source image"
+                    loading="eager"
+                    decoding="async"
                     className="w-full md:w-full max-w-lg mx-auto border border-gray-300"
+                    onLoad={() =>
+                      console.log(
+                        `Source image loaded and cached: ${sourceImageUrl}`
+                      )
+                    }
                   />
                 </div>
               )}
@@ -435,7 +461,10 @@ const ImageGallery: React.FC = () => {
           <img
             src={url}
             alt={`Media ${currentIndex + 1}`}
+            loading="eager"
+            decoding="async"
             className="w-full cursor-pointer md:w-full max-w-2xl mx-auto"
+            onLoad={() => console.log(`Image loaded and cached: ${url}`)}
           />
         )}
 
@@ -495,19 +524,22 @@ const ImageGallery: React.FC = () => {
           <h3 className="font-bold text-center mb-2">Prompt:</h3>
 
           <p className="mb-4">{mediaItem.Prompt || 'No prompt available'}</p>
-          
+
           {/* Creator Name Display */}
           <p className="text-sm text-gray-600 mb-2">
-            Created by: {mediaItem.CreatorName ? (
+            Created by:{' '}
+            {mediaItem.CreatorName ? (
               mediaItem.CreatorName
+            ) : mediaItem.UserId === userId ? (
+              <a
+                href="/account"
+                title="Set your name in your account settings"
+                className="text-blue-500 hover:underline"
+              >
+                Anonymous
+              </a>
             ) : (
-              mediaItem.UserId === userId ? (
-                <a href="/account" title="Set your name in your account settings" className="text-blue-500 hover:underline">
-                  Anonymous
-                </a>
-              ) : (
-                "Anonymous"
-              )
+              'Anonymous'
             )}
           </p>
 
@@ -589,14 +621,27 @@ const ImageGallery: React.FC = () => {
         Public Media Gallery
       </h1>
       <div className="text-center mb-4">
-        <button 
+        <button
           onClick={handleRefreshGallery}
           className="text-sm text-blue-500 hover:text-blue-700 underline"
           disabled={isRefreshingGallery}
         >
           {isRefreshingGallery ? 'Refreshing...' : 'Refresh Gallery'}
         </button>
-        <span className="text-xs text-gray-500 ml-2">(Updates every 10 minutes)</span>
+        <span className="text-xs text-gray-500 ml-2">
+          (Refresh to see your added assets)
+        </span>
+        <span className={'pl-2'}>
+          <Button
+            variant="slim"
+            onClick={() => handleStartFresh()}
+            title="Start generating images and videos from a black slate"
+            loading={regenerateInProgress}
+            className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+          >
+            <FaPlus size={12} />
+          </Button>
+        </span>
       </div>
       {media.length > 0 && (
         <div className="mt-1">

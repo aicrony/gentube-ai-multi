@@ -1,4 +1,34 @@
 module.exports = {
+  // Add caching headers for images and videos
+  async headers() {
+    return [
+      {
+        // Add cache control headers for image files
+        source: '/:path*.(jpg|jpeg|png|gif|webp)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, must-revalidate',
+          },
+        ],
+      },
+      {
+        // Add cache control headers for video files
+        source: '/:path*.(mp4|webm|ogg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
+  // Enable image optimization
+  images: {
+    domains: ['storage.googleapis.com'],
+    minimumCacheTTL: 86400, // 24 hours
+  },
   async rewrites() {
     return [
       {

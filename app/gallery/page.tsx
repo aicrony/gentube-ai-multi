@@ -11,7 +11,7 @@ export default function Gallery() {
             GenTube.ai Gallery
           </h1>
           <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
-            See what the GenTube.ai community has created.
+            WIN 500 Credits every month with the most hearts!
           </p>
         </div>
         <div className="mt-4 sm:mt-1">
