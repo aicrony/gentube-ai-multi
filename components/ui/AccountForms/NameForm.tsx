@@ -65,7 +65,7 @@ export default function NameForm({ userName }: { userName: string }) {
   return (
     <Card
       title="Your Display Name"
-      description="This name will show under your images and prompts in the gallery. Go back to the gallery and click Refresh at the top to see your update."
+      description="This name will show under your images and prompts in the gallery. Go back to the gallery and click Refresh at the top to see your updated display name."
       footer={
         <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
           <p className="pb-4 sm:pb-0">64 characters maximum</p>
