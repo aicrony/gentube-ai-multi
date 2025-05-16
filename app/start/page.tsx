@@ -46,7 +46,7 @@ function WorkflowSelectionContent() {
 
           <div className="grid gap-6 text-center max-w-3xl mx-auto mt-4">
             <h2 className="text-2xl font-bold pr-6">
-              <Link href="/" className="back-button">
+              <Link href="/about" className="back-button">
                 ←
               </Link>
               Choose Your Workflow
@@ -57,7 +57,9 @@ function WorkflowSelectionContent() {
                 onClick={() => (window.location.href = '/freeflow')}
               >
                 <h3 className="text-xl font-semibold mb-2">Free Flow</h3>
-                <p className="">Access all tools without guided workflows</p>
+                <p className="">
+                  Access all tools without guided workflows, win credits
+                </p>
               </div>
 
               <div

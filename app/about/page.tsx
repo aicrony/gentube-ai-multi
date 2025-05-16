@@ -46,12 +46,17 @@ function AboutPageContent() {
                 </Link>
                 <Link href="/pricing">
                   <Button variant="slim" className="px-8 py-3 text-lg">
-                    View Pricing
+                    See Pricing
                   </Button>
                 </Link>
                 <Link href="/start">
                   <Button variant="slim" className="px-8 py-3 text-lg">
-                    Try for Free
+                    Try It Out
+                  </Button>
+                </Link>
+                <Link href="/gallery">
+                  <Button variant="slim" className="px-8 py-3 text-lg">
+                    Win Credits
                   </Button>
                 </Link>
               </div>

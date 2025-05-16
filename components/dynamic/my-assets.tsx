@@ -373,11 +373,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Handle adding/removing an asset to/from the gallery
-  const handleToggleGallery = async (activity: UserActivity, event: React.MouseEvent) => {
+  const handleToggleGallery = async (
+    activity: UserActivity,
+    event: React.MouseEvent
+  ) => {
     // Prevent event propagation to avoid any parent handlers
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (!userId || !activity.id) {
       if (!userId) {
         alert('You must be signed in to add items to the gallery.');
@@ -419,21 +422,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       if (response.ok && result.success) {
         // Optimistically update the UI state without a full refresh
-        setActivities(activities.map(item => {
-          if (item.id === assetId) {
-            return {
-              ...item,
-              SubscriptionTier: isInGallery ? 0 : 3
-            };
-          }
-          return item;
-        }));
-        
+        setActivities(
+          activities.map((item) => {
+            if (item.id === assetId) {
+              return {
+                ...item,
+                SubscriptionTier: isInGallery ? 0 : 3
+              };
+            }
+            return item;
+          })
+        );
+
         // Show a subtle notification instead of an alert
         const message = isInGallery
           ? 'Asset removed from gallery'
           : 'Asset added to gallery!';
-        
+
         // Create and show a toast-like notification
         const notification = document.createElement('div');
         notification.textContent = message;
@@ -447,14 +452,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         notification.style.zIndex = '1000';
         notification.style.opacity = '0';
         notification.style.transition = 'opacity 0.3s ease-in-out';
-        
+
         document.body.appendChild(notification);
-        
+
         // Fade in
         setTimeout(() => {
           notification.style.opacity = '1';
         }, 10);
-        
+
         // Fade out and remove after 3 seconds
         setTimeout(() => {
           notification.style.opacity = '0';
@@ -572,6 +577,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           <strong>*WIN:</strong> 500 Credits EVERY MONTH for the most hearts in
           the <a href={'/gallery'}>GenTube.ai gallery</a>. Next winner: June 30,
           2025.
+        </p>
+      </div>
+      <div className="flex justify-between items-center mb-2">
+        <p>
+          <strong>*BUY MORE CREDITS:</strong> Keep the creative juices flowing!{' '}
+          <a href={'/pricing'}>See Pricing</a>
         </p>
       </div>
 

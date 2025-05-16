@@ -83,8 +83,8 @@ const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
           </Button>
         </div>
         <div className="mt-4">
-          <Link href="/start">
-            <Button variant="slim">Return to Home</Button>
+          <Link href="/">
+            <Button variant="slim">Return to Generate</Button>
           </Link>
         </div>
       </div>
