@@ -194,7 +194,7 @@ export async function getGalleryAssets(
     }
     
     // Get creator name if available
-    let creatorName = null;
+    let creatorName: string | null = null;
     if (activity.UserId && creatorNames[activity.UserId]) {
       creatorName = creatorNames[activity.UserId];
       console.log(`Found creator name for ${activity.UserId}: ${creatorName}`);
