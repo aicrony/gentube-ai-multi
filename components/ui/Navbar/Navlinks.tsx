@@ -21,7 +21,7 @@ export default function Navlinks({ user }: NavlinksProps) {
       <div className="flex items-center flex-1">
         <nav className="ml-4 space-x-1 lg:block">
           <Link href="/" target="_parent" className={s.link}>
-            Home
+            Generate
           </Link>
           <Link href="/about" className={s.link}>
             About

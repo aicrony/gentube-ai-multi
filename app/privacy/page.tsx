@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
                   color: 'var(--background-color)'
                 }}
               >
-                Back to Home
+                Back to Generate
               </Link>
             </div>
           </div>

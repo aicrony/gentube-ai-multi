@@ -9,44 +9,44 @@ interface ContextErrorHandlerProps {
   onRetry?: () => void;
 }
 
-const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({ 
-  children, 
+const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
+  children,
   onRetry = () => window.location.reload()
 }) => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
-  
+
   // Reset the error state when the component mounts
   useEffect(() => {
     setHasError(false);
     setIsLoading(true);
     setShowErrorMessage(false);
-    
+
     // Set a timeout to stop the loading state
     const loadingTimer = setTimeout(() => {
       setIsLoading(false);
-      
+
       // If there's an error, wait a bit longer before showing the error UI
       if (hasError) {
         const errorTimer = setTimeout(() => {
           setShowErrorMessage(true);
         }, 5000); // 5 more seconds (10s total)
-        
+
         return () => clearTimeout(errorTimer);
       }
     }, 5000);
-    
+
     return () => clearTimeout(loadingTimer);
   }, [hasError]);
-  
+
   // Function to handle context errors
   const handleContextError = (error: Error) => {
     console.error('Context error detected:', error);
     setHasError(true);
     // Don't show the error message immediately to avoid flashing
   };
-  
+
   // Loading spinner component
   const LoadingSpinner = () => (
     <div className="w-full min-h-screen flex flex-col items-center justify-center">
@@ -59,7 +59,7 @@ const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
       </div>
     </div>
   );
-  
+
   // Error message component
   const ErrorMessage = () => (
     <div className="w-full min-h-screen flex flex-col items-center justify-center">
@@ -71,7 +71,8 @@ const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
           </h2>
           <p className="text-gray-700 mb-4">
             We are preparing your session. If the page does not load, try
-            clicking 'Reload Page' or 'Return to Home' to restart the session.
+            clicking 'Reload Page' or 'Return to Generate' to restart the
+            session.
           </p>
           <Button
             variant="slim"
@@ -89,16 +90,16 @@ const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
       </div>
     </div>
   );
-  
+
   // Decide what to render based on the state
   if (isLoading) {
     return <LoadingSpinner />;
   }
-  
+
   if (hasError && showErrorMessage) {
     return <ErrorMessage />;
   }
-  
+
   // Try to render the children, catch context errors
   try {
     return <>{children}</>;

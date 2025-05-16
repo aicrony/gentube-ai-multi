@@ -166,13 +166,19 @@ export async function getGalleryAssets(
     .map((activity: any) => activity.UserId)
     .filter((userId: string | undefined) => userId && userId !== 'none');
   
+  console.log('Gallery asset user IDs extracted:', userIds);
+  
   // Fetch creator names for all user IDs
   let creatorNames: {[key: string]: string} = {};
   try {
     // Dynamically import to avoid circular dependency
     const { getCreatorNames } = await import('./getUserCreator');
     if (userIds.length > 0) {
-      creatorNames = await getCreatorNames([...new Set(userIds)]);
+      // Unique user IDs to avoid duplicates
+      const uniqueUserIds = [...new Set(userIds)];
+      console.log('Fetching creator names for unique user IDs:', uniqueUserIds);
+      creatorNames = await getCreatorNames(uniqueUserIds);
+      console.log('Creator names fetched:', creatorNames);
     }
   } catch (error) {
     console.error('Error fetching creator names:', error);
@@ -188,9 +194,15 @@ export async function getGalleryAssets(
     }
     
     // Get creator name if available
-    const creatorName = activity.UserId && creatorNames[activity.UserId] 
-      ? creatorNames[activity.UserId] 
-      : null;
+    let creatorName = null;
+    if (activity.UserId && creatorNames[activity.UserId]) {
+      creatorName = creatorNames[activity.UserId];
+      console.log(`Found creator name for ${activity.UserId}: ${creatorName}`);
+    } else if (activity.UserId) {
+      console.log(`No creator name found for user ID: ${activity.UserId}`);
+    } else {
+      console.log('No user ID associated with this activity');
+    }
     
     return {
       id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
