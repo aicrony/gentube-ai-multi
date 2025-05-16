@@ -8,7 +8,8 @@ import {
   FaVideo,
   FaPlus,
   FaHeart,
-  FaDownload
+  FaDownload,
+  FaShare
 } from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
@@ -45,14 +46,24 @@ const ImageGallery: React.FC = () => {
   const userIp = useUserIp();
   const router = useRouter();
 
+  // Check for an asset ID in the URL
   useEffect(() => {
     const fetchMedia = async () => {
       try {
+        // Read the URL params to see if we have a direct link to an asset
+        const urlParams = new URLSearchParams(window.location.search);
+        const assetIdParam = urlParams.get('id');
+
+        if (assetIdParam) {
+          console.log(`Direct link to asset ID: ${assetIdParam} detected`);
+        }
+
         const cachedMedia = localStorage.getItem('mediaUrls');
         const cachedTimestamp = localStorage.getItem('mediaUrlsTimestamp');
         const tenMinutes = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-        if (cachedMedia && cachedTimestamp) {
+        // Only use cache if we don't have a specific asset ID to show
+        if (!assetIdParam && cachedMedia && cachedTimestamp) {
           const parsedTimestamp = new Date(cachedTimestamp).getTime();
           const currentTime = new Date().getTime();
 
@@ -60,12 +71,14 @@ const ImageGallery: React.FC = () => {
             const parsedMedia = JSON.parse(cachedMedia);
             if (parsedMedia.length > 0 && parsedMedia[0].CreatedAssetUrl) {
               setMedia(parsedMedia);
+
               return;
             }
           }
         }
 
-        await fetchAndSetMedia();
+        // Always fetch fresh data if we have an asset ID
+        await fetchAndSetMedia(assetIdParam);
       } catch (error) {
         console.error('Error fetching media:', error);
       }
@@ -111,7 +124,7 @@ const ImageGallery: React.FC = () => {
     fetchLikesForCurrentItem();
   }, [userId, media, currentIndex]);
 
-  const fetchAndSetMedia = async () => {
+  const fetchAndSetMedia = async (targetAssetId: string | null = null) => {
     try {
       const response = await fetch('/api/getGalleryAssets?limit=60', {
         method: 'GET',
@@ -137,8 +150,34 @@ const ImageGallery: React.FC = () => {
       localStorage.setItem('mediaUrls', JSON.stringify(processedMedia));
       localStorage.setItem('mediaUrlsTimestamp', new Date().toISOString());
 
-      // Always fetch likes for the first item, even if user is not logged in
-      if (processedMedia.length > 0) {
+      // If we have a specific asset ID to display, find and set it as current
+      if (targetAssetId && processedMedia.length > 0) {
+        const assetIndex = processedMedia.findIndex(
+          (item) => item.id === targetAssetId
+        );
+        if (assetIndex !== -1) {
+          setCurrentIndex(assetIndex);
+          console.log(
+            `Found and displaying asset ID ${targetAssetId} at index ${assetIndex}`
+          );
+
+          // Fetch likes for the target asset
+          if (processedMedia[assetIndex].id) {
+            const likeResponse = await fetch(
+              `/api/getAssetLikes?assetId=${processedMedia[assetIndex].id}${userId ? `&userId=${userId}` : ''}`
+            );
+            const likeInfo = await likeResponse.json();
+
+            setAssetLikes({
+              [processedMedia[assetIndex].id]: likeInfo
+            });
+          }
+        } else {
+          console.log(`Asset ID ${targetAssetId} not found in gallery`);
+        }
+      }
+      // Otherwise, always fetch likes for the first item
+      else if (processedMedia.length > 0) {
         const currentItem = processedMedia[0];
         if (currentItem.id) {
           const likeResponse = await fetch(
@@ -205,6 +244,57 @@ const ImageGallery: React.FC = () => {
   };
 
   // Handle liking/unliking from the gallery
+  // Handle copying a shareable URL to the clipboard
+  const handleShareUrl = (mediaItem: GalleryItem) => {
+    if (!mediaItem.id) {
+      return;
+    }
+
+    // Create a URL that links directly to this item in the gallery
+    // Using window.location to get the current base URL
+    const shareUrl = `${window.location.origin}/gallery?id=${mediaItem.id}`;
+
+    // Copy to clipboard with a custom message
+    handleCopy(shareUrl, 'Share URL copied to clipboard!');
+  };
+
+  // Generic function to handle copying text to the clipboard with a notification
+  const handleCopy = (
+    text: string,
+    message: string = 'Copied to clipboard!'
+  ) => {
+    navigator.clipboard.writeText(text);
+
+    // Use a more user-friendly notification instead of an alert
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '10px 15px';
+    notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    notification.style.color = 'white';
+    notification.style.borderRadius = '4px';
+    notification.style.zIndex = '1000';
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.3s ease-in-out';
+
+    document.body.appendChild(notification);
+
+    // Fade in
+    setTimeout(() => {
+      notification.style.opacity = '1';
+    }, 10);
+
+    // Fade out and remove after 2 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 2000);
+  };
+
   const handleToggleLike = async (mediaItem: GalleryItem) => {
     if (!mediaItem.id) {
       return;
@@ -515,6 +605,19 @@ const ImageGallery: React.FC = () => {
                 />
               </button>
             )}
+
+            {/* Share button - new button for copying shareable URL */}
+            {mediaItem.id && (
+              <button
+                onClick={() => handleShareUrl(mediaItem)}
+                className="text-gray-500 hover:text-gray-700 p-1"
+                title="Copy shareable link"
+              >
+                <FaShare className="text-lg" />
+              </button>
+            )}
+
+            <div>Share with your friends and ask them to heart your image!</div>
           </div>
         </div>
 
