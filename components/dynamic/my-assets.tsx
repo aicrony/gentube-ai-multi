@@ -595,14 +595,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {activities.map((activity, index) => (
         <div
           key={index}
-          className={`border p-4 flex items-center ${
+          className={`border p-4 ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
           } ${
             selectedAssetUrl === activity.CreatedAssetUrl ||
             selectedAssetUrl === activity.AssetSource
               ? 'asset-item-selected'
               : ''
-          }`}
+          } flex flex-col md:flex-row md:items-center`}
           onClick={(e) => {
             if (onSelectAsset) {
               // If in selection mode, make the whole row clickable
@@ -629,63 +629,70 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             }
           }}
         >
-          <div
-            className={`w-16 h-16 flex items-center justify-center mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
-            style={{ backgroundColor: 'var(--card-bg-hover)' }}
-            onClick={(e) => {
-              e.preventDefault();
-              if (onSelectAsset) {
-                // If in selection mode, call the selection callback
-                const urlToSelect =
-                  activity.AssetType === 'vid'
-                    ? activity.AssetSource || activity.CreatedAssetUrl
-                    : activity.CreatedAssetUrl;
+          {/* Image/thumbnail - larger on mobile */}
+          <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
+            <div
+              className={`w-48 h-48 md:w-32 md:h-32 flex items-center justify-center md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
+              style={{ backgroundColor: 'var(--card-bg-hover)' }}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onSelectAsset) {
+                  // If in selection mode, call the selection callback
+                  const urlToSelect =
+                    activity.AssetType === 'vid'
+                      ? activity.AssetSource || activity.CreatedAssetUrl
+                      : activity.CreatedAssetUrl;
 
-                // Check if this asset is already selected
-                const isAlreadySelected =
-                  selectedAssetUrl === activity.CreatedAssetUrl ||
-                  selectedAssetUrl === activity.AssetSource;
+                  // Check if this asset is already selected
+                  const isAlreadySelected =
+                    selectedAssetUrl === activity.CreatedAssetUrl ||
+                    selectedAssetUrl === activity.AssetSource;
 
-                if (isAlreadySelected) {
-                  // If already selected, deselect it
-                  setSelectedAssetUrl(undefined);
-                  onSelectAsset(''); // Pass empty string to deselect
+                  if (isAlreadySelected) {
+                    // If already selected, deselect it
+                    setSelectedAssetUrl(undefined);
+                    onSelectAsset(''); // Pass empty string to deselect
+                  } else {
+                    // Otherwise select it
+                    setSelectedAssetUrl(urlToSelect);
+                    onSelectAsset(urlToSelect);
+                  }
                 } else {
-                  // Otherwise select it
-                  setSelectedAssetUrl(urlToSelect);
-                  onSelectAsset(urlToSelect);
+                  // Otherwise, open the modal as usual
+                  openModal(activity.CreatedAssetUrl);
                 }
-              } else {
-                // Otherwise, open the modal as usual
-                openModal(activity.CreatedAssetUrl);
-              }
-            }}
-          >
-            {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
-              <FaPlay className="w-8 h-8 text-gray-500" />
-            ) : (
-              <img
-                src={
-                  activity.AssetType === 'vid'
-                    ? activity.AssetSource
-                    : activity.AssetType === 'img'
-                      ? activity.CreatedAssetUrl
-                      : activity.AssetType === 'upl'
+              }}
+            >
+              {activity.AssetType === 'vid' &&
+              activity.AssetSource === 'none' ? (
+                <FaPlay className="w-8 h-8 text-gray-500" />
+              ) : (
+                <img
+                  src={
+                    activity.AssetType === 'vid'
+                      ? activity.AssetSource
+                      : activity.AssetType === 'img'
                         ? activity.CreatedAssetUrl
-                        : activity.AssetType === 'que'
-                          ? '/logo.png'
-                          : activity.AssetType === 'err'
+                        : activity.AssetType === 'upl'
+                          ? activity.CreatedAssetUrl
+                          : activity.AssetType === 'que'
                             ? '/logo.png'
-                            : '/logo.png'
-                }
-                alt="Thumbnail"
-                className="w-16 h-16 object-cover"
-              />
-            )}
+                            : activity.AssetType === 'err'
+                              ? '/logo.png'
+                              : '/logo.png'
+                  }
+                  alt="Thumbnail"
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap w-full max-w-full">
-            <div className="pr-2">
-              <p>
+
+          {/* Content */}
+          <div className="flex flex-col flex-grow w-full">
+            {/* Asset Type */}
+            <div className="mb-2 text-center md:text-left">
+              <p className="font-medium">
                 <strong>Type:</strong>{' '}
                 {activity.AssetType === 'vid'
                   ? 'Video'
@@ -700,9 +707,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                           : activity.AssetType}
               </p>
             </div>
+
+            {/* Prompt - with more space on mobile */}
             {activity.AssetType !== 'upl' && (
-              <div className="flex flex-wrap w-full max-w-full">
-                <p>
+              <div className="mb-3 text-center md:text-left">
+                <p className="break-words">
                   <strong>Prompt:</strong>{' '}
                   {expandedPrompts[index] ||
                   activity.Prompt.length <= promptLength
@@ -728,102 +737,104 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 </p>
               </div>
             )}
-          </div>
-          <div>
-            <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
-              <button
-                onClick={() => openModal(activity.CreatedAssetUrl)}
-                className="icon-size"
-                title="Open"
-              >
-                <FaExternalLinkAlt />
-              </button>
-              <button
-                onClick={() =>
-                  handleCopy(
-                    activity.AssetType === 'vid'
-                      ? activity.AssetSource
-                      : activity.CreatedAssetUrl,
-                    'Image URL copied!'
-                  )
-                }
-                className="icon-size"
-                title="Copy Image URL"
-              >
-                <FaImage />
-              </button>
-              {activity.AssetType === 'vid' && (
+
+            {/* Action buttons - horizontally centered on mobile */}
+            <div className="flex justify-center md:justify-start">
+              <div className="flex items-center space-x-3 md:space-x-2">
+                <button
+                  onClick={() => openModal(activity.CreatedAssetUrl)}
+                  className="icon-size"
+                  title="Open"
+                >
+                  <FaExternalLinkAlt />
+                </button>
                 <button
                   onClick={() =>
-                    handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
+                    handleCopy(
+                      activity.AssetType === 'vid'
+                        ? activity.AssetSource
+                        : activity.CreatedAssetUrl,
+                      'Image URL copied!'
+                    )
                   }
                   className="icon-size"
-                  title="Copy Video URL"
+                  title="Copy Image URL"
                 >
-                  <FaVideo />
+                  <FaImage />
                 </button>
-              )}
-              <button
-                onClick={() =>
-                  handleDownload(
-                    activity.AssetType === 'vid'
-                      ? activity.CreatedAssetUrl
-                      : activity.CreatedAssetUrl,
-                    activity.AssetType
-                  )
-                }
-                className="icon-size"
-                title="Download Asset"
-              >
-                <FaDownload />
-              </button>
-              {/* Heart/Like button */}
-              {activity.AssetType !== 'upl' && activity.id && (
-                <button
-                  onClick={() => handleToggleLike(activity)}
-                  className={`icon-size ${assetLikes[activity.id]?.isLiked ? 'text-red-500' : ''}`}
-                  title={assetLikes[activity.id]?.isLiked ? 'Unlike' : 'Like'}
-                >
-                  <div className="flex items-center">
-                    {assetLikes[activity.id]?.likesCount > 0 && (
-                      <span className="mr-1 text-xs">
-                        {assetLikes[activity.id]?.likesCount}
-                      </span>
-                    )}
-                    <FaHeart />
-                  </div>
-                </button>
-              )}
-
-              {/* Gallery toggle button */}
-              {activity.AssetType !== 'upl' && (
-                <button
-                  onClick={(e) => handleToggleGallery(activity, e)}
-                  className={`icon-size ${activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
-                  title={
-                    activity.SubscriptionTier === 3
-                      ? 'Remove from Gallery'
-                      : 'Add to Gallery'
-                  }
-                  disabled={galleryActionAssetId !== null} // Disable all gallery buttons while any operation is in progress
-                >
-                  <FaStar
-                    className={
-                      galleryActionAssetId === activity.id
-                        ? 'animate-pulse'
-                        : ''
+                {activity.AssetType === 'vid' && (
+                  <button
+                    onClick={() =>
+                      handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
                     }
-                  />
+                    className="icon-size"
+                    title="Copy Video URL"
+                  >
+                    <FaVideo />
+                  </button>
+                )}
+                <button
+                  onClick={() =>
+                    handleDownload(
+                      activity.AssetType === 'vid'
+                        ? activity.CreatedAssetUrl
+                        : activity.CreatedAssetUrl,
+                      activity.AssetType
+                    )
+                  }
+                  className="icon-size"
+                  title="Download Asset"
+                >
+                  <FaDownload />
                 </button>
-              )}
+                {/* Heart/Like button */}
+                {activity.AssetType !== 'upl' && activity.id && (
+                  <button
+                    onClick={() => handleToggleLike(activity)}
+                    className={`icon-size ${assetLikes[activity.id]?.isLiked ? 'text-red-500' : ''}`}
+                    title={assetLikes[activity.id]?.isLiked ? 'Unlike' : 'Like'}
+                  >
+                    <div className="flex items-center">
+                      {assetLikes[activity.id]?.likesCount > 0 && (
+                        <span className="mr-1 text-xs">
+                          {assetLikes[activity.id]?.likesCount}
+                        </span>
+                      )}
+                      <FaHeart />
+                    </div>
+                  </button>
+                )}
 
-              <button
-                onClick={() => handleDelete(activity)}
-                className="red icon-size"
-                title="Delete Asset"
-              >
-                <FaTrash />
-              </button>
+                {/* Gallery toggle button */}
+                {activity.AssetType !== 'upl' && (
+                  <button
+                    onClick={(e) => handleToggleGallery(activity, e)}
+                    className={`icon-size ${activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    title={
+                      activity.SubscriptionTier === 3
+                        ? 'Remove from Gallery'
+                        : 'Add to Gallery'
+                    }
+                    disabled={galleryActionAssetId !== null} // Disable all gallery buttons while any operation is in progress
+                  >
+                    <FaStar
+                      className={
+                        galleryActionAssetId === activity.id
+                          ? 'animate-pulse'
+                          : ''
+                      }
+                    />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleDelete(activity)}
+                  className="red icon-size"
+                  title="Delete Asset"
+                >
+                  <FaTrash />
+                </button>
+              </div>
             </div>
           </div>
         </div>
