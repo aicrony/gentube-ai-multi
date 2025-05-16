@@ -21,6 +21,26 @@ export async function getUserCreator(
       return null;
     }
 
+    // First try direct key lookup (most reliable)
+    const key = datastore.key({
+      namespace: NAMESPACE,
+      path: [USER_CREDITS_KIND, userId]
+    });
+    
+    const [entity] = await datastore.get(key);
+    
+    if (entity) {
+      // Check for both field names (Name and CreatorName) for compatibility
+      if (entity.CreatorName) {
+        console.log(`Found CreatorName for userId=${userId}: ${entity.CreatorName}`);
+        return entity.CreatorName;
+      } else if (entity.Name) {
+        console.log(`Found Name for userId=${userId}: ${entity.Name}`);
+        return entity.Name;
+      }
+    }
+    
+    // If direct lookup fails, try query by UserId field
     const query = datastore
       .createQuery(NAMESPACE, USER_CREDITS_KIND)
       .filter('UserId', '=', userId)
@@ -28,10 +48,17 @@ export async function getUserCreator(
 
     const [userCredits] = await datastore.runQuery(query);
     
-    if (userCredits.length > 0 && userCredits[0].Name) {
-      return userCredits[0].Name;
+    if (userCredits.length > 0) {
+      if (userCredits[0].CreatorName) {
+        console.log(`Found CreatorName via query for userId=${userId}: ${userCredits[0].CreatorName}`);
+        return userCredits[0].CreatorName;
+      } else if (userCredits[0].Name) {
+        console.log(`Found Name via query for userId=${userId}: ${userCredits[0].Name}`);
+        return userCredits[0].Name;
+      }
     }
     
+    console.log(`No name found for userId=${userId}`);
     return null;
   } catch (error) {
     console.error('Error getting user creator name:', error);

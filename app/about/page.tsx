@@ -55,7 +55,10 @@ function AboutPageContent() {
                   </Button>
                 </Link>
                 <Link href="/gallery">
-                  <Button variant="slim" className="px-8 py-3 text-lg">
+                  <Button 
+                    variant="slim" 
+                    className="px-8 py-3 text-lg rainbow-button"
+                  >
                     Win Credits
                   </Button>
                 </Link>

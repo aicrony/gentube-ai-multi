@@ -201,7 +201,7 @@ export default function Pricing({
                     borderWidth: billingInterval === 'day' ? '1px' : '0'
                   }}
                 >
-                  One-Time billing
+                  On-Demand Credits
                 </button>
               )}
             </div>

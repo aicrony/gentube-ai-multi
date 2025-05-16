@@ -43,8 +43,9 @@ export async function updateUserName(
         // Get current entity data
         const userCreditsEntity = { ...directEntity };
         
-        // Update the name and other fields
+        // Update both name fields for compatibility
         userCreditsEntity.Name = name;
+        userCreditsEntity.CreatorName = name;
         userCreditsEntity.LastUpdated = new Date();
         
         // Ensure UserId is properly set (it might be missing)
@@ -82,8 +83,9 @@ export async function updateUserName(
       // Get current entity data
       const userCreditsEntity = { ...userCredits[0] };
       
-      // Update the name
+      // Update both name fields for compatibility
       userCreditsEntity.Name = name;
+      userCreditsEntity.CreatorName = name;
       userCreditsEntity.LastUpdated = new Date();
       
       // Save the updated entity
@@ -105,6 +107,7 @@ export async function updateUserName(
       const userCreditsEntity = {
         UserId: userId,
         Name: name,
+        CreatorName: name,
         Credits: 0,
         LastUpdated: new Date()
       };
