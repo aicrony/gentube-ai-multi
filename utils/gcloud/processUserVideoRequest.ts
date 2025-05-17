@@ -23,7 +23,7 @@ export async function processUserVideoRequest(
   aspectRatio?: string | undefined,
   loop?: string | undefined,
   motion?: string | undefined
-): Promise<{ result: string; credits: number }> {
+): Promise<{ result: string; credits: number; error?: boolean; statusCode?: number }> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let userResponse = {
