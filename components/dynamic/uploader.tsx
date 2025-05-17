@@ -24,6 +24,15 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
       setUploadError("Please upload a supported image file (JPG, JPEG, PNG, HEIF)");
       return;
     }
+    
+    // Check file size - 10MB limit (with some buffer below the 12MB server limit)
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    const file = filteredFiles[0];
+    
+    if (file.size > maxSizeInBytes) {
+      setUploadError(`File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Please upload an image smaller than 10MB.`);
+      return;
+    }
 
     // Reset states
     setIsUploading(true);
@@ -56,7 +65,15 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
             })
           });
 
-          // Use centralized error handler
+          // Handle 413 Payload Too Large specifically before other errors
+          if (response.status === 413) {
+            setUploadError('File size too large. Please upload a smaller image (less than 10MB).');
+            setIsUploading(false);
+            setPreviewImage(null);
+            return;
+          }
+          
+          // Use centralized error handler for other errors
           if (await handleApiError(response, { 
             setErrorMessage: (msg) => setUploadError(msg) 
           })) {
@@ -143,7 +160,7 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
                 {isUploading ? 'Uploading...' : 'Drag & drop your photo here, or click to select'}
               </p>
               <p className="text-sm" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
-                Supported formats: JPG, JPEG, PNG, HEIF
+                Supported formats: JPG, JPEG, PNG, HEIF (max 10MB)
               </p>
             </div>
           )}
