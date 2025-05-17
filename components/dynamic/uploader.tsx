@@ -88,23 +88,41 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
           
           const { signedUrl, finalUrl } = await getSignedUrlResponse.json();
           
-          // Now upload directly to GCS using the signed URL
-          const fileBlob = new Blob([Buffer.from(base64data, 'base64')], { type: file.type });
+          // Convert base64 to binary data
+          // Note: We can't use Buffer in the browser, so we'll use Uint8Array instead
+          const binaryString = atob(base64data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
           
-          const uploadResponse = await fetch(signedUrl, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': file.type
-            },
-            body: fileBlob
+          // Create blob with the correct content type
+          const fileBlob = new Blob([bytes], { type: file.type });
+          
+          // Upload directly to GCS using the signed URL
+          // Note: We're using XMLHttpRequest instead of fetch for better CORS support
+          const uploadResult = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', signedUrl, true);
+            xhr.setRequestHeader('Content-Type', file.type);
+            
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve({ ok: true });
+              } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+              }
+            };
+            
+            xhr.onerror = () => {
+              reject(new Error('XHR error occurred during upload'));
+            };
+            
+            xhr.send(fileBlob);
           });
           
-          if (!uploadResponse.ok) {
-            setUploadError('Failed to upload to storage. Please try again.');
-            setIsUploading(false);
-            setPreviewImage(null);
-            return;
-          }
+          // After successful upload to GCS using XMLHttpRequest, we continue with saving the activity
+          // No need to check uploadResult since any error would be caught in the promise
           
           // Now save the user activity by calling our API
           const activityResponse = await fetch('/api/saveUploadActivity', {

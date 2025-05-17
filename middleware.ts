@@ -13,7 +13,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(mainUrl);
   }
 
-  return await updateSession(request);
+  // Handle CORS preflight requests
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-User-Id, X-Forwarded-For',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Max-Age': '86400' // 24 hours
+      }
+    });
+  }
+
+  // Add CORS headers to all responses
+  const response = await updateSession(request);
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Id, X-Forwarded-For');
+  
+  return response;
 }
 
 export const config = {
@@ -24,9 +43,11 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * - api routes starting with /api/
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Also include API routes that need CORS handling
+    '/api/getSignedUploadUrl',
+    '/api/saveUploadActivity'
   ]
 };
