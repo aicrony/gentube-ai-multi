@@ -78,7 +78,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [galleryActionAssetId, setGalleryActionAssetId] = useState<
     string | null
   >(null); // Track which asset is being updated
-  
+
   // New state for filtering, searching, and sorting
   const [filters, setFilters] = useState({
     assetType: assetType || '', // initialize with prop if provided
@@ -88,7 +88,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const limit = 10;
   const promptLength = 100;
 
@@ -109,19 +109,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (page == 0) {
           setActivities([]);
         }
-        
+
         // Process the assets to ensure gallery status is properly reflected
         const processedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
           isInGallery: asset.SubscriptionTier === 3
         }));
-        
+
         // Log to help debug gallery status issues
         if (processedAssets.length > 0) {
-          console.log('First asset SubscriptionTier:', processedAssets[0].SubscriptionTier);
-          console.log('Assets in gallery:', processedAssets.filter(a => a.isInGallery).length);
+          console.log(
+            'First asset SubscriptionTier:',
+            processedAssets[0].SubscriptionTier
+          );
+          console.log(
+            'Assets in gallery:',
+            processedAssets.filter((a) => a.isInGallery).length
+          );
         }
-        
+
         setActivities((prev) => [...prev, ...processedAssets]);
         setHasMore(data.assets.length === limit && data.assets.length > 0);
       } catch (error) {
@@ -139,42 +145,46 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setPage(0);
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, filters.assetType]);
-  
+
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
-    
+
     // Apply gallery filter
     if (filters.inGallery) {
-      result = result.filter(activity => activity.isInGallery || activity.SubscriptionTier === 3);
+      result = result.filter(
+        (activity) => activity.isInGallery || activity.SubscriptionTier === 3
+      );
     }
-    
+
     // Apply heart count filter
     if (filters.minHearts > 0) {
-      result = result.filter(activity => {
+      result = result.filter((activity) => {
         const likeInfo = activity.id ? assetLikes[activity.id] : undefined;
         return likeInfo && likeInfo.likesCount >= filters.minHearts;
       });
     }
-    
+
     // Apply search filter for prompt text
     if (searchTerm.trim()) {
       const searchTermLower = searchTerm.toLowerCase();
-      result = result.filter(activity => 
-        activity.Prompt && activity.Prompt.toLowerCase().includes(searchTermLower)
+      result = result.filter(
+        (activity) =>
+          activity.Prompt &&
+          activity.Prompt.toLowerCase().includes(searchTermLower)
       );
     }
-    
+
     // Apply sorting
     result.sort((a, b) => {
       const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
       const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
-      
-      return sortDirection === 'asc' 
-        ? dateA - dateB  // Oldest first
+
+      return sortDirection === 'asc'
+        ? dateA - dateB // Oldest first
         : dateB - dateA; // Newest first
     });
-    
+
     return result;
   }, [activities, filters, searchTerm, sortDirection, assetLikes]);
 
@@ -366,12 +376,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (!response.ok) {
           throw new Error('Failed to delete asset');
         }
-        
+
         // Instead of refreshing, just remove the deleted asset from the state
-        setActivities(currentActivities => 
-          currentActivities.filter(item => item.id !== activity.id)
+        setActivities((currentActivities) =>
+          currentActivities.filter((item) => item.id !== activity.id)
         );
-        
+
         // Show a toast to confirm deletion
         const notification = document.createElement('div');
         notification.textContent = 'Asset deleted successfully';
@@ -502,8 +512,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setGalleryActionAssetId(assetId); // Set this specific asset as being processed
 
       // Use either direct SubscriptionTier check or the isInGallery helper property
-      const isInGallery = activity.isInGallery || activity.SubscriptionTier === 3;
-      console.log(`Asset ${activity.id} - SubscriptionTier: ${activity.SubscriptionTier}, isInGallery: ${isInGallery}`);
+      const isInGallery =
+        activity.isInGallery || activity.SubscriptionTier === 3;
+      console.log(
+        `Asset ${activity.id} - SubscriptionTier: ${activity.SubscriptionTier}, isInGallery: ${isInGallery}`
+      );
       const action = isInGallery ? 'remove' : 'add';
 
       // Don't allow uploaded images to be added to gallery
@@ -657,20 +670,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Handle filter changes
   const handleFilterChange = (filterName: string, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [filterName]: value
     }));
-    
+
     // Reset to page 0 when filters change
     setPage(0);
   };
-  
+
   // Toggle filter panel
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
-  
+
   // Clear all filters
   const clearFilters = () => {
     setFilters({
@@ -695,35 +708,45 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               Auto-refreshing...
             </span>
           )}
-          
+
           {/* Filter toggle button */}
-          <button 
+          <button
             onClick={toggleFilters}
             className="flex items-center gap-1 px-2 py-1 rounded"
-            style={{ 
-              backgroundColor: showFilters ? 'var(--primary-color)' : 'transparent',
+            style={{
+              backgroundColor: showFilters
+                ? 'var(--primary-color)'
+                : 'transparent',
               color: showFilters ? 'white' : 'var(--primary-color)'
             }}
           >
             <FaFilter /> {showFilters ? 'Hide Filters' : 'Filters'}
           </button>
-          
+
           <button onClick={handleRefresh}>
             {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
           </button>
         </div>
       </div>
-      
+
       {/* Filter and search panel */}
       {showFilters && (
-        <div className="p-3 mb-4 border rounded" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg-hover)' }}>
+        <div
+          className="p-3 mb-4 border rounded"
+          style={{
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--card-bg-hover)'
+          }}
+        >
           <div className="flex flex-col gap-4 md:flex-row md:justify-between">
             {/* Asset Type Filter */}
             <div className="flex flex-col">
               <label className="mb-1 font-medium">Asset Type</label>
-              <select 
-                value={filters.assetType} 
-                onChange={(e) => handleFilterChange('assetType', e.target.value)}
+              <select
+                value={filters.assetType}
+                onChange={(e) =>
+                  handleFilterChange('assetType', e.target.value)
+                }
                 className="p-2 rounded border"
                 style={{ borderColor: 'var(--border-color)' }}
               >
@@ -734,39 +757,50 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 <option value="upl">Uploads</option>
               </select>
             </div>
-            
+
             {/* Gallery Filter */}
             <div className="flex flex-col">
               <label className="mb-1 font-medium">In Gallery</label>
               <div className="flex items-center">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={filters.inGallery}
-                  onChange={(e) => handleFilterChange('inGallery', e.target.checked)}
+                  onChange={(e) =>
+                    handleFilterChange('inGallery', e.target.checked)
+                  }
                   className="mr-2"
                 />
-                <label>Show only gallery items <FaStar className="inline text-yellow-500 ml-1" /></label>
+                <label>
+                  Show only gallery items{' '}
+                  <FaStar className="inline text-yellow-500 ml-1" />
+                </label>
               </div>
             </div>
-            
+
             {/* Heart Count Filter */}
             <div className="flex flex-col">
-              <label className="mb-1 font-medium">Min Hearts <FaHeart className="inline text-red-500 ml-1" /></label>
-              <input 
-                type="number" 
+              <label className="mb-1 font-medium">
+                Min Hearts <FaHeart className="inline text-red-500 ml-1" />
+              </label>
+              <input
+                type="number"
                 min="0"
                 value={filters.minHearts}
-                onChange={(e) => handleFilterChange('minHearts', parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleFilterChange('minHearts', parseInt(e.target.value) || 0)
+                }
                 className="p-2 rounded border w-20"
                 style={{ borderColor: 'var(--border-color)' }}
               />
             </div>
-            
+
             {/* Sort Direction */}
             <div className="flex flex-col">
               <label className="mb-1 font-medium">Sort By Date</label>
-              <button 
-                onClick={() => setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')}
+              <button
+                onClick={() =>
+                  setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
+                }
                 className="flex items-center gap-1 p-2 border rounded"
                 style={{ borderColor: 'var(--border-color)' }}
               >
@@ -782,13 +816,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </button>
             </div>
           </div>
-          
+
           {/* Search Box */}
           <div className="mt-4">
             <label className="mb-1 font-medium">Search Prompts</label>
             <div className="relative">
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input 
+              <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -797,7 +831,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 style={{ borderColor: 'var(--border-color)' }}
               />
               {searchTerm && (
-                <button 
+                <button
                   onClick={() => setSearchTerm('')}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
@@ -806,10 +840,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               )}
             </div>
           </div>
-          
+
           {/* Reset Filters */}
           <div className="mt-4 flex justify-end">
-            <button 
+            <button
               onClick={clearFilters}
               className="text-sm"
               style={{ color: 'var(--primary-color)' }}
@@ -819,17 +853,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Results summary */}
       <div className="flex justify-between items-center mb-4">
         <div>
           <p className="text-sm">
-            Showing {filteredAndSortedActivities.length} {filteredAndSortedActivities.length === 1 ? 'asset' : 'assets'}
-            {(filters.assetType || filters.inGallery || filters.minHearts > 0 || searchTerm) && ' (filtered)'}
+            Showing {filteredAndSortedActivities.length}{' '}
+            {filteredAndSortedActivities.length === 1 ? 'asset' : 'assets'}
+            {(filters.assetType ||
+              filters.inGallery ||
+              filters.minHearts > 0 ||
+              searchTerm) &&
+              ' (filtered)'}
           </p>
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center mb-2">
         <p>
           <strong>*New:</strong> Star your asset to add it to the{' '}
@@ -853,7 +892,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       {filteredAndSortedActivities.length === 0 && (
         <p>
-          {activities.length === 0 
+          {activities.length === 0
             ? `No assets found. You may need to ${userId ? '' : '<a href="/signin">sign in</a> to'} see your assets.`
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
@@ -957,30 +996,40 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                       const container = e.currentTarget.parentElement;
                       if (container) {
                         const playIcon = document.createElement('div');
-                        playIcon.className = 'w-full h-full flex flex-col items-center justify-center';
-                        
+                        playIcon.className =
+                          'w-full h-full flex flex-col items-center justify-center';
+
                         // Create the FaPlay icon element
                         const iconElement = document.createElement('div');
                         iconElement.className = 'w-8 h-8 text-gray-500';
-                        
+
                         // Use the same icon component styling as above
-                        const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        const svgIcon = document.createElementNS(
+                          'http://www.w3.org/2000/svg',
+                          'svg'
+                        );
                         svgIcon.setAttribute('fill', 'currentColor');
                         svgIcon.setAttribute('viewBox', '0 0 448 512');
                         svgIcon.setAttribute('class', 'w-8 h-8');
-                        
+
                         // This is the path data for FaPlay from react-icons
-                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
-                        
+                        const path = document.createElementNS(
+                          'http://www.w3.org/2000/svg',
+                          'path'
+                        );
+                        path.setAttribute(
+                          'd',
+                          'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z'
+                        );
+
                         svgIcon.appendChild(path);
                         iconElement.appendChild(svgIcon);
-                        
-                        // Add text 
+
+                        // Add text
                         const textElement = document.createElement('div');
                         textElement.className = 'mt-2 text-gray-500';
-                        textElement.textContent = 'Video';
-                        
+                        textElement.textContent = '';
+
                         // Assemble the complete element
                         playIcon.appendChild(iconElement);
                         playIcon.appendChild(textElement);
@@ -1114,9 +1163,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 {activity.AssetType !== 'upl' && (
                   <button
                     onClick={(e) => handleToggleGallery(activity, e)}
-                    className={`icon-size ${(activity.isInGallery || activity.SubscriptionTier === 3) ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    className={`icon-size ${activity.isInGallery || activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                     title={
-                      (activity.isInGallery || activity.SubscriptionTier === 3)
+                      activity.isInGallery || activity.SubscriptionTier === 3
                         ? 'Remove from Gallery'
                         : 'Add to Gallery'
                     }
@@ -1145,16 +1194,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         </div>
       ))}
       {/* Only show load more if we have more original assets and we're not applying client-side filters */}
-      {activities.length > 0 && hasMore && 
+      {activities.length > 0 &&
+        hasMore &&
         !(filters.inGallery || filters.minHearts > 0 || searchTerm.trim()) && (
-        <button 
-          onClick={() => setPage((prev) => prev + 1)} 
-          className="mt-4 px-4 py-2 rounded border"
-          style={{ borderColor: 'var(--border-color)' }}
-        >
-          Load More
-        </button>
-      )}
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            className="mt-4 px-4 py-2 rounded border"
+            style={{ borderColor: 'var(--border-color)' }}
+          >
+            Load More
+          </button>
+        )}
       {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} />}
     </div>
   );
