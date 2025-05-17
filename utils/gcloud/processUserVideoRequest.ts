@@ -83,27 +83,41 @@ export async function processUserVideoRequest(
 
   console.log('Check credit count: ', userResponse.credits);
 
-  if (userResponse.credits && userResponse.credits <= 0) {
-    // console.log('Credit limit exceeded');
-    // res.status(429).json({
-    //   error: 'Credit limit exceeded. Purchase credits on the PRICING page.'
-    // });
-    // return;
+  if (userResponse.credits <= 0) {
+    console.log('Credit limit exceeded - User has 0 or negative credits');
     userResponse.result = 'LimitExceeded';
+    userResponse.error = true;
+    userResponse.statusCode = 429; // Too Many Requests
+    return userResponse;
   }
 
   if (userResponse.result == 'CreateAccount') {
     userResponse.error = true;
     return userResponse;
-  } else if (userResponse.result == 'LimitExceeded') {
+  }
+
+  // Calculate the credit cost before making any API calls
+  let creditCost = 100;
+  if (duration == '10') {
+    creditCost = 100;
+  } else if (duration == '5') {
+    creditCost = 50;
+  } else {
+    creditCost = 500;
+  }
+
+  // Check if user has enough credits for this specific operation
+  if (userResponse.credits < creditCost) {
+    console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
+    userResponse.result = 'LimitExceeded';
     userResponse.error = true;
+    userResponse.statusCode = 429; // Too Many Requests
     return userResponse;
   }
 
   let videoResult;
   let requestId;
   try {
-    let creditCost = 100;
     let result: string | VideoApiResult;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -199,13 +213,7 @@ export async function processUserVideoRequest(
       //   videoResult && videoResult.url ? videoResult.url : '';
     }
 
-    if (duration == '10') {
-      creditCost = 100;
-    } else if (duration == '5') {
-      creditCost = 50;
-    } else {
-      creditCost = 500;
-    }
+    // We already calculated the credit cost above, so we don't need to do it again here
 
     // console.log('****** IMAGE RESULT: ********');
     // console.log(JSON.stringify(userResponse.result));

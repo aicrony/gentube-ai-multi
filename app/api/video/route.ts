@@ -64,6 +64,29 @@ export async function POST(request: NextRequest) {
       motion
     );
 
+    // Check if there was an error in the user response
+    if (userResponse.error) {
+      const statusCode = userResponse.statusCode || 400;
+      
+      // Handle specific error cases
+      if (userResponse.result === 'LimitExceeded') {
+        return NextResponse.json(
+          { 
+            error: 'Credit limit exceeded. You need credits to generate videos. Please purchase credits on the pricing page.',
+            result: 'LimitExceeded',
+            credits: userResponse.credits
+          }, 
+          { status: statusCode }
+        );
+      }
+      
+      // Handle other errors
+      return NextResponse.json(
+        { error: userResponse.result || 'An error occurred', credits: userResponse.credits }, 
+        { status: statusCode }
+      );
+    }
+
     return NextResponse.json(userResponse);
   } catch (error) {
     console.error('Error processing video request:', error);
