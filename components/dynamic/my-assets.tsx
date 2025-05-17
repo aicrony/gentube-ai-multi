@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import {
@@ -10,7 +10,13 @@ import {
   FaPlay,
   FaDownload,
   FaHeart,
-  FaStar
+  FaStar,
+  FaFilter,
+  FaSearch,
+  FaSortAmountDown,
+  FaSortAmountUp,
+  FaList,
+  FaTimesCircle
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
@@ -20,8 +26,10 @@ interface UserActivity {
   Prompt: string;
   AssetSource: string;
   AssetType: string;
+  DateTime?: Date; // Added for sorting
   SubscriptionTier?: number;
   isInGallery?: boolean; // Helper property
+  likesCount?: number; // Added for filtering by heart count
 }
 
 interface AssetLikeInfo {
@@ -70,14 +78,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [galleryActionAssetId, setGalleryActionAssetId] = useState<
     string | null
   >(null); // Track which asset is being updated
+  
+  // New state for filtering, searching, and sorting
+  const [filters, setFilters] = useState({
+    assetType: assetType || '', // initialize with prop if provided
+    inGallery: false,
+    minHearts: 0
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
+  const [showFilters, setShowFilters] = useState(false);
+  
   const limit = 10;
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
     if (userId || userIp) {
       try {
-        // Support comma-separated asset types
-        const assetTypeParam = assetType || '';
+        // Support comma-separated asset types - use the filters state
+        const assetTypeParam = filters.assetType || '';
 
         const response = await fetch(
           `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
@@ -116,8 +135,48 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   useEffect(() => {
+    // Reset to page 0 when filters change
+    setPage(0);
     fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, assetType]);
+  }, [userId, userIp, page, filters.assetType]);
+  
+  // Process and filter/sort the activities based on user preferences
+  const filteredAndSortedActivities = useMemo(() => {
+    let result = [...activities];
+    
+    // Apply gallery filter
+    if (filters.inGallery) {
+      result = result.filter(activity => activity.isInGallery || activity.SubscriptionTier === 3);
+    }
+    
+    // Apply heart count filter
+    if (filters.minHearts > 0) {
+      result = result.filter(activity => {
+        const likeInfo = activity.id ? assetLikes[activity.id] : undefined;
+        return likeInfo && likeInfo.likesCount >= filters.minHearts;
+      });
+    }
+    
+    // Apply search filter for prompt text
+    if (searchTerm.trim()) {
+      const searchTermLower = searchTerm.toLowerCase();
+      result = result.filter(activity => 
+        activity.Prompt && activity.Prompt.toLowerCase().includes(searchTermLower)
+      );
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
+      const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
+      
+      return sortDirection === 'asc' 
+        ? dateA - dateB  // Oldest first
+        : dateB - dateA; // Newest first
+    });
+    
+    return result;
+  }, [activities, filters, searchTerm, sortDirection, assetLikes]);
 
   // Fetch likes for all displayed assets
   useEffect(() => {
@@ -596,25 +655,181 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const assetTypeTitle = getAssetTypeTitle(assetType);
 
+  // Handle filter changes
+  const handleFilterChange = (filterName: string, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    
+    // Reset to page 0 when filters change
+    setPage(0);
+  };
+  
+  // Toggle filter panel
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+  
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      assetType: '',
+      inGallery: false,
+      minHearts: 0
+    });
+    setSearchTerm('');
+    setSortDirection('desc');
+  };
+
   return (
     <div className="my-assets-container">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           {isAutoRefreshing && (
             <span
               className="text-xs mr-2"
               style={{ color: 'var(--primary-color)' }}
             >
-              {/*Auto-refreshing {nextRefreshIn !== null ? `(${nextRefreshIn}s)` : '...'}*/}
               Auto-refreshing...
             </span>
           )}
+          
+          {/* Filter toggle button */}
+          <button 
+            onClick={toggleFilters}
+            className="flex items-center gap-1 px-2 py-1 rounded"
+            style={{ 
+              backgroundColor: showFilters ? 'var(--primary-color)' : 'transparent',
+              color: showFilters ? 'white' : 'var(--primary-color)'
+            }}
+          >
+            <FaFilter /> {showFilters ? 'Hide Filters' : 'Filters'}
+          </button>
+          
           <button onClick={handleRefresh}>
             {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
           </button>
         </div>
       </div>
+      
+      {/* Filter and search panel */}
+      {showFilters && (
+        <div className="p-3 mb-4 border rounded" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg-hover)' }}>
+          <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+            {/* Asset Type Filter */}
+            <div className="flex flex-col">
+              <label className="mb-1 font-medium">Asset Type</label>
+              <select 
+                value={filters.assetType} 
+                onChange={(e) => handleFilterChange('assetType', e.target.value)}
+                className="p-2 rounded border"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <option value="">All Types</option>
+                <option value="img">Images</option>
+                <option value="vid">Videos</option>
+                <option value="que">In Queue</option>
+                <option value="upl">Uploads</option>
+              </select>
+            </div>
+            
+            {/* Gallery Filter */}
+            <div className="flex flex-col">
+              <label className="mb-1 font-medium">In Gallery</label>
+              <div className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  checked={filters.inGallery}
+                  onChange={(e) => handleFilterChange('inGallery', e.target.checked)}
+                  className="mr-2"
+                />
+                <label>Show only gallery items <FaStar className="inline text-yellow-500 ml-1" /></label>
+              </div>
+            </div>
+            
+            {/* Heart Count Filter */}
+            <div className="flex flex-col">
+              <label className="mb-1 font-medium">Min Hearts <FaHeart className="inline text-red-500 ml-1" /></label>
+              <input 
+                type="number" 
+                min="0"
+                value={filters.minHearts}
+                onChange={(e) => handleFilterChange('minHearts', parseInt(e.target.value) || 0)}
+                className="p-2 rounded border w-20"
+                style={{ borderColor: 'var(--border-color)' }}
+              />
+            </div>
+            
+            {/* Sort Direction */}
+            <div className="flex flex-col">
+              <label className="mb-1 font-medium">Sort By Date</label>
+              <button 
+                onClick={() => setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')}
+                className="flex items-center gap-1 p-2 border rounded"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                {sortDirection === 'desc' ? (
+                  <>
+                    <FaSortAmountDown /> Newest First
+                  </>
+                ) : (
+                  <>
+                    <FaSortAmountUp /> Oldest First
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {/* Search Box */}
+          <div className="mt-4">
+            <label className="mb-1 font-medium">Search Prompts</label>
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input 
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search in prompts..."
+                className="p-2 pl-10 rounded border w-full"
+                style={{ borderColor: 'var(--border-color)' }}
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <FaTimesCircle />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Reset Filters */}
+          <div className="mt-4 flex justify-end">
+            <button 
+              onClick={clearFilters}
+              className="text-sm"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              Reset All Filters
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Results summary */}
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <p className="text-sm">
+            Showing {filteredAndSortedActivities.length} {filteredAndSortedActivities.length === 1 ? 'asset' : 'assets'}
+            {(filters.assetType || filters.inGallery || filters.minHearts > 0 || searchTerm) && ' (filtered)'}
+          </p>
+        </div>
+      </div>
+      
       <div className="flex justify-between items-center mb-2">
         <p>
           <strong>*New:</strong> Star your asset to add it to the{' '}
@@ -636,13 +851,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         </p>
       </div>
 
-      {activities && activities.length === 0 && (
+      {filteredAndSortedActivities.length === 0 && (
         <p>
-          No assets found. You may need to <a href="/signin">sign in</a> to see
-          your assets.
+          {activities.length === 0 
+            ? `No assets found. You may need to ${userId ? '' : '<a href="/signin">sign in</a> to'} see your assets.`
+            : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
-      {activities.map((activity, index) => (
+      {filteredAndSortedActivities.map((activity, index) => (
         <div
           key={index}
           className={`border p-4 ${
@@ -889,8 +1105,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </div>
         </div>
       ))}
-      {activities.length > 0 && hasMore && (
-        <button onClick={() => setPage((prev) => prev + 1)} className="mt-4">
+      {/* Only show load more if we have more original assets and we're not applying client-side filters */}
+      {activities.length > 0 && hasMore && 
+        !(filters.inGallery || filters.minHearts > 0 || searchTerm.trim()) && (
+        <button 
+          onClick={() => setPage((prev) => prev + 1)} 
+          className="mt-4 px-4 py-2 rounded border"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
           Load More
         </button>
       )}
