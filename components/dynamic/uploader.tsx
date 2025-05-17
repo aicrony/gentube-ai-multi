@@ -25,9 +25,11 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
       return;
     }
     
+    // Get the file
+    const file = filteredFiles[0]; // Just use the first file
+    
     // Check file size - 10MB limit (with some buffer below the 12MB server limit)
     const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-    const file = filteredFiles[0];
     
     if (file.size > maxSizeInBytes) {
       setUploadError(`File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Please upload an image smaller than 10MB.`);
@@ -38,9 +40,6 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(false);
-    
-    // Get the file
-    const file = filteredFiles[0]; // Just use the first file
 
     // Create a preview
     const objectUrl = URL.createObjectURL(file);
