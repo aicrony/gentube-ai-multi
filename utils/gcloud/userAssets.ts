@@ -21,6 +21,7 @@ interface UserActivity {
   DateTime: Date;
   UserId?: string | null; // Added for creator info
   CreatorName?: string | null; // Added for creator display
+  SubscriptionTier?: number; // Added for gallery status
 }
 
 export async function getUserAssets(
@@ -86,7 +87,8 @@ export async function getUserAssets(
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
     AssetType: activity.AssetType,
-    DateTime: activity.DateTime
+    DateTime: activity.DateTime,
+    SubscriptionTier: activity.SubscriptionTier
   }));
 }
 
@@ -123,7 +125,8 @@ export async function getPublicAssets(
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
     AssetType: activity.AssetType,
-    DateTime: activity.DateTime
+    DateTime: activity.DateTime,
+    SubscriptionTier: activity.SubscriptionTier
   }));
 }
 
@@ -212,7 +215,8 @@ export async function getGalleryAssets(
       AssetType: activity.AssetType || 'unknown',
       DateTime: activity.DateTime,
       UserId: activity.UserId || null,
-      CreatorName: creatorName
+      CreatorName: creatorName,
+      SubscriptionTier: activity.SubscriptionTier || 3 // Default to 3 for gallery assets
     };
   });
 }

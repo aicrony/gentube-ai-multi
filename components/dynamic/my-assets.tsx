@@ -21,6 +21,7 @@ interface UserActivity {
   AssetSource: string;
   AssetType: string;
   SubscriptionTier?: number;
+  isInGallery?: boolean; // Helper property
 }
 
 interface AssetLikeInfo {
@@ -89,7 +90,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (page == 0) {
           setActivities([]);
         }
-        setActivities((prev) => [...prev, ...data.assets]);
+        
+        // Process the assets to ensure gallery status is properly reflected
+        const processedAssets = data.assets.map((asset: UserActivity) => ({
+          ...asset,
+          isInGallery: asset.SubscriptionTier === 3
+        }));
+        
+        // Log to help debug gallery status issues
+        if (processedAssets.length > 0) {
+          console.log('First asset SubscriptionTier:', processedAssets[0].SubscriptionTier);
+          console.log('Assets in gallery:', processedAssets.filter(a => a.isInGallery).length);
+        }
+        
+        setActivities((prev) => [...prev, ...processedAssets]);
         setHasMore(data.assets.length === limit && data.assets.length > 0);
       } catch (error) {
         console.error(error);
@@ -293,9 +307,43 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (!response.ok) {
           throw new Error('Failed to delete asset');
         }
-        handleRefresh();
+        
+        // Instead of refreshing, just remove the deleted asset from the state
+        setActivities(currentActivities => 
+          currentActivities.filter(item => item.id !== activity.id)
+        );
+        
+        // Show a toast to confirm deletion
+        const notification = document.createElement('div');
+        notification.textContent = 'Asset deleted successfully';
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.right = '20px';
+        notification.style.padding = '10px 15px';
+        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        notification.style.color = 'white';
+        notification.style.borderRadius = '4px';
+        notification.style.zIndex = '1000';
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.body.appendChild(notification);
+
+        // Fade in
+        setTimeout(() => {
+          notification.style.opacity = '1';
+        }, 10);
+
+        // Fade out and remove after 3 seconds
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
       } catch (error) {
         console.error('Error deleting asset:', error);
+        alert('Failed to delete asset. Please try again.');
       }
     }
   };
@@ -394,7 +442,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       const assetId = activity.id;
       setGalleryActionAssetId(assetId); // Set this specific asset as being processed
 
-      const isInGallery = activity.SubscriptionTier === 3;
+      // Use either direct SubscriptionTier check or the isInGallery helper property
+      const isInGallery = activity.isInGallery || activity.SubscriptionTier === 3;
+      console.log(`Asset ${activity.id} - SubscriptionTier: ${activity.SubscriptionTier}, isInGallery: ${isInGallery}`);
       const action = isInGallery ? 'remove' : 'add';
 
       // Don't allow uploaded images to be added to gallery
@@ -809,9 +859,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 {activity.AssetType !== 'upl' && (
                   <button
                     onClick={(e) => handleToggleGallery(activity, e)}
-                    className={`icon-size ${activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    className={`icon-size ${(activity.isInGallery || activity.SubscriptionTier === 3) ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                     title={
-                      activity.SubscriptionTier === 3
+                      (activity.isInGallery || activity.SubscriptionTier === 3)
                         ? 'Remove from Gallery'
                         : 'Add to Gallery'
                     }
