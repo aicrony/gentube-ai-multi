@@ -212,7 +212,7 @@ const ImageGallery: React.FC = () => {
   };
 
   // We're using openModal directly now for both normal and fullscreen views
-  
+
   // Handle opening the modal with the media URL
   // Enhanced modal open function that takes a media item index
   const openModalForItem = (index: number, fullScreen = false) => {
@@ -224,11 +224,11 @@ const ImageGallery: React.FC = () => {
       setIsFullScreenModal(fullScreen);
     }
   };
-  
+
   // Original function for backward compatibility - opens the modal for a URL
   const openModal = (url: string, fullScreen = false) => {
     // Find the index of the media item with this URL
-    const index = media.findIndex(item => item.CreatedAssetUrl === url);
+    const index = media.findIndex((item) => item.CreatedAssetUrl === url);
     if (index !== -1) {
       openModalForItem(index, fullScreen);
     } else {
@@ -238,7 +238,7 @@ const ImageGallery: React.FC = () => {
       setIsFullScreenModal(fullScreen);
     }
   };
-  
+
   // Navigate to the next item in the modal
   const handleNextInModal = () => {
     if (currentIndex < media.length - 1) {
@@ -246,7 +246,7 @@ const ImageGallery: React.FC = () => {
       setModalMediaUrl(media[currentIndex + 1].CreatedAssetUrl);
     }
   };
-  
+
   // Navigate to the previous item in the modal
   const handlePreviousInModal = () => {
     if (currentIndex > 0) {
@@ -254,7 +254,7 @@ const ImageGallery: React.FC = () => {
       setModalMediaUrl(media[currentIndex - 1].CreatedAssetUrl);
     }
   };
-  
+
   // Handle closing the modal
   const closeModal = () => {
     setIsModalOpen(false);
@@ -611,65 +611,81 @@ const ImageGallery: React.FC = () => {
         )}
 
         {/* Action icons bar under the image */}
-        <div className="flex justify-end items-center mt-4 mb-4 max-w-2xl mx-auto w-full">
-          <div className="flex items-center space-x-4">
-            {/* Download button */}
-            <button
-              onClick={() => handleDownload(url, isVideo)}
-              className="text-gray-500 hover:text-gray-700 p-1"
-              title="Download"
-            >
-              <FaDownload className="text-lg" />
-            </button>
-
-            {/* Open in full screen modal button */}
-            <button
-              onClick={() => openModal(url, true)}
-              className="text-gray-500 hover:text-gray-700 p-1"
-              title="View in Full Screen"
-            >
-              <FaExternalLinkAlt className="text-lg" />
-            </button>
-
-            {/* Like/Heart button - always show likes count */}
-            {mediaItem.id && (
-              <button
-                onClick={() => handleToggleLike(mediaItem)}
-                disabled={isLiking}
-                className={`flex items-center gap-1 p-1 ${
-                  assetLikes[mediaItem.id]?.isLiked
-                    ? 'text-red-500 hover:text-red-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                title={
-                  userId
-                    ? assetLikes[mediaItem.id]?.isLiked
-                      ? 'Unlike'
-                      : 'Like'
-                    : 'Sign in to like'
-                }
-              >
-                <span className="text-sm font-medium mr-1">
-                  {assetLikes[mediaItem.id]?.likesCount || 0}
-                </span>
-                <FaHeart
-                  className={`text-lg ${isLiking ? 'animate-pulse' : ''}`}
-                />
-              </button>
-            )}
-
-            {/* Share button - new button for copying shareable URL */}
+        <div className="mt-4 mb-3 max-w-2xl mx-auto w-full">
+          <div className="flex justify-between items-center">
+            {/* Share message - clickable with same functionality as share button */}
             {mediaItem.id && (
               <button
                 onClick={() => handleShareUrl(mediaItem)}
-                className="text-gray-500 hover:text-gray-700 p-1"
-                title="Copy shareable link"
+                className="text-xs hover:text-slate-900 dark:hover:text-white transition-colors flex items-center cursor-pointer"
+                title="Share this creation"
               >
-                <FaShare className="text-lg" />
+                <FaShare className="inline mr-1 text-xs" />
+                Share and ask friends to{' '}
+                <FaHeart className="inline mx-1 text-xs text-red-500" /> your
+                creations
               </button>
             )}
 
-            <div>Share with your friends and ask them to heart your image!</div>
+            <div className="flex items-center space-x-3">
+              {/* Download button */}
+              <button
+                onClick={() => handleDownload(url, isVideo)}
+                className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                title="Download"
+              >
+                <FaDownload className="text-sm md:text-base" />
+              </button>
+
+              {/* Open in full screen modal button */}
+              <button
+                onClick={() => openModal(url, true)}
+                className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                title="View in Full Screen"
+              >
+                <FaExternalLinkAlt className="text-sm md:text-base" />
+              </button>
+
+              {/* Like/Heart button - always show likes count */}
+              {mediaItem.id && (
+                <button
+                  onClick={() => handleToggleLike(mediaItem)}
+                  disabled={isLiking}
+                  className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${
+                    assetLikes[mediaItem.id]?.isLiked
+                      ? 'text-red-500'
+                      : 'text-white'
+                  } focus:outline-none transition-all shadow-md flex items-center`}
+                  title={
+                    userId
+                      ? assetLikes[mediaItem.id]?.isLiked
+                        ? 'Unlike'
+                        : 'Like'
+                      : 'Sign in to like'
+                  }
+                >
+                  {assetLikes[mediaItem.id]?.likesCount > 0 && (
+                    <span className="mr-1 text-xs font-medium">
+                      {assetLikes[mediaItem.id]?.likesCount}
+                    </span>
+                  )}
+                  <FaHeart
+                    className={`text-sm md:text-base ${isLiking ? 'animate-pulse' : ''}`}
+                  />
+                </button>
+              )}
+
+              {/* Share button - new button for copying shareable URL */}
+              {mediaItem.id && (
+                <button
+                  onClick={() => handleShareUrl(mediaItem)}
+                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Copy shareable link"
+                >
+                  <FaShare className="text-sm md:text-base" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -842,24 +858,32 @@ const ImageGallery: React.FC = () => {
       )}
 
       {/* Add the Modal component for viewing images with navigation, like, and share functionality */}
-      {isModalOpen && media.length > 0 && 
-        <Modal 
-          mediaUrl={modalMediaUrl} 
-          onClose={closeModal} 
+      {isModalOpen && media.length > 0 && (
+        <Modal
+          mediaUrl={modalMediaUrl}
+          onClose={closeModal}
           fullScreen={isFullScreenModal}
           onNext={handleNextInModal}
           onPrevious={handlePreviousInModal}
           hasNext={currentIndex < media.length - 1}
           hasPrevious={currentIndex > 0}
           onLike={() => handleToggleLike(media[currentIndex])}
-          isLiked={media[currentIndex].id ? assetLikes[media[currentIndex].id]?.isLiked : false}
-          likesCount={media[currentIndex].id ? assetLikes[media[currentIndex].id]?.likesCount || 0 : 0}
+          isLiked={
+            media[currentIndex].id
+              ? assetLikes[media[currentIndex].id]?.isLiked
+              : false
+          }
+          likesCount={
+            media[currentIndex].id
+              ? assetLikes[media[currentIndex].id]?.likesCount || 0
+              : 0
+          }
           showLikeButton={true}
           currentItemId={media[currentIndex].id}
           onShare={() => handleShareUrl(media[currentIndex])}
           showShareButton={true}
         />
-      }
+      )}
     </div>
   );
 };

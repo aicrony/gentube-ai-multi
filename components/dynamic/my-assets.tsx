@@ -350,7 +350,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const togglePrompt = (index: number) => {
     setExpandedPrompts((prev) => ({ ...prev, [index]: !prev[index] }));
   };
-  
+
   // Handle sharing an asset URL
   const handleShareUrl = (activity: UserActivity) => {
     if (!activity.id) {
@@ -629,7 +629,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const openModalForAsset = (index: number, fullScreen = false) => {
     if (index >= 0 && index < filteredAndSortedActivities.length) {
       const activity = filteredAndSortedActivities[index];
-      const url = activity.AssetType === 'vid' ? activity.CreatedAssetUrl : activity.CreatedAssetUrl;
+      const url =
+        activity.AssetType === 'vid'
+          ? activity.CreatedAssetUrl
+          : activity.CreatedAssetUrl;
       setCurrentModalIndex(index);
       setModalMediaUrl(url);
       setIsModalOpen(true);
@@ -641,9 +644,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const openModal = (url: string, fullScreen = false) => {
     // Find the index of the asset with this URL
     const index = filteredAndSortedActivities.findIndex(
-      activity => activity.CreatedAssetUrl === url || activity.AssetSource === url
+      (activity) =>
+        activity.CreatedAssetUrl === url || activity.AssetSource === url
     );
-    
+
     if (index !== -1) {
       openModalForAsset(index, fullScreen);
     } else {
@@ -658,7 +662,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleNextInModal = () => {
     if (currentModalIndex < filteredAndSortedActivities.length - 1) {
       const nextActivity = filteredAndSortedActivities[currentModalIndex + 1];
-      const url = nextActivity.AssetType === 'vid' ? nextActivity.CreatedAssetUrl : nextActivity.CreatedAssetUrl;
+      const url =
+        nextActivity.AssetType === 'vid'
+          ? nextActivity.CreatedAssetUrl
+          : nextActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex + 1);
       setModalMediaUrl(url);
     }
@@ -667,7 +674,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handlePreviousInModal = () => {
     if (currentModalIndex > 0) {
       const prevActivity = filteredAndSortedActivities[currentModalIndex - 1];
-      const url = prevActivity.AssetType === 'vid' ? prevActivity.CreatedAssetUrl : prevActivity.CreatedAssetUrl;
+      const url =
+        prevActivity.AssetType === 'vid'
+          ? prevActivity.CreatedAssetUrl
+          : prevActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex - 1);
       setModalMediaUrl(url);
     }
@@ -677,7 +687,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setIsModalOpen(false);
     setModalMediaUrl('');
   };
-  
+
   // Add state to track whether modal should open in full screen mode
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
 
@@ -810,7 +820,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 className="p-2 rounded border"
                 style={{ borderColor: 'var(--border-color)' }}
               >
-                <option value="">All Types</option>
+                <option value=""></option>
                 <option value="img">Images</option>
                 <option value="vid">Videos</option>
                 <option value="que">In Queue</option>
@@ -903,11 +913,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
           {/* Reset Filters */}
           <div className="mt-4 flex justify-end">
-            <button
-              onClick={clearFilters}
-              className="text-sm"
-              style={{ color: 'var(--primary-color)' }}
-            >
+            <button onClick={clearFilters} className="text-sm">
               Reset All Filters
             </button>
           </div>
@@ -1156,11 +1162,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             <div className="flex justify-center md:justify-start">
               <div className="flex items-center space-x-3 md:space-x-2">
                 <button
-                  onClick={() => openModal(activity.CreatedAssetUrl, true)} 
-                  className="icon-size"
+                  onClick={() => openModal(activity.CreatedAssetUrl, true)}
+                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Open in Full Screen"
                 >
-                  <FaExternalLinkAlt />
+                  <FaExternalLinkAlt className="text-sm" />
                 </button>
                 <button
                   onClick={() =>
@@ -1171,20 +1177,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                       'Image URL copied!'
                     )
                   }
-                  className="icon-size"
+                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Copy Image URL"
                 >
-                  <FaImage />
+                  <FaImage className="text-sm" />
                 </button>
                 {activity.AssetType === 'vid' && (
                   <button
                     onClick={() =>
                       handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
                     }
-                    className="icon-size"
+                    className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                     title="Copy Video URL"
                   >
-                    <FaVideo />
+                    <FaVideo className="text-sm" />
                   </button>
                 )}
                 <button
@@ -1196,26 +1202,28 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                       activity.AssetType
                     )
                   }
-                  className="icon-size"
+                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Download Asset"
                 >
-                  <FaDownload />
+                  <FaDownload className="text-sm" />
                 </button>
                 {/* Heart/Like button */}
                 {activity.AssetType !== 'upl' && activity.id && (
                   <button
                     onClick={() => handleToggleLike(activity)}
-                    className={`icon-size ${assetLikes[activity.id]?.isLiked ? 'text-red-500' : ''}`}
+                    className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${
+                      assetLikes[activity.id]?.isLiked
+                        ? 'text-red-500'
+                        : 'text-white'
+                    } focus:outline-none transition-all shadow-md flex items-center`}
                     title={assetLikes[activity.id]?.isLiked ? 'Unlike' : 'Like'}
                   >
-                    <div className="flex items-center">
-                      {assetLikes[activity.id]?.likesCount > 0 && (
-                        <span className="mr-1 text-xs">
-                          {assetLikes[activity.id]?.likesCount}
-                        </span>
-                      )}
-                      <FaHeart />
-                    </div>
+                    {assetLikes[activity.id]?.likesCount > 0 && (
+                      <span className="mr-1 text-xs font-medium">
+                        {assetLikes[activity.id]?.likesCount}
+                      </span>
+                    )}
+                    <FaHeart className="text-sm" />
                   </button>
                 )}
 
@@ -1223,7 +1231,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 {activity.AssetType !== 'upl' && (
                   <button
                     onClick={(e) => handleToggleGallery(activity, e)}
-                    className={`icon-size ${activity.isInGallery || activity.SubscriptionTier === 3 ? 'text-yellow-500' : ''} ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${
+                      activity.isInGallery || activity.SubscriptionTier === 3
+                        ? 'text-yellow-500'
+                        : 'text-white'
+                    } focus:outline-none transition-all shadow-md ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                     title={
                       activity.isInGallery || activity.SubscriptionTier === 3
                         ? 'Remove from Gallery'
@@ -1232,21 +1244,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     disabled={galleryActionAssetId !== null} // Disable all gallery buttons while any operation is in progress
                   >
                     <FaStar
-                      className={
+                      className={`text-sm ${
                         galleryActionAssetId === activity.id
                           ? 'animate-pulse'
                           : ''
-                      }
+                      }`}
                     />
                   </button>
                 )}
 
                 <button
                   onClick={() => handleDelete(activity)}
-                  className="red icon-size"
+                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Delete Asset"
                 >
-                  <FaTrash />
+                  <FaTrash className="text-sm" />
                 </button>
               </div>
             </div>
@@ -1265,10 +1277,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             Load More
           </button>
         )}
-      {isModalOpen && filteredAndSortedActivities.length > 0 && 
-        <Modal 
-          mediaUrl={modalMediaUrl} 
-          onClose={closeModal} 
+      {isModalOpen && filteredAndSortedActivities.length > 0 && (
+        <Modal
+          mediaUrl={modalMediaUrl}
+          onClose={closeModal}
           fullScreen={isFullScreenModal}
           onNext={handleNextInModal}
           onPrevious={handlePreviousInModal}
@@ -1281,21 +1293,27 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             }
           }}
           isLiked={
-            filteredAndSortedActivities[currentModalIndex]?.id 
-              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]?.isLiked 
+            filteredAndSortedActivities[currentModalIndex]?.id
+              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]
+                  ?.isLiked
               : false
           }
           likesCount={
-            filteredAndSortedActivities[currentModalIndex]?.id 
-              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]?.likesCount || 0 
+            filteredAndSortedActivities[currentModalIndex]?.id
+              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]
+                  ?.likesCount || 0
               : 0
           }
-          showLikeButton={filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'}
+          showLikeButton={
+            filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
+          }
           currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
-          onShare={() => handleShareUrl(filteredAndSortedActivities[currentModalIndex])}
+          onShare={() =>
+            handleShareUrl(filteredAndSortedActivities[currentModalIndex])
+          }
           showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
         />
-      }
+      )}
     </div>
   );
 };
