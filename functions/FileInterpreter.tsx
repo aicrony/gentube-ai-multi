@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { UploadImageDynamicButton } from '@/components/dynamic/upload-image-event';
-import { useUserId } from '@/context/UserIdContext';
 import { fileTypeFromBuffer } from 'file-type';
 
 interface FileInterpreterProps {

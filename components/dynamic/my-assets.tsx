@@ -611,15 +611,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
-  const openModal = (url: string) => {
+  const openModal = (url: string, fullScreen = false) => {
     setModalMediaUrl(url);
     setIsModalOpen(true);
+    // The fullScreen parameter will be passed to the Modal component
+    setIsFullScreenModal(fullScreen);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
   };
+  
+  // Add state to track whether modal should open in full screen mode
+  const [isFullScreenModal, setIsFullScreenModal] = useState(false);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -964,7 +969,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }
                 } else {
                   // Otherwise, open the modal as usual
-                  openModal(activity.CreatedAssetUrl);
+                  openModal(activity.CreatedAssetUrl, false); // Regular size initially
                 }
               }}
             >
@@ -1096,9 +1101,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             <div className="flex justify-center md:justify-start">
               <div className="flex items-center space-x-3 md:space-x-2">
                 <button
-                  onClick={() => openModal(activity.CreatedAssetUrl)}
+                  onClick={() => openModal(activity.CreatedAssetUrl, true)} 
                   className="icon-size"
-                  title="Open"
+                  title="Open in Full Screen"
                 >
                   <FaExternalLinkAlt />
                 </button>
@@ -1205,7 +1210,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             Load More
           </button>
         )}
-      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} />}
+      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} fullScreen={isFullScreenModal} />}
     </div>
   );
 };

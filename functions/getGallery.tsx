@@ -15,6 +15,7 @@ import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import { useRouter } from 'next/navigation';
 import MyAssets from '@/components/dynamic/my-assets';
+import Modal from '@/components/ui/Modal';
 
 interface GalleryItem {
   id?: string;
@@ -42,6 +43,9 @@ const ImageGallery: React.FC = () => {
   }>({});
   const [isLiking, setIsLiking] = useState(false);
   const [isRefreshingGallery, setIsRefreshingGallery] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMediaUrl, setModalMediaUrl] = useState('');
+  const [isFullScreenModal, setIsFullScreenModal] = useState(false);
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -207,8 +211,19 @@ const ImageGallery: React.FC = () => {
     );
   };
 
-  const handleExternalLink = (url: string) => {
-    window.open(url, '_blank');
+  // We're using openModal directly now for both normal and fullscreen views
+  
+  // Handle opening the modal with the media URL
+  const openModal = (url: string, fullScreen = false) => {
+    setModalMediaUrl(url);
+    setIsModalOpen(true);
+    setIsFullScreenModal(fullScreen);
+  };
+  
+  // Handle closing the modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalMediaUrl('');
   };
 
   // Handle downloading the current media
@@ -520,6 +535,7 @@ const ImageGallery: React.FC = () => {
               autoPlay
               preload="auto"
               className="w-full cursor-pointer md:w-full max-w-2xl mx-auto"
+              onClick={() => openModal(url, false)}
               onLoadStart={() => console.log(`Started loading video: ${url}`)}
               onLoadedData={() =>
                 console.log(`Video loaded and cached: ${url}`)
@@ -554,6 +570,7 @@ const ImageGallery: React.FC = () => {
             loading="eager"
             decoding="async"
             className="w-full cursor-pointer md:w-full max-w-2xl mx-auto"
+            onClick={() => openModal(url, false)}
             onLoad={() => console.log(`Image loaded and cached: ${url}`)}
           />
         )}
@@ -570,11 +587,11 @@ const ImageGallery: React.FC = () => {
               <FaDownload className="text-lg" />
             </button>
 
-            {/* Open in new tab button */}
+            {/* Open in full screen modal button */}
             <button
-              onClick={() => handleExternalLink(url)}
+              onClick={() => openModal(url, true)}
               className="text-gray-500 hover:text-gray-700 p-1"
-              title="Open in new tab"
+              title="View in Full Screen"
             >
               <FaExternalLinkAlt className="text-lg" />
             </button>
@@ -788,6 +805,9 @@ const ImageGallery: React.FC = () => {
           <MyAssets autoRefreshQueued={true} />
         </div>
       )}
+
+      {/* Add the Modal component for viewing images in full size */}
+      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} fullScreen={isFullScreenModal} />}
     </div>
   );
 };

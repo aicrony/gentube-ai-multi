@@ -1,34 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { FaExpand, FaCompress, FaDownload } from 'react-icons/fa';
 
 interface ModalProps {
   mediaUrl: string;
   onClose: () => void;
+  fullScreen?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ mediaUrl, onClose }) => {
+const Modal: React.FC<ModalProps> = ({ mediaUrl, onClose, fullScreen = false }) => {
+  const [isFullScreen, setIsFullScreen] = useState(fullScreen);
+  
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+  
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
+  
+  const handleDownload = async () => {
+    try {
+      // Determine file extension based on media type
+      const isVideo = mediaUrl.endsWith('.mp4');
+      const fileExtension = isVideo ? '.mp4' : '.jpg';
+      const fileName = `gentube-download${fileExtension}`;
 
+      // Fetch the file as a blob
+      const response = await fetch(mediaUrl);
+      const blob = await response.blob();
+
+      // Create an object URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+
+      // Append to the document, click, and remove
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error downloading media:', error);
+      alert('Failed to download the media');
+    }
+  };
+
+  const isVideo = mediaUrl.endsWith('.mp4');
+  
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50"
       onClick={handleBackgroundClick}
     >
-      <div className="bg-white p-4 rounded shadow-lg max-w-3xl w-full relative">
-        <button
-          onClick={onClose}
-          className="absolute top-0 right-0 text-gray-500 hover:text-gray-700 text-2xl"
-        >
-          &times;
-        </button>
-        <div className="flex justify-center">
-          {mediaUrl.endsWith('.mp4') ? (
-            <video src={mediaUrl} controls className="max-w-full h-auto" />
+      <div 
+        className={`${
+          isFullScreen 
+            ? 'fixed inset-0 m-0 p-0 bg-black' 
+            : 'bg-white p-4 rounded shadow-lg max-w-5xl w-11/12 relative'
+        }`}
+      >
+        <div className="absolute top-2 right-2 flex space-x-2 z-10">
+          <button
+            onClick={handleDownload}
+            className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+            title="Download media"
+          >
+            <FaDownload />
+          </button>
+          <button
+            onClick={toggleFullScreen}
+            className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+            title={isFullScreen ? "Exit full screen" : "Full screen"}
+          >
+            {isFullScreen ? <FaCompress /> : <FaExpand />}
+          </button>
+          <button
+            onClick={onClose}
+            className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md text-2xl font-bold"
+            title="Close"
+          >
+            ×
+          </button>
+        </div>
+        
+        <div className={`flex justify-center items-center ${isFullScreen ? 'h-screen' : ''}`}>
+          {isVideo ? (
+            <video 
+              src={mediaUrl} 
+              controls 
+              autoPlay 
+              className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain`}
+              style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
+            />
           ) : (
-            <img src={mediaUrl} alt="Media" className="max-w-full h-auto" />
+            <img 
+              src={mediaUrl} 
+              alt="Media" 
+              className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
+              style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
+            />
           )}
         </div>
       </div>
