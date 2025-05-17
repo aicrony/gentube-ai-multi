@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
-import { FaExpand, FaCompress, FaDownload } from 'react-icons/fa';
+import { FaExpand, FaCompress, FaDownload, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface ModalProps {
   mediaUrl: string;
   onClose: () => void;
   fullScreen?: boolean;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  hasNext?: boolean;
+  hasPrevious?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ mediaUrl, onClose, fullScreen = false }) => {
+const Modal: React.FC<ModalProps> = ({ 
+  mediaUrl, 
+  onClose, 
+  fullScreen = false,
+  onNext,
+  onPrevious,
+  hasNext = false,
+  hasPrevious = false
+}) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -90,22 +102,53 @@ const Modal: React.FC<ModalProps> = ({ mediaUrl, onClose, fullScreen = false }) 
           </button>
         </div>
         
-        <div className={`flex justify-center items-center ${isFullScreen ? 'h-screen' : ''}`}>
-          {isVideo ? (
-            <video 
-              src={mediaUrl} 
-              controls 
-              autoPlay 
-              className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain`}
-              style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
-            />
-          ) : (
-            <img 
-              src={mediaUrl} 
-              alt="Media" 
-              className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
-              style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
-            />
+        <div className={`flex justify-center items-center ${isFullScreen ? 'h-screen' : ''} relative w-full`}>
+          {/* Previous button */}
+          {hasPrevious && onPrevious && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrevious();
+              }}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-20"
+              title="Previous"
+            >
+              <FaChevronLeft size={24} />
+            </button>
+          )}
+          
+          {/* Media content */}
+          <div className="flex justify-center items-center max-w-full">
+            {isVideo ? (
+              <video 
+                src={mediaUrl} 
+                controls 
+                autoPlay 
+                className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain`}
+                style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
+              />
+            ) : (
+              <img 
+                src={mediaUrl} 
+                alt="Media" 
+                className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
+                style={{boxShadow: "0 0 8px rgba(0, 0, 0, 0.3)"}}
+              />
+            )}
+          </div>
+          
+          {/* Next button */}
+          {hasNext && onNext && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onNext();
+              }}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-20"
+              title="Next"
+            >
+              <FaChevronRight size={24} />
+            </button>
           )}
         </div>
       </div>

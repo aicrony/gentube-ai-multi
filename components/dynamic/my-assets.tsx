@@ -61,6 +61,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
+  const [currentModalIndex, setCurrentModalIndex] = useState(0);
   const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(
     selectedUrl
   );
@@ -611,11 +612,52 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
+  // Enhanced modal open function that takes index and activity reference
+  const openModalForAsset = (index: number, fullScreen = false) => {
+    if (index >= 0 && index < filteredAndSortedActivities.length) {
+      const activity = filteredAndSortedActivities[index];
+      const url = activity.AssetType === 'vid' ? activity.CreatedAssetUrl : activity.CreatedAssetUrl;
+      setCurrentModalIndex(index);
+      setModalMediaUrl(url);
+      setIsModalOpen(true);
+      setIsFullScreenModal(fullScreen);
+    }
+  };
+
+  // Original function for backward compatibility - opens the modal by URL
   const openModal = (url: string, fullScreen = false) => {
-    setModalMediaUrl(url);
-    setIsModalOpen(true);
-    // The fullScreen parameter will be passed to the Modal component
-    setIsFullScreenModal(fullScreen);
+    // Find the index of the asset with this URL
+    const index = filteredAndSortedActivities.findIndex(
+      activity => activity.CreatedAssetUrl === url || activity.AssetSource === url
+    );
+    
+    if (index !== -1) {
+      openModalForAsset(index, fullScreen);
+    } else {
+      // Fallback if no matching asset found
+      setModalMediaUrl(url);
+      setIsModalOpen(true);
+      setIsFullScreenModal(fullScreen);
+    }
+  };
+
+  // Navigation functions for modal
+  const handleNextInModal = () => {
+    if (currentModalIndex < filteredAndSortedActivities.length - 1) {
+      const nextActivity = filteredAndSortedActivities[currentModalIndex + 1];
+      const url = nextActivity.AssetType === 'vid' ? nextActivity.CreatedAssetUrl : nextActivity.CreatedAssetUrl;
+      setCurrentModalIndex(currentModalIndex + 1);
+      setModalMediaUrl(url);
+    }
+  };
+
+  const handlePreviousInModal = () => {
+    if (currentModalIndex > 0) {
+      const prevActivity = filteredAndSortedActivities[currentModalIndex - 1];
+      const url = prevActivity.AssetType === 'vid' ? prevActivity.CreatedAssetUrl : prevActivity.CreatedAssetUrl;
+      setCurrentModalIndex(currentModalIndex - 1);
+      setModalMediaUrl(url);
+    }
   };
 
   const closeModal = () => {
@@ -1210,7 +1252,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             Load More
           </button>
         )}
-      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} fullScreen={isFullScreenModal} />}
+      {isModalOpen && 
+        <Modal 
+          mediaUrl={modalMediaUrl} 
+          onClose={closeModal} 
+          fullScreen={isFullScreenModal}
+          onNext={handleNextInModal}
+          onPrevious={handlePreviousInModal}
+          hasNext={currentModalIndex < filteredAndSortedActivities.length - 1}
+          hasPrevious={currentModalIndex > 0}
+        />
+      }
     </div>
   );
 };

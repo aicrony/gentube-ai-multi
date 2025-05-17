@@ -214,10 +214,45 @@ const ImageGallery: React.FC = () => {
   // We're using openModal directly now for both normal and fullscreen views
   
   // Handle opening the modal with the media URL
+  // Enhanced modal open function that takes a media item index
+  const openModalForItem = (index: number, fullScreen = false) => {
+    const item = media[index];
+    if (item) {
+      setCurrentIndex(index); // Update the current index to the displayed item
+      setModalMediaUrl(item.CreatedAssetUrl);
+      setIsModalOpen(true);
+      setIsFullScreenModal(fullScreen);
+    }
+  };
+  
+  // Original function for backward compatibility - opens the modal for a URL
   const openModal = (url: string, fullScreen = false) => {
-    setModalMediaUrl(url);
-    setIsModalOpen(true);
-    setIsFullScreenModal(fullScreen);
+    // Find the index of the media item with this URL
+    const index = media.findIndex(item => item.CreatedAssetUrl === url);
+    if (index !== -1) {
+      openModalForItem(index, fullScreen);
+    } else {
+      // Fallback if the URL is not found in the media array
+      setModalMediaUrl(url);
+      setIsModalOpen(true);
+      setIsFullScreenModal(fullScreen);
+    }
+  };
+  
+  // Navigate to the next item in the modal
+  const handleNextInModal = () => {
+    if (currentIndex < media.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setModalMediaUrl(media[currentIndex + 1].CreatedAssetUrl);
+    }
+  };
+  
+  // Navigate to the previous item in the modal
+  const handlePreviousInModal = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setModalMediaUrl(media[currentIndex - 1].CreatedAssetUrl);
+    }
   };
   
   // Handle closing the modal
@@ -806,8 +841,18 @@ const ImageGallery: React.FC = () => {
         </div>
       )}
 
-      {/* Add the Modal component for viewing images in full size */}
-      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} fullScreen={isFullScreenModal} />}
+      {/* Add the Modal component for viewing images with navigation */}
+      {isModalOpen && 
+        <Modal 
+          mediaUrl={modalMediaUrl} 
+          onClose={closeModal} 
+          fullScreen={isFullScreenModal}
+          onNext={handleNextInModal}
+          onPrevious={handlePreviousInModal}
+          hasNext={currentIndex < media.length - 1}
+          hasPrevious={currentIndex > 0}
+        />
+      }
     </div>
   );
 };
