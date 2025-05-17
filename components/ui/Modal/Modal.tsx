@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaExpand, FaCompress, FaDownload, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaExpand, FaCompress, FaDownload, FaChevronLeft, FaChevronRight, FaHeart, FaShare } from 'react-icons/fa';
 
 interface ModalProps {
   mediaUrl: string;
@@ -9,6 +9,13 @@ interface ModalProps {
   onPrevious?: () => void;
   hasNext?: boolean;
   hasPrevious?: boolean;
+  onLike?: () => void;
+  isLiked?: boolean;
+  likesCount?: number;
+  showLikeButton?: boolean;
+  currentItemId?: string;
+  onShare?: () => void;
+  showShareButton?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({ 
@@ -18,7 +25,14 @@ const Modal: React.FC<ModalProps> = ({
   onNext,
   onPrevious,
   hasNext = false,
-  hasPrevious = false
+  hasPrevious = false,
+  onLike,
+  isLiked = false,
+  likesCount = 0,
+  showLikeButton = false,
+  currentItemId,
+  onShare,
+  showShareButton = false
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   
@@ -79,6 +93,7 @@ const Modal: React.FC<ModalProps> = ({
         }`}
       >
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
+          {/* Download button */}
           <button
             onClick={handleDownload}
             className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
@@ -86,6 +101,39 @@ const Modal: React.FC<ModalProps> = ({
           >
             <FaDownload />
           </button>
+          
+          {/* Like/Heart button - only shown if the feature is enabled */}
+          {showLikeButton && onLike && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onLike) onLike();
+              }}
+              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${isLiked ? 'text-red-500' : 'text-white'} focus:outline-none transition-all shadow-md flex items-center`}
+              title={isLiked ? "Unlike" : "Like"}
+            >
+              {likesCount > 0 && (
+                <span className="mr-1 text-xs font-medium">{likesCount}</span>
+              )}
+              <FaHeart />
+            </button>
+          )}
+          
+          {/* Share button - only shown if the feature is enabled */}
+          {showShareButton && onShare && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onShare) onShare();
+              }}
+              className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+              title="Share"
+            >
+              <FaShare />
+            </button>
+          )}
+          
+          {/* Fullscreen toggle button */}
           <button
             onClick={toggleFullScreen}
             className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
@@ -93,6 +141,8 @@ const Modal: React.FC<ModalProps> = ({
           >
             {isFullScreen ? <FaCompress /> : <FaExpand />}
           </button>
+          
+          {/* Close button */}
           <button
             onClick={onClose}
             className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md text-2xl font-bold"

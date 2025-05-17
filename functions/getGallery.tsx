@@ -841,8 +841,8 @@ const ImageGallery: React.FC = () => {
         </div>
       )}
 
-      {/* Add the Modal component for viewing images with navigation */}
-      {isModalOpen && 
+      {/* Add the Modal component for viewing images with navigation, like, and share functionality */}
+      {isModalOpen && media.length > 0 && 
         <Modal 
           mediaUrl={modalMediaUrl} 
           onClose={closeModal} 
@@ -851,6 +851,13 @@ const ImageGallery: React.FC = () => {
           onPrevious={handlePreviousInModal}
           hasNext={currentIndex < media.length - 1}
           hasPrevious={currentIndex > 0}
+          onLike={() => handleToggleLike(media[currentIndex])}
+          isLiked={media[currentIndex].id ? assetLikes[media[currentIndex].id]?.isLiked : false}
+          likesCount={media[currentIndex].id ? assetLikes[media[currentIndex].id]?.likesCount || 0 : 0}
+          showLikeButton={true}
+          currentItemId={media[currentIndex].id}
+          onShare={() => handleShareUrl(media[currentIndex])}
+          showShareButton={true}
         />
       }
     </div>

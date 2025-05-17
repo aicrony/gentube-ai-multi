@@ -350,6 +350,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const togglePrompt = (index: number) => {
     setExpandedPrompts((prev) => ({ ...prev, [index]: !prev[index] }));
   };
+  
+  // Handle sharing an asset URL
+  const handleShareUrl = (activity: UserActivity) => {
+    if (!activity.id) {
+      return;
+    }
+
+    // Create a URL that links directly to the gallery with this item
+    const shareUrl = `${window.location.origin}/gallery?id=${activity.id}`;
+
+    // Copy to clipboard with a custom message
+    handleCopy(shareUrl, 'Share URL copied to clipboard!');
+  };
 
   const handleRefresh = () => {
     setLoading(true);
@@ -1252,7 +1265,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             Load More
           </button>
         )}
-      {isModalOpen && 
+      {isModalOpen && filteredAndSortedActivities.length > 0 && 
         <Modal 
           mediaUrl={modalMediaUrl} 
           onClose={closeModal} 
@@ -1261,6 +1274,26 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onPrevious={handlePreviousInModal}
           hasNext={currentModalIndex < filteredAndSortedActivities.length - 1}
           hasPrevious={currentModalIndex > 0}
+          onLike={() => {
+            const activity = filteredAndSortedActivities[currentModalIndex];
+            if (activity && activity.id) {
+              handleToggleLike(activity);
+            }
+          }}
+          isLiked={
+            filteredAndSortedActivities[currentModalIndex]?.id 
+              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]?.isLiked 
+              : false
+          }
+          likesCount={
+            filteredAndSortedActivities[currentModalIndex]?.id 
+              ? assetLikes[filteredAndSortedActivities[currentModalIndex].id]?.likesCount || 0 
+              : 0
+          }
+          showLikeButton={filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'}
+          currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
+          onShare={() => handleShareUrl(filteredAndSortedActivities[currentModalIndex])}
+          showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
         />
       }
     </div>
