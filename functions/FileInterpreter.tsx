@@ -74,7 +74,7 @@ const FileInterpreter: React.FC<FileInterpreterProps> = ({
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Upload Image (for AI Video)</h1>
       </div>
-      <p>Up to 7MB image:</p>
+      <p>Up to 4MB image:</p>
       <input type="file" onChange={handleFileChange} />
       {base64Data && (
         <div className="flex flex-col items-center">
