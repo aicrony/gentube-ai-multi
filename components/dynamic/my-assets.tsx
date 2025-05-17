@@ -949,6 +949,45 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }
                   alt="Thumbnail"
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    if (activity.AssetType === 'vid') {
+                      // Hide the broken image
+                      e.currentTarget.style.display = 'none';
+                      // Create play icon with label - using the same icon as for AssetSource === 'none'
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        const playIcon = document.createElement('div');
+                        playIcon.className = 'w-full h-full flex flex-col items-center justify-center';
+                        
+                        // Create the FaPlay icon element
+                        const iconElement = document.createElement('div');
+                        iconElement.className = 'w-8 h-8 text-gray-500';
+                        
+                        // Use the same icon component styling as above
+                        const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svgIcon.setAttribute('fill', 'currentColor');
+                        svgIcon.setAttribute('viewBox', '0 0 448 512');
+                        svgIcon.setAttribute('class', 'w-8 h-8');
+                        
+                        // This is the path data for FaPlay from react-icons
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
+                        
+                        svgIcon.appendChild(path);
+                        iconElement.appendChild(svgIcon);
+                        
+                        // Add text 
+                        const textElement = document.createElement('div');
+                        textElement.className = 'mt-2 text-gray-500';
+                        textElement.textContent = 'Video';
+                        
+                        // Assemble the complete element
+                        playIcon.appendChild(iconElement);
+                        playIcon.appendChild(textElement);
+                        container.appendChild(playIcon);
+                      }
+                    }
+                  }}
                 />
               )}
             </div>
