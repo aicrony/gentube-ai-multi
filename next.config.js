@@ -56,7 +56,7 @@ module.exports = {
   api: {
     // Configure the body parser for API routes
     bodyParser: {
-      sizeLimit: '7mb'
+      sizeLimit: '12mb'
     },
     // Enable response compression
     responseLimit: false
