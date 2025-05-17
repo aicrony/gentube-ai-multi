@@ -51,43 +51,93 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
       const base64data = reader.result?.toString().split(',')[1];
       if (base64data) {
         try {
-          // Call the API endpoint to upload the image with proper authentication headers
-          const response = await fetch('/api/uploadImage', {
+          // For larger files, we'll use a two-step approach:
+          // 1. Get a signed URL from our backend
+          // 2. Upload directly to Google Cloud Storage using that URL
+          
+          // First get a signed upload URL from our backend
+          const getSignedUrlResponse = await fetch('/api/getSignedUploadUrl', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'x-user-id': userId || 'none',
-              'x-forwarded-for': '127.0.0.1' // This would be handled by the server in production
+              'x-forwarded-for': '127.0.0.1'
             },
             body: JSON.stringify({
-              image: base64data
+              contentType: file.type,
+              fileName: file.name
             })
           });
-
-          // Handle 413 Payload Too Large specifically before other errors
-          if (response.status === 413) {
-            setUploadError('File size too large. Please upload a smaller image (less than 10MB).');
+          
+          if (!getSignedUrlResponse.ok) {
+            // Handle 413 Payload Too Large specifically before other errors
+            if (getSignedUrlResponse.status === 413) {
+              setUploadError('File size too large. Please upload a smaller image (less than 10MB).');
+              setIsUploading(false);
+              setPreviewImage(null);
+              return;
+            }
+            
+            // Use centralized error handler for other errors
+            if (await handleApiError(getSignedUrlResponse, { 
+              setErrorMessage: (msg) => setUploadError(msg) 
+            })) {
+              return; // Error was handled, exit the function
+            }
+          }
+          
+          const { signedUrl, finalUrl } = await getSignedUrlResponse.json();
+          
+          // Now upload directly to GCS using the signed URL
+          const fileBlob = new Blob([Buffer.from(base64data, 'base64')], { type: file.type });
+          
+          const uploadResponse = await fetch(signedUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': file.type
+            },
+            body: fileBlob
+          });
+          
+          if (!uploadResponse.ok) {
+            setUploadError('Failed to upload to storage. Please try again.');
             setIsUploading(false);
             setPreviewImage(null);
             return;
           }
           
-          // Use centralized error handler for other errors
-          if (await handleApiError(response, { 
-            setErrorMessage: (msg) => setUploadError(msg) 
-          })) {
-            return; // Error was handled, exit the function
+          // Now save the user activity by calling our API
+          const activityResponse = await fetch('/api/saveUploadActivity', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-user-id': userId || 'none',
+              'x-forwarded-for': '127.0.0.1'
+            },
+            body: JSON.stringify({
+              imageUrl: finalUrl
+            })
+          });
+          
+          if (!activityResponse.ok) {
+            if (await handleApiError(activityResponse, { 
+              setErrorMessage: (msg) => setUploadError(msg) 
+            })) {
+              return; // Error was handled, exit the function
+            }
           }
-
-          const data = await response.json();
-          console.log(`File uploaded to GCS: ${data.url}`);
+          
+          const data = await activityResponse.json();
+          console.log(`File uploaded to GCS: ${finalUrl}`);
           
           // Set success state
           setUploadSuccess(true);
           
           // Call the callback with the image URL if provided
-          if (onImageUploaded && data.url) {
-            onImageUploaded(data.url);
+          if (onImageUploaded) {
+            // Use the URL from the response if available, otherwise use the finalUrl
+            const imageUrl = data.url || finalUrl;
+            onImageUploaded(imageUrl);
           }
         } catch (error) {
           console.error('Error uploading file:', error);
