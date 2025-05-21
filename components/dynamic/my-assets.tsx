@@ -682,6 +682,33 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
     }
   };
+  
+  // Jump to first image in slideshow mode (for infinite looping)
+  const handleJumpToFirstImage = () => {
+    if (filteredAndSortedActivities.length > 0) {
+      const firstActivity = filteredAndSortedActivities[0];
+      const url =
+        firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
+      setCurrentModalIndex(0);
+      setModalMediaUrl(url);
+    }
+  };
+  
+  // Jump to last image in slideshow mode (for infinite looping)
+  const handleJumpToLastImage = () => {
+    if (filteredAndSortedActivities.length > 0) {
+      const lastIndex = filteredAndSortedActivities.length - 1;
+      const lastActivity = filteredAndSortedActivities[lastIndex];
+      const url =
+        lastActivity.AssetType === 'vid'
+          ? lastActivity.CreatedAssetUrl
+          : lastActivity.CreatedAssetUrl;
+      setCurrentModalIndex(lastIndex);
+      setModalMediaUrl(url);
+    }
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -1312,6 +1339,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             handleShareUrl(filteredAndSortedActivities[currentModalIndex])
           }
           showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
+          onJumpToFirst={handleJumpToFirstImage}
+          onJumpToLast={handleJumpToLastImage}
         />
       )}
     </div>

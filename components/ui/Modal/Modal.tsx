@@ -27,6 +27,8 @@ interface ModalProps {
   currentItemId?: string;
   onShare?: () => void;
   showShareButton?: boolean;
+  onJumpToFirst?: () => void;
+  onJumpToLast?: () => void;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -43,7 +45,9 @@ const Modal: React.FC<ModalProps> = ({
   showLikeButton = false,
   currentItemId,
   onShare,
-  showShareButton = false
+  showShareButton = false,
+  onJumpToFirst,
+  onJumpToLast
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -52,6 +56,7 @@ const Modal: React.FC<ModalProps> = ({
     'forward'
   );
   const [showSettings, setShowSettings] = useState(false);
+  const [infiniteLoop, setInfiniteLoop] = useState(false); // Add state for infinite loop
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Start slideshow
@@ -64,16 +69,35 @@ const Modal: React.FC<ModalProps> = ({
 
       // Set new timer
       slideshowTimerRef.current = setInterval(() => {
-        if (slideDirection === 'forward' && hasNext && onNext) {
-          onNext();
-        } else if (slideDirection === 'backward' && hasPrevious && onPrevious) {
-          onPrevious();
-        } else if (slideDirection === 'forward' && !hasNext) {
-          // Stop slideshow when we reach the end
-          setIsSlideshow(false);
-        } else if (slideDirection === 'backward' && !hasPrevious) {
-          // Stop slideshow when we reach the beginning
-          setIsSlideshow(false);
+        // Forward direction logic
+        if (slideDirection === 'forward') {
+          if (hasNext && onNext) {
+            // Normal forward navigation
+            onNext();
+          } else if (!hasNext) {
+            if (infiniteLoop && onJumpToFirst) {
+              // We've reached the end, jump directly to first image
+              onJumpToFirst();
+            } else {
+              // Not in infinite loop mode, stop slideshow
+              setIsSlideshow(false);
+            }
+          }
+        } 
+        // Backward direction logic
+        else if (slideDirection === 'backward') {
+          if (hasPrevious && onPrevious) {
+            // Normal backward navigation
+            onPrevious();
+          } else if (!hasPrevious) {
+            if (infiniteLoop && onJumpToLast) {
+              // We've reached the beginning, jump directly to last image
+              onJumpToLast();
+            } else {
+              // Not in infinite loop mode, stop slideshow
+              setIsSlideshow(false);
+            }
+          }
         }
       }, slideInterval);
     }
@@ -91,7 +115,10 @@ const Modal: React.FC<ModalProps> = ({
     hasNext,
     hasPrevious,
     onNext,
-    onPrevious
+    onPrevious,
+    infiniteLoop,
+    onJumpToFirst,
+    onJumpToLast
   ]);
 
   // Stop slideshow when modal is closed
@@ -253,9 +280,9 @@ const Modal: React.FC<ModalProps> = ({
         {/* Slideshow settings panel */}
         {showSettings && (
           <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-64">
-            <h3 className="text-lg font-bold mb-4">Slideshow Settings</h3>
+            <h3 className="text-lg font-bold mb-1">Slideshow Settings</h3>
 
-            <div className="mb-4">
+            <div className="mb-2">
               <label className="block mb-2 text-sm">Interval (seconds)</label>
               <input
                 type="range"
@@ -275,8 +302,8 @@ const Modal: React.FC<ModalProps> = ({
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block mb-2 text-sm">Direction</label>
+            <div className="mb-2">
+              <label className="block mb-1 text-sm">Direction</label>
               <div className="flex justify-between">
                 <button
                   onClick={() => setSlideDirection('backward')}
@@ -290,6 +317,23 @@ const Modal: React.FC<ModalProps> = ({
                 >
                   Forward
                 </button>
+              </div>
+            </div>
+
+            {/* Infinite Loop Toggle */}
+            <div className="mb-1">
+              <div className="flex items-center justify-start">
+                <label className="text-sm pr-2">Infinite Loop</label>
+                <div
+                  className={`relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out rounded-full cursor-pointer ${infiniteLoop ? 'bg-blue-500' : 'bg-gray-600'}`}
+                  onClick={() => setInfiniteLoop(!infiniteLoop)}
+                >
+                  <span
+                    className={`absolute left-1 top-1 w-4 h-4 transition-transform duration-200 ease-in-out bg-white rounded-full transform ${
+                      infiniteLoop ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  ></span>
+                </div>
               </div>
             </div>
           </div>
