@@ -22,20 +22,19 @@ export default function InfoPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 items-center">
               <div>
-                <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+                <h2 className="text-3xl font-bold mb-6">Mission Statement</h2>
                 <p className="mb-4">
-                  At GenTube.ai, we're revolutionizing the way people create
-                  visual content by making AI-powered image and video generation
-                  accessible to everyone. Our mission is to empower creators,
-                  businesses, and individuals to bring their ideas to life
-                  without the need for complex technical skills or expensive
-                  production equipment.
+                  Gentube.ai’s mission is to deliver innovative AI-driven video
+                  solutions, empowering users to create, share, and monetize
+                  high-quality short films, commercials, and feature-length
+                  films with limitless creative potential.
                 </p>
-                <p>
-                  We believe that creativity shouldn't be limited by technical
-                  barriers or high costs. With our intuitive platform, you can
-                  transform simple text descriptions into stunning visuals and
-                  captivating videos in minutes.
+                <p className="mb-4">
+                  We will enable users to easily and quickly create engaging AI
+                  videos by utilizing the creative process of initially
+                  generating images that express your vision so that you can
+                  quickly and predictably generate videos at your highest
+                  creative potential with minimal effort.
                 </p>
               </div>
               <div

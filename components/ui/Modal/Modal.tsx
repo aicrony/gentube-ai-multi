@@ -9,7 +9,8 @@ import {
   FaShare,
   FaPlay,
   FaPause,
-  FaCog
+  FaCog,
+  FaCopy
 } from 'react-icons/fa';
 
 interface ModalProps {
@@ -29,6 +30,12 @@ interface ModalProps {
   showShareButton?: boolean;
   onJumpToFirst?: () => void;
   onJumpToLast?: () => void;
+  currentAssets?: string[];
+  onCreateSlideshow?: (settings: {
+    interval: number;
+    direction: 'forward' | 'backward';
+    infiniteLoop: boolean;
+  }) => Promise<{ success: boolean; shareUrl?: string; error?: string }>;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -47,7 +54,9 @@ const Modal: React.FC<ModalProps> = ({
   onShare,
   showShareButton = false,
   onJumpToFirst,
-  onJumpToLast
+  onJumpToLast,
+  currentAssets = [],
+  onCreateSlideshow
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -81,20 +90,27 @@ const Modal: React.FC<ModalProps> = ({
     const savedInterval = getFromLocalStorage('slideshowInterval', '5000');
     return parseInt(savedInterval, 10);
   });
-  
-  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>(() => {
-    // Get from localStorage or use default of 'forward'
-    return getFromLocalStorage('slideshowDirection', 'forward') === 'backward' 
-      ? 'backward' 
-      : 'forward';
-  });
-  
+
+  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>(
+    () => {
+      // Get from localStorage or use default of 'forward'
+      return getFromLocalStorage('slideshowDirection', 'forward') === 'backward'
+        ? 'backward'
+        : 'forward';
+    }
+  );
+
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const [infiniteLoop, setInfiniteLoop] = useState(() => {
     // Get from localStorage or use default of false
     return getFromLocalStorage('slideshowInfiniteLoop', 'false') === 'true';
   });
+
+  // States for slideshow sharing
+  const [isCreatingSlideshow, setIsCreatingSlideshow] = useState(false);
+  const [slideshowUrl, setSlideshowUrl] = useState('');
+  const [slideshowError, setSlideshowError] = useState('');
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Start slideshow
@@ -180,6 +196,57 @@ const Modal: React.FC<ModalProps> = ({
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
+  };
+
+  // Handle creating and sharing slideshow
+  const handleCreateSlideshow = async () => {
+    if (!onCreateSlideshow || currentAssets.length === 0) {
+      setSlideshowError('Cannot create slideshow with no assets');
+      return;
+    }
+
+    try {
+      setIsCreatingSlideshow(true);
+      setSlideshowError('');
+
+      const result = await onCreateSlideshow({
+        interval: slideInterval,
+        direction: slideDirection,
+        infiniteLoop
+      });
+
+      if (result.success && result.shareUrl) {
+        setSlideshowUrl(result.shareUrl);
+      } else {
+        setSlideshowError(result.error || 'Failed to create slideshow');
+      }
+    } catch (error) {
+      console.error('Error creating slideshow:', error);
+      setSlideshowError('An error occurred while creating the slideshow');
+    } finally {
+      setIsCreatingSlideshow(false);
+    }
+  };
+
+  // Handle copying slideshow URL to clipboard
+  const copyToClipboard = () => {
+    if (slideshowUrl) {
+      navigator.clipboard
+        .writeText(slideshowUrl)
+        .then(() => {
+          // Show temporary success message
+          const originalUrl = slideshowUrl;
+          setSlideshowUrl('Copied to clipboard!');
+
+          setTimeout(() => {
+            setSlideshowUrl(originalUrl);
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error('Failed to copy URL:', err);
+          setSlideshowError('Failed to copy URL to clipboard');
+        });
+    }
   };
 
   const handleDownload = async () => {
@@ -368,7 +435,7 @@ const Modal: React.FC<ModalProps> = ({
             </div>
 
             {/* Infinite Loop Toggle */}
-            <div className="mb-1">
+            <div className="mb-3">
               <div className="flex items-center justify-start">
                 <label className="text-sm pr-2">Infinite Loop</label>
                 <div
@@ -376,7 +443,10 @@ const Modal: React.FC<ModalProps> = ({
                   onClick={() => {
                     const newValue = !infiniteLoop;
                     setInfiniteLoop(newValue);
-                    saveToLocalStorage('slideshowInfiniteLoop', newValue.toString());
+                    saveToLocalStorage(
+                      'slideshowInfiniteLoop',
+                      newValue.toString()
+                    );
                   }}
                 >
                   <span
@@ -387,6 +457,49 @@ const Modal: React.FC<ModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Share Slideshow */}
+            {onCreateSlideshow && (
+              <div className="mt-4 border-t border-gray-600 pt-4">
+                <h4 className="text-md font-bold mb-3">Sharing</h4>
+
+                {!slideshowUrl ? (
+                  <button
+                    onClick={handleCreateSlideshow}
+                    disabled={isCreatingSlideshow}
+                    className="flex items-center justify-center w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 rounded text-white transition-colors"
+                  >
+                    {isCreatingSlideshow ? (
+                      <span>Creating...</span>
+                    ) : (
+                      <>
+                        <FaShare className="mr-2" />
+                        <span>Create Shareable Slideshow</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="flex flex-col">
+                    <div className="bg-gray-700 p-2 rounded text-xs mb-2 overflow-hidden text-ellipsis">
+                      {slideshowUrl}
+                    </div>
+                    <button
+                      onClick={copyToClipboard}
+                      className="flex items-center justify-center w-full px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-white transition-colors"
+                    >
+                      <FaCopy className="mr-2" />
+                      <span>Copy Link</span>
+                    </button>
+                  </div>
+                )}
+
+                {slideshowError && (
+                  <div className="mt-2 text-red-400 text-xs">
+                    {slideshowError}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

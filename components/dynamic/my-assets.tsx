@@ -709,6 +709,89 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
     }
   };
+  
+  // Create a shareable slideshow
+  const handleCreateSlideshow = async (settings: {
+    interval: number;
+    direction: 'forward' | 'backward';
+    infiniteLoop: boolean;
+  }) => {
+    // Get asset IDs for the current filtered view
+    const assetIds = filteredAndSortedActivities.map(activity => activity.id).filter(Boolean) as string[];
+    
+    if (!assetIds.length || !userId) {
+      return { 
+        success: false, 
+        error: 'No assets available or user not logged in' 
+      };
+    }
+    
+    // Save current assets to localStorage for faster loading
+    const slideShowAssets = filteredAndSortedActivities
+      .filter(activity => activity.id && assetIds.includes(activity.id))
+      .map(activity => ({
+        id: activity.id || '',
+        createdAssetUrl: activity.CreatedAssetUrl,
+        prompt: activity.Prompt,
+        assetType: activity.AssetType
+      }));
+    
+    try {
+      const response = await fetch('/api/slideshow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId, // Pass the userId explicitly
+          userIp, // Pass the userIp explicitly
+          assetIds,
+          title: 'My Custom Slideshow',
+          settings
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return { 
+          success: false, 
+          error: data.error || 'Failed to create slideshow' 
+        };
+      }
+      
+      // If slideshow creation was successful, save the assets to localStorage
+      if (data.success && data.slideshowId) {
+        try {
+          // Save the assets data to localStorage for this slideshow
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(
+              `slideshow_${data.slideshowId}`, 
+              JSON.stringify({
+                assets: slideShowAssets,
+                timestamp: Date.now()
+              })
+            );
+            console.log('Saved slideshow assets to localStorage:', data.slideshowId);
+          }
+        } catch (err) {
+          console.error('Error saving slideshow data to localStorage:', err);
+          // Non-critical error, continue anyway
+        }
+      }
+      
+      return { 
+        success: true, 
+        shareUrl: data.shareUrl 
+      };
+    } catch (error) {
+      console.error('Error creating slideshow:', error);
+      return { 
+        success: false, 
+        error: 'An error occurred while creating the slideshow' 
+      };
+    }
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -1341,6 +1424,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
           onJumpToFirst={handleJumpToFirstImage}
           onJumpToLast={handleJumpToLastImage}
+          currentAssets={filteredAndSortedActivities.map(a => a.id).filter(Boolean) as string[]}
+          onCreateSlideshow={userId ? handleCreateSlideshow : undefined}
         />
       )}
     </div>
