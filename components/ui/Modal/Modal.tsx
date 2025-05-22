@@ -51,12 +51,50 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(false);
-  const [slideInterval, setSlideInterval] = useState(3000); // Default: 3 seconds
-  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>(
-    'forward'
-  );
+  // Safe localStorage accessor functions
+  const getFromLocalStorage = (key: string, defaultValue: string): string => {
+    if (typeof window !== 'undefined') {
+      try {
+        const item = localStorage.getItem(key);
+        return item !== null ? item : defaultValue;
+      } catch (error) {
+        console.error('Error accessing localStorage:', error);
+        return defaultValue;
+      }
+    }
+    return defaultValue;
+  };
+
+  const saveToLocalStorage = (key: string, value: string): void => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    }
+  };
+
+  // Initialize with saved values from localStorage or defaults
+  const [slideInterval, setSlideInterval] = useState(() => {
+    // Get from localStorage or use default of 5 seconds
+    const savedInterval = getFromLocalStorage('slideshowInterval', '5000');
+    return parseInt(savedInterval, 10);
+  });
+  
+  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>(() => {
+    // Get from localStorage or use default of 'forward'
+    return getFromLocalStorage('slideshowDirection', 'forward') === 'backward' 
+      ? 'backward' 
+      : 'forward';
+  });
+  
   const [showSettings, setShowSettings] = useState(false);
-  const [infiniteLoop, setInfiniteLoop] = useState(false); // Add state for infinite loop
+  
+  const [infiniteLoop, setInfiniteLoop] = useState(() => {
+    // Get from localStorage or use default of false
+    return getFromLocalStorage('slideshowInfiniteLoop', 'false') === 'true';
+  });
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Start slideshow
@@ -83,7 +121,7 @@ const Modal: React.FC<ModalProps> = ({
               setIsSlideshow(false);
             }
           }
-        } 
+        }
         // Backward direction logic
         else if (slideDirection === 'backward') {
           if (hasPrevious && onPrevious) {
@@ -290,9 +328,12 @@ const Modal: React.FC<ModalProps> = ({
                 max="20"
                 step="1.0"
                 value={slideInterval / 1000}
-                onChange={(e) =>
-                  setSlideInterval(Number(e.target.value) * 1000)
-                }
+                onChange={(e) => {
+                  const newValue = Number(e.target.value) * 1000;
+                  setSlideInterval(newValue);
+                  // Save to localStorage
+                  saveToLocalStorage('slideshowInterval', newValue.toString());
+                }}
                 className="w-full"
               />
               <div className="flex justify-between text-xs mt-1">
@@ -306,13 +347,19 @@ const Modal: React.FC<ModalProps> = ({
               <label className="block mb-1 text-sm">Direction</label>
               <div className="flex justify-between">
                 <button
-                  onClick={() => setSlideDirection('backward')}
+                  onClick={() => {
+                    setSlideDirection('backward');
+                    saveToLocalStorage('slideshowDirection', 'backward');
+                  }}
                   className={`px-3 py-1 rounded ${slideDirection === 'backward' ? 'bg-blue-500' : 'bg-gray-600'}`}
                 >
                   Backward
                 </button>
                 <button
-                  onClick={() => setSlideDirection('forward')}
+                  onClick={() => {
+                    setSlideDirection('forward');
+                    saveToLocalStorage('slideshowDirection', 'forward');
+                  }}
                   className={`px-3 py-1 rounded ${slideDirection === 'forward' ? 'bg-blue-500' : 'bg-gray-600'}`}
                 >
                   Forward
@@ -326,7 +373,11 @@ const Modal: React.FC<ModalProps> = ({
                 <label className="text-sm pr-2">Infinite Loop</label>
                 <div
                   className={`relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out rounded-full cursor-pointer ${infiniteLoop ? 'bg-blue-500' : 'bg-gray-600'}`}
-                  onClick={() => setInfiniteLoop(!infiniteLoop)}
+                  onClick={() => {
+                    const newValue = !infiniteLoop;
+                    setInfiniteLoop(newValue);
+                    saveToLocalStorage('slideshowInfiniteLoop', newValue.toString());
+                  }}
                 >
                   <span
                     className={`absolute left-1 top-1 w-4 h-4 transition-transform duration-200 ease-in-out bg-white rounded-full transform ${
