@@ -14,6 +14,7 @@ export interface GcloudSlideshow {
   slideshowId: string;          // Unique identifier for URL sharing
   userId: string;               // User who created the slideshow
   assets: SlideshowAsset[];     // Simplified asset data for the slideshow
+  assetIds?: string[];          // Legacy: Array of asset IDs (for backward compatibility)
   title?: string;               // Optional title for the slideshow
   creationDate: string;         // Creation timestamp
   settings?: SlideshowSettings; // Optional settings

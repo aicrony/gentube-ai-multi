@@ -126,7 +126,15 @@ const Modal: React.FC<ModalProps> = ({
   const [slideshowError, setSlideshowError] = useState('');
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Start slideshow
+  // Start slideshow with effect dependency on autoStartSlideshow
+  useEffect(() => {
+    // Start slideshow automatically if specified
+    if (autoStartSlideshow) {
+      setIsSlideshow(true);
+    }
+  }, [autoStartSlideshow]);
+
+  // Slideshow logic
   useEffect(() => {
     if (isSlideshow) {
       // Clear any existing timer
