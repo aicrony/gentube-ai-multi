@@ -682,7 +682,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
     }
   };
-  
+
   // Jump to first image in slideshow mode (for infinite looping)
   const handleJumpToFirstImage = () => {
     if (filteredAndSortedActivities.length > 0) {
@@ -695,7 +695,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
     }
   };
-  
+
   // Jump to last image in slideshow mode (for infinite looping)
   const handleJumpToLastImage = () => {
     if (filteredAndSortedActivities.length > 0) {
@@ -709,7 +709,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
     }
   };
-  
+
   // Create a shareable slideshow
   const handleCreateSlideshow = async (settings: {
     interval: number;
@@ -717,25 +717,27 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     infiniteLoop: boolean;
   }) => {
     // Get asset IDs for the current filtered view
-    const assetIds = filteredAndSortedActivities.map(activity => activity.id).filter(Boolean) as string[];
-    
+    const assetIds = filteredAndSortedActivities
+      .map((activity) => activity.id)
+      .filter(Boolean) as string[];
+
     if (!assetIds.length || !userId) {
-      return { 
-        success: false, 
-        error: 'No assets available or user not logged in' 
+      return {
+        success: false,
+        error: 'No assets available or user not logged in'
       };
     }
-    
+
     // Save current assets to localStorage for faster loading
     const slideShowAssets = filteredAndSortedActivities
-      .filter(activity => activity.id && assetIds.includes(activity.id))
-      .map(activity => ({
+      .filter((activity) => activity.id && assetIds.includes(activity.id))
+      .map((activity) => ({
         id: activity.id || '',
         createdAssetUrl: activity.CreatedAssetUrl,
         prompt: activity.Prompt,
         assetType: activity.AssetType
       }));
-    
+
     try {
       const response = await fetch('/api/slideshow', {
         method: 'POST',
@@ -750,45 +752,48 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           settings
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        return { 
-          success: false, 
-          error: data.error || 'Failed to create slideshow' 
+        return {
+          success: false,
+          error: data.error || 'Failed to create slideshow'
         };
       }
-      
+
       // If slideshow creation was successful, save the assets to localStorage
       if (data.success && data.slideshowId) {
         try {
           // Save the assets data to localStorage for this slideshow
           if (typeof window !== 'undefined') {
             localStorage.setItem(
-              `slideshow_${data.slideshowId}`, 
+              `slideshow_${data.slideshowId}`,
               JSON.stringify({
                 assets: slideShowAssets,
                 timestamp: Date.now()
               })
             );
-            console.log('Saved slideshow assets to localStorage:', data.slideshowId);
+            console.log(
+              'Saved slideshow assets to localStorage:',
+              data.slideshowId
+            );
           }
         } catch (err) {
           console.error('Error saving slideshow data to localStorage:', err);
           // Non-critical error, continue anyway
         }
       }
-      
-      return { 
-        success: true, 
-        shareUrl: data.shareUrl 
+
+      return {
+        success: true,
+        shareUrl: data.shareUrl
       };
     } catch (error) {
       console.error('Error creating slideshow:', error);
-      return { 
-        success: false, 
-        error: 'An error occurred while creating the slideshow' 
+      return {
+        success: false,
+        error: 'An error occurred while creating the slideshow'
       };
     }
   };
@@ -1069,7 +1074,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.length === 0 && (
         <p>
           {activities.length === 0
-            ? `No assets found. You may need to ${userId ? '' : '<a href="/signin">sign in</a> to'} see your assets.`
+            ? `No assets found. You may need to ${userId ? '' : <a href="/signin">sign in</a> + 'to'} see your assets.`
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
@@ -1424,7 +1429,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
           onJumpToFirst={handleJumpToFirstImage}
           onJumpToLast={handleJumpToLastImage}
-          currentAssets={filteredAndSortedActivities.map(a => a.id).filter(Boolean) as string[]}
+          currentAssets={
+            filteredAndSortedActivities
+              .map((a) => a.id)
+              .filter(Boolean) as string[]
+          }
           onCreateSlideshow={userId ? handleCreateSlideshow : undefined}
         />
       )}
