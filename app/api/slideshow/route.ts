@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSlideshow, getSlideshow } from '@/utils/gcloud/slideshowManager';
-import { apiErrorHandler } from '@/utils/apiErrorHandler';
+import { apiErrorHandler } from '@/utils/apiErrorHandler.server';
 
 // Create a new slideshow
 export async function POST(req: NextRequest) {

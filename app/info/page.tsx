@@ -24,10 +24,10 @@ export default function InfoPage() {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Mission Statement</h2>
                 <p className="mb-4">
-                  Gentube.ai’s mission is to deliver innovative AI-driven video
-                  solutions, empowering users to create, share, and monetize
-                  high-quality short films, commercials, and feature-length
-                  films with limitless creative potential.
+                  Gentube.ai’s mission is to deliver innovative AI-driven image
+                  and video solutions, empowering users to create, share, and
+                  monetize high-quality slideshows, short films, commercials,
+                  and feature-length films with limitless creative potential.
                 </p>
                 <p className="mb-4">
                   We will enable users to easily and quickly create engaging AI

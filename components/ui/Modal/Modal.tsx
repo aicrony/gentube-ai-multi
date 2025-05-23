@@ -36,6 +36,11 @@ interface ModalProps {
     direction: 'forward' | 'backward';
     infiniteLoop: boolean;
   }) => Promise<{ success: boolean; shareUrl?: string; error?: string }>;
+  // New props for direct slideshow configuration
+  slideshowInterval?: number;
+  slideshowDirection?: 'forward' | 'backward';
+  slideshowInfiniteLoop?: boolean;
+  autoStartSlideshow?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -56,10 +61,15 @@ const Modal: React.FC<ModalProps> = ({
   onJumpToFirst,
   onJumpToLast,
   currentAssets = [],
-  onCreateSlideshow
+  onCreateSlideshow,
+  // New props with defaults
+  slideshowInterval,
+  slideshowDirection,
+  slideshowInfiniteLoop,
+  autoStartSlideshow = false
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
-  const [isSlideshow, setIsSlideshow] = useState(false);
+  const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
   // Safe localStorage accessor functions
   const getFromLocalStorage = (key: string, defaultValue: string): string => {
     if (typeof window !== 'undefined') {
@@ -84,16 +94,18 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  // Initialize with saved values from localStorage or defaults
+  // Initialize with props if provided, otherwise use localStorage or defaults
   const [slideInterval, setSlideInterval] = useState(() => {
-    // Get from localStorage or use default of 5 seconds
+    // Priority: 1. Props, 2. LocalStorage, 3. Default 5 seconds
+    if (slideshowInterval !== undefined) return slideshowInterval;
     const savedInterval = getFromLocalStorage('slideshowInterval', '5000');
     return parseInt(savedInterval, 10);
   });
 
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>(
     () => {
-      // Get from localStorage or use default of 'forward'
+      // Priority: 1. Props, 2. LocalStorage, 3. Default 'forward'
+      if (slideshowDirection !== undefined) return slideshowDirection;
       return getFromLocalStorage('slideshowDirection', 'forward') === 'backward'
         ? 'backward'
         : 'forward';
@@ -103,7 +115,8 @@ const Modal: React.FC<ModalProps> = ({
   const [showSettings, setShowSettings] = useState(false);
 
   const [infiniteLoop, setInfiniteLoop] = useState(() => {
-    // Get from localStorage or use default of false
+    // Priority: 1. Props, 2. LocalStorage, 3. Default false
+    if (slideshowInfiniteLoop !== undefined) return slideshowInfiniteLoop;
     return getFromLocalStorage('slideshowInfiniteLoop', 'false') === 'true';
   });
 
