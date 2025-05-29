@@ -1074,7 +1074,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.length === 0 && (
         <p>
           {activities.length === 0
-            ? `No assets found. You may need to ${userId ? '' : <a href="/signin">sign in</a> + 'to'} see your assets.`
+            ? `No assets found. You may need to ${userId ? 'refresh' : <a href="/signin">sign in</a> + 'to'} see your assets.`
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}

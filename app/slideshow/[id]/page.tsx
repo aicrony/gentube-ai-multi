@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { FaMagic } from 'react-icons/fa';
+import ServiceWorkerRegistration from '@/components/dynamic/service-worker-registration';
 
 interface SlideshowSettings {
   interval: number;
@@ -259,14 +260,8 @@ export default function SlideshowPage({ params }: { params: { id: string } }) {
           // Store in our local cache
           imageCache.current[asset.id] = img;
           
-          // Add to browser cache with cache API
-          if ('caches' in window) {
-            caches.open('slideshow-cache').then(cache => {
-              cache.add(asset.CreatedAssetUrl).catch(err => {
-                console.error('Failed to cache asset:', err);
-              });
-            });
-          }
+          // Note: We no longer need to manually add to browser cache here
+          // as the ServiceWorkerRegistration component will handle that
         }
       }
       
@@ -343,8 +338,21 @@ export default function SlideshowPage({ params }: { params: { id: string } }) {
   // Get current asset
   const currentAsset = assets[currentIndex];
   
+  // Create a list of asset URLs for the service worker to cache
+  const assetUrlsToCache = useMemo(() => {
+    return assets
+      .filter(asset => asset && asset.CreatedAssetUrl)
+      .map(asset => asset.CreatedAssetUrl);
+  }, [assets]);
+
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      {/* Register service worker for asset caching */}
+      <ServiceWorkerRegistration 
+        workerPath="/slideshow-service-worker.js"
+        assetsToCache={assetUrlsToCache}
+      />
+      
       <div className="flex-grow flex items-center justify-center p-4">
         {/* Only show this if the modal is closed */}
         {!isModalOpen && (

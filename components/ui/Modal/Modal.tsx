@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   FaExpand,
   FaCompress,
@@ -10,8 +10,20 @@ import {
   FaPlay,
   FaPause,
   FaCog,
-  FaCopy
+  FaCopy,
+  FaHistory,
+  FaChevronDown,
+  FaChevronUp,
+  FaTrash,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
+
+interface SlideshowHistoryItem {
+  url: string;
+  title: string;
+  createdAt: number; // timestamp
+  slideshowId: string;
+}
 
 interface ModalProps {
   mediaUrl: string;
@@ -125,7 +137,49 @@ const Modal: React.FC<ModalProps> = ({
   const [slideshowUrl, setSlideshowUrl] = useState('');
   const [slideshowError, setSlideshowError] = useState('');
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // States for slideshow history
+  const [slideshowHistory, setSlideshowHistory] = useState<SlideshowHistoryItem[]>([]);
+  const [showSlideshowHistory, setShowSlideshowHistory] = useState(false);
 
+  // Load slideshow history from localStorage and clean up old entries
+  const loadAndCleanSlideshowHistory = () => {
+    try {
+      const history = localStorage.getItem('slideshowHistory');
+      if (!history) {
+        return [];
+      }
+      
+      const parsedHistory = JSON.parse(history) as SlideshowHistoryItem[];
+      const now = Date.now();
+      const tenDaysMs = 10 * 24 * 60 * 60 * 1000; // 10 days in milliseconds
+      
+      // Filter out slideshows older than 10 days
+      const filteredHistory = parsedHistory.filter(item => {
+        return (now - item.createdAt) < tenDaysMs;
+      });
+      
+      // Save the filtered history back to localStorage if we removed any items
+      if (parsedHistory.length !== filteredHistory.length) {
+        localStorage.setItem('slideshowHistory', JSON.stringify(filteredHistory));
+        console.log(`Cleaned up ${parsedHistory.length - filteredHistory.length} old slideshow links`);
+      }
+      
+      return filteredHistory;
+    } catch (error) {
+      console.error('Error loading slideshow history:', error);
+      return [];
+    }
+  };
+  
+  // Load slideshow history when showing the history panel
+  useEffect(() => {
+    if (showSlideshowHistory) {
+      const history = loadAndCleanSlideshowHistory();
+      setSlideshowHistory(history);
+    }
+  }, [showSlideshowHistory]);
+  
   // Start slideshow with effect dependency on autoStartSlideshow
   useEffect(() => {
     // Start slideshow automatically if specified
@@ -205,6 +259,30 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, []);
 
+  const isVideo = mediaUrl.endsWith('.mp4');
+  
+  // Preload the next image if we're in a slideshow
+  useEffect(() => {
+    if (!isVideo && currentAssets && currentAssets.length > 1 && hasNext && mediaUrl) {
+      // Find the current asset index
+      const currentIndex = currentAssets.findIndex(id => id === currentItemId);
+      
+      // If there's a next asset and we know what it is
+      if (currentIndex !== -1 && currentIndex + 1 < currentAssets.length && onNext) {
+        // We need to somehow get the URL of the next asset, but we don't have direct access
+        // Instead, let's use the service worker to preload the current image
+        // which will make navigation faster even if we can't preload the exact next one
+        if ('serviceWorker' in navigator && 'caches' in window) {
+          caches.open('slideshow-images-v2').then(cache => {
+            cache.add(mediaUrl).catch(err => {
+              console.warn('Failed to cache current asset:', err);
+            });
+          });
+        }
+      }
+    }
+  }, [mediaUrl, currentAssets, currentItemId, isVideo, hasNext, onNext]);
+
   const toggleSlideshow = () => {
     setIsSlideshow(!isSlideshow);
   };
@@ -238,6 +316,38 @@ const Modal: React.FC<ModalProps> = ({
 
       if (result.success && result.shareUrl) {
         setSlideshowUrl(result.shareUrl);
+        
+        // Save to slideshow history
+        try {
+          // Extract slideshowId from URL (format: /slideshow/[id])
+          const urlParts = result.shareUrl.split('/');
+          const slideshowId = urlParts[urlParts.length - 1];
+          
+          // Create new history item
+          const newHistoryItem: SlideshowHistoryItem = {
+            url: result.shareUrl,
+            title: `Slideshow ${new Date().toLocaleString()}`,
+            createdAt: Date.now(),
+            slideshowId
+          };
+          
+          // Load existing history
+          const existingHistory = loadAndCleanSlideshowHistory();
+          
+          // Add new item to the beginning of the array
+          const updatedHistory = [newHistoryItem, ...existingHistory];
+          
+          // Save updated history
+          localStorage.setItem('slideshowHistory', JSON.stringify(updatedHistory));
+          
+          // Update state if history panel is open
+          if (showSlideshowHistory) {
+            setSlideshowHistory(updatedHistory);
+          }
+        } catch (historyError) {
+          console.error('Error saving to slideshow history:', historyError);
+          // Non-critical error, don't show to user
+        }
       } else {
         setSlideshowError(result.error || 'Failed to create slideshow');
       }
@@ -269,6 +379,25 @@ const Modal: React.FC<ModalProps> = ({
         });
     }
   };
+  
+  // Handle deleting a slideshow from history
+  const deleteSlideshowFromHistory = (slideshowId: string) => {
+    try {
+      // Load current history
+      const history = loadAndCleanSlideshowHistory();
+      
+      // Filter out the slideshow to delete
+      const updatedHistory = history.filter(item => item.slideshowId !== slideshowId);
+      
+      // Save updated history
+      localStorage.setItem('slideshowHistory', JSON.stringify(updatedHistory));
+      
+      // Update state
+      setSlideshowHistory(updatedHistory);
+    } catch (error) {
+      console.error('Error deleting slideshow from history:', error);
+    }
+  };
 
   const handleDownload = async () => {
     try {
@@ -277,9 +406,39 @@ const Modal: React.FC<ModalProps> = ({
       const fileExtension = isVideo ? '.mp4' : '.jpg';
       const fileName = `gentube-download${fileExtension}`;
 
-      // Fetch the file as a blob
-      const response = await fetch(mediaUrl);
-      const blob = await response.blob();
+      // Try to get the file from cache first if service worker is active
+      let blob;
+      if ('caches' in window) {
+        try {
+          const cache = await caches.open(isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2');
+          const cachedResponse = await cache.match(mediaUrl);
+          
+          if (cachedResponse) {
+            console.log('Using cached version for download');
+            blob = await cachedResponse.blob();
+          }
+        } catch (cacheError) {
+          console.warn('Error accessing cache:', cacheError);
+          // Continue with network fetch
+        }
+      }
+      
+      // If we couldn't get from cache, fetch from network
+      if (!blob) {
+        const response = await fetch(mediaUrl);
+        blob = await response.blob();
+        
+        // Add to cache for future use
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open(isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2');
+            const response = new Response(blob);
+            await cache.put(mediaUrl, response);
+          } catch (cacheError) {
+            console.warn('Error adding to cache:', cacheError);
+          }
+        }
+      }
 
       // Create an object URL for the blob
       const blobUrl = window.URL.createObjectURL(blob);
@@ -301,8 +460,6 @@ const Modal: React.FC<ModalProps> = ({
       alert('Failed to download the media');
     }
   };
-
-  const isVideo = mediaUrl.endsWith('.mp4');
 
   return (
     <div
@@ -519,6 +676,95 @@ const Modal: React.FC<ModalProps> = ({
                     {slideshowError}
                   </div>
                 )}
+                
+                {/* Slideshow History Section */}
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowSlideshowHistory(!showSlideshowHistory)}
+                    className="flex items-center justify-between w-full px-2 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white text-left"
+                  >
+                    <div className="flex items-center">
+                      <FaHistory className="mr-2" />
+                      <span>Your Slideshow Links</span>
+                    </div>
+                    {showSlideshowHistory ? <FaChevronUp /> : <FaChevronDown />}
+                  </button>
+                  
+                  {showSlideshowHistory && (
+                    <div className="mt-2 bg-gray-800 border border-gray-700 rounded p-2">
+                      {slideshowHistory.length === 0 ? (
+                        <p className="text-gray-400 text-sm text-center py-2">No slideshows yet</p>
+                      ) : (
+                        <ul className="max-h-40 overflow-y-auto">
+                          {slideshowHistory.map((item, index) => (
+                            <li key={item.slideshowId} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
+                              <div className="flex-grow overflow-hidden mr-2">
+                                <div className="text-sm truncate">
+                                  {item.title}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {new Date(item.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <div className="flex space-x-2">
+                                <a 
+                                  href={item.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 hover:text-blue-300"
+                                  title="Open slideshow"
+                                >
+                                  <FaExternalLinkAlt />
+                                </a>
+                                <button
+                                  onClick={(event) => {
+                                    navigator.clipboard.writeText(item.url);
+                                    
+                                    // Show temporary tooltip
+                                    const tooltip = document.createElement('div');
+                                    tooltip.textContent = 'Copied!';
+                                    tooltip.style.position = 'absolute';
+                                    tooltip.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                                    tooltip.style.color = 'white';
+                                    tooltip.style.padding = '4px 8px';
+                                    tooltip.style.borderRadius = '4px';
+                                    tooltip.style.fontSize = '12px';
+                                    tooltip.style.zIndex = '1000';
+                                    tooltip.style.opacity = '0';
+                                    tooltip.style.transition = 'opacity 0.3s';
+                                    
+                                    // Position near button
+                                    const rect = (event.target as HTMLElement).getBoundingClientRect();
+                                    tooltip.style.top = `${rect.top - 30}px`;
+                                    tooltip.style.left = `${rect.left}px`;
+                                    
+                                    document.body.appendChild(tooltip);
+                                    setTimeout(() => { tooltip.style.opacity = '1'; }, 10);
+                                    setTimeout(() => {
+                                      tooltip.style.opacity = '0';
+                                      setTimeout(() => document.body.removeChild(tooltip), 300);
+                                    }, 2000);
+                                  }}
+                                  className="text-gray-400 hover:text-gray-300"
+                                  title="Copy link"
+                                >
+                                  <FaCopy />
+                                </button>
+                                <button
+                                  onClick={() => deleteSlideshowFromHistory(item.slideshowId)}
+                                  className="text-red-500 hover:text-red-400"
+                                  title="Delete from history"
+                                >
+                                  <FaTrash />
+                                </button>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -543,22 +789,40 @@ const Modal: React.FC<ModalProps> = ({
 
           {/* Media content */}
           <div className="flex justify-center items-center max-w-full">
-            {isVideo ? (
-              <video
-                src={mediaUrl}
-                controls
-                autoPlay
-                className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain`}
-                style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)' }}
-              />
-            ) : (
-              <img
-                src={mediaUrl}
-                alt="Media"
-                className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
-                style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)' }}
-              />
-            )}
+            {(() => {
+              // Cache in service worker if available
+              if ('serviceWorker' in navigator && 'caches' in window) {
+                // Cache image or video in the appropriate cache
+                const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
+                caches.open(cacheName).then(cache => {
+                  cache.add(mediaUrl).catch(err => {
+                    console.warn('Failed to cache asset in modal:', err);
+                  });
+                });
+              }
+              
+              if (isVideo) {
+                return (
+                  <video
+                    src={mediaUrl}
+                    controls
+                    autoPlay
+                    className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain`}
+                    style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)' }}
+                  />
+                );
+              } else {
+                return (
+                  <img
+                    src={mediaUrl}
+                    alt="Media"
+                    className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
+                    style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)' }}
+                    loading="eager"
+                  />
+                );
+              }
+            })()}
           </div>
 
           {/* Next button */}

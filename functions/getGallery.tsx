@@ -9,13 +9,15 @@ import {
   FaPlus,
   FaHeart,
   FaDownload,
-  FaShare
+  FaShare,
+  FaEdit
 } from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import { useRouter } from 'next/navigation';
 import MyAssets from '@/components/dynamic/my-assets';
 import Modal from '@/components/ui/Modal';
+import { PromptInputWithStyles } from '@/components/dynamic/prompt-input-with-styles';
 
 interface GalleryItem {
   id?: string;
@@ -32,6 +34,13 @@ interface AssetLikeInfo {
   isLiked: boolean;
 }
 
+interface ModifiedImage {
+  id: string;
+  url: string;
+  prompt: string;
+  originalIndex: number;
+}
+
 const ImageGallery: React.FC = () => {
   const [media, setMedia] = useState<GalleryItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -46,6 +55,13 @@ const ImageGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
+  const [showModifyPrompt, setShowModifyPrompt] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [modifiedImages, setModifiedImages] = useState<{
+    [key: number]: ModifiedImage[];
+  }>({});
+  const [modifyPromptValue, setModifyPromptValue] = useState('');
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -400,7 +416,7 @@ const ImageGallery: React.FC = () => {
     router.push('/');
   };
 
-  const handleCreateImage = async (prompt: string) => {
+  const handleCreateImage = async (prompt: string, mediaIndex?: number) => {
     if (!userId) {
       router.push('/signin');
       return;
@@ -420,7 +436,9 @@ const ImageGallery: React.FC = () => {
     }
 
     setRegenerateInProgress(true);
-    setShowMyAssets(true);
+    if (mediaIndex === undefined) {
+      setShowMyAssets(true);
+    }
 
     try {
       console.log('Creating image with prompt:', prompt);
@@ -447,9 +465,38 @@ const ImageGallery: React.FC = () => {
       } else {
         console.log('Image creation response:', data);
         if (data.result === 'InQueue') {
-          alert(
-            'Your image has been added to the queue. Check My Assets for updates.'
-          );
+          if (mediaIndex !== undefined) {
+            // For modify operations, show success message and prepare for image update
+            alert(
+              'Your modified image has been added to the queue. Click "Generate" at the top to see your generated images.'
+            );
+
+            // Hide the modify prompt form
+            setShowModifyPrompt((prev) => ({ ...prev, [mediaIndex]: false }));
+            setModifyPromptValue('');
+
+            // TODO: In a real implementation, you'd want to poll for the result and add it to modifiedImages
+            // For now, we'll simulate this with a placeholder
+            setTimeout(() => {
+              if (data.imageUrl) {
+                const newModifiedImage: ModifiedImage = {
+                  id: Date.now().toString(),
+                  url: data.imageUrl,
+                  prompt: prompt,
+                  originalIndex: mediaIndex
+                };
+
+                setModifiedImages((prev) => ({
+                  ...prev,
+                  [mediaIndex]: [...(prev[mediaIndex] || []), newModifiedImage]
+                }));
+              }
+            }, 2000);
+          } else {
+            alert(
+              'Your image has been added to the queue. Check My Assets for updates.'
+            );
+          }
         }
       }
     } catch (error) {
@@ -458,6 +505,23 @@ const ImageGallery: React.FC = () => {
     } finally {
       setRegenerateInProgress(false);
     }
+  };
+
+  const handleModifyImage = (mediaIndex: number) => {
+    setShowModifyPrompt((prev) => ({
+      ...prev,
+      [mediaIndex]: !prev[mediaIndex]
+    }));
+    if (!showModifyPrompt[mediaIndex]) {
+      setModifyPromptValue('');
+    }
+  };
+
+  const handleModifyPromptSubmit = async (mediaIndex: number) => {
+    const originalPrompt = media[mediaIndex]?.Prompt || '';
+    const fullPrompt =
+      originalPrompt + (modifyPromptValue ? `, ${modifyPromptValue}` : '');
+    await handleCreateImage(fullPrompt, mediaIndex);
   };
 
   const handleCreateVideo = async (item: GalleryItem) => {
@@ -729,17 +793,17 @@ const ImageGallery: React.FC = () => {
           <div className="flex justify-center space-x-4 mt-4">
             <Button
               variant="slim"
-              onClick={() => handleCreateImage(mediaItem.Prompt || '')}
+              onClick={() => handleModifyImage(currentIndex)}
               disabled={regenerateInProgress || !mediaItem.Prompt}
               title={
                 !mediaItem.Prompt
-                  ? 'No prompt available for regeneration'
-                  : 'Create image using this prompt'
+                  ? 'No prompt available for modification'
+                  : 'Modify this image with additional prompts'
               }
               loading={regenerateInProgress}
               className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
             >
-              <FaImage /> Create Image
+              <FaEdit /> Modify Image
             </Button>
 
             <Button
@@ -763,6 +827,147 @@ const ImageGallery: React.FC = () => {
               <FaPlus /> Start Fresh
             </Button>
           </div>
+
+          {/* Modify Prompt Interface */}
+          {showModifyPrompt[currentIndex] && (
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-semibold mb-3">Modify Image</h4>
+              <div className="mb-3">
+                <label className="block text-sm font-medium mb-1">
+                  Original Prompt (cannot be changed):
+                </label>
+                <div className="p-3 bg-gray-400 dark:bg-gray-700 dark:text-white rounded border text-sm text-left">
+                  {mediaItem.Prompt || 'No prompt available'}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="modify-prompt"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Add to prompt:
+                </label>
+                <input
+                  id="modify-prompt"
+                  type="text"
+                  value={modifyPromptValue}
+                  onChange={(e) => setModifyPromptValue(e.target.value)}
+                  placeholder="Add additional details, styles, or modifications..."
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="slim"
+                  onClick={() => handleModifyImage(currentIndex)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="slim"
+                  onClick={() => handleModifyPromptSubmit(currentIndex)}
+                  disabled={regenerateInProgress || !modifyPromptValue.trim()}
+                  loading={regenerateInProgress}
+                  className="bg-purple-500 hover:bg-purple-600 text-white"
+                >
+                  Generate Modified Image
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Display Modified Images */}
+          {modifiedImages[currentIndex] &&
+            modifiedImages[currentIndex].length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3 text-center">
+                  Modified Versions
+                </h4>
+                {modifiedImages[currentIndex].map((modifiedImage, index) => (
+                  <div key={modifiedImage.id} className="mt-4 border-t pt-4">
+                    <img
+                      src={modifiedImage.url}
+                      alt={`Modified version ${index + 1}`}
+                      className="w-full max-w-2xl mx-auto cursor-pointer"
+                      onClick={() => openModal(modifiedImage.url, false)}
+                    />
+
+                    {/* Action icons for modified image */}
+                    <div className="mt-4 mb-3 max-w-2xl mx-auto w-full">
+                      <div className="flex justify-between items-center">
+                        <div className="text-xs text-gray-600">
+                          Modified with:{' '}
+                          {modifiedImage.prompt
+                            .replace(mediaItem.Prompt || '', '')
+                            .replace(/^,\s*/, '')}
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() =>
+                              handleDownload(modifiedImage.url, false)
+                            }
+                            className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                            title="Download"
+                          >
+                            <FaDownload className="text-sm md:text-base" />
+                          </button>
+                          <button
+                            onClick={() => openModal(modifiedImage.url, true)}
+                            className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                            title="View in Full Screen"
+                          >
+                            <FaExternalLinkAlt className="text-sm md:text-base" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Prompt Display for Modified Image */}
+                    <div className="my-4 text-center max-w-2xl mx-auto">
+                      <h5 className="font-medium text-center mb-2">
+                        Full Prompt:
+                      </h5>
+                      <p className="mb-4 text-sm">{modifiedImage.prompt}</p>
+
+                      {/* Action Buttons for Modified Image */}
+                      <div className="flex justify-center space-x-4 mt-4">
+                        <Button
+                          variant="slim"
+                          onClick={() =>
+                            handleCreateImage(modifiedImage.prompt)
+                          }
+                          disabled={regenerateInProgress}
+                          title="Create another image using this modified prompt"
+                          loading={regenerateInProgress}
+                          className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                        >
+                          <FaImage /> Create Image
+                        </Button>
+
+                        <Button
+                          variant="slim"
+                          onClick={() => {
+                            const tempMediaItem = {
+                              ...mediaItem,
+                              Prompt: modifiedImage.prompt,
+                              CreatedAssetUrl: modifiedImage.url
+                            };
+                            handleCreateVideo(tempMediaItem);
+                          }}
+                          disabled={regenerateInProgress}
+                          title="Create video from this modified image"
+                          loading={regenerateInProgress}
+                          className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                        >
+                          <FaVideo /> Create Video
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
         </div>
         <div className="my-4 text-center max-w-2xl mx-auto">
           <p>Create from this prompt or start something new.</p>
@@ -839,7 +1044,9 @@ const ImageGallery: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-lg font-semibold">Processing your request...</p>
+            <p className="text-lg font-semibold text-gray-600 mt-2">
+              Processing your request...
+            </p>
             <p className="text-sm text-gray-600 mt-2">
               This may take a few moments.
             </p>

@@ -56,6 +56,8 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0f172a" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
