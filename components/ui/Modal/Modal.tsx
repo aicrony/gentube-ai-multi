@@ -15,7 +15,8 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaTrash,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaEdit
 } from 'react-icons/fa';
 
 interface SlideshowHistoryItem {
@@ -54,6 +55,13 @@ interface ModalProps {
   slideshowInfiniteLoop?: boolean;
   autoStartSlideshow?: boolean;
   showSlideshowSettings?: boolean;
+  // Image edit props
+  showImageEditPane?: boolean;
+  editPrompt?: string;
+  onEditPromptChange?: (value: string) => void;
+  onSubmitImageEdit?: () => void;
+  onToggleImageEditPane?: () => void;
+  isEditingImage?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -80,7 +88,14 @@ const Modal: React.FC<ModalProps> = ({
   slideshowDirection,
   slideshowInfiniteLoop,
   autoStartSlideshow = false,
-  showSlideshowSettings = false
+  showSlideshowSettings = false,
+  // Image edit props with defaults
+  showImageEditPane = false,
+  editPrompt = '',
+  onEditPromptChange,
+  onSubmitImageEdit,
+  onToggleImageEditPane,
+  isEditingImage = false
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
@@ -503,6 +518,25 @@ const Modal: React.FC<ModalProps> = ({
               <FaCog />
             </button>
           )}
+
+          {/* Image Edit button - only show for images */}
+          {!isVideo && onSubmitImageEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Toggle between edit pane and settings (only one should be open)
+                setShowSettings(false);
+                // Toggle the edit pane state by calling parent component
+                if (onToggleImageEditPane) {
+                  onToggleImageEditPane();
+                }
+              }}
+              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md ${showImageEditPane ? 'bg-blue-600' : ''}`}
+              title="Edit image"
+            >
+              <FaEdit />
+            </button>
+          )}
           {/* Download button */}
           <button
             onClick={handleDownload}
@@ -561,6 +595,51 @@ const Modal: React.FC<ModalProps> = ({
             ×
           </button>
         </div>
+
+        {/* Image Edit panel */}
+        {showImageEditPane && (
+          <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-80">
+            <h3 className="text-lg font-bold mb-3">Edit Image</h3>
+            
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-medium">
+                Describe how you want to edit this image:
+              </label>
+              <textarea
+                value={editPrompt}
+                onChange={(e) => onEditPromptChange && onEditPromptChange(e.target.value)}
+                placeholder="e.g., change the background to a sunset, add a vintage filter, make it black and white..."
+                className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none resize-vertical"
+                rows={4}
+              />
+            </div>
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (onEditPromptChange) onEditPromptChange('');
+                }}
+                className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={onSubmitImageEdit}
+                disabled={!editPrompt.trim() || isEditingImage}
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-white transition-colors flex items-center justify-center"
+              >
+                {isEditingImage ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Editing...
+                  </>
+                ) : (
+                  'Edit Image'
+                )}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Slideshow settings panel */}
         {showSettings && (

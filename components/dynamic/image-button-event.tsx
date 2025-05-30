@@ -9,6 +9,7 @@ import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import { handleApiError } from '@/utils/apiErrorHandler';
+import { useToast } from '@/components/ui/Toast';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -30,6 +31,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const [imageGalleryData, setImageGalleryData] = useState<any>(null); // State for ImageGallery
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null); // State for Modal Image URL
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
+  const { showToast } = useToast();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
@@ -105,12 +107,19 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           ); // set the url of the response
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
-            setMessage('Refresh your assets to see your image in queue.');
+            // Show toast notification instead of message
+            showToast({
+              type: 'image',
+              prompt: prompt,
+              duration: 15000
+            });
             
-            // Auto-clear the message after 30 seconds
+            setMessage('Image added to queue.');
+            
+            // Auto-clear the message after 5 seconds
             setTimeout(() => {
               setMessage('');
-            }, 30000);
+            }, 5000);
           }
         }
 
