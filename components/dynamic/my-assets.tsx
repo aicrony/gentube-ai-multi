@@ -18,7 +18,8 @@ import {
   FaList,
   FaTimesCircle,
   FaPlayCircle,
-  FaEdit
+  FaEdit,
+  FaGripVertical
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { useToast } from '@/components/ui/Toast';
@@ -1045,6 +1046,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [editPrompt, setEditPrompt] = useState('');
   const [isEditingImage, setIsEditingImage] = useState(false);
 
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   // Listen for closeModal event from toast clicks
   useEffect(() => {
     const handleCloseModal = () => {
@@ -1143,8 +1149,114 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setSortDirection('desc');
   };
 
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', '');
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear drag over if we're actually leaving the container
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      setIsDragging(false);
+      return;
+    }
+
+    try {
+      const draggedAsset = filteredAndSortedActivities[draggedIndex];
+      if (!draggedAsset.id) {
+        console.error('Cannot reorder asset without ID');
+        return;
+      }
+
+      // Get all asset IDs in current order
+      const allAssetIds = filteredAndSortedActivities
+        .map(activity => activity.id)
+        .filter(Boolean) as string[];
+
+      console.log('Reordering asset:', {
+        assetId: draggedAsset.id,
+        fromIndex: draggedIndex,
+        toIndex: dropIndex,
+        allAssetIds
+      });
+
+      // Call API to update the order
+      const response = await fetch('/api/reorderAssets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          assetId: draggedAsset.id,
+          targetIndex: dropIndex,
+          allAssetIds
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reorder assets');
+      }
+
+      console.log('Asset reordered successfully:', result);
+
+      // Refresh the asset list to show new order
+      handleRefresh();
+
+      // Show success toast
+      showToast({
+        type: 'image',
+        prompt: 'Asset order updated successfully!',
+        duration: 3000
+      });
+
+    } catch (error) {
+      console.error('Error reordering assets:', error);
+      showToast({
+        type: 'error',
+        prompt: 'Failed to reorder assets. Please try again.',
+        duration: 5000
+      });
+    } finally {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    setIsDragging(false);
+  };
+
   return (
-    <div className="my-assets-container">
+    <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
         <div className="flex items-center gap-2">
@@ -1325,6 +1437,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               searchTerm) &&
               ' (filtered)'}
           </p>
+          {!(filters.assetType || filters.inGallery || filters.minHearts > 0 || searchTerm) && 
+           !onSelectAsset && 
+           filteredAndSortedActivities.length > 1 && (
+            <p className="text-xs text-gray-500 mt-1">
+              <FaGripVertical className="inline mr-1" />
+              Drag assets by the handle to reorder them
+            </p>
+          )}
         </div>
       </div>
 
@@ -1358,7 +1478,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       )}
       {filteredAndSortedActivities.map((activity, index) => (
         <div
-          key={index}
+          key={activity.id || index}
           className={`border p-4 ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
           } ${
@@ -1366,7 +1486,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             selectedAssetUrl === activity.AssetSource
               ? 'asset-item-selected'
               : ''
-          } flex flex-col md:flex-row md:items-center`}
+          } ${
+            draggedIndex === index ? 'opacity-50' : ''
+          } ${
+            dragOverIndex === index ? 'border-blue-500 border-2' : ''
+          } flex flex-col md:flex-row md:items-center transition-all duration-200`}
+          draggable={Boolean(
+            !onSelectAsset && 
+            activity.id && 
+            !filters.assetType && 
+            !filters.inGallery && 
+            !filters.minHearts && 
+            !searchTerm.trim()
+          )} // Only draggable if not in selection mode, has ID, and no filters applied
+          onDragStart={(e) => handleDragStart(e, index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, index)}
+          onDragEnd={handleDragEnd}
           onClick={(e) => {
             if (onSelectAsset) {
               // If in selection mode, make the whole row clickable
@@ -1393,6 +1530,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             }
           }}
         >
+          {/* Drag handle - only show if draggable */}
+          {!onSelectAsset && 
+           activity.id && 
+           !filters.assetType && 
+           !filters.inGallery && 
+           !filters.minHearts && 
+           !searchTerm.trim() && (
+            <div 
+              className="flex items-center justify-center w-6 h-6 md:mr-2 mb-2 md:mb-0 cursor-grab active:cursor-grabbing"
+              onMouseDown={(e) => e.stopPropagation()}
+              title="Drag to reorder"
+            >
+              <FaGripVertical className="text-gray-400 hover:text-gray-600 transition-colors" />
+            </div>
+          )}
+
           {/* Image/thumbnail - larger on mobile */}
           <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
             <div
