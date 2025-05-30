@@ -125,13 +125,21 @@ const Toast: React.FC<ToastProps> = ({
         <div 
           className={`cursor-pointer ${type === 'error' ? 'hover:bg-red-700' : 'hover:bg-blue-700'} -m-4 p-4 rounded-lg transition-colors`}
           onClick={handleClick}
-          title={type === 'error' ? "Click to go to pricing page" : "Click to open in edit mode"}
+          title={type === 'error' 
+            ? "Click to go to pricing page" 
+            : type === 'image-edit' 
+              ? "Click to view edited image with options"
+              : "Click to open in edit mode"}
         >
           <p className={`text-xs mb-2 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}>
             "{truncatePrompt(prompt)}"
           </p>
           <p className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}>
-            {type === 'error' ? 'Click to get credits' : 'Click to view'} • Auto-close in {timeLeft}s
+            {type === 'error' 
+              ? 'Click to get credits' 
+              : type === 'image-edit' 
+                ? 'Click to view edited image'
+                : 'Click to view'} • Auto-close in {timeLeft}s
           </p>
         </div>
       </div>

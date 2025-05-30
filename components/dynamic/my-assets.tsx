@@ -57,25 +57,40 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const userIp = useUserIp();
   const { showToast } = useToast();
   const [activities, setActivities] = useState<UserActivity[]>([]);
-  
+
   // Check for URL parameter to open specific image
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const openImageId = urlParams.get('openImage');
-      
+
       if (openImageId && activities.length > 0) {
         // Find the image with this ID and open it
-        const imageIndex = activities.findIndex(activity => activity.id === openImageId);
+        const imageIndex = activities.findIndex(
+          (activity) => activity.id === openImageId
+        );
         if (imageIndex !== -1) {
+          const activity = activities[imageIndex];
           // Open the modal with this image
           openModalForAsset(imageIndex, false);
+
+          // If it's an image or upload, automatically show the edit pane
+          if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
+            // Set the edit pane to show after modal opens
+            setTimeout(() => {
+              setShowImageEditPane(true);
+              setEditImageUrl(activity.CreatedAssetUrl);
+              setEditPrompt('');
+            }, 100); // Small delay to ensure modal is open
+          }
+
           // Clear the URL parameter
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
     }
   }, [activities]); // Run when activities change
+
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -169,6 +184,30 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setPage(0);
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, filters.assetType]);
+
+  // Listen for closeModal event from toast clicks
+  useEffect(() => {
+    const handleCloseModal = () => {
+      if (isModalOpen) {
+        setIsModalOpen(false);
+        setModalMediaUrl('');
+        setShowSlideshowSettings(false);
+        setAutoStartSlideshow(false);
+        setShowImageEditPane(false);
+        setEditImageUrl('');
+        setEditPrompt('');
+        setIsEditingImage(false);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('closeModal', handleCloseModal);
+
+      return () => {
+        window.removeEventListener('closeModal', handleCloseModal);
+      };
+    }
+  }, [isModalOpen]); // Include isModalOpen as dependency to ensure we have the latest state
 
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
@@ -658,12 +697,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : activity.CreatedAssetUrl;
       setCurrentModalIndex(index);
       setModalMediaUrl(url);
-      
+
       // Set edit image URL for images and uploads so edit functionality works
       if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
         setEditImageUrl(activity.CreatedAssetUrl);
       }
-      
+
       setIsModalOpen(true);
       setIsFullScreenModal(fullScreen);
     }
@@ -682,15 +721,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     } else {
       // Fallback if no matching asset found
       setModalMediaUrl(url);
-      
+
       // Try to set edit image URL for edit functionality even in fallback
       const matchingActivity = filteredAndSortedActivities.find(
         (activity) => activity.CreatedAssetUrl === url
       );
-      if (matchingActivity && (matchingActivity.AssetType === 'img' || matchingActivity.AssetType === 'upl')) {
+      if (
+        matchingActivity &&
+        (matchingActivity.AssetType === 'img' ||
+          matchingActivity.AssetType === 'upl')
+      ) {
         setEditImageUrl(url);
       }
-      
+
       setIsModalOpen(true);
       setIsFullScreenModal(fullScreen);
     }
@@ -708,9 +751,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : nextActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex - 1);
       setModalMediaUrl(url);
-      
+
       // Update edit image URL for the new image
-      if (nextActivity.AssetType === 'img' || nextActivity.AssetType === 'upl') {
+      if (
+        nextActivity.AssetType === 'img' ||
+        nextActivity.AssetType === 'upl'
+      ) {
         setEditImageUrl(nextActivity.CreatedAssetUrl);
       } else {
         setEditImageUrl(''); // Clear for videos
@@ -729,9 +775,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : prevActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex + 1);
       setModalMediaUrl(url);
-      
+
       // Update edit image URL for the new image
-      if (prevActivity.AssetType === 'img' || prevActivity.AssetType === 'upl') {
+      if (
+        prevActivity.AssetType === 'img' ||
+        prevActivity.AssetType === 'upl'
+      ) {
         setEditImageUrl(prevActivity.CreatedAssetUrl);
       } else {
         setEditImageUrl(''); // Clear for videos
@@ -749,9 +798,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : firstActivity.CreatedAssetUrl;
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
-      
+
       // Update edit image URL for the first image
-      if (firstActivity.AssetType === 'img' || firstActivity.AssetType === 'upl') {
+      if (
+        firstActivity.AssetType === 'img' ||
+        firstActivity.AssetType === 'upl'
+      ) {
         setEditImageUrl(firstActivity.CreatedAssetUrl);
       } else {
         setEditImageUrl(''); // Clear for videos
@@ -770,9 +822,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : lastActivity.CreatedAssetUrl;
       setCurrentModalIndex(lastIndex);
       setModalMediaUrl(url);
-      
+
       // Update edit image URL for the last image
-      if (lastActivity.AssetType === 'img' || lastActivity.AssetType === 'upl') {
+      if (
+        lastActivity.AssetType === 'img' ||
+        lastActivity.AssetType === 'upl'
+      ) {
         setEditImageUrl(lastActivity.CreatedAssetUrl);
       } else {
         setEditImageUrl(''); // Clear for videos
@@ -884,10 +939,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     if (filteredAndSortedActivities.length > 0) {
       // Open modal with first asset
       const firstActivity = filteredAndSortedActivities[0];
-      const url = firstActivity.AssetType === 'vid' 
-        ? firstActivity.CreatedAssetUrl 
-        : firstActivity.CreatedAssetUrl;
-      
+      const url =
+        firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
+
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
       setShowSlideshowSettings(true); // Show slideshow options
@@ -901,7 +957,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleEditImage = (activity: UserActivity) => {
     if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
       // Open modal without automatically showing edit pane
-      setCurrentModalIndex(filteredAndSortedActivities.findIndex(a => a.id === activity.id));
+      setCurrentModalIndex(
+        filteredAndSortedActivities.findIndex((a) => a.id === activity.id)
+      );
       setModalMediaUrl(activity.CreatedAssetUrl);
       setEditImageUrl(activity.CreatedAssetUrl);
       setShowImageEditPane(true); // Show edit pane when opened via edit button
@@ -944,7 +1002,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       if (!response.ok) {
         console.error('Failed to edit image:', data);
-        
+
         // Check if it's a credit limit exceeded error
         if (response.status === 429 && data.result === 'LimitExceeded') {
           // Show error toast for credit limit exceeded
@@ -961,23 +1019,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (data.result === 'InQueue') {
           // Close the edit pane but keep modal open
           setShowImageEditPane(false);
-          
+
           // Show toast notification
           showToast({
             type: 'image-edit',
             prompt: editPrompt,
             duration: 15000
           });
-          
+
           // Clear edit prompt after successful submission
           setEditPrompt('');
-          
+
           // Refresh assets to show queued item
           handleRefresh();
         } else if (data.result === 'Completed') {
           // Image edit completed immediately
           setShowImageEditPane(false);
-          
+
           // Show success toast notification with edited image ID
           showToast({
             type: 'image-edit',
@@ -985,10 +1043,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             duration: 10000,
             editedImageId: data.editedImageId // Include the new image ID for opening
           });
-          
+
           // Clear edit prompt after successful submission
           setEditPrompt('');
-          
+
           // Refresh assets to show the new edited image
           handleRefresh();
         }
@@ -1293,7 +1351,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.length === 0 && (
         <p>
           {activities.length === 0
-            ? `No assets found. You may need to ${userId ? 'refresh' : <a href="/signin">sign in</a> + 'to'} see your assets.`
+            ? `No assets found. You may need to ${userId ? 'refresh' : <a href="/signin">sign in</a>} to see your assets.`
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
@@ -1588,7 +1646,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 )}
 
                 {/* Edit button - only show for images and uploads */}
-                {(activity.AssetType === 'img' || activity.AssetType === 'upl') && (
+                {(activity.AssetType === 'img' ||
+                  activity.AssetType === 'upl') && (
                   <button
                     onClick={() => handleEditImage(activity)}
                     className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
@@ -1630,7 +1689,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onNext={handleNextInModal}
           onPrevious={handlePreviousInModal}
           hasNext={currentModalIndex > 0}
-          hasPrevious={currentModalIndex < filteredAndSortedActivities.length - 1}
+          hasPrevious={
+            currentModalIndex < filteredAndSortedActivities.length - 1
+          }
           onLike={() => {
             const activity = filteredAndSortedActivities[currentModalIndex];
             if (activity && activity.id) {

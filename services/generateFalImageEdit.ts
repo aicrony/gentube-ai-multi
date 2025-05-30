@@ -2,7 +2,7 @@ import { fal, InProgressQueueStatus, QueueStatus } from '@fal-ai/client';
 require('dotenv').config();
 
 const apiEndpoint = 'fal-ai/flux-pro/kontext';
-const falApiWebhook = process.env.FAL_API_WEBHOOK as string;
+const falApiWebhook = process.env.FAL_API_IMAGE_WEBHOOK || process.env.FAL_API_WEBHOOK?.replace('falvideoresult', 'falimageresult') || 'https://gentube.ai/api/falimageresult';
 
 export default async function generateFalImageEdit(
   imageUrl: string,
