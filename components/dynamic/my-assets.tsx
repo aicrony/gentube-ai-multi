@@ -16,7 +16,8 @@ import {
   FaSortAmountDown,
   FaSortAmountUp,
   FaList,
-  FaTimesCircle
+  FaTimesCircle,
+  FaPlayCircle
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 
@@ -801,10 +802,32 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
+    setShowSlideshowSettings(false);
+    setAutoStartSlideshow(false);
+  };
+
+  // Function to start slideshow with the first displayed asset
+  const handleStartSlideshow = () => {
+    if (filteredAndSortedActivities.length > 0) {
+      // Open modal with first asset
+      const firstActivity = filteredAndSortedActivities[0];
+      const url = firstActivity.AssetType === 'vid' 
+        ? firstActivity.CreatedAssetUrl 
+        : firstActivity.CreatedAssetUrl;
+      
+      setCurrentModalIndex(0);
+      setModalMediaUrl(url);
+      setShowSlideshowSettings(true); // Show slideshow options
+      setAutoStartSlideshow(true); // Auto-start the slideshow
+      setIsModalOpen(true);
+      setIsFullScreenModal(false);
+    }
   };
 
   // Add state to track whether modal should open in full screen mode
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
+  const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
+  const [autoStartSlideshow, setAutoStartSlideshow] = useState(false);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -892,6 +915,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             >
               Auto-refreshing...
             </span>
+          )}
+
+          {/* Start Slideshow button */}
+          {filteredAndSortedActivities.length > 0 && (
+            <button
+              onClick={handleStartSlideshow}
+              className="flex items-center gap-1 px-2 py-1 rounded"
+              style={{
+                backgroundColor: 'var(--primary-color)',
+                color: 'white'
+              }}
+              title="Start slideshow with the first asset"
+            >
+              <FaPlayCircle /> Start Slideshow
+            </button>
           )}
 
           {/* Filter toggle button */}
@@ -1435,6 +1473,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               .filter(Boolean) as string[]
           }
           onCreateSlideshow={userId ? handleCreateSlideshow : undefined}
+          autoStartSlideshow={autoStartSlideshow}
+          showSlideshowSettings={showSlideshowSettings}
         />
       )}
     </div>

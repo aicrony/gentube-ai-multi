@@ -53,6 +53,7 @@ interface ModalProps {
   slideshowDirection?: 'forward' | 'backward';
   slideshowInfiniteLoop?: boolean;
   autoStartSlideshow?: boolean;
+  showSlideshowSettings?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -78,7 +79,8 @@ const Modal: React.FC<ModalProps> = ({
   slideshowInterval,
   slideshowDirection,
   slideshowInfiniteLoop,
-  autoStartSlideshow = false
+  autoStartSlideshow = false,
+  showSlideshowSettings = false
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
@@ -124,7 +126,7 @@ const Modal: React.FC<ModalProps> = ({
     }
   );
 
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(showSlideshowSettings);
 
   const [infiniteLoop, setInfiniteLoop] = useState(() => {
     // Priority: 1. Props, 2. LocalStorage, 3. Default false
