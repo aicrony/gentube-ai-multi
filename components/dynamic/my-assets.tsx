@@ -185,29 +185,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, filters.assetType]);
 
-  // Listen for closeModal event from toast clicks
-  useEffect(() => {
-    const handleCloseModal = () => {
-      if (isModalOpen) {
-        setIsModalOpen(false);
-        setModalMediaUrl('');
-        setShowSlideshowSettings(false);
-        setAutoStartSlideshow(false);
-        setShowImageEditPane(false);
-        setEditImageUrl('');
-        setEditPrompt('');
-        setIsEditingImage(false);
-      }
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('closeModal', handleCloseModal);
-
-      return () => {
-        window.removeEventListener('closeModal', handleCloseModal);
-      };
-    }
-  }, [isModalOpen]); // Include isModalOpen as dependency to ensure we have the latest state
 
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
@@ -1067,6 +1044,30 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [editImageUrl, setEditImageUrl] = useState('');
   const [editPrompt, setEditPrompt] = useState('');
   const [isEditingImage, setIsEditingImage] = useState(false);
+
+  // Listen for closeModal event from toast clicks
+  useEffect(() => {
+    const handleCloseModal = () => {
+      if (isModalOpen) {
+        setIsModalOpen(false);
+        setModalMediaUrl('');
+        setShowSlideshowSettings(false);
+        setAutoStartSlideshow(false);
+        setShowImageEditPane(false);
+        setEditImageUrl('');
+        setEditPrompt('');
+        setIsEditingImage(false);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('closeModal', handleCloseModal);
+      
+      return () => {
+        window.removeEventListener('closeModal', handleCloseModal);
+      };
+    }
+  }, [isModalOpen]); // Include isModalOpen as dependency to ensure we have the latest state
 
   if (loading) {
     return <p>Loading...</p>;
