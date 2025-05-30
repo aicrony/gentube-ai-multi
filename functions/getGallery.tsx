@@ -513,15 +513,14 @@ const ImageGallery: React.FC = () => {
       [mediaIndex]: !prev[mediaIndex]
     }));
     if (!showModifyPrompt[mediaIndex]) {
-      setModifyPromptValue('');
+      // Pre-populate with the original prompt when opening the modify form
+      setModifyPromptValue(media[mediaIndex]?.Prompt || '');
     }
   };
 
   const handleModifyPromptSubmit = async (mediaIndex: number) => {
-    const originalPrompt = media[mediaIndex]?.Prompt || '';
-    const fullPrompt =
-      originalPrompt + (modifyPromptValue ? `, ${modifyPromptValue}` : '');
-    await handleCreateImage(fullPrompt, mediaIndex);
+    // Use the modified prompt directly instead of combining with original
+    await handleCreateImage(modifyPromptValue, mediaIndex);
   };
 
   const handleCreateVideo = async (item: GalleryItem) => {
@@ -832,28 +831,20 @@ const ImageGallery: React.FC = () => {
           {showModifyPrompt[currentIndex] && (
             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <h4 className="font-semibold mb-3">Modify Image</h4>
-              <div className="mb-3">
-                <label className="block text-sm font-medium mb-1">
-                  Original Prompt (cannot be changed):
-                </label>
-                <div className="p-3 bg-gray-400 dark:bg-gray-700 dark:text-white rounded border text-sm text-left">
-                  {mediaItem.Prompt || 'No prompt available'}
-                </div>
-              </div>
               <div className="mb-4">
                 <label
                   htmlFor="modify-prompt"
                   className="block text-sm font-medium mb-1"
                 >
-                  Add to prompt:
+                  Edit prompt (modify as needed):
                 </label>
-                <input
+                <textarea
                   id="modify-prompt"
-                  type="text"
                   value={modifyPromptValue}
                   onChange={(e) => setModifyPromptValue(e.target.value)}
-                  placeholder="Add additional details, styles, or modifications..."
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Edit the prompt to modify the image..."
+                  rows={4}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-vertical"
                 />
               </div>
               <div className="flex gap-2 justify-end">
