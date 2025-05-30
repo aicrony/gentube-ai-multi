@@ -1,0 +1,174 @@
+{
+  "name": "Gentube AI",
+  "short_name": "Gentube AI",
+  "description": "Generate and share AI-powered images and videos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Main landing page to create AI images and videos",
+      "url": "/"
+    },
+    {
+      "name": "Gallery",
+      "short_name": "Gallery",
+      "description": "Browse and modify AI-generated content",
+      "url": "/gallery"
+    },
+    {
+      "name": "Personal Tools",
+      "short_name": "Personal",
+      "description": "Personal AI generation tools",
+      "url": "/personal"
+    },
+    {
+      "name": "Business Tools",
+      "short_name": "Business",
+      "description": "Business AI generation tools",
+      "url": "/business"
+    },
+    {
+      "name": "Generate Image",
+      "short_name": "Image",
+      "description": "Create AI-generated images",
+      "url": "/personal/generate-image"
+    },
+    {
+      "name": "Text to Video",
+      "short_name": "Text Video",
+      "description": "Create AI videos from text prompts",
+      "url": "/text-to-video"
+    },
+    {
+      "name": "Upload to Video",
+      "short_name": "Upload Video",
+      "description": "Create AI videos from uploaded images",
+      "url": "/upload-to-video"
+    },
+    {
+      "name": "Image URL to Video",
+      "short_name": "URL Video",
+      "description": "Create AI videos from image URLs",
+      "url": "/image-url-to-video"
+    },
+    {
+      "name": "Animate Photo",
+      "short_name": "Animate",
+      "description": "Animate static AI photos",
+      "url": "/personal/animate-photo"
+    },
+    {
+      "name": "Social Media",
+      "short_name": "Social",
+      "description": "Create social media content from AI images",
+      "url": "/personal/social-media"
+    },
+    {
+      "name": "Story Video",
+      "short_name": "Story",
+      "description": "Create story AI videos",
+      "url": "/personal/story-video"
+    },
+    {
+      "name": "Upload Image",
+      "short_name": "Upload",
+      "description": "Upload and generate AI images",
+      "url": "/personal/upload-image"
+    },
+    {
+      "name": "Manage Images",
+      "short_name": "Manage",
+      "description": "Manage your AI images",
+      "url": "/personal/manage-image"
+    },
+    {
+      "name": "Brand Image",
+      "short_name": "Brand",
+      "description": "Create brand AI images",
+      "url": "/business/brand-image"
+    },
+    {
+      "name": "Business Image",
+      "short_name": "Biz Image",
+      "description": "Create business AI images",
+      "url": "/business/business-image"
+    },
+    {
+      "name": "Logo Creation",
+      "short_name": "Logo",
+      "description": "Create business logos using AI",
+      "url": "/business/logo-creation"
+    },
+    {
+      "name": "Product Image",
+      "short_name": "Product",
+      "description": "Create product images using AI",
+      "url": "/business/product-image"
+    },
+    {
+      "name": "Product Video",
+      "short_name": "Prod Video",
+      "description": "Create product videos using AI",
+      "url": "/business/product-video"
+    },
+    {
+      "name": "Freeflow",
+      "short_name": "Freeflow",
+      "description": "Freeflow AI generation tools",
+      "url": "/freeflow"
+    },
+    {
+      "name": "Freeflow Guided",
+      "short_name": "Guided",
+      "description": "Guided AI freeflow generation",
+      "url": "/freeflow-guided"
+    },
+    {
+      "name": "Account",
+      "short_name": "Account",
+      "description": "Manage your account",
+      "url": "/account"
+    },
+    {
+      "name": "Pricing",
+      "short_name": "Pricing",
+      "description": "View pricing plans for AI image and video generation",
+      "url": "/pricing"
+    },
+    {
+      "name": "Sign In",
+      "short_name": "Sign In",
+      "description": "Sign in to your account",
+      "url": "/signin"
+    },
+    {
+      "name": "Start",
+      "short_name": "Start",
+      "description": "Get started using a guide",
+      "url": "/start"
+    },
+    {
+      "name": "About",
+      "short_name": "About",
+      "description": "Learn about Gentube AI",
+      "url": "/about"
+    },
+    {
+      "name": "Info",
+      "short_name": "Info",
+      "description": "Platform information and mission statement",
+      "url": "/info"
+    }
+  ]
+}

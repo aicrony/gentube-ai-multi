@@ -50,6 +50,13 @@ export default function SlideshowPage({ params }: { params: { id: string } }) {
   // Ref for image caching
   const imageCache = useRef<{[key: string]: HTMLImageElement}>({});
 
+  // Create a list of asset URLs for the service worker to cache
+  const assetUrlsToCache = useMemo(() => {
+    return assets
+      .filter(asset => asset && asset.CreatedAssetUrl)
+      .map(asset => asset.CreatedAssetUrl);
+  }, [assets]);
+
   // Try to get cached data from localStorage
   const getLocalStorageSlideshow = (slideshowId: string) => {
     if (typeof window === 'undefined') return null;
@@ -337,13 +344,6 @@ export default function SlideshowPage({ params }: { params: { id: string } }) {
 
   // Get current asset
   const currentAsset = assets[currentIndex];
-  
-  // Create a list of asset URLs for the service worker to cache
-  const assetUrlsToCache = useMemo(() => {
-    return assets
-      .filter(asset => asset && asset.CreatedAssetUrl)
-      .map(asset => asset.CreatedAssetUrl);
-  }, [assets]);
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
