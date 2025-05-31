@@ -683,7 +683,9 @@ const Modal: React.FC<ModalProps> = ({
         {/* Image Edit panel */}
         {showImageEditPane && (
           <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
-            <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">Edit Image</h3>
+            <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">
+              Edit Image
+            </h3>
 
             <div className="mb-4">
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -730,10 +732,14 @@ const Modal: React.FC<ModalProps> = ({
         {/* Slideshow settings panel */}
         {showSettings && (
           <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
-            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">Slideshow Settings</h3>
+            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">
+              Slideshow Settings
+            </h3>
 
             <div className="mb-2">
-              <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">Interval (seconds)</label>
+              <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">
+                Interval (seconds)
+              </label>
               <input
                 type="range"
                 min="3"
@@ -756,7 +762,9 @@ const Modal: React.FC<ModalProps> = ({
             </div>
 
             <div className="mb-2">
-              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">Direction</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+                Direction
+              </label>
               <div className="flex justify-between">
                 <button
                   onClick={() => {
@@ -782,7 +790,9 @@ const Modal: React.FC<ModalProps> = ({
             {/* Infinite Loop Toggle */}
             <div className="mb-3">
               <div className="flex items-center justify-start">
-                <label className="text-sm pr-2 text-gray-700 dark:text-gray-300">Infinite Loop</label>
+                <label className="text-sm pr-2 text-gray-700 dark:text-gray-300">
+                  Infinite Loop
+                </label>
                 <div
                   className={`relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out rounded-full cursor-pointer ${infiniteLoop ? 'bg-blue-500' : 'bg-gray-400 dark:bg-gray-600'}`}
                   onClick={() => {
@@ -806,7 +816,9 @@ const Modal: React.FC<ModalProps> = ({
             {/* Share Slideshow */}
             {onCreateSlideshow && (
               <div className="mt-4 border-t border-gray-300 dark:border-gray-600 pt-4">
-                <h4 className="text-md font-bold mb-3 text-gray-900 dark:text-white">Sharing</h4>
+                <h4 className="text-md font-bold mb-3 text-gray-900 dark:text-white">
+                  Sharing
+                </h4>
 
                 {!slideshowUrl ? (
                   <button

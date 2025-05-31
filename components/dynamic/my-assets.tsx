@@ -21,7 +21,8 @@ import {
   FaEdit,
   FaGripVertical,
   FaTag,
-  FaFolder
+  FaFolder,
+  FaTrophy
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { useToast } from '@/components/ui/Toast';
@@ -422,7 +423,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     const handleStartDemoSlideshow = (event: CustomEvent) => {
       const demoImage = event.detail?.demoImage;
-      
+
       if (filteredAndSortedActivities.length > 0) {
         // If user has assets, start normal slideshow
         handleStartSlideshow();
@@ -439,11 +440,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     const handleOpenImageEdit = (event: CustomEvent) => {
       const demoImage = event.detail?.demoImage;
-      
+
       if (filteredAndSortedActivities.length > 0) {
         // If user has assets, edit the first image
         const firstImageAsset = filteredAndSortedActivities.find(
-          (activity) => activity.AssetType === 'img' || activity.AssetType === 'upl'
+          (activity) =>
+            activity.AssetType === 'img' || activity.AssetType === 'upl'
         );
         if (firstImageAsset) {
           handleEditImage(firstImageAsset);
@@ -461,13 +463,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     };
 
     window.addEventListener('openGroupsPanel', handleOpenGroupsPanel);
-    window.addEventListener('startDemoSlideshow', handleStartDemoSlideshow as EventListener);
-    window.addEventListener('openImageEdit', handleOpenImageEdit as EventListener);
+    window.addEventListener(
+      'startDemoSlideshow',
+      handleStartDemoSlideshow as EventListener
+    );
+    window.addEventListener(
+      'openImageEdit',
+      handleOpenImageEdit as EventListener
+    );
 
     return () => {
       window.removeEventListener('openGroupsPanel', handleOpenGroupsPanel);
-      window.removeEventListener('startDemoSlideshow', handleStartDemoSlideshow as EventListener);
-      window.removeEventListener('openImageEdit', handleOpenImageEdit as EventListener);
+      window.removeEventListener(
+        'startDemoSlideshow',
+        handleStartDemoSlideshow as EventListener
+      );
+      window.removeEventListener(
+        'openImageEdit',
+        handleOpenImageEdit as EventListener
+      );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredAndSortedActivities]);
@@ -1503,6 +1517,26 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }, 100);
   };
 
+  // Early return if user is not signed in
+  if (!userId) {
+    return (
+      <div className="my-assets-container">
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-lg mb-4">Please sign in to view your assets.</p>
+          <a
+            href="/signin"
+            className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
       <div className="flex justify-between items-center mb-2">
@@ -1853,30 +1887,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       </div>
 
       <div className="flex justify-between items-center mb-2">
-        <p>
-          <strong>*New:</strong> Star your asset to add it to the{' '}
-          <a href={'/gallery'}>public gallery</a>. Heart your asset to be first
-          to love it.
-        </p>
-      </div>
-      <div className="flex justify-between items-center mb-2">
-        <p>
-          <strong>*WIN:</strong> 500 Credits EVERY MONTH for the most hearts in
-          the <a href={'/gallery'}>GenTube.ai gallery</a>. Next winner: June 30,
-          2025.
-        </p>
-      </div>
-      <div className="flex justify-between items-center mb-2">
-        <p>
-          <strong>*BUY MORE CREDITS:</strong> Keep the creative juices flowing!{' '}
-          <a href={'/pricing'}>See Pricing</a>
+        <p className="flex items-center">
+          <FaTrophy className="text-orange-500 mr-1" />
+          <span>
+            * Star your images and win 500 Credits EVERY MONTH for the most
+            hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>. Next
+            winner: June 30, 2025.
+          </span>
         </p>
       </div>
 
       {filteredAndSortedActivities.length === 0 && (
         <p>
           {activities.length === 0
-            ? `No assets found. You may need to ${userId ? 'refresh' : <a href="/signin">sign in</a>} to see your assets.`
+            ? 'No assets found. You may need to refresh to see your assets.'
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}

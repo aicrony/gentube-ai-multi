@@ -187,9 +187,7 @@ export async function getSlideshow(
 /**
  * Gets all slideshows created by a user
  */
-export async function getUserSlideshows(
-  userId: string
-): Promise<{
+export async function getUserSlideshows(userId: string): Promise<{
   success: boolean;
   slideshows?: GcloudSlideshow[];
   error?: string;

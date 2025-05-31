@@ -8,11 +8,9 @@ import {
   FaImage,
   FaPlay,
   FaFolder,
-  FaCog,
   FaStar,
   FaHeart,
   FaTrophy,
-  FaShoppingCart,
   FaExternalLinkAlt
 } from 'react-icons/fa';
 // Don't import useUserId to avoid hook issues - we'll get userId from props or context differently
@@ -24,7 +22,7 @@ interface InfoPanelProps {
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
@@ -75,24 +73,32 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
 
   const handleFeatureClick = (featureTitle: string) => {
     setIsOpen(false); // Close the modal first
-    
+
     switch (featureTitle) {
       case 'Asset Groups':
-        // Dispatch a custom event to trigger groups panel
-        window.dispatchEvent(new CustomEvent('openGroupsPanel'));
+        // Check if user is signed in before opening groups panel
+        if (userId) {
+          window.dispatchEvent(new CustomEvent('openGroupsPanel'));
+        } else {
+          // Redirect to sign in if not authenticated
+          window.location.href = '/signin';
+        }
         break;
       case 'Group Slideshows':
-      case 'Slideshow Settings':
         // Try to start slideshow with demo image if no assets
-        window.dispatchEvent(new CustomEvent('startDemoSlideshow', {
-          detail: { demoImage: '/panda-demo-image.png' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('startDemoSlideshow', {
+            detail: { demoImage: '/panda-demo-image.png' }
+          })
+        );
         break;
       case 'Image Editing':
         // Try to open image editing with demo image if no assets
-        window.dispatchEvent(new CustomEvent('openImageEdit', {
-          detail: { demoImage: '/panda-demo-image.png' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('openImageEdit', {
+            detail: { demoImage: '/panda-demo-image.png' }
+          })
+        );
         break;
       default:
         break;
@@ -103,28 +109,23 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     {
       icon: <FaFolder className="text-blue-500" />,
       title: 'Asset Groups',
-      description:
-        'Organize your assets into custom groups for better management',
+      description: userId
+        ? 'Organize your assets into custom groups for better management'
+        : 'Organize your assets into custom groups for better management (requires sign in)',
       clickable: true
     },
     {
       icon: <FaPlay className="text-green-500" />,
       title: 'Group Slideshows',
-      description: 'Create and share slideshows directly from your asset groups',
-      clickable: true
-    },
-    {
-      icon: <FaCog className="text-gray-500" />,
-      title: 'Slideshow Settings',
       description:
-        'Customize slideshow timing, direction, and infinite loop options',
+        'Create and share slideshows from asset groups - customize timing, direction, and looping',
       clickable: true
     },
     {
       icon: <FaImage className="text-purple-500" />,
       title: 'Image Editing',
       description:
-        'Edit your images directly from the modal with AI-powered modifications',
+        'Edit your images directly with AI-powered modifications',
       clickable: true
     },
     {
@@ -133,7 +134,10 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
       description: (
         <>
           Star your asset to add it to the{' '}
-          <a href="/gallery" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <a
+            href="/gallery"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
             public gallery
           </a>
           . Heart your asset to be first to love it.
@@ -146,22 +150,13 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
       description: (
         <>
           WIN 500 Credits EVERY MONTH for the most hearts in the{' '}
-          <a href="/gallery" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <a
+            href="/gallery"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
             GenTube.ai gallery
           </a>
           . Next winner: June 30, 2025.
-        </>
-      )
-    },
-    {
-      icon: <FaShoppingCart className="text-green-600" />,
-      title: 'More Credits',
-      description: (
-        <>
-          Keep the creative juices flowing!{' '}
-          <a href="/pricing" className="text-blue-600 dark:text-blue-400 hover:underline">
-            See Pricing
-          </a>
         </>
       )
     }
@@ -181,7 +176,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
 
       {/* Info Panel Modal */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4 md:p-6"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -224,13 +219,21 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                           ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors'
                           : ''
                       }`}
-                      onClick={feature.clickable ? () => handleFeatureClick(feature.title) : undefined}
+                      onClick={
+                        feature.clickable
+                          ? () => handleFeatureClick(feature.title)
+                          : undefined
+                      }
                     >
                       <div className="flex-shrink-0 mt-0.5">{feature.icon}</div>
                       <div className="min-w-0 flex-1">
-                        <h4 className={`font-medium text-gray-900 dark:text-white text-sm sm:text-base ${
-                          feature.clickable ? 'text-blue-600 dark:text-blue-400' : ''
-                        }`}>
+                        <h4
+                          className={`font-medium text-gray-900 dark:text-white text-sm sm:text-base ${
+                            feature.clickable
+                              ? 'text-blue-600 dark:text-blue-400'
+                              : ''
+                          }`}
+                        >
                           {feature.title}
                           {feature.clickable && (
                             <FaExternalLinkAlt className="inline ml-1 w-3 h-3 opacity-60" />
