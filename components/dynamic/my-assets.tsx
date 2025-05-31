@@ -23,7 +23,8 @@ import {
   FaGripVertical,
   FaTag,
   FaFolder,
-  FaTrophy
+  FaTrophy,
+  FaTimes
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { useToast } from '@/components/ui/Toast';
@@ -1303,6 +1304,58 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setGroupRefreshKey((prev) => prev + 1);
   };
 
+  // Function to remove an asset from a specific group
+  const handleRemoveFromGroup = async (assetId: string, groupId: string, groupName: string) => {
+    if (!userId || !assetId || !groupId) return;
+
+    try {
+      const response = await fetch('/api/groups/assets', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          groupIds: [groupId],
+          assetIds: [assetId]
+        })
+      });
+
+      if (response.ok) {
+        // Update the local state to remove the group from this asset
+        setActivities((currentActivities) =>
+          currentActivities.map((activity) => {
+            if (activity.id === assetId) {
+              return {
+                ...activity,
+                groups: activity.groups?.filter(group => group.id !== groupId) || []
+              };
+            }
+            return activity;
+          })
+        );
+
+        // Force refresh of GroupManager to update asset counts
+        setGroupRefreshKey((prev) => prev + 1);
+
+        showToast({
+          type: 'image',
+          prompt: `Asset removed from "${groupName}" group`,
+          duration: 3000
+        });
+      } else {
+        throw new Error('Failed to remove asset from group');
+      }
+    } catch (error) {
+      console.error('Error removing asset from group:', error);
+      showToast({
+        type: 'error',
+        prompt: 'Failed to remove asset from group. Please try again.',
+        duration: 5000
+      });
+    }
+  };
+
   // Slideshow preview functions
   const generateSlideshowAssets = () => {
     return filteredAndSortedActivities
@@ -1538,8 +1591,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   return (
     <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
-      {/* Title section - moved above buttons */}
-      <h1 className="text-xl font-bold mb-2 text-left">My {assetTypeTitle} Assets</h1>
+      {/* Title and Refresh section - same line on mobile */}
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-xl font-bold text-left">My {assetTypeTitle} Assets</h1>
+        <button 
+          onClick={handleRefresh}
+          className="md:hidden flex items-center gap-1 px-2 py-1 rounded text-sm"
+          style={{
+            backgroundColor: 'var(--primary-color)',
+            color: 'white'
+          }}
+        >
+          {isAutoRefreshing ? 'Refresh Now' : 'Refresh'}
+        </button>
+      </div>
 
       {/* Buttons section */}
       <div className="flex justify-between items-center mb-2">
@@ -1618,7 +1683,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             <FaFilter /> {showFilters ? 'Hide Filters' : 'Filters'}
           </button>
 
-          <button onClick={handleRefresh}>
+          {/* Desktop refresh button */}
+          <button onClick={handleRefresh} className="hidden md:block">
             {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
           </button>
         </div>
@@ -1630,11 +1696,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           className="flex flex-col md:flex-row gap-4 mb-4 p-4 border rounded"
           style={{
             borderColor: 'var(--border-color)',
-            backgroundColor: 'var(--card-bg-hover)'
+            backgroundColor: 'var(--secondary-color)'
           }}
         >
           {/* Groups Sidebar */}
-          <div className="md:w-64 flex-shrink-0">
+          <div className="md:w-80 flex-shrink-0">
             <GroupManager
               key={groupRefreshKey}
               onGroupSelect={handleGroupSelect}
@@ -2147,7 +2213,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                       {activity.groups.slice(0, 3).map((group) => (
                         <span
                           key={group.id}
-                          className="inline-block px-1 py-0.5 text-xs rounded"
+                          className="inline-flex items-center gap-1 px-1 py-0.5 text-xs rounded"
                           style={{
                             backgroundColor: group.color + '20',
                             color: group.color,
@@ -2156,6 +2222,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                           title={group.name}
                         >
                           {group.name}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (activity.id) {
+                                handleRemoveFromGroup(activity.id, group.id, group.name);
+                              }
+                            }}
+                            className="ml-1 hover:opacity-70 transition-opacity"
+                            title={`Remove from ${group.name}`}
+                          >
+                            <FaTimes className="text-xs" />
+                          </button>
                         </span>
                       ))}
                       {activity.groups.length > 3 && (

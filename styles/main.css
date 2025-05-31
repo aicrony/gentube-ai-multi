@@ -189,6 +189,28 @@ button.danger:hover {
   margin: 0 auto; /* Center the container */
 }
 
+/* Remove left padding on mobile for better space utilization */
+@media (max-width: 768px) {
+  .my-assets-container {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 0.5rem; /* Minimal left padding */
+    padding-right: 0.5rem; /* Minimal right padding */
+  }
+  
+  /* Remove container padding on mobile */
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* General layout padding reduction on mobile */
+  main {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
 /* Theme-aware asset item hover and selected styles */
 .asset-item-hover:hover {
   background-color: var(--card-bg-hover) !important;

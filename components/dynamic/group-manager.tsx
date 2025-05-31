@@ -398,7 +398,7 @@ const GroupManager: React.FC<GroupManagerProps> = ({
             </button>
 
             {!compact && (
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1">
                 {group.assetCount && group.assetCount > 0 && (
                   <>
                     <button
