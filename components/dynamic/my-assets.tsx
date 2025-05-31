@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import Image from 'next/image';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import {
@@ -1521,9 +1522,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   if (!userId) {
     return (
       <div className="my-assets-container">
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        </div>
+        <h1 className="text-xl font-bold mb-2 text-left">My {assetTypeTitle} Assets</h1>
         <div className="text-center py-8">
           <p className="text-lg mb-4">Please sign in to view your assets.</p>
           <a
@@ -1539,18 +1538,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   return (
     <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-xl font-bold">My {assetTypeTitle} Assets</h1>
-        <div className="flex items-center gap-2">
-          {isAutoRefreshing && (
-            <span
-              className="text-xs mr-2"
-              style={{ color: 'var(--primary-color)' }}
-            >
-              Auto-refreshing...
-            </span>
-          )}
+      {/* Title section - moved above buttons */}
+      <h1 className="text-xl font-bold mb-2 text-left">My {assetTypeTitle} Assets</h1>
 
+      {/* Buttons section */}
+      <div className="flex justify-between items-center mb-2">
+        {/* Left side buttons */}
+        <div className="flex items-center gap-2">
           {/* Start Slideshow button */}
           {filteredAndSortedActivities.length > 0 && (
             <button
@@ -1564,6 +1558,33 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             >
               <FaPlayCircle /> Start Slideshow
             </button>
+          )}
+
+          {/* Add Group Assets button - only show when groups panel is closed */}
+          {!showGroupsPanel && (
+            <button
+              onClick={handleBulkModeToggle}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
+                bulkMode
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <FaTag />
+              {bulkMode ? 'Exit Add Mode' : 'Add Group Assets'}
+            </button>
+          )}
+        </div>
+
+        {/* Right side buttons */}
+        <div className="flex items-center gap-2">
+          {isAutoRefreshing && (
+            <span
+              className="text-xs mr-2"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              Auto-refreshing...
+            </span>
           )}
 
           {/* Groups toggle button */}
@@ -1638,7 +1659,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }`}
                 >
                   <FaTag />
-                  {bulkMode ? 'Exit Add Mode' : 'Add Assets'}
+                  {bulkMode ? 'Exit Add Mode' : 'Add Group Assets'}
                 </button>
 
                 {bulkMode && (
@@ -1678,46 +1699,30 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         </div>
       )}
 
-      {/* Quick bulk actions when groups panel is closed */}
-      {!showGroupsPanel && (
+      {/* Quick bulk actions when groups panel is closed and bulk mode is active */}
+      {!showGroupsPanel && bulkMode && (
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <button
-              onClick={handleBulkModeToggle}
-              className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
-                bulkMode
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              onClick={handleSelectAllVisible}
+              className="text-blue-600 hover:text-blue-700 text-sm"
             >
-              <FaTag />
-              {bulkMode ? 'Exit Add Mode' : 'Add Assets'}
+              Select All Visible
             </button>
-
-            {bulkMode && (
-              <>
-                <button
-                  onClick={handleSelectAllVisible}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  Select All Visible
-                </button>
-                <button
-                  onClick={handleClearSelection}
-                  className="text-gray-600 hover:text-gray-700 text-sm"
-                >
-                  Clear Selection
-                </button>
-                {selectedAssets.length > 0 && (
-                  <button
-                    onClick={() => handleGroupManager()}
-                    className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                  >
-                    <FaFolder />
-                    Manage Groups ({selectedAssets.length})
-                  </button>
-                )}
-              </>
+            <button
+              onClick={handleClearSelection}
+              className="text-gray-600 hover:text-gray-700 text-sm"
+            >
+              Clear Selection
+            </button>
+            {selectedAssets.length > 0 && (
+              <button
+                onClick={() => handleGroupManager()}
+                className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+              >
+                <FaFolder />
+                Manage Groups ({selectedAssets.length})
+              </button>
             )}
           </div>
 
@@ -1734,6 +1739,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Group filter indicator when groups panel is closed and not in bulk mode */}
+      {!showGroupsPanel && !bulkMode && filters.groupId && (
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-600">
+              Showing assets in selected group
+            </div>
+            <button
+              onClick={() => handleGroupSelect(null)}
+              className="text-xs text-blue-600 hover:text-blue-700"
+            >
+              Clear Filter
+            </button>
+          </div>
         </div>
       )}
 
@@ -2010,7 +2032,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               activity.AssetSource === 'none' ? (
                 <FaPlay className="w-8 h-8 text-gray-500" />
               ) : (
-                <img
+                <Image
                   src={
                     activity.AssetType === 'vid'
                       ? activity.AssetSource
@@ -2026,6 +2048,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }
                   alt="Thumbnail"
                   className="w-full h-full object-contain"
+                  width={200}
+                  height={200}
+                  style={{ width: '100%', height: '100%' }}
+                  unoptimized
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
                       // Hide the broken image

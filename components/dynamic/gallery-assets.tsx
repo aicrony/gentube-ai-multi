@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import {
   FaExternalLinkAlt,
   FaCopy,
@@ -264,7 +265,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
             {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
               <FaPlay className="w-8 h-8 text-gray-500" />
             ) : (
-              <img
+              <Image
                 src={
                   activity.AssetType === 'vid'
                     ? activity.AssetSource
@@ -280,6 +281,8 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                 }
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover"
+                width={64}
+                height={64}
               />
             )}
           </a>

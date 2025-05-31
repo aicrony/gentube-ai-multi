@@ -124,8 +124,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     {
       icon: <FaImage className="text-purple-500" />,
       title: 'Image Editing',
-      description:
-        'Edit your images directly with AI-powered modifications',
+      description: 'Edit your images directly with AI-powered modifications',
       clickable: true
     },
     {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import {
   FaExpand,
   FaCompress,
@@ -1015,12 +1016,18 @@ const Modal: React.FC<ModalProps> = ({
                 );
               } else {
                 return (
-                  <img
+                  <Image
                     src={mediaUrl}
                     alt="Media"
+                    width={800}
+                    height={600}
+                    unoptimized
                     className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
-                    style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)' }}
-                    loading="eager"
+                    style={{
+                      boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)',
+                      objectFit: 'contain'
+                    }}
+                    priority
                   />
                 );
               }
@@ -1062,11 +1069,14 @@ const Modal: React.FC<ModalProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <img
+                      <Image
                         src={asset.thumbnailUrl || asset.url}
                         alt={`Slideshow item ${index + 1}`}
+                        width={64}
+                        height={64}
+                        unoptimized
                         className="w-16 h-16 object-cover rounded"
-                        loading="lazy"
+                        style={{ objectFit: 'cover' }}
                       />
                     )}
 

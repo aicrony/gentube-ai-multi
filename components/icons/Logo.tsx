@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 const Logo = ({ ...props }) => (
   <div
     style={{
@@ -7,7 +9,7 @@ const Logo = ({ ...props }) => (
       padding: '10px'
     }}
   >
-    <img alt={'logo'} src="/logo.png" {...props} />
+    <Image alt={'logo'} src="/logo.png" width={40} height={40} {...props} />
   </div>
 );
 

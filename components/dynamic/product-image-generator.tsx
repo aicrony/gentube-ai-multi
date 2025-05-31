@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -241,10 +242,19 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
               onClick={() => setIsProductModalOpen(true)}
             >
               {selectedProductImage ? (
-                <img
+                <Image
                   src={selectedProductImage}
                   alt="Selected product"
                   className="max-w-full max-h-full object-contain"
+                  width={96}
+                  height={96}
+                  style={{
+                    width: 'auto',
+                    height: 'auto',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
+                  }}
+                  unoptimized
                 />
               ) : (
                 <div className="text-sm text-center">
@@ -270,10 +280,19 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
               onClick={() => setIsBackgroundModalOpen(true)}
             >
               {selectedBackgroundImage ? (
-                <img
+                <Image
                   src={selectedBackgroundImage}
                   alt="Selected background"
                   className="max-w-full max-h-full object-contain"
+                  width={96}
+                  height={96}
+                  style={{
+                    width: 'auto',
+                    height: 'auto',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
+                  }}
+                  unoptimized
                 />
               ) : (
                 <div className="text-sm text-center">

@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Button from '@/components/ui/Button';
@@ -273,10 +274,14 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
         <Label className="block mb-2 font-medium">Select an image:</Label>
         {selectedImage ? (
           <div className="relative inline-block">
-            <img
+            <Image
               src={selectedImage}
               alt="Selected media"
+              width={200}
+              height={200}
+              unoptimized
               className="max-w-full h-auto max-h-64 rounded-md border border-gray-300"
+              style={{ objectFit: 'contain' }}
             />
             <button
               onClick={clearSelectedImage}

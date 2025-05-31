@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import { handleApiError } from '@/utils/apiErrorHandler';
 
@@ -213,7 +214,14 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
           {previewImage ? (
             // Show preview if available
             <div className="upload-preview">
-              <img src={previewImage} alt="Upload preview" />
+              <Image
+                src={previewImage}
+                alt="Upload preview"
+                width={200}
+                height={200}
+                unoptimized
+                style={{ objectFit: 'contain' }}
+              />
             </div>
           ) : (
             // Show upload icon if no preview
@@ -266,7 +274,14 @@ function Uploader({ onImageUploaded, userId }: UploaderProps) {
         // Show success UI when upload completes
         <div className="upload-dropzone">
           <div className="upload-preview">
-            <img src={previewImage || ''} alt="Uploaded image" />
+            <Image
+              src={previewImage || ''}
+              alt="Uploaded image"
+              width={200}
+              height={200}
+              unoptimized
+              style={{ objectFit: 'contain' }}
+            />
           </div>
           <div className="upload-success">
             <svg

@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -195,7 +196,14 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
                   Open Image <br /> {JSON.stringify(imageData.code)}
                 </a>
               </div>
-              <img src={imageData} alt="Generated Image" />
+              <Image
+                src={imageData}
+                alt="Generated Image"
+                width={512}
+                height={512}
+                style={{ width: 'auto', height: 'auto' }}
+                unoptimized
+              />
               {renderVideoButton()}
             </div>
           )}
