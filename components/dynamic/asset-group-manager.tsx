@@ -269,7 +269,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <FaTag />
-            <h2 className="text-lg font-semibold">Manage Groups</h2>
+            <h2 className="text-lg font-semibold">Add to Group</h2>
           </div>
           <button
             onClick={onClose}

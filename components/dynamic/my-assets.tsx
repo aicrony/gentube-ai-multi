@@ -1396,28 +1396,50 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const handleSlideshowAssetReorder = (fromIndex: number, toIndex: number) => {
-    // For now, we'll just show a message that reordering affects the slideshow
-    // In a full implementation, this would update the order in the backend
     console.log(
-      `Moving asset from position ${fromIndex} to position ${toIndex}`
+      `Moving slideshow asset from position ${fromIndex} to position ${toIndex}`
     );
 
-    // Temporarily reorder the local state for immediate feedback
-    const newActivities = [...filteredAndSortedActivities];
-    const [movedItem] = newActivities.splice(fromIndex, 1);
-    newActivities.splice(toIndex, 0, movedItem);
+    // Since slideshow assets are in reverse order (.reverse() in generateSlideshowAssets),
+    // we need to convert the slideshow indices back to the original filteredAndSortedActivities indices
+    const totalAssets = filteredAndSortedActivities.length;
+    const originalFromIndex = totalAssets - 1 - fromIndex;
+    const originalToIndex = totalAssets - 1 - toIndex;
 
-    // Update current modal index if needed
-    if (currentModalIndex === fromIndex) {
-      setCurrentModalIndex(toIndex);
-    } else if (currentModalIndex > fromIndex && currentModalIndex <= toIndex) {
+    console.log(
+      `Converting to original indices: ${originalFromIndex} -> ${originalToIndex}`
+    );
+
+    // Reorder the activities state for immediate visual feedback
+    const newActivities = [...filteredAndSortedActivities];
+    const [movedItem] = newActivities.splice(originalFromIndex, 1);
+    newActivities.splice(originalToIndex, 0, movedItem);
+
+    // Update the main activities state to reflect the new order
+    setActivities((currentActivities) => {
+      const updatedActivities = [...currentActivities];
+      
+      // Find and update the items in the main activities array
+      const filteredIds = newActivities.map(activity => activity.id).filter(Boolean);
+      const reorderedActivities = updatedActivities.map(activity => {
+        const indexInFiltered = filteredIds.indexOf(activity.id);
+        if (indexInFiltered !== -1) {
+          return newActivities[indexInFiltered];
+        }
+        return activity;
+      });
+      
+      return reorderedActivities;
+    });
+
+    // Update current modal index to follow the moved item
+    if (currentModalIndex === originalFromIndex) {
+      setCurrentModalIndex(originalToIndex);
+    } else if (currentModalIndex > originalFromIndex && currentModalIndex <= originalToIndex) {
       setCurrentModalIndex(currentModalIndex - 1);
-    } else if (currentModalIndex < fromIndex && currentModalIndex >= toIndex) {
+    } else if (currentModalIndex < originalFromIndex && currentModalIndex >= originalToIndex) {
       setCurrentModalIndex(currentModalIndex + 1);
     }
-
-    // For a complete implementation, you would call an API to persist this order
-    // handleRefresh(); // Refresh to get the updated order from the server
   };
 
   // Drag and drop handlers
@@ -1624,24 +1646,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               }}
               title="Start slideshow with the first asset"
             >
-              <FaPlayCircle /> Start Slideshow
+              <FaPlayCircle /> Slideshow
             </button>
           )}
 
-          {/* Add Group Assets button - only show when groups panel is closed */}
-          {!showGroupsPanel && (
-            <button
-              onClick={handleBulkModeToggle}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                bulkMode
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <FaTag />
-              {bulkMode ? 'Exit Add Mode' : 'Add Group Assets'}
-            </button>
-          )}
         </div>
 
         {/* Right side buttons */}
@@ -1728,7 +1736,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }`}
                 >
                   <FaTag />
-                  {bulkMode ? 'Exit Add Mode' : 'Add Group Assets'}
+                  {bulkMode ? 'Exit Add Mode' : 'Add Assets to a Group'}
                 </button>
 
                 {bulkMode && (
@@ -1751,7 +1759,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                         className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
                       >
                         <FaFolder />
-                        Manage Groups ({selectedAssets.length})
+                        Add to Group ({selectedAssets.length})
                       </button>
                     )}
                   </>
@@ -1764,6 +1772,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 </div>
               )}
             </div>
+
+            {bulkMode && (
+              <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-700 dark:text-blue-300">
+                <strong>Instructions:</strong> Check the box next to the images that you want to add to a group
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1790,7 +1804,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
               >
                 <FaFolder />
-                Manage Groups ({selectedAssets.length})
+                Add to Group ({selectedAssets.length})
               </button>
             )}
           </div>
@@ -2392,7 +2406,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   <button
                     onClick={() => handleGroupManager([activity.id!])}
                     className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
-                    title="Manage Groups"
+                    title="Add to Group"
                   >
                     <FaTag className="text-sm" />
                   </button>
