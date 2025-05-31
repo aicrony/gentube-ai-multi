@@ -101,10 +101,11 @@ export async function getGroupsForAssets(
     const [groups] = await datastore.get(groupKeys);
 
     // Create a map of group ID to group data
+    // Fix: Use the actual group key ID rather than array index to avoid mismatches
     const groupMap: { [groupId: string]: UserGroup } = {};
-    groups.forEach((group: any, index: number) => {
-      if (group) {
-        const groupId = groupIds[index];
+    groups.forEach((group: any) => {
+      if (group && group[datastore.KEY]) {
+        const groupId = group[datastore.KEY].id.toString();
         groupMap[groupId] = {
           id: groupId,
           name: group.name,
@@ -126,7 +127,7 @@ export async function getGroupsForAssets(
 
     for (const membership of memberships) {
       const assetId = membership.assetId;
-      const groupId = membership.groupId;
+      const groupId = membership.groupId.toString(); // Ensure string type consistency
 
       if (groupMap[groupId] && assetGroupMap[assetId]) {
         assetGroupMap[assetId].push(groupMap[groupId]);

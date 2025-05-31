@@ -305,6 +305,55 @@ const Modal: React.FC<ModalProps> = ({
 
   const isVideo = mediaUrl.endsWith('.mp4');
 
+  // Helper function to clean up old cache entries
+  const cleanupCache = React.useCallback(async (isVideo: boolean) => {
+    try {
+      const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
+      const cache = await caches.open(cacheName);
+      const requests = await cache.keys();
+      
+      // Remove oldest entries (remove first 25% of cached items)
+      const itemsToRemove = Math.ceil(requests.length * 0.25);
+      const toRemove = requests.slice(0, itemsToRemove);
+      
+      await Promise.all(toRemove.map(request => cache.delete(request)));
+      console.log(`Cleaned up ${itemsToRemove} cached items`);
+    } catch (error) {
+      console.warn('Error during cache cleanup:', error);
+    }
+  }, []);
+
+  // Helper function to safely add to cache with quota management
+  const safeCacheAdd = React.useCallback(async (url: string, isVideo: boolean) => {
+    if (!('caches' in window)) return;
+    
+    try {
+      const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
+      const cache = await caches.open(cacheName);
+      
+      // Check if already cached to avoid duplicate storage
+      const cached = await cache.match(url);
+      if (cached) return;
+      
+      await cache.add(url);
+    } catch (error: any) {
+      if (error?.name === 'QuotaExceededError') {
+        console.warn('Cache quota exceeded, attempting cleanup...');
+        await cleanupCache(isVideo);
+        // Try once more after cleanup
+        try {
+          const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
+          const cache = await caches.open(cacheName);
+          await cache.add(url);
+        } catch (retryError) {
+          console.warn('Failed to cache after cleanup:', retryError);
+        }
+      } else {
+        console.warn('Failed to cache asset:', error);
+      }
+    }
+  }, [cleanupCache]);
+
   // Preload the next image if we're in a slideshow
   useEffect(() => {
     if (
@@ -325,19 +374,11 @@ const Modal: React.FC<ModalProps> = ({
         currentIndex + 1 < currentAssets.length &&
         onNext
       ) {
-        // We need to somehow get the URL of the next asset, but we don't have direct access
-        // Instead, let's use the service worker to preload the current image
-        // which will make navigation faster even if we can't preload the exact next one
-        if ('serviceWorker' in navigator && 'caches' in window) {
-          caches.open('slideshow-images-v2').then((cache) => {
-            cache.add(mediaUrl).catch((err) => {
-              console.warn('Failed to cache current asset:', err);
-            });
-          });
-        }
+        // Use safe caching to preload current image
+        safeCacheAdd(mediaUrl, false);
       }
     }
-  }, [mediaUrl, currentAssets, currentItemId, isVideo, hasNext, onNext]);
+  }, [mediaUrl, currentAssets, currentItemId, isVideo, hasNext, onNext, safeCacheAdd]);
 
   const toggleSlideshow = () => {
     setIsSlideshow(!isSlideshow);
@@ -463,8 +504,8 @@ const Modal: React.FC<ModalProps> = ({
   const handleDownload = async () => {
     try {
       // Determine file extension based on media type
-      const isVideo = mediaUrl.endsWith('.mp4');
-      const fileExtension = isVideo ? '.mp4' : '.jpg';
+      const isVideoFile = mediaUrl.endsWith('.mp4');
+      const fileExtension = isVideoFile ? '.mp4' : '.jpg';
       const fileName = `gentube-download${fileExtension}`;
 
       // Try to get the file from cache first if service worker is active
@@ -472,7 +513,7 @@ const Modal: React.FC<ModalProps> = ({
       if ('caches' in window) {
         try {
           const cache = await caches.open(
-            isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2'
+            isVideoFile ? 'slideshow-assets-v2' : 'slideshow-images-v2'
           );
           const cachedResponse = await cache.match(mediaUrl);
 
@@ -491,16 +532,25 @@ const Modal: React.FC<ModalProps> = ({
         const response = await fetch(mediaUrl);
         blob = await response.blob();
 
-        // Add to cache for future use
+        // Use safe caching to store for future use
         if ('caches' in window) {
           try {
-            const cache = await caches.open(
-              isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2'
-            );
-            const response = new Response(blob);
-            await cache.put(mediaUrl, response);
-          } catch (cacheError) {
-            console.warn('Error adding to cache:', cacheError);
+            const cacheName = isVideoFile ? 'slideshow-assets-v2' : 'slideshow-images-v2';
+            const cache = await caches.open(cacheName);
+            
+            // Check if already cached to avoid duplicate storage
+            const cached = await cache.match(mediaUrl);
+            if (!cached) {
+              const responseClone = new Response(blob.slice());
+              await cache.put(mediaUrl, responseClone);
+            }
+          } catch (cacheError: any) {
+            if (cacheError?.name === 'QuotaExceededError') {
+              console.warn('Cache quota exceeded during download, attempting cleanup...');
+              await cleanupCache(isVideoFile);
+            } else {
+              console.warn('Error adding to cache during download:', cacheError);
+            }
           }
         }
       }
@@ -991,18 +1041,8 @@ const Modal: React.FC<ModalProps> = ({
           {/* Media content */}
           <div className="flex justify-center items-center max-w-full">
             {(() => {
-              // Cache in service worker if available
-              if ('serviceWorker' in navigator && 'caches' in window) {
-                // Cache image or video in the appropriate cache
-                const cacheName = isVideo
-                  ? 'slideshow-assets-v2'
-                  : 'slideshow-images-v2';
-                caches.open(cacheName).then((cache) => {
-                  cache.add(mediaUrl).catch((err) => {
-                    console.warn('Failed to cache asset in modal:', err);
-                  });
-                });
-              }
+              // Use safe caching for the current media
+              safeCacheAdd(mediaUrl, isVideo);
 
               if (isVideo) {
                 return (
@@ -1025,7 +1065,9 @@ const Modal: React.FC<ModalProps> = ({
                     className={`${isFullScreen ? 'max-h-screen max-w-screen' : 'max-w-full max-h-[70vh]'} object-contain ${mediaUrl.endsWith('.png') ? 'bg-checkerboard' : ''}`}
                     style={{
                       boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      width: 'auto',
+                      height: 'auto'
                     }}
                     priority
                   />
@@ -1076,7 +1118,7 @@ const Modal: React.FC<ModalProps> = ({
                         height={64}
                         unoptimized
                         className="w-16 h-16 object-cover rounded"
-                        style={{ objectFit: 'cover' }}
+                        style={{ objectFit: 'cover', width: '64px', height: '64px' }}
                       />
                     )}
 

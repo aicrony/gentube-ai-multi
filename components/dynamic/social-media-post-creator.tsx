@@ -281,7 +281,7 @@ export const SocialMediaPostCreator: React.FC<SocialMediaPostCreatorProps> = ({
               height={200}
               unoptimized
               className="max-w-full h-auto max-h-64 rounded-md border border-gray-300"
-              style={{ objectFit: 'contain' }}
+              style={{ objectFit: 'contain', width: 'auto', height: 'auto' }}
             />
             <button
               onClick={clearSelectedImage}

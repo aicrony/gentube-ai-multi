@@ -2050,7 +2050,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   className="w-full h-full object-contain"
                   width={200}
                   height={200}
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: 'auto', height: 'auto' }}
                   unoptimized
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
