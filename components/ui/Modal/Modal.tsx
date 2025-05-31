@@ -716,6 +716,10 @@ const Modal: React.FC<ModalProps> = ({
                   onToggleImageEditPane();
                 }
                 setShowSettings(false);
+                // Exit full-screen mode if enabled so user can see reorder interface
+                if (isFullScreen) {
+                  setIsFullScreen(false);
+                }
                 setShowReorderMode(!showReorderMode);
               }}
               className={`${showReorderMode ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}

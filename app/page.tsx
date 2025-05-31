@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { FaPalette } from 'react-icons/fa';
 import { VideoFromUrlDynamicButton } from '@/components/dynamic/video-from-url-button-event';
 import { ImageDynamicButton } from '@/components/dynamic/image-button-event';
 import { VideoFromTextDynamicButton } from '@/components/dynamic/video-from-text-button-event';
@@ -149,6 +150,16 @@ export default function Home() {
                 WIN 500 Free Credits for having the most{' '}
                 <a href={'/gallery'}>gallery hearts</a> EVERY MONTH
               </p>
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <FaPalette className="text-purple-500" />
+                <p>
+                  Keep the creative juices flowing!{' '}
+                  <Link href="/pricing" className="text-blue-500 hover:text-blue-600 underline">
+                    See pricing
+                  </Link>
+                  .
+                </p>
+              </div>
             </div>
             <div className="grid gap-4">
               <nav className="flex flex-wrap justify-center gap-1">

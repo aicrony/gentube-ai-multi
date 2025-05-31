@@ -585,14 +585,61 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
-  const handleDownload = async (url: string, assetType: string) => {
+  const handleDownload = async (activity: UserActivity) => {
     try {
-      // For videos and images, determine file extension
-      const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
-      const fileName = `asset${fileExtension}`;
+      const { CreatedAssetUrl: url, AssetType: assetType, Prompt: prompt, id } = activity;
+      
+      // Generate filename based on prompt (first 15 chars, alphanumeric only, spaces to dashes)
+      const generateFileName = (prompt: string, assetType: string, assetId?: string): string => {
+        const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
+        
+        if (prompt && prompt.trim()) {
+          // Take first 15 characters of prompt
+          let baseName = prompt.substring(0, 15);
+          // Keep only letters, numbers, and spaces
+          baseName = baseName.replace(/[^a-zA-Z0-9\s]/g, '');
+          // Replace spaces with dashes and trim
+          baseName = baseName.replace(/\s+/g, '-').trim();
+          // Remove leading/trailing dashes
+          baseName = baseName.replace(/^-+|-+$/g, '');
+          
+          return baseName ? `${baseName}${fileExtension}` : `asset${fileExtension}`;
+        } else {
+          // Fallback for uploads or assets without prompts
+          const fallbackName = assetId ? `asset-${assetId.substring(0, 8)}` : 'asset';
+          return `${fallbackName}${fileExtension}`;
+        }
+      };
 
-      // Fetch the file as a blob
-      const response = await fetch(url);
+      const fileName = generateFileName(prompt, assetType, id);
+
+      // For uploaded assets, try different approaches to handle potential CORS issues
+      if (assetType === 'upl') {
+        try {
+          // First try direct download link approach
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          return;
+        } catch (directError) {
+          console.log('Direct download failed, trying fetch approach:', directError);
+        }
+      }
+
+      // Standard fetch approach for generated assets and fallback for uploads
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const blob = await response.blob();
 
       // Create an object URL for the blob
@@ -612,7 +659,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert('Failed to download the asset');
+      alert('Failed to download the asset. The file may not be accessible or may have been moved.');
     }
   };
 
@@ -2379,14 +2426,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   </button>
                 )}
                 <button
-                  onClick={() =>
-                    handleDownload(
-                      activity.AssetType === 'vid'
-                        ? activity.CreatedAssetUrl
-                        : activity.CreatedAssetUrl,
-                      activity.AssetType
-                    )
-                  }
+                  onClick={() => handleDownload(activity)}
                   className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Download Asset"
                 >
