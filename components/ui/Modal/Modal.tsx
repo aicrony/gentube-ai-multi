@@ -633,19 +633,6 @@ const Modal: React.FC<ModalProps> = ({
             </button>
           )}
 
-          {/* Share button - only shown if the feature is enabled */}
-          {showShareButton && onShare && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onShare) onShare();
-              }}
-              className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
-              title="Share"
-            >
-              <FaShare />
-            </button>
-          )}
 
           {/* Fullscreen toggle button */}
           <button

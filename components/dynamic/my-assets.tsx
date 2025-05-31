@@ -2253,10 +2253,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
           }
           currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
-          onShare={() =>
-            handleShareUrl(filteredAndSortedActivities[currentModalIndex])
-          }
-          showShareButton={!!filteredAndSortedActivities[currentModalIndex]?.id}
           onJumpToFirst={handleJumpToLastImage}
           onJumpToLast={handleJumpToFirstImage}
           currentAssets={
