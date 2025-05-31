@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserAssets } from '@/utils/gcloud/userAssets';
+import { getUserAssetsWithGroups } from '@/utils/gcloud/groupManager';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -8,6 +9,8 @@ export async function GET(request: NextRequest) {
   const limit = searchParams.get('limit') || '10';
   const offset = searchParams.get('offset') || '0';
   const assetType = searchParams.get('assetType');
+  const groupId = searchParams.get('groupId'); // New parameter for group filtering
+  const includeGroups = searchParams.get('includeGroups') === 'true'; // Whether to include group info
 
   console.log('USER-IP: ' + userIp);
   
@@ -20,13 +23,28 @@ export async function GET(request: NextRequest) {
   
   if (userIp !== 'unknown') {
     try {
-      const assets = await getUserAssets(
-        userId,
-        userIp,
-        Number(limit),
-        Number(offset),
-        assetType || undefined
-      );
+      let assets;
+      
+      if (groupId || includeGroups) {
+        // Use enhanced function that includes group information
+        assets = await getUserAssetsWithGroups(
+          userId,
+          userIp,
+          Number(limit),
+          Number(offset),
+          assetType || undefined,
+          groupId || undefined
+        );
+      } else {
+        // Use original function for backward compatibility
+        assets = await getUserAssets(
+          userId,
+          userIp,
+          Number(limit),
+          Number(offset),
+          assetType || undefined
+        );
+      }
       
       return NextResponse.json({ assets });
     } catch (error) {

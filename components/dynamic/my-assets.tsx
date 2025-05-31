@@ -19,10 +19,14 @@ import {
   FaTimesCircle,
   FaPlayCircle,
   FaEdit,
-  FaGripVertical
+  FaGripVertical,
+  FaTag,
+  FaFolder
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { useToast } from '@/components/ui/Toast';
+import GroupManager from './group-manager';
+import AssetGroupManager from './asset-group-manager';
 
 interface UserActivity {
   id?: string;
@@ -34,6 +38,11 @@ interface UserActivity {
   SubscriptionTier?: number;
   isInGallery?: boolean; // Helper property
   likesCount?: number; // Added for filtering by heart count
+  groups?: Array<{
+    id: string;
+    name: string;
+    color?: string;
+  }>; // Groups this asset belongs to
 }
 
 interface AssetLikeInfo {
@@ -123,11 +132,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [filters, setFilters] = useState({
     assetType: assetType || '', // initialize with prop if provided
     inGallery: false,
-    minHearts: 0
+    minHearts: 0,
+    groupId: null as string | null // Add group filter
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
   const [showFilters, setShowFilters] = useState(false);
+
+  // Group management state
+  const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
+  const [isGroupManagerOpen, setIsGroupManagerOpen] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [showGroupsPanel, setShowGroupsPanel] = useState(false);
 
   const limit = 10;
   const promptLength = 100;
@@ -137,10 +153,26 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       try {
         // Support comma-separated asset types - use the filters state
         const assetTypeParam = filters.assetType || '';
+        const groupIdParam = filters.groupId || '';
+        
+        // Build query parameters
+        const params = new URLSearchParams({
+          userId: userId ? userId : 'none',
+          userIp: userIp ? userIp : 'none',
+          limit: limit.toString(),
+          offset: (page * limit).toString(),
+          includeGroups: 'true' // Always include group information
+        });
+        
+        if (assetTypeParam) {
+          params.append('assetType', assetTypeParam);
+        }
+        
+        if (groupIdParam) {
+          params.append('groupId', groupIdParam);
+        }
 
-        const response = await fetch(
-          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
-        );
+        const response = await fetch(`/api/getUserAssets?${params.toString()}`);
         if (!response.ok) {
           console.log('Error fetching user assets.');
           throw new Error('Failed to fetch user assets');
@@ -184,7 +216,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Reset to page 0 when filters change
     setPage(0);
     fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, filters.assetType]);
+  }, [userId, userIp, page, filters.assetType, filters.groupId]);
 
 
   // Process and filter/sort the activities based on user preferences
@@ -1143,10 +1175,109 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setFilters({
       assetType: '',
       inGallery: false,
-      minHearts: 0
+      minHearts: 0,
+      groupId: null
     });
     setSearchTerm('');
     setSortDirection('desc');
+  };
+
+  // Group management functions
+  const handleGroupSelect = (groupId: string | null) => {
+    setFilters(prev => ({ ...prev, groupId }));
+    setPage(0); // Reset pagination when changing groups
+  };
+
+  const handleBulkModeToggle = () => {
+    setBulkMode(!bulkMode);
+    setSelectedAssets([]); // Clear selection when toggling
+  };
+
+  const handleAssetSelect = (assetId: string) => {
+    setSelectedAssets(prev => {
+      if (prev.includes(assetId)) {
+        return prev.filter(id => id !== assetId);
+      } else {
+        return [...prev, assetId];
+      }
+    });
+  };
+
+  const handleSelectAllVisible = () => {
+    const visibleAssetIds = filteredAndSortedActivities
+      .map(activity => activity.id)
+      .filter(Boolean) as string[];
+    
+    setSelectedAssets(visibleAssetIds);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedAssets([]);
+  };
+
+  const handleGroupManager = (assetIds?: string[]) => {
+    if (assetIds) {
+      setSelectedAssets(assetIds);
+    }
+    setIsGroupManagerOpen(true);
+  };
+
+  const handleGroupManagerUpdate = () => {
+    // Refresh the asset list to show updated group information
+    fetchUserActivities(userId, userIp);
+    setSelectedAssets([]);
+  };
+
+  // Slideshow preview functions
+  const generateSlideshowAssets = () => {
+    return filteredAndSortedActivities.slice().reverse().map((activity) => ({
+      id: activity.id || '',
+      url: activity.CreatedAssetUrl,
+      thumbnailUrl: activity.AssetType === 'vid' ? activity.AssetSource : activity.CreatedAssetUrl,
+      assetType: activity.AssetType
+    }));
+  };
+
+  const handleSlideshowAssetClick = (index: number) => {
+    if (index >= 0 && index < filteredAndSortedActivities.length) {
+      // Convert thumbnail index (creation order) to modal index (newest first)
+      const modalIndex = filteredAndSortedActivities.length - 1 - index;
+      const activity = filteredAndSortedActivities[modalIndex];
+      const url = activity.AssetType === 'vid' 
+        ? activity.CreatedAssetUrl 
+        : activity.CreatedAssetUrl;
+      
+      setCurrentModalIndex(modalIndex);
+      setModalMediaUrl(url);
+
+      // Set edit image URL for images and uploads so edit functionality works
+      if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
+        setEditImageUrl(activity.CreatedAssetUrl);
+      }
+    }
+  };
+
+  const handleSlideshowAssetReorder = (fromIndex: number, toIndex: number) => {
+    // For now, we'll just show a message that reordering affects the slideshow
+    // In a full implementation, this would update the order in the backend
+    console.log(`Moving asset from position ${fromIndex} to position ${toIndex}`);
+    
+    // Temporarily reorder the local state for immediate feedback
+    const newActivities = [...filteredAndSortedActivities];
+    const [movedItem] = newActivities.splice(fromIndex, 1);
+    newActivities.splice(toIndex, 0, movedItem);
+    
+    // Update current modal index if needed
+    if (currentModalIndex === fromIndex) {
+      setCurrentModalIndex(toIndex);
+    } else if (currentModalIndex > fromIndex && currentModalIndex <= toIndex) {
+      setCurrentModalIndex(currentModalIndex - 1);
+    } else if (currentModalIndex < fromIndex && currentModalIndex >= toIndex) {
+      setCurrentModalIndex(currentModalIndex + 1);
+    }
+    
+    // For a complete implementation, you would call an API to persist this order
+    // handleRefresh(); // Refresh to get the updated order from the server
   };
 
   // Drag and drop handlers
@@ -1284,6 +1415,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             </button>
           )}
 
+          {/* Groups toggle button */}
+          <button
+            onClick={() => setShowGroupsPanel(!showGroupsPanel)}
+            className="flex items-center gap-1 px-2 py-1 rounded relative"
+            style={{
+              backgroundColor: showGroupsPanel
+                ? 'var(--primary-color)'
+                : 'transparent',
+              color: showGroupsPanel ? 'white' : 'var(--primary-color)'
+            }}
+          >
+            <FaFolder /> {showGroupsPanel ? 'Hide Groups' : 'Groups'}
+            {filters.groupId && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+            )}
+          </button>
+
           {/* Filter toggle button */}
           <button
             onClick={toggleFilters}
@@ -1303,6 +1451,136 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Group Management Panel */}
+      {showGroupsPanel && (
+        <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 border rounded"
+          style={{
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--card-bg-hover)'
+          }}
+        >
+          {/* Groups Sidebar */}
+          <div className="md:w-64 flex-shrink-0">
+            <GroupManager
+              onGroupSelect={handleGroupSelect}
+              selectedGroupId={filters.groupId}
+              showCreateButton={true}
+              compact={false}
+            />
+          </div>
+
+          {/* Bulk Actions */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleBulkModeToggle}
+                  className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
+                    bulkMode
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  <FaTag />
+                  {bulkMode ? 'Exit Add Mode' : 'Add Assets'}
+                </button>
+
+                {bulkMode && (
+                  <>
+                    <button
+                      onClick={handleSelectAllVisible}
+                      className="text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      Select All Visible
+                    </button>
+                    <button
+                      onClick={handleClearSelection}
+                      className="text-gray-600 hover:text-gray-700 text-sm"
+                    >
+                      Clear Selection
+                    </button>
+                    {selectedAssets.length > 0 && (
+                      <button
+                        onClick={() => handleGroupManager()}
+                        className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                      >
+                        <FaFolder />
+                        Manage Groups ({selectedAssets.length})
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {filters.groupId && (
+                <div className="text-sm text-gray-600">
+                  Showing assets in selected group
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick bulk actions when groups panel is closed */}
+      {!showGroupsPanel && (
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleBulkModeToggle}
+              className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
+                bulkMode
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <FaTag />
+              {bulkMode ? 'Exit Add Mode' : 'Add Assets'}
+            </button>
+
+            {bulkMode && (
+              <>
+                <button
+                  onClick={handleSelectAllVisible}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  Select All Visible
+                </button>
+                <button
+                  onClick={handleClearSelection}
+                  className="text-gray-600 hover:text-gray-700 text-sm"
+                >
+                  Clear Selection
+                </button>
+                {selectedAssets.length > 0 && (
+                  <button
+                    onClick={() => handleGroupManager()}
+                    className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                  >
+                    <FaFolder />
+                    Manage Groups ({selectedAssets.length})
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {filters.groupId && (
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-gray-600">
+                Showing assets in selected group
+              </div>
+              <button
+                onClick={() => handleGroupSelect(null)}
+                className="text-xs text-blue-600 hover:text-blue-700"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filter and search panel */}
       {showFilters && (
@@ -1674,6 +1952,49 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </p>
             </div>
 
+            {/* Bulk selection and group indicators */}
+            <div className="mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {/* Bulk selection checkbox */}
+                {bulkMode && activity.id && (
+                  <input
+                    type="checkbox"
+                    checked={selectedAssets.includes(activity.id)}
+                    onChange={() => handleAssetSelect(activity.id!)}
+                    className="w-4 h-4"
+                  />
+                )}
+
+                {/* Group indicators */}
+                {activity.groups && activity.groups.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <FaFolder className="text-xs text-gray-500" />
+                    <div className="flex gap-1">
+                      {activity.groups.slice(0, 3).map((group) => (
+                        <span
+                          key={group.id}
+                          className="inline-block px-1 py-0.5 text-xs rounded"
+                          style={{
+                            backgroundColor: group.color + '20',
+                            color: group.color,
+                            border: `1px solid ${group.color}40`
+                          }}
+                          title={group.name}
+                        >
+                          {group.name}
+                        </span>
+                      ))}
+                      {activity.groups.length > 3 && (
+                        <span className="text-xs text-gray-500">
+                          +{activity.groups.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Prompt - with more space on mobile */}
             {activity.AssetType !== 'upl' && (
               <div className="mb-3 text-center md:text-left">
@@ -1811,6 +2132,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   </button>
                 )}
 
+                {/* Group management button */}
+                {activity.id && (
+                  <button
+                    onClick={() => handleGroupManager([activity.id!])}
+                    className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                    title="Manage Groups"
+                  >
+                    <FaTag className="text-sm" />
+                  </button>
+                )}
+
                 <button
                   onClick={() => handleDelete(activity)}
                   className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
@@ -1882,6 +2214,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onCreateSlideshow={userId ? handleCreateSlideshow : undefined}
           autoStartSlideshow={autoStartSlideshow}
           showSlideshowSettings={showSlideshowSettings}
+          slideshowAssets={generateSlideshowAssets()}
+          currentAssetIndex={filteredAndSortedActivities.length - 1 - currentModalIndex}
+          onAssetClick={handleSlideshowAssetClick}
+          onAssetReorder={handleSlideshowAssetReorder}
           showImageEditPane={showImageEditPane}
           editPrompt={editPrompt}
           onEditPromptChange={setEditPrompt}
@@ -1890,6 +2226,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           isEditingImage={isEditingImage}
         />
       )}
+
+      {/* Asset Group Manager Modal */}
+      <AssetGroupManager
+        assetIds={selectedAssets}
+        isOpen={isGroupManagerOpen}
+        onClose={() => setIsGroupManagerOpen(false)}
+        onUpdate={handleGroupManagerUpdate}
+      />
     </div>
   );
 };

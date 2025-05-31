@@ -20,5 +20,29 @@ indexes:
     - name: DateTime
       direction: desc
 
+  # Groups feature indexes
+  - kind: UserGroup
+    properties:
+    - name: userId
+    - name: createdAt
+      direction: desc
 
+  - kind: AssetGroupMembership
+    properties:
+    - name: userId
+    - name: groupId
 
+  - kind: AssetGroupMembership
+    properties:
+    - name: userId
+    - name: assetId
+
+  - kind: AssetGroupMembership
+    properties:
+    - name: groupId
+    - name: userId
+
+  - kind: AssetGroupMembership
+    properties:
+    - name: assetId
+    - name: userId

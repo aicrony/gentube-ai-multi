@@ -49,6 +49,16 @@ interface ModalProps {
     direction: 'forward' | 'backward';
     infiniteLoop: boolean;
   }) => Promise<{ success: boolean; shareUrl?: string; error?: string }>;
+  // Slideshow preview props
+  slideshowAssets?: Array<{
+    id: string;
+    url: string;
+    thumbnailUrl?: string;
+    assetType: string;
+  }>;
+  currentAssetIndex?: number;
+  onAssetClick?: (index: number) => void;
+  onAssetReorder?: (fromIndex: number, toIndex: number) => void;
   // New props for direct slideshow configuration
   slideshowInterval?: number;
   slideshowDirection?: 'forward' | 'backward';
@@ -83,6 +93,11 @@ const Modal: React.FC<ModalProps> = ({
   onJumpToLast,
   currentAssets = [],
   onCreateSlideshow,
+  // Slideshow preview props with defaults
+  slideshowAssets = [],
+  currentAssetIndex = 0,
+  onAssetClick,
+  onAssetReorder,
   // New props with defaults
   slideshowInterval,
   slideshowDirection,
@@ -158,6 +173,10 @@ const Modal: React.FC<ModalProps> = ({
   // States for slideshow history
   const [slideshowHistory, setSlideshowHistory] = useState<SlideshowHistoryItem[]>([]);
   const [showSlideshowHistory, setShowSlideshowHistory] = useState(false);
+
+  // States for thumbnail strip drag and drop
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Load slideshow history from localStorage and clean up old entries
   const loadAndCleanSlideshowHistory = () => {
@@ -476,6 +495,53 @@ const Modal: React.FC<ModalProps> = ({
       console.error('Error downloading media:', error);
       alert('Failed to download the media');
     }
+  };
+
+  // Drag and drop handlers for thumbnail strip
+  const handleThumbnailDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', '');
+  };
+
+  const handleThumbnailDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleThumbnailDragLeave = (e: React.DragEvent) => {
+    // Only clear drag over if we're actually leaving the container
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleThumbnailDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Call the reorder callback if provided
+    if (onAssetReorder) {
+      onAssetReorder(draggedIndex, dropIndex);
+    }
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleThumbnailDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -905,6 +971,76 @@ const Modal: React.FC<ModalProps> = ({
               }
             })()}
           </div>
+
+          {/* Slideshow thumbnail strip */}
+          {showSettings && slideshowAssets.length > 0 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 bg-opacity-90 p-3 rounded-lg max-w-4xl overflow-x-auto">
+              <div className="flex space-x-2">
+                {slideshowAssets.map((asset, index) => (
+                  <div
+                    key={asset.id}
+                    className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                      index === currentAssetIndex 
+                        ? 'ring-2 ring-blue-500 scale-110' 
+                        : 'hover:scale-105'
+                    } ${
+                      draggedIndex === index ? 'opacity-50' : ''
+                    } ${
+                      dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
+                    }`}
+                    draggable={onAssetReorder !== undefined}
+                    onDragStart={(e) => handleThumbnailDragStart(e, index)}
+                    onDragOver={(e) => handleThumbnailDragOver(e, index)}
+                    onDragLeave={handleThumbnailDragLeave}
+                    onDrop={(e) => handleThumbnailDrop(e, index)}
+                    onDragEnd={handleThumbnailDragEnd}
+                    onClick={() => onAssetClick && onAssetClick(index)}
+                  >
+                    {asset.assetType === 'vid' ? (
+                      <div className="relative w-16 h-16 bg-gray-700 rounded overflow-hidden">
+                        <video
+                          src={asset.url}
+                          className="w-full h-full object-cover"
+                          muted
+                          preload="metadata"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <FaPlay className="text-white text-xs opacity-80" />
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={asset.thumbnailUrl || asset.url}
+                        alt={`Slideshow item ${index + 1}`}
+                        className="w-16 h-16 object-cover rounded"
+                        loading="lazy"
+                      />
+                    )}
+                    
+                    {/* Index indicator */}
+                    <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {index + 1}
+                    </div>
+                    
+                    {/* Drag indicator */}
+                    {onAssetReorder && (
+                      <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-1">
+                        ⋮⋮
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              {onAssetReorder && (
+                <div className="text-center mt-2">
+                  <span className="text-xs text-gray-300">
+                    Drag thumbnails to reorder slideshow
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Next button */}
           {hasNext && onNext && (
