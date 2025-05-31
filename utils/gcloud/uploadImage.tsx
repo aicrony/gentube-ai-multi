@@ -38,7 +38,8 @@ export async function uploadImageToGCSFromBase64(
     const stream = file.createWriteStream({
       metadata: {
         contentType: 'image/png'
-      }
+      },
+      predefinedAcl: 'publicRead'
     });
     stream.on('error', reject);
     stream.on('finish', resolve);
@@ -76,7 +77,8 @@ export default async function uploadImageToGCSFromUrl(
           metadata: {
             contentType: 'image/png',
             validation: 'md5'
-          }
+          },
+          predefinedAcl: 'publicRead'
         })
       )
       .on('error', reject)

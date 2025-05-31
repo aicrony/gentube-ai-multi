@@ -183,13 +183,30 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     try {
       const { CreatedAssetUrl: url, AssetType: assetType, Prompt: prompt } = activity;
       
-      // Generate filename based on prompt (first 15 chars, alphanumeric only, spaces to dashes)
-      const generateFileName = (prompt: string, assetType: string): string => {
-        const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
+      // Generate filename based on prompt (first 25 chars, alphanumeric only, spaces to dashes)
+      const generateFileName = (prompt: string, assetType: string, originalUrl: string): string => {
+        // Extract file extension from the original URL
+        let fileExtension = '.jpg'; // Default fallback
         
-        if (prompt && prompt.trim()) {
-          // Take first 15 characters of prompt
-          let baseName = prompt.substring(0, 15);
+        if (assetType === 'vid') {
+          fileExtension = '.mp4';
+        } else {
+          // Extract extension from URL for images/uploads
+          try {
+            const urlPath = new URL(originalUrl).pathname;
+            const match = urlPath.match(/\.[a-zA-Z0-9]+$/);
+            if (match) {
+              fileExtension = match[0].toLowerCase();
+            }
+          } catch (error) {
+            console.log('Could not extract file extension from URL, using default .jpg');
+          }
+        }
+        
+        // Check if prompt exists and has content
+        if (prompt && prompt.trim().length > 0) {
+          // Take first 25 characters of prompt
+          let baseName = prompt.substring(0, 25);
           // Keep only letters, numbers, and spaces
           baseName = baseName.replace(/[^a-zA-Z0-9\s]/g, '');
           // Replace spaces with dashes and trim
@@ -197,59 +214,95 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           // Remove leading/trailing dashes
           baseName = baseName.replace(/^-+|-+$/g, '');
           
-          return baseName ? `${baseName}${fileExtension}` : `gallery-asset${fileExtension}`;
+          return baseName ? `${baseName}${fileExtension}` : `downloaded-gentube-asset${fileExtension}`;
         } else {
-          // Fallback for assets without prompts
-          return `gallery-asset${fileExtension}`;
+          // Fallback for uploads or assets without prompts
+          return `downloaded-gentube-asset${fileExtension}`;
         }
       };
 
-      const fileName = generateFileName(prompt, assetType);
+      const fileName = generateFileName(prompt, assetType, url);
 
-      // For uploaded assets, try different approaches to handle potential CORS issues
+      // For uploaded assets, create a proxy API call to avoid CORS issues
       if (assetType === 'upl') {
+        console.log('Using API proxy for uploaded asset to avoid CORS issues');
         try {
-          // First try direct download link approach
+          // Use a Next.js API route to proxy the download and avoid CORS
+          const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(fileName)}`;
+          
+          const response = await fetch(proxyUrl);
+          if (!response.ok) {
+            throw new Error(`Proxy download failed: ${response.status}`);
+          }
+          
+          const blob = await response.blob();
+          
+          // Create download link from blob
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = fileName;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+          return;
+        } catch (error) {
+          console.log('Proxy download failed, trying direct approach:', error);
+          // If proxy fails, try direct download with Content-Disposition
           const link = document.createElement('a');
           link.href = url;
           link.download = fileName;
-          link.target = '_blank';
+          // Add additional attributes to force download
+          link.setAttribute('type', 'application/octet-stream');
+          link.style.display = 'none';
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
           return;
-        } catch (directError) {
-          console.log('Direct download failed, trying fetch approach:', directError);
         }
       }
 
-      // Standard fetch approach for generated assets and fallback for uploads
-      const response = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Standard fetch approach for generated assets (external URLs typically have CORS configured)
+      try {
+        const response = await fetch(url, {
+          mode: 'cors',
+          credentials: 'omit'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+
+        // Create an object URL for the blob
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // Create a temporary anchor element
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+
+        // Append to the document, click, and remove
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (corsError) {
+        console.log('CORS error with generated asset, falling back to direct download:', corsError);
+        // Fallback to direct download if CORS fails
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.setAttribute('crossorigin', 'anonymous');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-      
-      const blob = await response.blob();
-
-      // Create an object URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      // Create a temporary anchor element
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-
-      // Append to the document, click, and remove
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Error downloading asset:', error);
       alert('Failed to download the asset. The file may not be accessible or may have been moved.');
