@@ -576,9 +576,13 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                // Close edit pane if it's open, then toggle settings
+                if (onToggleImageEditPane && showImageEditPane) {
+                  onToggleImageEditPane();
+                }
                 setShowSettings(!showSettings);
               }}
-              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md ${showSettings ? 'bg-blue-600' : ''}`}
+              className={`${showSettings ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
               title="Slideshow settings"
             >
               <FaCog />
@@ -590,14 +594,14 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Toggle between edit pane and settings (only one should be open)
+                // Close settings if it's open, then toggle edit pane
                 setShowSettings(false);
                 // Toggle the edit pane state by calling parent component
                 if (onToggleImageEditPane) {
                   onToggleImageEditPane();
                 }
               }}
-              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md ${showImageEditPane ? 'bg-blue-600' : ''}`}
+              className={`${showImageEditPane ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
               title="Edit image"
             >
               <FaEdit />
