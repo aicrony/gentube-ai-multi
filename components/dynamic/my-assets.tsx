@@ -88,11 +88,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           // Open the modal with this image
           openModalForAsset(imageIndex, false);
 
-          // If it's an image or upload, automatically show the edit pane
+          // Set up the edit image URL for edit functionality, but don't automatically show edit pane
           if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
-            // Set the edit pane to show after modal opens
+            // Set the edit image URL so edit functionality is available if user chooses to edit
             setTimeout(() => {
-              setShowImageEditPane(true);
               setEditImageUrl(activity.CreatedAssetUrl);
               setEditPrompt('');
             }, 100); // Small delay to ensure modal is open

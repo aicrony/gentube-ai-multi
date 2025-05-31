@@ -137,8 +137,8 @@ const Toast: React.FC<ToastProps> = ({
             type === 'error'
               ? 'Click to go to pricing page'
               : type === 'image-edit'
-                ? 'Click to view edited image with options'
-                : 'Click to open in edit mode'
+                ? 'Click to view edited image'
+                : 'Click to view'
           }
         >
           <p
