@@ -3,6 +3,8 @@ import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
 import { getGroupAssetCounts } from '@/utils/gcloud/groupManager';
 
+export const dynamic = 'force-dynamic';
+
 const datastore = new Datastore({
   projectId: google_app_creds.projectId,
   credentials: google_app_creds

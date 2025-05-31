@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/utils/auth/session';
 
+export const dynamic = 'force-dynamic';
+
 // Multi-platform post handler
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
 
+export const dynamic = 'force-dynamic';
+
 const datastore = new Datastore({
   projectId: google_app_creds.projectId,
   credentials: google_app_creds

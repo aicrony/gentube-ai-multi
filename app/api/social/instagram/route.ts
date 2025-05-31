@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { postToInstagram } from '@/services/socialMedia/instagramService';
 import { getServerSession } from '@/utils/auth/session';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get the authenticated user session

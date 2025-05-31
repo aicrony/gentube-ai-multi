@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSlideshow, getSlideshow } from '@/utils/gcloud/slideshowManager';
 import { apiErrorHandler } from '@/utils/apiErrorHandler.server';
 
+export const dynamic = 'force-dynamic';
+
 // Create a new slideshow
 export async function POST(req: NextRequest) {
   try {

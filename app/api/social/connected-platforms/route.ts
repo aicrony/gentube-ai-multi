@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/utils/auth/session';
 import { getUserConnectedPlatforms } from '@/utils/gcloud/socialTokens';
 
+export const dynamic = 'force-dynamic';
+
 // Get all platforms that a user has connected to
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {

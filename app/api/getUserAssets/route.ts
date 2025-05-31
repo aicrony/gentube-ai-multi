@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserAssets } from '@/utils/gcloud/userAssets';
 import { getUserAssetsWithGroups } from '@/utils/gcloud/groupManager';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get('userId');
