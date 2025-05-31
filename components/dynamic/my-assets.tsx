@@ -2077,10 +2077,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
             )}
 
-          {/* Image/thumbnail - larger on mobile */}
+          {/* Image/thumbnail - responsive width on mobile */}
           <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
             <div
-              className={`w-48 h-48 md:w-32 md:h-32 flex items-center justify-center md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
+              className={`w-full max-w-sm h-48 md:w-32 md:h-32 flex items-center justify-center md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
               style={{ backgroundColor: 'var(--card-bg-hover)' }}
               onClick={(e) => {
                 e.preventDefault();
