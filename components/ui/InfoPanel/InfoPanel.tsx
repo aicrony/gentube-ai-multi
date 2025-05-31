@@ -22,6 +22,7 @@ interface InfoPanelProps {
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'features' | 'feedback'>('features');
 
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,6 +101,14 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
           })
         );
         break;
+      case 'Gallery & Hearts':
+        // Navigate to the gallery page
+        window.location.href = '/gallery';
+        break;
+      case 'Monthly Contest':
+        // Navigate to the gallery page (where the contest is held)
+        window.location.href = '/gallery';
+        break;
       default:
         break;
     }
@@ -130,34 +139,14 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     {
       icon: <FaStar className="text-yellow-500" />,
       title: 'Gallery & Hearts',
-      description: (
-        <>
-          Star your asset to add it to the{' '}
-          <a
-            href="/gallery"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            public gallery
-          </a>
-          . Heart your asset to be first to love it.
-        </>
-      )
+      description: 'Star your asset to add it to the public gallery. Heart your asset to be first to love it.',
+      clickable: true
     },
     {
       icon: <FaTrophy className="text-orange-500" />,
       title: 'Monthly Contest',
-      description: (
-        <>
-          WIN 500 Credits EVERY MONTH for the most hearts in the{' '}
-          <a
-            href="/gallery"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            GenTube.ai gallery
-          </a>
-          . Next winner: June 30, 2025.
-        </>
-      )
+      description: 'WIN 500 Credits EVERY MONTH for the most hearts in the GenTube.ai gallery. Next winner: June 30, 2025.',
+      clickable: true
     }
   ];
 
@@ -201,16 +190,46 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
               </button>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <button
+                onClick={() => setActiveTab('features')}
+                className={`flex-1 px-4 sm:px-6 py-3 text-sm sm:text-base font-medium transition-colors ${
+                  activeTab === 'features'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <FaStar className="inline mr-1 sm:mr-2" />
+                Latest Features
+              </button>
+              <button
+                onClick={() => setActiveTab('feedback')}
+                className={`flex-1 px-4 sm:px-6 py-3 text-sm sm:text-base font-medium transition-colors ${
+                  activeTab === 'feedback'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <FaPaperPlane className="inline mr-1 sm:mr-2" />
+                Feedback
+              </button>
+            </div>
+
             {/* Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-              {/* Latest Features */}
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-                  <FaStar className="text-yellow-500" />
-                  Latest Features
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  {latestFeatures.map((feature, index) => (
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              {/* Latest Features Tab */}
+              {activeTab === 'features' && (
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Release Date */}
+                  <div className="text-center pb-2 border-b border-gray-200 dark:border-gray-600">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Released: June 1, 2025
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2 sm:space-y-3">
+                    {latestFeatures.map((feature, index) => (
                     <div
                       key={index}
                       className={`flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg ${
@@ -244,22 +263,27 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Feedback Section */}
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
-                  <FaPaperPlane className="text-blue-500" />
-                  Share Your Feedback
-                </h3>
+              {/* Feedback Tab */}
+              {activeTab === 'feedback' && (
                 <div className="space-y-3 sm:space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      Share Your Feedback
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      Help us improve GenTube.ai with your thoughts and suggestions
+                    </p>
+                  </div>
                   <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="What is the one feature that would make you a subscriber for life? Share feature requests, bug reports, or general feedback... "
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
-                    rows={3}
+                    rows={6}
                     maxLength={1000}
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -301,7 +325,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                     </div>
                   )}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Footer */}

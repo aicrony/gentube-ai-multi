@@ -653,21 +653,11 @@ const Modal: React.FC<ModalProps> = ({
 
     setDraggedIndex(null);
     setDragOverIndex(null);
-    
-    // Reset local reordering flag after a short delay to allow parent updates
-    setTimeout(() => {
-      setIsLocallyReordering(false);
-    }, 500);
   };
 
   const handleThumbnailDragEnd = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
-    
-    // Reset local reordering flag in case drag was cancelled
-    setTimeout(() => {
-      setIsLocallyReordering(false);
-    }, 100);
   };
 
   return (
