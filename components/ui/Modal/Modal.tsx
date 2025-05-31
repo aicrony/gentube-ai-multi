@@ -186,20 +186,12 @@ const Modal: React.FC<ModalProps> = ({
   // Local state for immediate visual feedback during reordering
   const [localSlideshowAssets, setLocalSlideshowAssets] = useState(slideshowAssets);
   const [localCurrentAssetIndex, setLocalCurrentAssetIndex] = useState(currentAssetIndex);
-  const [isLocallyReordering, setIsLocallyReordering] = useState(false);
   
-  // Update local slideshow assets when props change, but not during local reordering
+  // Update local slideshow assets when props change
   useEffect(() => {
-    if (!isLocallyReordering) {
-      console.log(`Modal: Props changed - updating local state`);
-      console.log(`Modal: New slideshowAssets:`, slideshowAssets.map((asset, i) => `${i}: ${asset.id}`));
-      console.log(`Modal: New currentAssetIndex:`, currentAssetIndex);
-      setLocalSlideshowAssets(slideshowAssets);
-      setLocalCurrentAssetIndex(currentAssetIndex);
-    } else {
-      console.log(`Modal: Props changed but ignoring during local reordering`);
-    }
-  }, [slideshowAssets, currentAssetIndex, isLocallyReordering]);
+    setLocalSlideshowAssets(slideshowAssets);
+    setLocalCurrentAssetIndex(currentAssetIndex);
+  }, [slideshowAssets, currentAssetIndex]);
 
   // Load slideshow history from localStorage and clean up old entries
   const loadAndCleanSlideshowHistory = () => {
@@ -598,9 +590,7 @@ const Modal: React.FC<ModalProps> = ({
 
   // Drag and drop handlers for thumbnail strip
   const handleThumbnailDragStart = (e: React.DragEvent, index: number) => {
-    console.log(`Modal: Starting drag for thumbnail at index ${index}`);
     setDraggedIndex(index);
-    setIsLocallyReordering(true);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     // Prevent any image drag behavior
@@ -635,15 +625,10 @@ const Modal: React.FC<ModalProps> = ({
       return;
     }
 
-    console.log(`Modal: Dropping thumbnail from display index ${draggedIndex} to display index ${dropIndex}`);
-    console.log(`Modal: Current localSlideshowAssets:`, localSlideshowAssets.map((asset, i) => `${i}: ${asset.id}`));
-
     // Immediately update local state for visual feedback (using display indices)
     const newLocalAssets = [...localSlideshowAssets];
     const [movedItem] = newLocalAssets.splice(draggedIndex, 1);
     newLocalAssets.splice(dropIndex, 0, movedItem);
-    console.log(`Modal: Moving item ${movedItem.id} from index ${draggedIndex} to ${dropIndex}`);
-    console.log(`Modal: New localSlideshowAssets order:`, newLocalAssets.map((asset, i) => `${i}: ${asset.id}`));
     setLocalSlideshowAssets(newLocalAssets);
     
     // Update local current asset index to follow the moved item
@@ -659,17 +644,11 @@ const Modal: React.FC<ModalProps> = ({
       newLocalCurrentIndex = localCurrentAssetIndex + 1;
     }
     setLocalCurrentAssetIndex(newLocalCurrentIndex);
-    
-    console.log(`Modal: Updated local slideshow assets for immediate visual feedback`);
 
     // Call the reorder callback if provided - pass display indices directly
     // The parent component (MyAssets) will handle the conversion to data indices
     if (onAssetReorder) {
-      console.log(`🚀 Modal: About to call onAssetReorder(${draggedIndex}, ${dropIndex}) - using display indices`);
       onAssetReorder(draggedIndex, dropIndex);
-      console.log(`✅ Modal: onAssetReorder callback completed`);
-    } else {
-      console.log(`❌ Modal: onAssetReorder callback is not provided!`);
     }
 
     setDraggedIndex(null);
@@ -761,8 +740,9 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close settings if it's open, then toggle edit pane
+                // Close settings and reorder mode if open, then toggle edit pane
                 setShowSettings(false);
+                setShowReorderMode(false);
                 // Toggle the edit pane state by calling parent component
                 if (onToggleImageEditPane) {
                   onToggleImageEditPane();
@@ -821,7 +801,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Image Edit panel */}
         {showImageEditPane && (
-          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
+          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">
               Edit Image
             </h3>
@@ -870,7 +850,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow settings panel */}
         {showSettings && (
-          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
+          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">
               Slideshow Settings
             </h3>
@@ -1119,7 +1099,7 @@ const Modal: React.FC<ModalProps> = ({
                 e.stopPropagation();
                 onPrevious();
               }}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-20"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-10"
               title="Previous"
             >
               <FaChevronLeft size={24} />
@@ -1172,7 +1152,7 @@ const Modal: React.FC<ModalProps> = ({
                 e.stopPropagation();
                 onNext();
               }}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-20"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-3 text-white focus:outline-none transition-all shadow-md z-10"
               title="Next"
             >
               <FaChevronRight size={24} />
@@ -1182,8 +1162,8 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow thumbnail strip - positioned below the image */}
         {showReorderMode && localSlideshowAssets.length > 0 && (
-          <div className="mt-4 bg-gray-800 bg-opacity-90 p-3 rounded-lg max-w-full overflow-x-auto">
-            <div className="flex space-x-2 justify-center">
+          <div className="mt-4 bg-gray-800 bg-opacity-90 p-2 md:p-3 rounded-lg w-full overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex space-x-1 md:space-x-2 justify-start md:justify-center pb-1 min-w-max">
               {localSlideshowAssets.map((asset, index) => (
                 <div
                   key={asset.id}
@@ -1208,7 +1188,7 @@ const Modal: React.FC<ModalProps> = ({
                   }}
                 >
                   {asset.assetType === 'vid' ? (
-                    <div className="relative w-16 h-16 bg-gray-700 rounded overflow-hidden">
+                    <div className="relative w-12 h-12 md:w-16 md:h-16 bg-gray-700 rounded overflow-hidden">
                       <video
                         src={asset.url}
                         className="w-full h-full object-cover pointer-events-none"
@@ -1229,28 +1209,29 @@ const Modal: React.FC<ModalProps> = ({
                       height={64}
                       unoptimized
                       draggable={false}
-                      className="w-16 h-16 object-cover rounded pointer-events-none"
-                      style={{ objectFit: 'cover', width: '64px', height: '64px' }}
+                      className="w-12 h-12 md:w-16 md:h-16 object-cover rounded pointer-events-none"
+                      style={{ objectFit: 'cover' }}
                       onDragStart={(e) => e.preventDefault()}
                     />
                   )}
 
                   {/* Index indicator */}
-                  <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {index + 1}
+                  <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+                    <span className="text-xs md:text-xs">{index + 1}</span>
                   </div>
 
                   {/* Drag indicator */}
-                  <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-1">
-                    ⋮⋮
+                  <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-0.5 md:px-1">
+                    <span className="text-xs">⋮⋮</span>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="text-center mt-2">
-              <span className="text-xs text-gray-300">
-                Drag thumbnails to reorder slideshow
+              <span className="text-xs md:text-sm text-gray-300">
+                <span className="hidden md:inline">Drag thumbnails to reorder slideshow</span>
+                <span className="md:hidden">Drag to reorder</span>
               </span>
             </div>
           </div>

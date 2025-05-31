@@ -724,3 +724,13 @@ button.red:hover,
     linear-gradient(45deg, transparent 75%, #333333 75%),
     linear-gradient(-45deg, transparent 75%, #333333 75%);
 }
+
+/* Hide scrollbars while maintaining scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

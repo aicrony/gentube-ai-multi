@@ -229,8 +229,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
-    console.log(`📊 filteredAndSortedActivities memo recalculating...`);
-    console.log(`📊 Base activities order:`, activities.map((a, i) => `${i}: ${a.id}`));
     let result = [...activities];
 
     // NOTE: assetType and groupId filtering is handled by the backend API
@@ -262,7 +260,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
 
     // Apply sorting
-    console.log(`📊 Applying DateTime sort...`);
     result.sort((a, b) => {
       const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
       const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
@@ -272,7 +269,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         : dateB - dateA; // Newest first
     });
 
-    console.log(`📊 Final filtered result:`, result.map((a, i) => `${i}: ${a.id}`));
     return result;
   }, [activities, filters, searchTerm, sortDirection, assetLikes]);
 
@@ -1387,7 +1383,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Slideshow preview functions
   const generateSlideshowAssets = () => {
-    const assets = filteredAndSortedActivities
+    return filteredAndSortedActivities
       .slice()
       .reverse()
       .map((activity) => ({
@@ -1399,10 +1395,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             : activity.CreatedAssetUrl,
         assetType: activity.AssetType
       }));
-    
-    console.log(`MyAssets: generateSlideshowAssets - created ${assets.length} assets`);
-    console.log(`MyAssets: Asset order:`, assets.map((asset, i) => `${i}: ${asset.id}`));
-    return assets;
   };
 
   const handleSlideshowAssetClick = (index: number) => {
@@ -1426,25 +1418,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const handleSlideshowAssetReorder = (fromIndex: number, toIndex: number) => {
-    console.log(`🔄 MyAssets: handleSlideshowAssetReorder called!`);
-    console.log(
-      `MyAssets: Moving slideshow asset from position ${fromIndex} to position ${toIndex}`
-    );
-    console.log(`MyAssets: Current filteredAndSortedActivities order:`, filteredAndSortedActivities.map((a, i) => `${i}: ${a.id}`));
-
     // Since slideshow assets are in reverse order (.reverse() in generateSlideshowAssets),
     // we need to convert the slideshow indices back to the original filteredAndSortedActivities indices
     const totalAssets = filteredAndSortedActivities.length;
     const originalFromIndex = totalAssets - 1 - fromIndex;
     const originalToIndex = totalAssets - 1 - toIndex;
-
-    console.log(
-      `MyAssets: Converting to original indices: ${originalFromIndex} -> ${originalToIndex}`
-    );
-    console.log(
-      `MyAssets: Total assets: ${totalAssets}, current modal index: ${currentModalIndex}`
-    );
-    console.log(`MyAssets: Will move asset ${filteredAndSortedActivities[originalFromIndex]?.id} from position ${originalFromIndex} to ${originalToIndex}`);
 
     // We need to update the main activities array, not the filtered one
     // The issue is that filteredAndSortedActivities is a computed value, not the source state
@@ -1452,10 +1430,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // First, let's identify which items from the main activities array correspond to our filtered items
     const itemToMove = filteredAndSortedActivities[originalFromIndex];
     const targetItem = filteredAndSortedActivities[originalToIndex];
-    
-    console.log(
-      `MyAssets: Moving item ${itemToMove?.id} to position of item ${targetItem?.id}`
-    );
 
     // Update the main activities state by finding the items in the original array and reordering them
     setActivities((currentActivities) => {
@@ -1465,16 +1439,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       const actualFromIndex = updatedActivities.findIndex(activity => activity.id === itemToMove?.id);
       const actualToIndex = updatedActivities.findIndex(activity => activity.id === targetItem?.id);
       
-      console.log(`MyAssets: Found actual indices in main array: ${actualFromIndex} -> ${actualToIndex}`);
-      
       if (actualFromIndex !== -1 && actualToIndex !== -1) {
         // Remove the item from its current position
         const [movedItem] = updatedActivities.splice(actualFromIndex, 1);
         // Insert it at the new position
         updatedActivities.splice(actualToIndex, 0, movedItem);
-        
-        console.log(`MyAssets: Successfully reordered main activities array`);
-        console.log(`MyAssets: New main activities order:`, updatedActivities.map((a, i) => `${i}: ${a.id}`));
         
         // Update DateTime values to preserve the new order when sorting
         // We'll use the current time as base and increment by milliseconds to maintain order
@@ -1484,28 +1453,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           // So we subtract index to make newer items (lower indices) have more recent dates
           activity.DateTime = new Date(baseTime - (updatedActivities.length - 1 - index) * 1000);
         });
-        
-        console.log(`MyAssets: Updated DateTime values to preserve manual order`);
-      } else {
-        console.error(`MyAssets: Could not find items in main activities array`);
       }
       
       return updatedActivities;
     });
 
     // Update current modal index to follow the moved item
-    const oldModalIndex = currentModalIndex;
     if (currentModalIndex === originalFromIndex) {
       setCurrentModalIndex(originalToIndex);
-      console.log(`MyAssets: Updated modal index from ${oldModalIndex} to ${originalToIndex} (followed moved item)`);
     } else if (currentModalIndex > originalFromIndex && currentModalIndex <= originalToIndex) {
       setCurrentModalIndex(currentModalIndex - 1);
-      console.log(`MyAssets: Updated modal index from ${oldModalIndex} to ${currentModalIndex - 1} (shifted down)`);
     } else if (currentModalIndex < originalFromIndex && currentModalIndex >= originalToIndex) {
       setCurrentModalIndex(currentModalIndex + 1);
-      console.log(`MyAssets: Updated modal index from ${oldModalIndex} to ${currentModalIndex + 1} (shifted up)`);
-    } else {
-      console.log(`MyAssets: Modal index unchanged: ${currentModalIndex}`);
     }
   };
 
