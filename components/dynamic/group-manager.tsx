@@ -6,7 +6,9 @@ import {
   FaFolder, 
   FaFolderOpen,
   FaTimes,
-  FaPalette
+  FaPalette,
+  FaPlay,
+  FaCog
 } from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
 import { useToast } from '@/components/ui/Toast';
@@ -27,6 +29,8 @@ interface GroupManagerProps {
   selectedGroupId?: string | null;
   showCreateButton?: boolean;
   compact?: boolean;
+  onStartGroupSlideshow?: (groupId: string) => void;
+  onOpenGroupSlideshowSettings?: (groupId: string) => void;
 }
 
 interface GroupModalProps {
@@ -226,7 +230,9 @@ const GroupManager: React.FC<GroupManagerProps> = ({
   onGroupSelect, 
   selectedGroupId, 
   showCreateButton = true, 
-  compact = false 
+  compact = false,
+  onStartGroupSlideshow,
+  onOpenGroupSlideshowSettings
 }) => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -323,7 +329,7 @@ const GroupManager: React.FC<GroupManagerProps> = ({
   return (
     <div className={`group-manager ${compact ? 'compact' : ''}`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium text-sm">Groups</h3>
+        <h3 className="font-medium text-sm">Asset Groups</h3>
         {showCreateButton && (
           <button
             onClick={handleCreateGroup}
@@ -378,6 +384,24 @@ const GroupManager: React.FC<GroupManagerProps> = ({
 
             {!compact && (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {group.assetCount && group.assetCount > 0 && (
+                  <>
+                    <button
+                      onClick={() => onStartGroupSlideshow?.(group.id)}
+                      className="p-1 text-gray-400 hover:text-green-600"
+                      title="Start slideshow for this group"
+                    >
+                      <FaPlay className="text-xs" />
+                    </button>
+                    <button
+                      onClick={() => onOpenGroupSlideshowSettings?.(group.id)}
+                      className="p-1 text-gray-400 hover:text-blue-600"
+                      title="Open slideshow settings for this group"
+                    >
+                      <FaCog className="text-xs" />
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => handleEditGroup(group)}
                   className="p-1 text-gray-400 hover:text-blue-600"

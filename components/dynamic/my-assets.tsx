@@ -1389,6 +1389,53 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setIsDragging(false);
   };
 
+  // Group slideshow handlers
+  const handleStartGroupSlideshow = (groupId: string) => {
+    // Set the group filter to show only this group's assets
+    setFilters(prev => ({ ...prev, groupId }));
+    setPage(0);
+    
+    // Wait a moment for the filter to take effect, then start slideshow
+    setTimeout(() => {
+      if (filteredAndSortedActivities.length > 0) {
+        const firstActivity = filteredAndSortedActivities[0];
+        const url = firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
+
+        setCurrentModalIndex(0);
+        setModalMediaUrl(url);
+        setShowSlideshowSettings(true); // Show slideshow options
+        setAutoStartSlideshow(true); // Auto-start the slideshow
+        setIsModalOpen(true);
+        setIsFullScreenModal(false);
+      }
+    }, 100);
+  };
+
+  const handleOpenGroupSlideshowSettings = (groupId: string) => {
+    // Set the group filter to show only this group's assets
+    setFilters(prev => ({ ...prev, groupId }));
+    setPage(0);
+    
+    // Wait a moment for the filter to take effect, then open with settings
+    setTimeout(() => {
+      if (filteredAndSortedActivities.length > 0) {
+        const firstActivity = filteredAndSortedActivities[0];
+        const url = firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
+
+        setCurrentModalIndex(0);
+        setModalMediaUrl(url);
+        setShowSlideshowSettings(true); // Show slideshow options but don't auto-start
+        setAutoStartSlideshow(false);
+        setIsModalOpen(true);
+        setIsFullScreenModal(false);
+      }
+    }, 100);
+  };
+
   return (
     <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
       <div className="flex justify-between items-center mb-2">
@@ -1471,6 +1518,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               selectedGroupId={filters.groupId}
               showCreateButton={true}
               compact={false}
+              onStartGroupSlideshow={handleStartGroupSlideshow}
+              onOpenGroupSlideshowSettings={handleOpenGroupSlideshowSettings}
             />
           </div>
 

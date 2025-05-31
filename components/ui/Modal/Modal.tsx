@@ -578,7 +578,7 @@ const Modal: React.FC<ModalProps> = ({
                 e.stopPropagation();
                 setShowSettings(!showSettings);
               }}
-              className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md ${showSettings ? 'bg-blue-600' : ''}`}
               title="Slideshow settings"
             >
               <FaCog />
