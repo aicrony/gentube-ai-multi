@@ -17,7 +17,8 @@ import {
   FaChevronUp,
   FaTrash,
   FaExternalLinkAlt,
-  FaEdit
+  FaEdit,
+  FaSort
 } from 'react-icons/fa';
 
 interface SlideshowHistoryItem {
@@ -158,6 +159,7 @@ const Modal: React.FC<ModalProps> = ({
   );
 
   const [showSettings, setShowSettings] = useState(showSlideshowSettings);
+  const [showReorderMode, setShowReorderMode] = useState(false);
 
   const [infiniteLoop, setInfiniteLoop] = useState(() => {
     // Priority: 1. Props, 2. LocalStorage, 3. Default false
@@ -180,6 +182,24 @@ const Modal: React.FC<ModalProps> = ({
   // States for thumbnail strip drag and drop
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  
+  // Local state for immediate visual feedback during reordering
+  const [localSlideshowAssets, setLocalSlideshowAssets] = useState(slideshowAssets);
+  const [localCurrentAssetIndex, setLocalCurrentAssetIndex] = useState(currentAssetIndex);
+  const [isLocallyReordering, setIsLocallyReordering] = useState(false);
+  
+  // Update local slideshow assets when props change, but not during local reordering
+  useEffect(() => {
+    if (!isLocallyReordering) {
+      console.log(`Modal: Props changed - updating local state`);
+      console.log(`Modal: New slideshowAssets:`, slideshowAssets.map((asset, i) => `${i}: ${asset.id}`));
+      console.log(`Modal: New currentAssetIndex:`, currentAssetIndex);
+      setLocalSlideshowAssets(slideshowAssets);
+      setLocalCurrentAssetIndex(currentAssetIndex);
+    } else {
+      console.log(`Modal: Props changed but ignoring during local reordering`);
+    }
+  }, [slideshowAssets, currentAssetIndex, isLocallyReordering]);
 
   // Load slideshow history from localStorage and clean up old entries
   const loadAndCleanSlideshowHistory = () => {
@@ -578,13 +598,18 @@ const Modal: React.FC<ModalProps> = ({
 
   // Drag and drop handlers for thumbnail strip
   const handleThumbnailDragStart = (e: React.DragEvent, index: number) => {
+    console.log(`Modal: Starting drag for thumbnail at index ${index}`);
     setDraggedIndex(index);
+    setIsLocallyReordering(true);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', '');
+    e.dataTransfer.setData('text/plain', index.toString());
+    // Prevent any image drag behavior
+    e.stopPropagation();
   };
 
   const handleThumbnailDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setDragOverIndex(index);
   };
@@ -602,6 +627,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleThumbnailDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
+    e.stopPropagation();
 
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
@@ -609,18 +635,60 @@ const Modal: React.FC<ModalProps> = ({
       return;
     }
 
-    // Call the reorder callback if provided
+    console.log(`Modal: Dropping thumbnail from display index ${draggedIndex} to display index ${dropIndex}`);
+    console.log(`Modal: Current localSlideshowAssets:`, localSlideshowAssets.map((asset, i) => `${i}: ${asset.id}`));
+
+    // Immediately update local state for visual feedback (using display indices)
+    const newLocalAssets = [...localSlideshowAssets];
+    const [movedItem] = newLocalAssets.splice(draggedIndex, 1);
+    newLocalAssets.splice(dropIndex, 0, movedItem);
+    console.log(`Modal: Moving item ${movedItem.id} from index ${draggedIndex} to ${dropIndex}`);
+    console.log(`Modal: New localSlideshowAssets order:`, newLocalAssets.map((asset, i) => `${i}: ${asset.id}`));
+    setLocalSlideshowAssets(newLocalAssets);
+    
+    // Update local current asset index to follow the moved item
+    let newLocalCurrentIndex = localCurrentAssetIndex;
+    if (localCurrentAssetIndex === draggedIndex) {
+      // The current asset was moved
+      newLocalCurrentIndex = dropIndex;
+    } else if (localCurrentAssetIndex > draggedIndex && localCurrentAssetIndex <= dropIndex) {
+      // Current asset shifts down
+      newLocalCurrentIndex = localCurrentAssetIndex - 1;
+    } else if (localCurrentAssetIndex < draggedIndex && localCurrentAssetIndex >= dropIndex) {
+      // Current asset shifts up
+      newLocalCurrentIndex = localCurrentAssetIndex + 1;
+    }
+    setLocalCurrentAssetIndex(newLocalCurrentIndex);
+    
+    console.log(`Modal: Updated local slideshow assets for immediate visual feedback`);
+
+    // Call the reorder callback if provided - pass display indices directly
+    // The parent component (MyAssets) will handle the conversion to data indices
     if (onAssetReorder) {
+      console.log(`🚀 Modal: About to call onAssetReorder(${draggedIndex}, ${dropIndex}) - using display indices`);
       onAssetReorder(draggedIndex, dropIndex);
+      console.log(`✅ Modal: onAssetReorder callback completed`);
+    } else {
+      console.log(`❌ Modal: onAssetReorder callback is not provided!`);
     }
 
     setDraggedIndex(null);
     setDragOverIndex(null);
+    
+    // Reset local reordering flag after a short delay to allow parent updates
+    setTimeout(() => {
+      setIsLocallyReordering(false);
+    }, 500);
   };
 
   const handleThumbnailDragEnd = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
+    
+    // Reset local reordering flag in case drag was cancelled
+    setTimeout(() => {
+      setIsLocallyReordering(false);
+    }, 100);
   };
 
   return (
@@ -655,16 +723,36 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close edit pane if it's open, then toggle settings
+                // Close edit pane and reorder mode if open, then toggle settings
                 if (onToggleImageEditPane && showImageEditPane) {
                   onToggleImageEditPane();
                 }
+                setShowReorderMode(false);
                 setShowSettings(!showSettings);
               }}
               className={`${showSettings ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
               title="Slideshow settings"
             >
               <FaCog />
+            </button>
+          )}
+
+          {/* Reorder button - only show if there are assets to reorder */}
+          {localSlideshowAssets.length > 1 && onAssetReorder && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Close edit pane and settings if open, then toggle reorder mode
+                if (onToggleImageEditPane && showImageEditPane) {
+                  onToggleImageEditPane();
+                }
+                setShowSettings(false);
+                setShowReorderMode(!showReorderMode);
+              }}
+              className={`${showReorderMode ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
+              title="Reorder slideshow"
+            >
+              <FaSort />
             </button>
           )}
 
@@ -1076,76 +1164,6 @@ const Modal: React.FC<ModalProps> = ({
             })()}
           </div>
 
-          {/* Slideshow thumbnail strip */}
-          {showSettings && slideshowAssets.length > 0 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 bg-opacity-90 p-3 rounded-lg max-w-4xl overflow-x-auto">
-              <div className="flex space-x-2">
-                {slideshowAssets.map((asset, index) => (
-                  <div
-                    key={asset.id}
-                    className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                      index === currentAssetIndex
-                        ? 'ring-2 ring-blue-500 scale-110'
-                        : 'hover:scale-105'
-                    } ${draggedIndex === index ? 'opacity-50' : ''} ${
-                      dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
-                    }`}
-                    draggable={onAssetReorder !== undefined}
-                    onDragStart={(e) => handleThumbnailDragStart(e, index)}
-                    onDragOver={(e) => handleThumbnailDragOver(e, index)}
-                    onDragLeave={handleThumbnailDragLeave}
-                    onDrop={(e) => handleThumbnailDrop(e, index)}
-                    onDragEnd={handleThumbnailDragEnd}
-                    onClick={() => onAssetClick && onAssetClick(index)}
-                  >
-                    {asset.assetType === 'vid' ? (
-                      <div className="relative w-16 h-16 bg-gray-700 rounded overflow-hidden">
-                        <video
-                          src={asset.url}
-                          className="w-full h-full object-cover"
-                          muted
-                          preload="metadata"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <FaPlay className="text-white text-xs opacity-80" />
-                        </div>
-                      </div>
-                    ) : (
-                      <Image
-                        src={asset.thumbnailUrl || asset.url}
-                        alt={`Slideshow item ${index + 1}`}
-                        width={64}
-                        height={64}
-                        unoptimized
-                        className="w-16 h-16 object-cover rounded"
-                        style={{ objectFit: 'cover', width: '64px', height: '64px' }}
-                      />
-                    )}
-
-                    {/* Index indicator */}
-                    <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {index + 1}
-                    </div>
-
-                    {/* Drag indicator */}
-                    {onAssetReorder && (
-                      <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-1">
-                        ⋮⋮
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {onAssetReorder && (
-                <div className="text-center mt-2">
-                  <span className="text-xs text-gray-300">
-                    Drag thumbnails to reorder slideshow
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Next button */}
           {hasNext && onNext && (
@@ -1161,6 +1179,82 @@ const Modal: React.FC<ModalProps> = ({
             </button>
           )}
         </div>
+
+        {/* Slideshow thumbnail strip - positioned below the image */}
+        {showReorderMode && localSlideshowAssets.length > 0 && (
+          <div className="mt-4 bg-gray-800 bg-opacity-90 p-3 rounded-lg max-w-full overflow-x-auto">
+            <div className="flex space-x-2 justify-center">
+              {localSlideshowAssets.map((asset, index) => (
+                <div
+                  key={asset.id}
+                  className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                    index === localCurrentAssetIndex
+                      ? 'ring-2 ring-blue-500 scale-110'
+                      : 'hover:scale-105'
+                  } ${draggedIndex === index ? 'opacity-50' : ''} ${
+                    dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
+                  }`}
+                  draggable={true}
+                  onDragStart={(e) => handleThumbnailDragStart(e, index)}
+                  onDragOver={(e) => handleThumbnailDragOver(e, index)}
+                  onDragLeave={handleThumbnailDragLeave}
+                  onDrop={(e) => handleThumbnailDrop(e, index)}
+                  onDragEnd={handleThumbnailDragEnd}
+                  onClick={(e) => {
+                    // Only handle click if we're not dragging
+                    if (draggedIndex === null && onAssetClick) {
+                      onAssetClick(index);
+                    }
+                  }}
+                >
+                  {asset.assetType === 'vid' ? (
+                    <div className="relative w-16 h-16 bg-gray-700 rounded overflow-hidden">
+                      <video
+                        src={asset.url}
+                        className="w-full h-full object-cover pointer-events-none"
+                        muted
+                        preload="metadata"
+                        draggable={false}
+                        onDragStart={(e) => e.preventDefault()}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <FaPlay className="text-white text-xs opacity-80" />
+                      </div>
+                    </div>
+                  ) : (
+                    <Image
+                      src={asset.thumbnailUrl || asset.url}
+                      alt={`Slideshow item ${index + 1}`}
+                      width={64}
+                      height={64}
+                      unoptimized
+                      draggable={false}
+                      className="w-16 h-16 object-cover rounded pointer-events-none"
+                      style={{ objectFit: 'cover', width: '64px', height: '64px' }}
+                      onDragStart={(e) => e.preventDefault()}
+                    />
+                  )}
+
+                  {/* Index indicator */}
+                  <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {index + 1}
+                  </div>
+
+                  {/* Drag indicator */}
+                  <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-1">
+                    ⋮⋮
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center mt-2">
+              <span className="text-xs text-gray-300">
+                Drag thumbnails to reorder slideshow
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
