@@ -2160,7 +2160,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.map((activity, index) => (
         <div
           key={activity.id || index}
-          className={`border p-4 ${
+          className={`border p-4 asset-item ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
           } ${
             selectedAssetUrl === activity.CreatedAssetUrl ||
@@ -2225,10 +2225,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
             )}
 
-          {/* Image/thumbnail - responsive width on mobile */}
+          {/* Image/thumbnail - responsive with proper constraints */}
           <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
             <div
-              className={`w-full max-w-sm h-48 md:w-32 md:h-32 flex items-center justify-center md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
+              className={`asset-image-container w-full max-w-sm min-h-[12rem] max-h-[20rem] md:w-32 md:h-32 md:min-h-32 md:max-h-32 md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
               style={{ backgroundColor: 'var(--card-bg-hover)' }}
               onClick={(e) => {
                 e.preventDefault();
@@ -2281,7 +2281,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   className="w-full h-full object-contain"
                   width={200}
                   height={200}
-                  style={{ width: 'auto', height: 'auto' }}
+                  style={{ 
+                    maxWidth: '100%', 
+                    maxHeight: '100%',
+                    width: 'auto', 
+                    height: 'auto',
+                    objectFit: 'contain'
+                  }}
                   unoptimized
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
