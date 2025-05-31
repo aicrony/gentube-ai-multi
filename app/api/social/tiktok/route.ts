@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToTikTok } from '@/services/socialMedia/tiktokService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -25,7 +25,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!imageUrl) {
       return NextResponse.json(
-        { error: 'Bad Request', message: 'Media URL is required for TikTok posts' },
+        {
+          error: 'Bad Request',
+          message: 'Media URL is required for TikTok posts'
+        },
         { status: 400 }
       );
     }
@@ -33,10 +36,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Get TikTok API credentials from environment variables
     const accessToken = process.env.TIKTOK_ACCESS_TOKEN;
     const openId = process.env.TIKTOK_OPEN_ID;
-    
+
     if (!accessToken || !openId) {
       return NextResponse.json(
-        { error: 'Configuration Error', message: 'TikTok API credentials not configured' },
+        {
+          error: 'Configuration Error',
+          message: 'TikTok API credentials not configured'
+        },
         { status: 500 }
       );
     }

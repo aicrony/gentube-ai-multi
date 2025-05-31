@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
     const [memberships] = await datastore.runQuery(query);
 
     const result = memberships.map((membership: any) => ({
-      id: membership[datastore.KEY].id?.toString() || membership[datastore.KEY].name,
+      id:
+        membership[datastore.KEY].id?.toString() ||
+        membership[datastore.KEY].name,
       assetId: membership.assetId,
       groupId: membership.groupId,
       userId: membership.userId,
@@ -68,18 +70,17 @@ export async function GET(request: NextRequest) {
       // Return asset IDs for the group
       return NextResponse.json({
         success: true,
-        assetIds: result.map(m => m.assetId),
+        assetIds: result.map((m) => m.assetId),
         memberships: result
       });
     } else {
       // Return group IDs for the asset
       return NextResponse.json({
         success: true,
-        groupIds: result.map(m => m.groupId),
+        groupIds: result.map((m) => m.groupId),
         memberships: result
       });
     }
-
   } catch (error) {
     console.error('Error fetching asset-group relationships:', error);
     return NextResponse.json(
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     );
 
     const [assets] = await datastore.get(assetKeys);
-    
+
     for (const asset of assets) {
       if (!asset || asset.UserId !== userId) {
         return NextResponse.json(
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
     );
 
     const [groups] = await datastore.get(groupKeys);
-    
+
     for (const group of groups) {
       if (!group || group.userId !== userId) {
         return NextResponse.json(
@@ -192,8 +193,10 @@ export async function POST(request: NextRequest) {
       if (membershipsToCreate.length > 0) {
         transaction.save(membershipsToCreate);
         await transaction.commit();
-        
-        console.log(`Created ${membershipsToCreate.length} asset-group memberships`);
+
+        console.log(
+          `Created ${membershipsToCreate.length} asset-group memberships`
+        );
       } else {
         await transaction.rollback();
         console.log('No new memberships to create (all already exist)');
@@ -204,12 +207,10 @@ export async function POST(request: NextRequest) {
         created: membershipsToCreate.length,
         memberships: createdMemberships
       });
-
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-
   } catch (error) {
     console.error('Error adding assets to groups:', error);
     return NextResponse.json(
@@ -261,7 +262,7 @@ export async function DELETE(request: NextRequest) {
       if (keysToDelete.length > 0) {
         transaction.delete(keysToDelete);
         await transaction.commit();
-        
+
         console.log(`Deleted ${keysToDelete.length} asset-group memberships`);
       } else {
         await transaction.rollback();
@@ -272,12 +273,10 @@ export async function DELETE(request: NextRequest) {
         success: true,
         deleted: keysToDelete.length
       });
-
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-
   } catch (error) {
     console.error('Error removing assets from groups:', error);
     return NextResponse.json(

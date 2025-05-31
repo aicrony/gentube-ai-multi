@@ -28,7 +28,10 @@ interface UserLikesEntity {
 /**
  * Get likes information for a specific asset
  */
-export async function getAssetLikes(assetId: string, userId?: string): Promise<{
+export async function getAssetLikes(
+  assetId: string,
+  userId?: string
+): Promise<{
   likesCount: number;
   isLiked: boolean;
 }> {
@@ -112,7 +115,7 @@ export async function toggleAssetLike(
       namespace: NAMESPACE,
       path: [ASSET_LIKES_KIND, assetId]
     });
-    
+
     const userLikesKey = datastore.key({
       namespace: NAMESPACE,
       path: [USER_LIKES_KIND, userId]
@@ -165,7 +168,7 @@ export async function toggleAssetLike(
       // Add like
       assetLikesEntity.likedBy.push(userId);
       assetLikesEntity.totalLikes = assetLikesEntity.likedBy.length;
-      
+
       if (assetLikedIndex === -1) {
         userLikesEntity.likedAssets.push(assetId);
       }
@@ -173,7 +176,7 @@ export async function toggleAssetLike(
       // Remove like
       assetLikesEntity.likedBy.splice(userLikedIndex, 1);
       assetLikesEntity.totalLikes = assetLikesEntity.likedBy.length;
-      
+
       if (assetLikedIndex !== -1) {
         userLikesEntity.likedAssets.splice(assetLikedIndex, 1);
       }
@@ -209,23 +212,25 @@ export async function toggleAssetLike(
  * Add an existing asset to the gallery by enabling its gallery flag
  */
 export async function addAssetToGallery(
-  userId: string, 
+  userId: string,
   assetId: string
 ): Promise<boolean> {
   try {
     // Get the asset entity - handle IDs as numbers for numeric IDs
     const keyId = isNaN(parseInt(assetId)) ? assetId : parseInt(assetId);
-    console.log(`Creating datastore key for ID: ${assetId}, parsed as: ${keyId}, type: ${typeof keyId}`);
-    
+    console.log(
+      `Creating datastore key for ID: ${assetId}, parsed as: ${keyId}, type: ${typeof keyId}`
+    );
+
     const assetKey = datastore.key({
       namespace: NAMESPACE,
       path: ['UserActivity', keyId]
     });
-    
+
     console.log('Constructed key:', assetKey);
 
     const [asset] = await datastore.get(assetKey);
-    
+
     if (!asset) {
       console.error('Asset not found:', assetId);
       return false;
@@ -234,11 +239,17 @@ export async function addAssetToGallery(
     // Check if the user is the owner of the asset
     // This is required for security reasons
     console.log('Add to gallery - Asset data:', JSON.stringify(asset, null, 2));
-    
+
     // Be flexible about user ID checking - some assets might not have UserId fields
     // or might have it stored in a different format
-    if (asset.UserId && asset.UserId !== userId && String(asset.UserId) !== String(userId)) {
-      console.error(`User is not the owner of this asset. Asset owner: ${asset.UserId}, Current user: ${userId}`);
+    if (
+      asset.UserId &&
+      asset.UserId !== userId &&
+      String(asset.UserId) !== String(userId)
+    ) {
+      console.error(
+        `User is not the owner of this asset. Asset owner: ${asset.UserId}, Current user: ${userId}`
+      );
       // Temporarily bypass this check for debugging
       //return false;
     }
@@ -256,7 +267,7 @@ export async function addAssetToGallery(
 
     // Set the subscription tier to 3 to mark it as gallery-visible
     asset.SubscriptionTier = 3;
-    
+
     // Update timestamp - use the field that already exists in the object
     if (asset.LastUpdated) {
       asset.LastUpdated = new Date();
@@ -286,23 +297,25 @@ export async function addAssetToGallery(
  * Remove an asset from the gallery by disabling its gallery flag
  */
 export async function removeAssetFromGallery(
-  userId: string, 
+  userId: string,
   assetId: string
 ): Promise<boolean> {
   try {
     // Get the asset entity - handle IDs as numbers for numeric IDs
     const keyId = isNaN(parseInt(assetId)) ? assetId : parseInt(assetId);
-    console.log(`Creating datastore key for ID: ${assetId}, parsed as: ${keyId}, type: ${typeof keyId}`);
-    
+    console.log(
+      `Creating datastore key for ID: ${assetId}, parsed as: ${keyId}, type: ${typeof keyId}`
+    );
+
     const assetKey = datastore.key({
       namespace: NAMESPACE,
       path: ['UserActivity', keyId]
     });
-    
+
     console.log('Constructed key:', assetKey);
 
     const [asset] = await datastore.get(assetKey);
-    
+
     if (!asset) {
       console.error('Asset not found:', assetId);
       return false;
@@ -310,12 +323,21 @@ export async function removeAssetFromGallery(
 
     // Check if the user is the owner of the asset
     // This is required for security reasons
-    console.log('Remove from gallery - Asset data:', JSON.stringify(asset, null, 2));
-    
+    console.log(
+      'Remove from gallery - Asset data:',
+      JSON.stringify(asset, null, 2)
+    );
+
     // Be flexible about user ID checking - some assets might not have UserId fields
     // or might have it stored in a different format
-    if (asset.UserId && asset.UserId !== userId && String(asset.UserId) !== String(userId)) {
-      console.error(`User is not the owner of this asset. Asset owner: ${asset.UserId}, Current user: ${userId}`);
+    if (
+      asset.UserId &&
+      asset.UserId !== userId &&
+      String(asset.UserId) !== String(userId)
+    ) {
+      console.error(
+        `User is not the owner of this asset. Asset owner: ${asset.UserId}, Current user: ${userId}`
+      );
       // Temporarily bypass this check for debugging
       //return false;
     }
@@ -328,7 +350,7 @@ export async function removeAssetFromGallery(
 
     // Reset the subscription tier to the user's actual tier (or 0 if not set)
     asset.SubscriptionTier = asset.UserSubscriptionTier || 0;
-    
+
     // Update timestamp - use the field that already exists in the object
     if (asset.LastUpdated) {
       asset.LastUpdated = new Date();

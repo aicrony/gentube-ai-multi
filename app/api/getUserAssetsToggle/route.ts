@@ -10,10 +10,7 @@ export async function GET(request: NextRequest) {
   const subscriptionTier = searchParams.get('subscriptionTier') || '0';
 
   if (!userId) {
-    return NextResponse.json(
-      { error: 'User ID is required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {

@@ -31,11 +31,13 @@ function ProductVideoContent() {
   const [userIp, setUserIp] = useState<string>('127.0.0.1');
   const [userAssets, setUserAssets] = useState<UserAsset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [openSteps, setOpenSteps] = useState<{ [key: string | number]: boolean }>({
+  const [openSteps, setOpenSteps] = useState<{
+    [key: string | number]: boolean;
+  }>({
     1: true,
     2: false,
     3: false,
-    'assets': false // Default to hidden assets
+    assets: false // Default to hidden assets
   });
   const [credits, setCredits] = useState<number | null>(null);
 
@@ -160,7 +162,9 @@ function ProductVideoContent() {
           <div className="mt-4">
             {!openSteps['assets'] && (
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Upload a new image:</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  Upload a new image:
+                </h3>
                 <Uploader
                   onImageUploaded={handleImageUploaded}
                   userId={userId || undefined}
@@ -171,16 +175,22 @@ function ProductVideoContent() {
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-medium">
-                  {openSteps['assets'] ? 'Select from your assets:' : 'Or select from your assets:'}
+                  {openSteps['assets']
+                    ? 'Select from your assets:'
+                    : 'Or select from your assets:'}
                 </h3>
-                <button 
-                  onClick={() => setOpenSteps(prev => ({
-                    ...prev, 
-                    'assets': !prev['assets']
-                  }))}
+                <button
+                  onClick={() =>
+                    setOpenSteps((prev) => ({
+                      ...prev,
+                      assets: !prev['assets']
+                    }))
+                  }
                   className="text-sm px-3 py-1 rounded-md toggle-button"
                 >
-                  {openSteps['assets'] ? 'Upload Image Instead ↑' : 'Select From Assets ↓'}
+                  {openSteps['assets']
+                    ? 'Upload Image Instead ↑'
+                    : 'Select From Assets ↓'}
                 </button>
               </div>
               {openSteps['assets'] && (

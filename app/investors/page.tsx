@@ -33,7 +33,7 @@ export default function InvestorsPage() {
                   expanding global market.
                 </p>
                 <p>
-                  We're seeking strategic partners who share our vision of
+                  We&apos;re seeking strategic partners who share our vision of
                   making cutting-edge AI tools accessible to everyone, from
                   individual creators to enterprise businesses.
                 </p>
@@ -121,7 +121,7 @@ export default function InvestorsPage() {
                     Growing User Base
                   </h3>
                   <p>
-                    We've achieved significant user growth with minimal
+                    We&apos;ve achieved significant user growth with minimal
                     marketing, demonstrating strong product-market fit and
                     creating opportunities for expansion across additional
                     channels.
@@ -207,9 +207,9 @@ export default function InvestorsPage() {
                 Contact Investor Relations
               </h2>
               <p className="mb-6">
-                If you're interested in exploring investment opportunities with
-                GenTube.ai, we'd love to hear from you. Please contact our
-                investor relations team for more information.
+                If you&apos;re interested in exploring investment opportunities
+                with GenTube.ai, we&apos;d love to hear from you. Please contact
+                our investor relations team for more information.
               </p>
               <div className="flex justify-center">
                 <a

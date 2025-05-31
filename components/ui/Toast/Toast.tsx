@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { FaTimes, FaImage, FaVideo, FaEdit, FaExclamationTriangle } from 'react-icons/fa';
+import {
+  FaTimes,
+  FaImage,
+  FaVideo,
+  FaEdit,
+  FaExclamationTriangle
+} from 'react-icons/fa';
 
 interface ToastProps {
   id: string;
@@ -110,7 +116,9 @@ const Toast: React.FC<ToastProps> = ({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             {getIcon()}
-            <span className="font-semibold text-sm">{getTypeText()} Ready!</span>
+            <span className="font-semibold text-sm">
+              {getTypeText()} Ready!
+            </span>
           </div>
           <button
             onClick={handleClose}
@@ -122,24 +130,31 @@ const Toast: React.FC<ToastProps> = ({
         </div>
 
         {/* Content */}
-        <div 
+        <div
           className={`cursor-pointer ${type === 'error' ? 'hover:bg-red-700' : 'hover:bg-blue-700'} -m-4 p-4 rounded-lg transition-colors`}
           onClick={handleClick}
-          title={type === 'error' 
-            ? "Click to go to pricing page" 
-            : type === 'image-edit' 
-              ? "Click to view edited image with options"
-              : "Click to open in edit mode"}
+          title={
+            type === 'error'
+              ? 'Click to go to pricing page'
+              : type === 'image-edit'
+                ? 'Click to view edited image with options'
+                : 'Click to open in edit mode'
+          }
         >
-          <p className={`text-xs mb-2 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}>
-            "{truncatePrompt(prompt)}"
+          <p
+            className={`text-xs mb-2 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}
+          >
+            &quot;{truncatePrompt(prompt)}&quot;
           </p>
-          <p className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}>
-            {type === 'error' 
-              ? 'Click to get credits' 
-              : type === 'image-edit' 
+          <p
+            className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}
+          >
+            {type === 'error'
+              ? 'Click to get credits'
+              : type === 'image-edit'
                 ? 'Click to view edited image'
-                : 'Click to view'} • Auto-close in {timeLeft}s
+                : 'Click to view'}{' '}
+            • Auto-close in {timeLeft}s
           </p>
         </div>
       </div>

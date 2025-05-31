@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
     );
     console.log('User ID: ' + userId);
     console.log('User IP: ' + userIp);
-    
+
     const credits = await getUserCredits(userId, userIp);
     console.log('getUserCredits: ', credits);
-    
+
     return NextResponse.json({ credits });
   } catch (error) {
     console.error('Failed to fetch user credits:', error);

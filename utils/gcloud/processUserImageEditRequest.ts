@@ -19,7 +19,13 @@ export async function processUserImageEditRequest(
   userIp: string | string[],
   editPrompt: string | undefined,
   imageUrl: string | undefined
-): Promise<{ result: string; credits: number; error?: boolean; statusCode?: number; editedImageId?: string }> {
+): Promise<{
+  result: string;
+  credits: number;
+  error?: boolean;
+  statusCode?: number;
+  editedImageId?: string;
+}> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let userResponse = {
@@ -29,7 +35,7 @@ export async function processUserImageEditRequest(
     statusCode: 200,
     editedImageId: undefined as string | undefined
   };
-  
+
   type ImageEditApiResult = {
     error?: {
       code: number;
@@ -94,7 +100,9 @@ export async function processUserImageEditRequest(
 
   // Check if user has enough credits for this specific operation
   if (userResponse.credits < creditCost) {
-    console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
+    console.log(
+      `Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`
+    );
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
     userResponse.statusCode = 429; // Too Many Requests
@@ -106,7 +114,8 @@ export async function processUserImageEditRequest(
   try {
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      userResponse.result = 'https://storage.googleapis.com/gen-image-storage/test-edited-image.jpg';
+      userResponse.result =
+        'https://storage.googleapis.com/gen-image-storage/test-edited-image.jpg';
       userResponse.error = false;
     } else {
       // Validate inputs before passing to callImageEditApi
@@ -122,25 +131,30 @@ export async function processUserImageEditRequest(
         imageUrl,
         editPrompt
       )) as any;
-      
+
       // Check for completed or queued webhook response and save it
       if (imageEditResult) {
         console.log('*****************************');
         console.log('Image edit result:', imageEditResult);
         console.log('*****************************');
-        
+
         let isCompleted = false;
         let completedImageUrl = '';
-        
+
         // Check if the result is already completed
-        if (imageEditResult.response && 
-            imageEditResult.response.status === 'COMPLETED' && 
-            imageEditResult.response.url) {
+        if (
+          imageEditResult.response &&
+          imageEditResult.response.status === 'COMPLETED' &&
+          imageEditResult.response.url
+        ) {
           isCompleted = true;
           completedImageUrl = imageEditResult.response.url;
-          console.log('Image edit completed immediately with URL:', completedImageUrl);
+          console.log(
+            'Image edit completed immediately with URL:',
+            completedImageUrl
+          );
         }
-        
+
         if (imageEditResult.webhook) {
           const webhook = imageEditResult.webhook;
           console.log('Webhook: ', webhook);
@@ -190,12 +204,12 @@ export async function processUserImageEditRequest(
           }
 
           console.log('Request ID:', requestId);
-          
+
           // If the image is already completed, we need to handle it differently
           if (isCompleted) {
             // Save the completed image directly instead of queuing
             console.log('Saving completed image edit result immediately');
-            
+
             const completedActivityResponse = await saveUserActivity({
               id: undefined,
               AssetSource: imageUrl,
@@ -209,8 +223,11 @@ export async function processUserImageEditRequest(
               UserId: userId,
               UserIp: localizedIpAddress
             });
-            
-            console.log('Completed image edit saved with ID:', completedActivityResponse);
+
+            console.log(
+              'Completed image edit saved with ID:',
+              completedActivityResponse
+            );
             userResponse.result = 'Completed';
             userResponse.editedImageId = completedActivityResponse; // Return the saved activity ID
             return userResponse;

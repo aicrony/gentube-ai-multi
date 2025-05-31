@@ -31,9 +31,9 @@ interface ToastProviderProps {
   onToastClick?: (id: string, toastData: ToastData) => void;
 }
 
-export const ToastProvider: React.FC<ToastProviderProps> = ({ 
-  children, 
-  onToastClick 
+export const ToastProvider: React.FC<ToastProviderProps> = ({
+  children,
+  onToastClick
 }) => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
@@ -44,7 +44,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       id,
       duration: toastData.duration || 15000
     };
-    
+
     setToasts((prev) => [...prev, newToast]);
     return id;
   }, []);
@@ -57,22 +57,28 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     setToasts([]);
   }, []);
 
-  const handleToastClick = useCallback((id: string) => {
-    const toast = toasts.find(t => t.id === id);
-    if (toast && onToastClick) {
-      onToastClick(id, toast);
-    }
-    // Don't auto-close when clicked, let the parent handle it
-  }, [toasts, onToastClick]);
+  const handleToastClick = useCallback(
+    (id: string) => {
+      const toast = toasts.find((t) => t.id === id);
+      if (toast && onToastClick) {
+        onToastClick(id, toast);
+      }
+      // Don't auto-close when clicked, let the parent handle it
+    },
+    [toasts, onToastClick]
+  );
 
   return (
     <ToastContext.Provider value={{ showToast, removeToast, clearAllToasts }}>
       {children}
-      
+
       {/* Render toasts */}
       <div className="fixed bottom-4 right-4 space-y-2 z-50">
         {toasts.map((toast, index) => (
-          <div key={toast.id} style={{ transform: `translateY(-${index * 10}px)` }}>
+          <div
+            key={toast.id}
+            style={{ transform: `translateY(-${index * 10}px)` }}
+          >
             <Toast
               id={toast.id}
               type={toast.type}

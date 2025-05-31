@@ -56,7 +56,7 @@ export default function InfoPage() {
 
             <div className="mb-16">
               <h2 className="text-3xl font-bold mb-6 text-center">
-                How We're Different
+                How We&apos;re Different
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
                 <div
@@ -87,9 +87,9 @@ export default function InfoPage() {
                     Specialized Solutions
                   </h3>
                   <p>
-                    Whether you're creating content for personal use, social
-                    media, or business marketing, we offer specialized tools
-                    designed for your specific needs.
+                    Whether you&apos;re creating content for personal use,
+                    social media, or business marketing, we offer specialized
+                    tools designed for your specific needs.
                   </p>
                 </div>
                 <div
@@ -121,7 +121,7 @@ export default function InfoPage() {
                 results across different types of visual content.
               </p>
               <p className="mb-4">
-                We're constantly improving our technology to deliver better
+                We&apos;re constantly improving our technology to deliver better
                 results, faster processing times, and more creative options. As
                 AI technology evolves, GenTube.ai ensures you always have access
                 to cutting-edge capabilities without needing to understand the

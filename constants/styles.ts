@@ -14,7 +14,11 @@ export const styles: StyleItem[] = [
   { id: 'anime', name: 'Anime', desc: 'anime art style' },
   { id: 'pixel', name: 'Pixel Art', desc: 'pixel art style' },
   { id: 'minimalist', name: 'Minimalist', desc: 'minimalist design' },
-  { id: 'impressionist', name: 'Impressionist', desc: 'impressionist painting style' },
+  {
+    id: 'impressionist',
+    name: 'Impressionist',
+    desc: 'impressionist painting style'
+  },
   { id: 'vector', name: 'Vector', desc: 'vector graphic' },
   { id: 'pop', name: 'Pop Art', desc: 'pop art style' },
   { id: 'abstract', name: '3D Abstract', desc: '3D abstract art' },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToLinkedIn } from '@/services/socialMedia/linkedinService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -25,10 +25,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Get LinkedIn access token from environment variables or database
     const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
-    
+
     if (!accessToken) {
       return NextResponse.json(
-        { error: 'Configuration Error', message: 'LinkedIn API token not configured' },
+        {
+          error: 'Configuration Error',
+          message: 'LinkedIn API token not configured'
+        },
         { status: 500 }
       );
     }

@@ -10,7 +10,11 @@ export const emotions: EmotionItem[] = [
   { id: 'energetic', name: 'Energetic', desc: 'dynamic and vibrant energy' },
   { id: 'nostalgic', name: 'Nostalgic', desc: 'warm nostalgic feeling' },
   { id: 'dramatic', name: 'Dramatic', desc: 'intense dramatic mood' },
-  { id: 'mysterious', name: 'Mysterious', desc: 'enigmatic mysterious atmosphere' },
+  {
+    id: 'mysterious',
+    name: 'Mysterious',
+    desc: 'enigmatic mysterious atmosphere'
+  },
   { id: 'romantic', name: 'Romantic', desc: 'romantic atmosphere' },
   { id: 'melancholy', name: 'Melancholy', desc: 'subtle melancholic mood' },
   { id: 'playful', name: 'Playful', desc: 'playful lighthearted feeling' },

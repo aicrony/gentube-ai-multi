@@ -74,48 +74,65 @@ export const PlatformSelectionGrid: React.FC<PlatformSelectionGridProps> = ({
 }) => {
   // Auto-detect dark mode if not explicitly provided
   const [detectedDarkMode, setDetectedDarkMode] = useState(false);
-  
+
   // Effect to detect dark mode from CSS variables if not explicitly provided
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Check if browser prefers dark mode
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+
       // Check if the body has a dark class or dark mode CSS variable
       const bodyHasDarkClass = document.body.classList.contains('dark');
-      const darkModeVar = getComputedStyle(document.documentElement).getPropertyValue('--dark-mode');
-      
-      setDetectedDarkMode(prefersDark || bodyHasDarkClass || darkModeVar === 'true');
+      const darkModeVar = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue('--dark-mode');
+
+      setDetectedDarkMode(
+        prefersDark || bodyHasDarkClass || darkModeVar === 'true'
+      );
     }
   }, []);
-  
+
   // Use provided dark mode value or detected value
-  const effectiveDarkMode = isDarkMode !== undefined ? isDarkMode : detectedDarkMode;
-  
+  const effectiveDarkMode =
+    isDarkMode !== undefined ? isDarkMode : detectedDarkMode;
+
   return (
-    <div className={`platform-selection-grid flex flex-wrap gap-3 ${className}`}>
+    <div
+      className={`platform-selection-grid flex flex-wrap gap-3 ${className}`}
+    >
       {platforms.map((platform) => {
         const isSelected = selectedPlatforms.includes(platform.id);
         const isConnected = connectedPlatforms.includes(platform.id);
-        
+
         // Determine button style based on selection state and dark mode
         let buttonStyle: React.CSSProperties = {
-          color: isSelected ? platform.color : effectiveDarkMode ? '#fff' : '#333',
-          borderColor: isSelected ? platform.color : effectiveDarkMode ? '#666' : '#e2e8f0',
+          color: isSelected
+            ? platform.color
+            : effectiveDarkMode
+              ? '#fff'
+              : '#333',
+          borderColor: isSelected
+            ? platform.color
+            : effectiveDarkMode
+              ? '#666'
+              : '#e2e8f0'
         };
-        
+
         // Determine background color
         let bgClass = '';
         if (isSelected) {
-          bgClass = effectiveDarkMode 
-            ? 'bg-opacity-25 bg-white' 
+          bgClass = effectiveDarkMode
+            ? 'bg-opacity-25 bg-white'
             : 'bg-opacity-20 bg-slate-100';
         } else {
           bgClass = effectiveDarkMode
             ? 'hover:bg-opacity-10 hover:bg-white'
             : 'hover:bg-gray-50';
         }
-        
+
         return (
           <button
             key={platform.id}
@@ -128,9 +145,11 @@ export const PlatformSelectionGrid: React.FC<PlatformSelectionGridProps> = ({
               ${!isConnected ? 'opacity-50' : ''}
             `}
             style={buttonStyle}
-            title={!isConnected
-              ? `Connect to ${platform.name} in step 1 to enable posting` 
-              : `${isSelected ? 'Deselect' : 'Select'} ${platform.name}`}
+            title={
+              !isConnected
+                ? `Connect to ${platform.name} in step 1 to enable posting`
+                : `${isSelected ? 'Deselect' : 'Select'} ${platform.name}`
+            }
           >
             <span style={{ color: platform.color }}>{platform.icon}</span>
             <span>{platform.name}</span>

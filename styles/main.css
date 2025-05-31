@@ -64,7 +64,7 @@ html {
 html,
 body {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Helvetica Neue',
-  'Helvetica', sans-serif;
+    'Helvetica', sans-serif;
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color);
@@ -81,7 +81,13 @@ body {
 /* Add to styles/main.css */
 
 /* Update typography to use theme variables */
-h1, h2, h3, h4, h5, h6, p {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
   color: var(--text-color);
   transition: color 0.3s ease;
 }
@@ -111,7 +117,8 @@ p a {
 }
 
 /* Add specific styling for underlined links */
-a.underline, a:hover.underline {
+a.underline,
+a:hover.underline {
   text-decoration: underline;
   text-decoration-color: var(--primary-color);
   text-decoration-thickness: 1px;
@@ -120,7 +127,7 @@ a.underline, a:hover.underline {
 /* Add to styles/main.css */
 button {
   color: var(--primary-color);
-  padding: 0.40rem 0.40rem;
+  padding: 0.4rem 0.4rem;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -274,9 +281,9 @@ a.disabled {
 }
 
 /* Input fields styling with theme awareness */
-input[type="text"],
-input[type="file"]::file-selector-button,
-input[type="file"],
+input[type='text'],
+input[type='file']::file-selector-button,
+input[type='file'],
 textarea,
 select {
   color: var(--text-color);
@@ -286,7 +293,7 @@ select {
 }
 
 /* Focus state for inputs */
-input[type="text"]:focus,
+input[type='text']:focus,
 textarea:focus,
 select:focus {
   border-color: var(--primary-color);
@@ -300,7 +307,7 @@ select:focus {
 }
 
 /* File input specific styling */
-input[type="file"]::file-selector-button {
+input[type='file']::file-selector-button {
   background-color: var(--secondary-color);
   color: var(--text-color);
   padding: 0.5rem 1rem;
@@ -310,14 +317,14 @@ input[type="file"]::file-selector-button {
   margin-right: 1rem;
 }
 
-input[type="file"]::file-selector-button:hover {
+input[type='file']::file-selector-button:hover {
   background-color: var(--primary-color);
   color: var(--background-color);
 }
 
 /* Update input fields styling with better dark mode contrast */
-input[type="text"],
-input[type="file"],
+input[type='text'],
+input[type='file'],
 textarea,
 select {
   color: var(--text-color);
@@ -327,8 +334,8 @@ select {
 }
 
 /* Specific styling for dark mode inputs */
-[data-theme='dark'] input[type="text"],
-[data-theme='dark'] input[type="file"],
+[data-theme='dark'] input[type='text'],
+[data-theme='dark'] input[type='file'],
 [data-theme='dark'] textarea,
 [data-theme='dark'] select {
   color: #f0f0f0; /* Brighter text for dark mode */
@@ -336,7 +343,7 @@ select {
 }
 
 /* Style the file input button properly in dark mode */
-[data-theme='dark'] input[type="file"]::file-selector-button {
+[data-theme='dark'] input[type='file']::file-selector-button {
   background-color: var(--primary-color);
   color: #222222; /* Dark text on light button for contrast */
   border: none;
@@ -381,7 +388,6 @@ select {
   box-shadow: 0 0 0 2px rgba(146, 187, 237, 0.4);
 }
 
-
 /*
  * Global Styles for File Upload Components
  * These styles should be used for all file upload components across the app
@@ -413,7 +419,7 @@ select {
   background-color: var(--card-selected-bg);
 }
 
-.upload-dropzone input[type="file"] {
+.upload-dropzone input[type='file'] {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -505,16 +511,18 @@ select {
 }
 
 /* Add to styles/main.css */
-button.red, .button-red {
+button.red,
+.button-red {
   background-color: #f13c4d; /* Same as danger button bg */
   color: #ffffff;
-  padding: 0.40rem 0.40rem;
+  padding: 0.4rem 0.4rem;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-button.red:hover, .button-red:hover {
+button.red:hover,
+.button-red:hover {
   background-color: #d8172a; /* Same as danger button hover bg */
   color: #ffffff;
 }
@@ -545,20 +553,41 @@ button.red:hover, .button-red:hover {
 }
 
 .back-button:hover {
-  color: var(--primary-color-dark, #2c5282); /* hover:text-blue-800 equivalent */
+  color: var(
+    --primary-color-dark,
+    #2c5282
+  ); /* hover:text-blue-800 equivalent */
 }
 
 /* Rainbow button effect - flash for 2 seconds and stop */
 @keyframes rainbow-animation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .rainbow-button {
   background: linear-gradient(
-    to right, 
-    #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000
+    to right,
+    #ff0000,
+    #ff8000,
+    #ffff00,
+    #80ff00,
+    #00ff00,
+    #00ff80,
+    #00ffff,
+    #0080ff,
+    #0000ff,
+    #8000ff,
+    #ff00ff,
+    #ff0080,
+    #ff0000
   );
   background-size: 200% 200%;
   color: white;
@@ -654,19 +683,21 @@ button.red:hover, .button-red:hover {
 
 /* Checkerboard background for transparent images */
 .bg-checkerboard {
-  background-image: 
-    linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+  background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
     linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
     linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
   background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
 }
 
 /* Dark theme checkerboard pattern */
 [data-theme='dark'] .bg-checkerboard {
-  background-image: 
-    linear-gradient(45deg, #333333 25%, transparent 25%), 
+  background-image: linear-gradient(45deg, #333333 25%, transparent 25%),
     linear-gradient(-45deg, #333333 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #333333 75%),
     linear-gradient(-45deg, transparent 75%, #333333 75%);

@@ -79,7 +79,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       });
 
       setIsSubmitting(false); // Response is received, enable the button
-      
+
       // Use the centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
         return; // Error was handled, exit the function
@@ -113,9 +113,9 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
               prompt: prompt,
               duration: 15000
             });
-            
+
             setMessage('Image added to queue.');
-            
+
             // Auto-clear the message after 5 seconds
             setTimeout(() => {
               setMessage('');

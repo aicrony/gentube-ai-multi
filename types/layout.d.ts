@@ -4,7 +4,10 @@ import type { ReactNode } from 'react';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      html: React.DetailedHTMLProps<React.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
+      html: React.DetailedHTMLProps<
+        React.HtmlHTMLAttributes<HTMLHtmlElement>,
+        HTMLHtmlElement
+      >;
     }
   }
 }

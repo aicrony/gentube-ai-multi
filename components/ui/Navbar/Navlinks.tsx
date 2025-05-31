@@ -8,13 +8,16 @@ import { getRedirectMethod } from '@/utils/auth-helpers/settings';
 import { FaCheck } from 'react-icons/fa';
 import s from './Navbar.module.css';
 import ThemeToggle from '@/components/theme/ThemeToggle';
+import InfoPanel from '@/components/ui/InfoPanel';
 
 interface NavlinksProps {
   user: any | null;
 }
 
 export default function Navlinks({ user }: NavlinksProps) {
-  const router = getRedirectMethod() === 'client' ? useRouter() : null;
+  const router = useRouter();
+  const pathname = usePathname();
+  const shouldUseRouter = getRedirectMethod() === 'client';
 
   return (
     <div className="relative flex flex-row justify-between py-1 align-center md:py-6">
@@ -43,12 +46,12 @@ export default function Navlinks({ user }: NavlinksProps) {
         <div>
           {user ? (
             <div>
-              <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
-                <input
-                  type="hidden"
-                  name="pathName"
-                  value={usePathname() ?? ''}
-                />
+              <form
+                onSubmit={(e) =>
+                  handleRequest(e, SignOut, shouldUseRouter ? router : null)
+                }
+              >
+                <input type="hidden" name="pathName" value={pathname ?? ''} />
                 <button type="submit" className={s.signOutButton}>
                   <span>
                     <FaCheck />
@@ -63,7 +66,8 @@ export default function Navlinks({ user }: NavlinksProps) {
             </Link>
           )}
         </div>
-        <div className="absolute right-[0%] top-[140%] transform -translate-y-1/2">
+        <div className="flex items-center gap-3 ml-4">
+          <InfoPanel userId={user?.id} />
           <ThemeToggle />
         </div>
       </div>

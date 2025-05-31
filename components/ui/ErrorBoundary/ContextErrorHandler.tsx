@@ -71,8 +71,8 @@ const ContextErrorHandler: React.FC<ContextErrorHandlerProps> = ({
           </h2>
           <p className="text-gray-700 mb-4">
             We are preparing your session. If the page does not load, try
-            clicking 'Reload Page' or 'Return to Generate' to restart the
-            session.
+            clicking &apos;Reload Page&apos; or &apos;Return to Generate&apos;
+            to restart the session.
           </p>
           <Button
             variant="slim"

@@ -155,7 +155,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Support comma-separated asset types - use the filters state
         const assetTypeParam = filters.assetType || '';
         const groupIdParam = filters.groupId || '';
-        
+
         // Build query parameters
         const params = new URLSearchParams({
           userId: userId ? userId : 'none',
@@ -164,11 +164,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           offset: (page * limit).toString(),
           includeGroups: 'true' // Always include group information
         });
-        
+
         if (assetTypeParam) {
           params.append('assetType', assetTypeParam);
         }
-        
+
         if (groupIdParam) {
           params.append('groupId', groupIdParam);
         }
@@ -218,7 +218,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setPage(0);
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, filters.assetType, filters.groupId]);
-
 
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
@@ -414,6 +413,64 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     autoRefreshStartTime,
     refreshCount
   ]);
+
+  // Handle InfoPanel events for opening features
+  useEffect(() => {
+    const handleOpenGroupsPanel = () => {
+      setShowGroupsPanel(true);
+    };
+
+    const handleStartDemoSlideshow = (event: CustomEvent) => {
+      const demoImage = event.detail?.demoImage;
+      
+      if (filteredAndSortedActivities.length > 0) {
+        // If user has assets, start normal slideshow
+        handleStartSlideshow();
+      } else if (demoImage) {
+        // If no assets, use demo image
+        setCurrentModalIndex(0);
+        setModalMediaUrl(demoImage);
+        setShowSlideshowSettings(true);
+        setAutoStartSlideshow(true);
+        setIsModalOpen(true);
+        setIsFullScreenModal(false);
+      }
+    };
+
+    const handleOpenImageEdit = (event: CustomEvent) => {
+      const demoImage = event.detail?.demoImage;
+      
+      if (filteredAndSortedActivities.length > 0) {
+        // If user has assets, edit the first image
+        const firstImageAsset = filteredAndSortedActivities.find(
+          (activity) => activity.AssetType === 'img' || activity.AssetType === 'upl'
+        );
+        if (firstImageAsset) {
+          handleEditImage(firstImageAsset);
+        }
+      } else if (demoImage) {
+        // If no assets, use demo image
+        setCurrentModalIndex(0);
+        setModalMediaUrl(demoImage);
+        setEditImageUrl(demoImage);
+        setShowImageEditPane(true);
+        setEditPrompt('');
+        setIsModalOpen(true);
+        setIsFullScreenModal(false);
+      }
+    };
+
+    window.addEventListener('openGroupsPanel', handleOpenGroupsPanel);
+    window.addEventListener('startDemoSlideshow', handleStartDemoSlideshow as EventListener);
+    window.addEventListener('openImageEdit', handleOpenImageEdit as EventListener);
+
+    return () => {
+      window.removeEventListener('openGroupsPanel', handleOpenGroupsPanel);
+      window.removeEventListener('startDemoSlideshow', handleStartDemoSlideshow as EventListener);
+      window.removeEventListener('openImageEdit', handleOpenImageEdit as EventListener);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredAndSortedActivities]);
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -1101,7 +1158,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     if (typeof window !== 'undefined') {
       window.addEventListener('closeModal', handleCloseModal);
-      
+
       return () => {
         window.removeEventListener('closeModal', handleCloseModal);
       };
@@ -1185,7 +1242,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Group management functions
   const handleGroupSelect = (groupId: string | null) => {
-    setFilters(prev => ({ ...prev, groupId }));
+    setFilters((prev) => ({ ...prev, groupId }));
     setPage(0); // Reset pagination when changing groups
   };
 
@@ -1195,9 +1252,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const handleAssetSelect = (assetId: string) => {
-    setSelectedAssets(prev => {
+    setSelectedAssets((prev) => {
       if (prev.includes(assetId)) {
-        return prev.filter(id => id !== assetId);
+        return prev.filter((id) => id !== assetId);
       } else {
         return [...prev, assetId];
       }
@@ -1206,9 +1263,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleSelectAllVisible = () => {
     const visibleAssetIds = filteredAndSortedActivities
-      .map(activity => activity.id)
+      .map((activity) => activity.id)
       .filter(Boolean) as string[];
-    
+
     setSelectedAssets(visibleAssetIds);
   };
 
@@ -1228,17 +1285,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     fetchUserActivities(userId, userIp);
     setSelectedAssets([]);
     // Force refresh of GroupManager to update asset counts
-    setGroupRefreshKey(prev => prev + 1);
+    setGroupRefreshKey((prev) => prev + 1);
   };
 
   // Slideshow preview functions
   const generateSlideshowAssets = () => {
-    return filteredAndSortedActivities.slice().reverse().map((activity) => ({
-      id: activity.id || '',
-      url: activity.CreatedAssetUrl,
-      thumbnailUrl: activity.AssetType === 'vid' ? activity.AssetSource : activity.CreatedAssetUrl,
-      assetType: activity.AssetType
-    }));
+    return filteredAndSortedActivities
+      .slice()
+      .reverse()
+      .map((activity) => ({
+        id: activity.id || '',
+        url: activity.CreatedAssetUrl,
+        thumbnailUrl:
+          activity.AssetType === 'vid'
+            ? activity.AssetSource
+            : activity.CreatedAssetUrl,
+        assetType: activity.AssetType
+      }));
   };
 
   const handleSlideshowAssetClick = (index: number) => {
@@ -1246,10 +1309,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // Convert thumbnail index (creation order) to modal index (newest first)
       const modalIndex = filteredAndSortedActivities.length - 1 - index;
       const activity = filteredAndSortedActivities[modalIndex];
-      const url = activity.AssetType === 'vid' 
-        ? activity.CreatedAssetUrl 
-        : activity.CreatedAssetUrl;
-      
+      const url =
+        activity.AssetType === 'vid'
+          ? activity.CreatedAssetUrl
+          : activity.CreatedAssetUrl;
+
       setCurrentModalIndex(modalIndex);
       setModalMediaUrl(url);
 
@@ -1263,13 +1327,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleSlideshowAssetReorder = (fromIndex: number, toIndex: number) => {
     // For now, we'll just show a message that reordering affects the slideshow
     // In a full implementation, this would update the order in the backend
-    console.log(`Moving asset from position ${fromIndex} to position ${toIndex}`);
-    
+    console.log(
+      `Moving asset from position ${fromIndex} to position ${toIndex}`
+    );
+
     // Temporarily reorder the local state for immediate feedback
     const newActivities = [...filteredAndSortedActivities];
     const [movedItem] = newActivities.splice(fromIndex, 1);
     newActivities.splice(toIndex, 0, movedItem);
-    
+
     // Update current modal index if needed
     if (currentModalIndex === fromIndex) {
       setCurrentModalIndex(toIndex);
@@ -1278,7 +1344,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     } else if (currentModalIndex < fromIndex && currentModalIndex >= toIndex) {
       setCurrentModalIndex(currentModalIndex + 1);
     }
-    
+
     // For a complete implementation, you would call an API to persist this order
     // handleRefresh(); // Refresh to get the updated order from the server
   };
@@ -1302,7 +1368,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragOverIndex(null);
     }
@@ -1310,7 +1376,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
+
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
       setDragOverIndex(null);
@@ -1327,7 +1393,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       // Get all asset IDs in current order
       const allAssetIds = filteredAndSortedActivities
-        .map(activity => activity.id)
+        .map((activity) => activity.id)
         .filter(Boolean) as string[];
 
       console.log('Reordering asset:', {
@@ -1368,7 +1434,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         prompt: 'Asset order updated successfully!',
         duration: 3000
       });
-
     } catch (error) {
       console.error('Error reordering assets:', error);
       showToast({
@@ -1392,16 +1457,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Group slideshow handlers
   const handleStartGroupSlideshow = (groupId: string) => {
     // Set the group filter to show only this group's assets
-    setFilters(prev => ({ ...prev, groupId }));
+    setFilters((prev) => ({ ...prev, groupId }));
     setPage(0);
-    
+
     // Wait a moment for the filter to take effect, then start slideshow
     setTimeout(() => {
       if (filteredAndSortedActivities.length > 0) {
         const firstActivity = filteredAndSortedActivities[0];
-        const url = firstActivity.AssetType === 'vid'
-          ? firstActivity.CreatedAssetUrl
-          : firstActivity.CreatedAssetUrl;
+        const url =
+          firstActivity.AssetType === 'vid'
+            ? firstActivity.CreatedAssetUrl
+            : firstActivity.CreatedAssetUrl;
 
         setCurrentModalIndex(0);
         setModalMediaUrl(url);
@@ -1415,16 +1481,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleOpenGroupSlideshowSettings = (groupId: string) => {
     // Set the group filter to show only this group's assets
-    setFilters(prev => ({ ...prev, groupId }));
+    setFilters((prev) => ({ ...prev, groupId }));
     setPage(0);
-    
+
     // Wait a moment for the filter to take effect, then open with settings
     setTimeout(() => {
       if (filteredAndSortedActivities.length > 0) {
         const firstActivity = filteredAndSortedActivities[0];
-        const url = firstActivity.AssetType === 'vid'
-          ? firstActivity.CreatedAssetUrl
-          : firstActivity.CreatedAssetUrl;
+        const url =
+          firstActivity.AssetType === 'vid'
+            ? firstActivity.CreatedAssetUrl
+            : firstActivity.CreatedAssetUrl;
 
         setCurrentModalIndex(0);
         setModalMediaUrl(url);
@@ -1504,7 +1571,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       {/* Group Management Panel */}
       {showGroupsPanel && (
-        <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 border rounded"
+        <div
+          className="flex flex-col md:flex-row gap-4 mb-4 p-4 border rounded"
           style={{
             borderColor: 'var(--border-color)',
             backgroundColor: 'var(--card-bg-hover)'
@@ -1768,14 +1836,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               searchTerm) &&
               ' (filtered)'}
           </p>
-          {!(filters.assetType || filters.inGallery || filters.minHearts > 0 || searchTerm) && 
-           !onSelectAsset && 
-           filteredAndSortedActivities.length > 1 && (
-            <p className="text-xs text-gray-500 mt-1">
-              <FaGripVertical className="inline mr-1" />
-              Drag assets by the handle to reorder them
-            </p>
-          )}
+          {!(
+            filters.assetType ||
+            filters.inGallery ||
+            filters.minHearts > 0 ||
+            searchTerm
+          ) &&
+            !onSelectAsset &&
+            filteredAndSortedActivities.length > 1 && (
+              <p className="text-xs text-gray-500 mt-1">
+                <FaGripVertical className="inline mr-1" />
+                Drag assets by the handle to reorder them
+              </p>
+            )}
         </div>
       </div>
 
@@ -1817,18 +1890,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             selectedAssetUrl === activity.AssetSource
               ? 'asset-item-selected'
               : ''
-          } ${
-            draggedIndex === index ? 'opacity-50' : ''
-          } ${
+          } ${draggedIndex === index ? 'opacity-50' : ''} ${
             dragOverIndex === index ? 'border-blue-500 border-2' : ''
           } flex flex-col md:flex-row md:items-center transition-all duration-200`}
           draggable={Boolean(
-            !onSelectAsset && 
-            activity.id && 
-            !filters.assetType && 
-            !filters.inGallery && 
-            !filters.minHearts && 
-            !searchTerm.trim()
+            !onSelectAsset &&
+              activity.id &&
+              !filters.assetType &&
+              !filters.inGallery &&
+              !filters.minHearts &&
+              !searchTerm.trim()
           )} // Only draggable if not in selection mode, has ID, and no filters applied
           onDragStart={(e) => handleDragStart(e, index)}
           onDragOver={(e) => handleDragOver(e, index)}
@@ -1862,20 +1933,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           }}
         >
           {/* Drag handle - only show if draggable */}
-          {!onSelectAsset && 
-           activity.id && 
-           !filters.assetType && 
-           !filters.inGallery && 
-           !filters.minHearts && 
-           !searchTerm.trim() && (
-            <div 
-              className="flex items-center justify-center w-6 h-6 md:mr-2 mb-2 md:mb-0 cursor-grab active:cursor-grabbing"
-              onMouseDown={(e) => e.stopPropagation()}
-              title="Drag to reorder"
-            >
-              <FaGripVertical className="text-gray-400 hover:text-gray-600 transition-colors" />
-            </div>
-          )}
+          {!onSelectAsset &&
+            activity.id &&
+            !filters.assetType &&
+            !filters.inGallery &&
+            !filters.minHearts &&
+            !searchTerm.trim() && (
+              <div
+                className="flex items-center justify-center w-6 h-6 md:mr-2 mb-2 md:mb-0 cursor-grab active:cursor-grabbing"
+                onMouseDown={(e) => e.stopPropagation()}
+                title="Drag to reorder"
+              >
+                <FaGripVertical className="text-gray-400 hover:text-gray-600 transition-colors" />
+              </div>
+            )}
 
           {/* Image/thumbnail - larger on mobile */}
           <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
@@ -2264,7 +2335,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           autoStartSlideshow={autoStartSlideshow}
           showSlideshowSettings={showSlideshowSettings}
           slideshowAssets={generateSlideshowAssets()}
-          currentAssetIndex={filteredAndSortedActivities.length - 1 - currentModalIndex}
+          currentAssetIndex={
+            filteredAndSortedActivities.length - 1 - currentModalIndex
+          }
           onAssetClick={handleSlideshowAssetClick}
           onAssetReorder={handleSlideshowAssetReorder}
           showImageEditPane={showImageEditPane}

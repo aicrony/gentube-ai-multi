@@ -18,7 +18,7 @@ export default function ImageUrlToVideoPage() {
   const handleUserCreditsUpdate = (credits: number | null) => {
     setUserCredits(credits);
   };
-  
+
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -58,7 +58,12 @@ export default function ImageUrlToVideoPage() {
                   <Button variant="slim">Image Gen</Button>
                 </Link>
                 <Link href="/image-url-to-video">
-                  <Button variant="slim" className="bg-blue-500 text-white hover:bg-blue-600">URL to Video</Button>
+                  <Button
+                    variant="slim"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
+                  >
+                    URL to Video
+                  </Button>
                 </Link>
                 <Link href="/text-to-video">
                   <Button variant="slim">Video Gen</Button>
@@ -77,7 +82,7 @@ export default function ImageUrlToVideoPage() {
                   </Button>
                 </Link>
               </nav>
-              
+
               <VideoFromUrlDynamicButton
                 userId={userId}
                 userIp={userIp}

@@ -180,7 +180,7 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         if (onUserCreditsUpdate) {
           onUserCreditsUpdate(data.credits);
         }
-        
+
         // Open step 3 and trigger auto-refresh for queued items
         if (onUserCreditsUpdate) {
           // onUserCreditsUpdate already sets openSteps[3] to true in the parent component
@@ -213,7 +213,11 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         <div className="p-4">
           <h2 className="text-xl font-bold mb-4">{title}</h2>
           <div className="asset-selection">
-            <MyAssets assetType="upl,img" onSelectAsset={onSelect} autoRefreshQueued={true} />
+            <MyAssets
+              assetType="upl,img"
+              onSelectAsset={onSelect}
+              autoRefreshQueued={true}
+            />
           </div>
         </div>
       </GenericModal>
@@ -377,7 +381,8 @@ export const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         {/* Result Image */}
         {resultImageUrl && (
           <div className="mt-2 p-3 text-sm bg-green-50 text-green-700 rounded">
-            ✓ Your product image is generating. Check Step 3 for your final image.
+            ✓ Your product image is generating. Check Step 3 for your final
+            image.
           </div>
         )}
       </div>

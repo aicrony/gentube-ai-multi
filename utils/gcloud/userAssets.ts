@@ -13,7 +13,7 @@ const USER_ACTIVITY_KIND = 'UserActivity';
 const NAMESPACE = 'GenTube';
 
 interface UserActivity {
-  id?: string;          // Datastore entity ID
+  id?: string; // Datastore entity ID
   CreatedAssetUrl: string;
   Prompt: string;
   AssetSource: string;
@@ -157,22 +157,22 @@ export async function getGalleryAssets(
   }
 
   const [results] = await datastore.runQuery(query);
-  
+
   // Log the raw results to debug missing prompts
   console.log(`Found ${results.length} gallery assets`);
   if (results.length > 0) {
     console.log('First gallery asset raw data:', JSON.stringify(results[0]));
   }
-  
+
   // Get all unique user IDs from the results to fetch creator names in one batch
   const userIds = results
     .map((activity: any) => activity.UserId)
     .filter((userId: string | undefined) => userId && userId !== 'none');
-  
+
   console.log('Gallery asset user IDs extracted:', userIds);
-  
+
   // Fetch creator names for all user IDs
-  let creatorNames: {[key: string]: string} = {};
+  let creatorNames: { [key: string]: string } = {};
   try {
     // Dynamically import to avoid circular dependency
     const { getCreatorNames } = await import('./getUserCreator');
@@ -186,7 +186,7 @@ export async function getGalleryAssets(
   } catch (error) {
     console.error('Error fetching creator names:', error);
   }
-  
+
   return results.map((activity: any) => {
     // Provide fallbacks for missing data
     let prompt = activity.Prompt;
@@ -195,7 +195,7 @@ export async function getGalleryAssets(
     } else if (!prompt) {
       prompt = '';
     }
-    
+
     // Get creator name if available
     let creatorName: string | null = null;
     if (activity.UserId && creatorNames[activity.UserId]) {
@@ -206,7 +206,7 @@ export async function getGalleryAssets(
     } else {
       console.log('No user ID associated with this activity');
     }
-    
+
     return {
       id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
       CreatedAssetUrl: activity.CreatedAssetUrl || '',

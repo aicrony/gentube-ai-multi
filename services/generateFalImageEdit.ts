@@ -2,7 +2,10 @@ import { fal, InProgressQueueStatus, QueueStatus } from '@fal-ai/client';
 require('dotenv').config();
 
 const apiEndpoint = 'fal-ai/flux-pro/kontext';
-const falApiWebhook = process.env.FAL_API_IMAGE_WEBHOOK || process.env.FAL_API_WEBHOOK?.replace('falvideoresult', 'falimageresult') || 'https://gentube.ai/api/falimageresult';
+const falApiWebhook =
+  process.env.FAL_API_IMAGE_WEBHOOK ||
+  process.env.FAL_API_WEBHOOK?.replace('falvideoresult', 'falimageresult') ||
+  'https://gentube.ai/api/falimageresult';
 
 export default async function generateFalImageEdit(
   imageUrl: string,
@@ -45,7 +48,7 @@ export default async function generateFalImageEdit(
         },
         logs: true,
         onQueueUpdate: (update: QueueStatus) => {
-          if (update.status === "IN_PROGRESS") {
+          if (update.status === 'IN_PROGRESS') {
             (update as InProgressQueueStatus).logs
               .map((log: { message: string }) => log.message)
               .forEach(console.log);
@@ -59,25 +62,32 @@ export default async function generateFalImageEdit(
 
     // fal.subscribe returns the completed result directly, not a queue object
     // We need to structure this for compatibility with the processing function
-    if (result && result.data && result.data.images && result.data.images.length > 0) {
+    if (
+      result &&
+      result.data &&
+      result.data.images &&
+      result.data.images.length > 0
+    ) {
       // Successful result - create a completed response structure
       const completedResult = {
         url: result.data.images[0].url,
         request_id: result.requestId || `completed-edit-${Date.now()}`,
         status: 'COMPLETED'
       };
-      
+
       callback.response = completedResult;
       return callback;
     } else {
       // If we don't get expected result structure, create a queue-like response
       const queueResult = {
         status: 'IN_QUEUE',
-        request_id: result.requestId || `generated-edit-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        request_id:
+          result.requestId ||
+          `generated-edit-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
         response_url: `https://queue.fal.run/${apiEndpoint}/requests/${result.requestId || 'unknown'}`,
         webhook: falApiWebhook
       };
-      
+
       callback.response = queueResult;
       return callback;
     }

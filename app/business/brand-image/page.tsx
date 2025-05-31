@@ -37,8 +37,12 @@ function BrandImageContent() {
   });
   const [credits, setCredits] = useState<number | null>(null);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
-  const [uploadedProductImageUrl, setUploadedProductImageUrl] = useState<string | null>(null);
-  const [uploadedBackgroundImageUrl, setUploadedBackgroundImageUrl] = useState<string | null>(null);
+  const [uploadedProductImageUrl, setUploadedProductImageUrl] = useState<
+    string | null
+  >(null);
+  const [uploadedBackgroundImageUrl, setUploadedBackgroundImageUrl] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -167,7 +171,7 @@ function BrandImageContent() {
           <div className="mt-4">
             <p className="mb-4">
               Upload your product and background images if you have not already.
-              You'll need at least one of each for Step 2.
+              You&apos;ll need at least one of each for Step 2.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -215,7 +219,6 @@ function BrandImageContent() {
                 )}
               </div>
             </div>
-
 
             {/*<div className="mt-6">*/}
             {/*  <MyAssets assetType="upl" />*/}

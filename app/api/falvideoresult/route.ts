@@ -60,11 +60,7 @@ export async function POST(request: NextRequest) {
           await transaction.rollback();
         }
       }
-    } else if (
-      body.request_id &&
-      body.status === 'OK' &&
-      body.error === null
-    ) {
+    } else if (body.request_id && body.status === 'OK' && body.error === null) {
       console.log('Request ID:', body.request_id);
       console.log('Status:', body.status);
       console.log('Incoming Payload: ', JSON.stringify(body.payload));

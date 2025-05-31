@@ -18,11 +18,15 @@ export const postToFacebook = async ({
   imageUrl,
   accessToken,
   pageId
-}: FacebookPostParams): Promise<{ success: boolean; postId?: string; error?: string }> => {
+}: FacebookPostParams): Promise<{
+  success: boolean;
+  postId?: string;
+  error?: string;
+}> => {
   try {
     const targetId = pageId || 'me'; // Post to page if pageId is provided, otherwise post to user's timeline
     const apiVersion = 'v17.0'; // Use the appropriate Graph API version
-    
+
     // For images, use the photos endpoint
     if (imageUrl) {
       // Determine if this is a remote URL or a local image path
@@ -36,7 +40,7 @@ export const postToFacebook = async ({
           access_token: accessToken,
           published: true
         });
-        
+
         return {
           success: true,
           postId: response.data.id
@@ -57,7 +61,7 @@ export const postToFacebook = async ({
         message: message,
         access_token: accessToken
       });
-      
+
       return {
         success: true,
         postId: response.data.id
@@ -67,7 +71,7 @@ export const postToFacebook = async ({
     // Check for token expiration or other auth errors
     const errorCode = error.response?.data?.error?.code;
     const errorType = error.response?.data?.error?.type;
-    
+
     if (
       errorCode === 190 || // Invalid OAuth token
       errorType === 'OAuthException' ||
@@ -75,14 +79,16 @@ export const postToFacebook = async ({
     ) {
       return {
         success: false,
-        error: 'Your Facebook authorization has expired. Please reconnect your account.'
+        error:
+          'Your Facebook authorization has expired. Please reconnect your account.'
       };
     }
-    
+
     console.error('Facebook API error:', error.response?.data || error.message);
     return {
       success: false,
-      error: error.response?.data?.error?.message || 'Failed to post to Facebook'
+      error:
+        error.response?.data?.error?.message || 'Failed to post to Facebook'
     };
   }
 };

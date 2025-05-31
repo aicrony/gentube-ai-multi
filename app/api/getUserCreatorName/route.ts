@@ -15,10 +15,10 @@ export async function GET(request: NextRequest) {
 
     // Get user's name from Google Cloud Datastore
     const creatorName = await getUserCreatorName(userId);
-    
-    return NextResponse.json({ 
-      success: true, 
-      creatorName 
+
+    return NextResponse.json({
+      success: true,
+      creatorName
     });
   } catch (error) {
     console.error('Failed to get creator name:', error);

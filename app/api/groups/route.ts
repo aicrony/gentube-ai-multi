@@ -55,29 +55,34 @@ export async function GET(request: NextRequest) {
         color: group.color,
         assetCount: 0 // Will be populated below
       }))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort newest first
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ); // Sort newest first
 
     // Get asset counts for all groups
     if (userGroups.length > 0) {
-      const groupIds = userGroups.map(group => group.id!);
+      const groupIds = userGroups.map((group) => group.id!);
       const assetCounts = await getGroupAssetCounts(groupIds, userId);
       console.log('Asset counts fetched:', assetCounts);
-      
+
       // Update groups with actual asset counts
-      userGroups.forEach(group => {
+      userGroups.forEach((group) => {
         if (group.id && assetCounts[group.id] !== undefined) {
           group.assetCount = assetCounts[group.id];
         }
       });
     }
 
-    console.log(`Found ${userGroups.length} groups for user ${userId}`, userGroups.map(g => `${g.name}: ${g.assetCount}`));
+    console.log(
+      `Found ${userGroups.length} groups for user ${userId}`,
+      userGroups.map((g) => `${g.name}: ${g.assetCount}`)
+    );
 
     return NextResponse.json({
       success: true,
       groups: userGroups
     });
-
   } catch (error) {
     console.error('Error fetching groups:', error);
     return NextResponse.json(
@@ -148,7 +153,6 @@ export async function POST(request: NextRequest) {
       success: true,
       group: newGroup
     });
-
   } catch (error) {
     console.error('Error creating group:', error);
     return NextResponse.json(
@@ -184,19 +188,13 @@ export async function PUT(request: NextRequest) {
 
       if (!group) {
         await transaction.rollback();
-        return NextResponse.json(
-          { error: 'Group not found' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Group not found' }, { status: 404 });
       }
 
       // Verify ownership
       if (group.userId !== userId) {
         await transaction.rollback();
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       }
 
       // Check if new name conflicts with existing groups (if name is being changed)
@@ -254,12 +252,10 @@ export async function PUT(request: NextRequest) {
         success: true,
         group: updatedGroup
       });
-
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-
   } catch (error) {
     console.error('Error updating group:', error);
     return NextResponse.json(
@@ -296,19 +292,13 @@ export async function DELETE(request: NextRequest) {
 
       if (!group) {
         await transaction.rollback();
-        return NextResponse.json(
-          { error: 'Group not found' },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: 'Group not found' }, { status: 404 });
       }
 
       // Verify ownership
       if (group.userId !== userId) {
         await transaction.rollback();
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       }
 
       // Delete all asset group memberships for this group first
@@ -318,8 +308,10 @@ export async function DELETE(request: NextRequest) {
         .filter('userId', '=', userId);
 
       const [memberships] = await datastore.runQuery(membershipQuery);
-      const membershipKeys = memberships.map((membership: any) => membership[datastore.KEY]);
-      
+      const membershipKeys = memberships.map(
+        (membership: any) => membership[datastore.KEY]
+      );
+
       if (membershipKeys.length > 0) {
         transaction.delete(membershipKeys);
       }
@@ -335,12 +327,10 @@ export async function DELETE(request: NextRequest) {
         success: true,
         message: 'Group deleted successfully'
       });
-
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-
   } catch (error) {
     console.error('Error deleting group:', error);
     return NextResponse.json(

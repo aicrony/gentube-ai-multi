@@ -8,9 +8,9 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, must-revalidate',
-          },
-        ],
+            value: 'public, max-age=86400, must-revalidate'
+          }
+        ]
       },
       {
         // Add cache control headers for video files
@@ -18,9 +18,9 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, must-revalidate',
-          },
-        ],
+            value: 'public, max-age=86400, must-revalidate'
+          }
+        ]
       },
       {
         // Add cache control headers for service worker
@@ -28,13 +28,13 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            value: 'public, max-age=0, must-revalidate'
           },
           {
             key: 'Service-Worker-Allowed',
-            value: '/',
-          },
-        ],
+            value: '/'
+          }
+        ]
       },
       {
         // Add cache control headers for manifest
@@ -42,20 +42,20 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, must-revalidate',
+            value: 'public, max-age=3600, must-revalidate'
           },
           {
             key: 'Content-Type',
-            value: 'application/manifest+json',
-          },
-        ],
-      },
+            value: 'application/manifest+json'
+          }
+        ]
+      }
     ];
   },
   // Enable image optimization
   images: {
     domains: ['storage.googleapis.com'],
-    minimumCacheTTL: 86400, // 24 hours
+    minimumCacheTTL: 86400 // 24 hours
   },
   async rewrites() {
     return [

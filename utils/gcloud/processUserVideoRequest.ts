@@ -23,7 +23,12 @@ export async function processUserVideoRequest(
   aspectRatio?: string | undefined,
   loop?: string | undefined,
   motion?: string | undefined
-): Promise<{ result: string; credits: number; error?: boolean; statusCode?: number }> {
+): Promise<{
+  result: string;
+  credits: number;
+  error?: boolean;
+  statusCode?: number;
+}> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let userResponse = {
@@ -108,7 +113,9 @@ export async function processUserVideoRequest(
 
   // Check if user has enough credits for this specific operation
   if (userResponse.credits < creditCost) {
-    console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
+    console.log(
+      `Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`
+    );
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
     userResponse.statusCode = 429; // Too Many Requests

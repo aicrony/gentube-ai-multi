@@ -44,9 +44,7 @@ export default function StartPageWrapper({ children }: StartPageWrapperProps) {
 
   return (
     <UserIdProvider userId={userId}>
-      <UserCreditsProvider>
-        {children}
-      </UserCreditsProvider>
+      <UserCreditsProvider>{children}</UserCreditsProvider>
     </UserIdProvider>
   );
 }

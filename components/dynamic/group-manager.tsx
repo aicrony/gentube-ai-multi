@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaFolder, 
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaFolder,
   FaFolderOpen,
   FaTimes,
   FaPalette,
@@ -42,7 +42,7 @@ interface GroupModalProps {
 
 const PRESET_COLORS = [
   '#3B82F6', // Blue
-  '#10B981', // Green  
+  '#10B981', // Green
   '#F59E0B', // Yellow
   '#EF4444', // Red
   '#8B5CF6', // Purple
@@ -50,10 +50,15 @@ const PRESET_COLORS = [
   '#F97316', // Orange
   '#84CC16', // Lime
   '#EC4899', // Pink
-  '#6B7280'  // Gray
+  '#6B7280' // Gray
 ];
 
-const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave }) => {
+const GroupModal: React.FC<GroupModalProps> = ({
+  isOpen,
+  onClose,
+  group,
+  onSave
+}) => {
   const [name, setName] = useState(group?.name || '');
   const [description, setDescription] = useState(group?.description || '');
   const [color, setColor] = useState(group?.color || PRESET_COLORS[0]);
@@ -77,7 +82,7 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       setError('Group name is required');
       return;
@@ -89,7 +94,7 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
     try {
       const url = group ? '/api/groups' : '/api/groups';
       const method = group ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -112,13 +117,12 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
 
       onSave(result.group);
       onClose();
-      
+
       showToast({
         type: 'image',
         prompt: `Group "${name}" ${group ? 'updated' : 'created'} successfully!`,
         duration: 3000
       });
-
     } catch (error) {
       console.error('Error saving group:', error);
       setError(error instanceof Error ? error.message : 'Failed to save group');
@@ -192,8 +196,8 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
                   type="button"
                   onClick={() => setColor(presetColor)}
                   className={`w-8 h-8 rounded-full border-2 ${
-                    color === presetColor 
-                      ? 'border-gray-800 dark:border-white scale-110' 
+                    color === presetColor
+                      ? 'border-gray-800 dark:border-white scale-110'
                       : 'border-gray-300 dark:border-gray-600'
                   } transition-transform`}
                   style={{ backgroundColor: presetColor }}
@@ -217,7 +221,7 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
               disabled={isLoading || !name.trim()}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Saving...' : (group ? 'Update' : 'Create')}
+              {isLoading ? 'Saving...' : group ? 'Update' : 'Create'}
             </button>
           </div>
         </form>
@@ -226,10 +230,10 @@ const GroupModal: React.FC<GroupModalProps> = ({ isOpen, onClose, group, onSave 
   );
 };
 
-const GroupManager: React.FC<GroupManagerProps> = ({ 
-  onGroupSelect, 
-  selectedGroupId, 
-  showCreateButton = true, 
+const GroupManager: React.FC<GroupManagerProps> = ({
+  onGroupSelect,
+  selectedGroupId,
+  showCreateButton = true,
   compact = false,
   onStartGroupSlideshow,
   onOpenGroupSlideshowSettings
@@ -267,7 +271,7 @@ const GroupManager: React.FC<GroupManagerProps> = ({
   const handleGroupSave = (savedGroup: UserGroup) => {
     if (editingGroup) {
       // Update existing group
-      setGroups(groups.map(g => g.id === savedGroup.id ? savedGroup : g));
+      setGroups(groups.map((g) => (g.id === savedGroup.id ? savedGroup : g)));
     } else {
       // Add new group
       setGroups([savedGroup, ...groups]);
@@ -276,18 +280,25 @@ const GroupManager: React.FC<GroupManagerProps> = ({
   };
 
   const handleDeleteGroup = async (group: UserGroup) => {
-    if (!confirm(`Are you sure you want to delete the group "${group.name}"? This will remove all assets from this group.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete the group "${group.name}"? This will remove all assets from this group.`
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/groups?groupId=${group.id}&userId=${userId}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/groups?groupId=${group.id}&userId=${userId}`,
+        {
+          method: 'DELETE'
+        }
+      );
 
       if (response.ok) {
-        setGroups(groups.filter(g => g.id !== group.id));
-        
+        setGroups(groups.filter((g) => g.id !== group.id));
+
         // If this was the selected group, clear selection
         if (selectedGroupId === group.id && onGroupSelect) {
           onGroupSelect(null);
@@ -347,7 +358,9 @@ const GroupManager: React.FC<GroupManagerProps> = ({
         <button
           onClick={() => onGroupSelect?.(null)}
           className={`w-full text-left p-2 rounded text-sm flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 ${
-            selectedGroupId === null ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : ''
+            selectedGroupId === null
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+              : ''
           }`}
         >
           <div className="flex items-center gap-2">
@@ -361,15 +374,17 @@ const GroupManager: React.FC<GroupManagerProps> = ({
           <div
             key={group.id}
             className={`group flex items-center justify-between p-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-              selectedGroupId === group.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+              selectedGroupId === group.id
+                ? 'bg-blue-50 dark:bg-blue-900/20'
+                : ''
             }`}
           >
             <button
               onClick={() => onGroupSelect?.(group.id)}
               className="flex-1 text-left flex items-center gap-2"
             >
-              <FaFolder 
-                style={{ color: group.color }} 
+              <FaFolder
+                style={{ color: group.color }}
                 className="flex-shrink-0"
               />
               <span className="truncate" title={group.name}>

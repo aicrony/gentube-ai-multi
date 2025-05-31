@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToTwitter } from '@/services/socialMedia/twitterService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -37,10 +37,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const accessToken = process.env.TWITTER_ACCESS_TOKEN;
     const accessTokenSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
     const bearerToken = process.env.TWITTER_BEARER_TOKEN;
-    
-    if (!apiKey || !apiKeySecret || !accessToken || !accessTokenSecret || !bearerToken) {
+
+    if (
+      !apiKey ||
+      !apiKeySecret ||
+      !accessToken ||
+      !accessTokenSecret ||
+      !bearerToken
+    ) {
       return NextResponse.json(
-        { error: 'Configuration Error', message: 'Twitter API credentials not configured' },
+        {
+          error: 'Configuration Error',
+          message: 'Twitter API credentials not configured'
+        },
         { status: 500 }
       );
     }

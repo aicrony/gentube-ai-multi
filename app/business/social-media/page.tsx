@@ -24,7 +24,14 @@ import {
   FaChevronRight
 } from 'react-icons/fa';
 import GuidedMessage from '@/components/ui/GuidedMessage/GuidedMessage';
-import { StyleItem, EffectItem, EmotionItem, styles, effects, emotions } from '@/constants';
+import {
+  StyleItem,
+  EffectItem,
+  EmotionItem,
+  styles,
+  effects,
+  emotions
+} from '@/constants';
 import PricingBadge from '@/components/ui/Pricing/PricingBadge';
 
 interface UserAsset {

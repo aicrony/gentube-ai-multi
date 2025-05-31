@@ -17,17 +17,17 @@ export async function POST(request: NextRequest) {
     // Validate prompt length - Google Cloud Datastore has limits
     const MAX_PROMPT_LENGTH = 1500; // Setting a reasonable limit
     const editPrompt = body.prompt as string;
-    
+
     if (editPrompt && editPrompt.length > MAX_PROMPT_LENGTH) {
       return NextResponse.json(
-        { 
+        {
           error: `Edit prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.`,
           promptLength: editPrompt.length
-        }, 
+        },
         { status: 400 }
       );
     }
-    
+
     const imageUrl = body.imageUrl as string;
 
     // Require both userId and userIp
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         { status: 430 } // Custom status code for sign-in required
       );
     }
-    
+
     if (!userIp || userIp === 'unknown') {
       return NextResponse.json(
         { error: 'User IP is required' },
@@ -70,22 +70,26 @@ export async function POST(request: NextRequest) {
     // Check if there was an error in the user response
     if (userResponse.error) {
       const statusCode = userResponse.statusCode || 400;
-      
+
       // Handle specific error cases
       if (userResponse.result === 'LimitExceeded') {
         return NextResponse.json(
-          { 
-            error: 'Credit limit exceeded. You need credits to edit images. Please purchase credits on the pricing page.',
+          {
+            error:
+              'Credit limit exceeded. You need credits to edit images. Please purchase credits on the pricing page.',
             result: 'LimitExceeded',
             credits: userResponse.credits
-          }, 
+          },
           { status: statusCode }
         );
       }
-      
+
       // Handle other errors
       return NextResponse.json(
-        { error: userResponse.result || 'An error occurred', credits: userResponse.credits }, 
+        {
+          error: userResponse.result || 'An error occurred',
+          credits: userResponse.credits
+        },
         { status: statusCode }
       );
     }

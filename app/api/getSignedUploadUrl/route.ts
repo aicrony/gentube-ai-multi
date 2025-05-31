@@ -18,18 +18,18 @@ export async function POST(request: NextRequest) {
     // Get userId from headers instead of body for security
     const userId = request.headers.get('x-user-id');
     const userIp = request.headers.get('x-forwarded-for') || 'unknown';
-    
+
     // Require both userId and userIp
     if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required. Please sign in for free credits.' }, 
+        { error: 'User ID is required. Please sign in for free credits.' },
         { status: 430 } // Custom status code for sign-in required
       );
     }
-    
+
     if (!userIp || userIp === 'unknown') {
       return NextResponse.json(
-        { error: 'User IP is required' }, 
+        { error: 'User IP is required' },
         { status: 400 }
       );
     }
@@ -47,9 +47,10 @@ export async function POST(request: NextRequest) {
     // Generate a unique filename to prevent collisions
     const fileExtension = fileName ? `.${fileName.split('.').pop()}` : '.png';
     const uniqueFileName = `${uuidv4()}${fileExtension}`;
-    
+
     // Get the appropriate bucket
-    const bucketName = process.env.GCLOUD_TEMP_PUBLIC_BUCKET_NAME || 'gen-image-storage';
+    const bucketName =
+      process.env.GCLOUD_TEMP_PUBLIC_BUCKET_NAME || 'gen-image-storage';
     const bucket = storage.bucket(bucketName);
     const file = bucket.file(uniqueFileName);
 
@@ -64,12 +65,11 @@ export async function POST(request: NextRequest) {
     // Construct the final URL that will be used after upload
     const finalUrl = `https://storage.googleapis.com/${bucketName}/${uniqueFileName}`;
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       signedUrl,
       finalUrl,
       fileName: uniqueFileName
     });
-
   } catch (error) {
     console.error('Error generating signed URL:', error);
     return NextResponse.json(

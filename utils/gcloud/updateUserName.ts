@@ -29,44 +29,46 @@ export async function updateUserName(
       namespace: namespace,
       path: [kind, userId]
     });
-    
+
     console.log(`Trying to update user name with direct key: ${userId}`);
-    
+
     try {
       // Try to get the entity by direct key first
       const [directEntity] = await datastore.get(directKey);
-      
+
       if (directEntity) {
         // User exists with direct key, update the name
         console.log(`Found user directly by key: ${userId}`);
-        
+
         // Get current entity data
         const userCreditsEntity = { ...directEntity };
-        
+
         // Update both name fields for compatibility
         userCreditsEntity.Name = name;
         userCreditsEntity.CreatorName = name;
         userCreditsEntity.LastUpdated = new Date();
-        
+
         // Ensure UserId is properly set (it might be missing)
         if (!userCreditsEntity.UserId) {
           userCreditsEntity.UserId = userId;
         }
-        
+
         // Save the updated entity
         await datastore.update({
           key: directKey,
           data: userCreditsEntity
         });
-        
-        console.log(`Updated user ${userId}'s name to ${name} using direct key`);
+
+        console.log(
+          `Updated user ${userId}'s name to ${name} using direct key`
+        );
         return true;
       }
     } catch (error) {
       console.error(`Error updating user by direct key: ${error}`);
       // Continue to other methods if direct lookup fails
     }
-    
+
     // Try finding by UserId field if direct key fails
     const query = datastore
       .createQuery(namespace, kind)
@@ -74,26 +76,26 @@ export async function updateUserName(
       .limit(1);
 
     const [userCredits] = await datastore.runQuery(query);
-    
+
     if (userCredits.length > 0) {
       // User exists, update the name
       console.log(`Found user by UserId field: ${userId}`);
       const userCreditsKey = userCredits[0][datastore.KEY];
-      
+
       // Get current entity data
       const userCreditsEntity = { ...userCredits[0] };
-      
+
       // Update both name fields for compatibility
       userCreditsEntity.Name = name;
       userCreditsEntity.CreatorName = name;
       userCreditsEntity.LastUpdated = new Date();
-      
+
       // Save the updated entity
       await datastore.update({
         key: userCreditsKey,
         data: userCreditsEntity
       });
-      
+
       console.log(`Updated user ${userId}'s name to ${name} via query`);
       return true;
     } else {
@@ -103,7 +105,7 @@ export async function updateUserName(
         namespace: namespace,
         path: [kind, userId]
       });
-      
+
       const userCreditsEntity = {
         UserId: userId,
         Name: name,
@@ -111,12 +113,12 @@ export async function updateUserName(
         Credits: 0,
         LastUpdated: new Date()
       };
-      
+
       await datastore.save({
         key: userCreditsKey,
         data: userCreditsEntity
       });
-      
+
       console.log(`Created new user ${userId} with name ${name}`);
       return true;
     }

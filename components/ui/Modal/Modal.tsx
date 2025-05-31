@@ -169,9 +169,11 @@ const Modal: React.FC<ModalProps> = ({
   const [slideshowUrl, setSlideshowUrl] = useState('');
   const [slideshowError, setSlideshowError] = useState('');
   const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // States for slideshow history
-  const [slideshowHistory, setSlideshowHistory] = useState<SlideshowHistoryItem[]>([]);
+  const [slideshowHistory, setSlideshowHistory] = useState<
+    SlideshowHistoryItem[]
+  >([]);
   const [showSlideshowHistory, setShowSlideshowHistory] = useState(false);
 
   // States for thumbnail strip drag and drop
@@ -185,29 +187,34 @@ const Modal: React.FC<ModalProps> = ({
       if (!history) {
         return [];
       }
-      
+
       const parsedHistory = JSON.parse(history) as SlideshowHistoryItem[];
       const now = Date.now();
       const tenDaysMs = 10 * 24 * 60 * 60 * 1000; // 10 days in milliseconds
-      
+
       // Filter out slideshows older than 10 days
-      const filteredHistory = parsedHistory.filter(item => {
-        return (now - item.createdAt) < tenDaysMs;
+      const filteredHistory = parsedHistory.filter((item) => {
+        return now - item.createdAt < tenDaysMs;
       });
-      
+
       // Save the filtered history back to localStorage if we removed any items
       if (parsedHistory.length !== filteredHistory.length) {
-        localStorage.setItem('slideshowHistory', JSON.stringify(filteredHistory));
-        console.log(`Cleaned up ${parsedHistory.length - filteredHistory.length} old slideshow links`);
+        localStorage.setItem(
+          'slideshowHistory',
+          JSON.stringify(filteredHistory)
+        );
+        console.log(
+          `Cleaned up ${parsedHistory.length - filteredHistory.length} old slideshow links`
+        );
       }
-      
+
       return filteredHistory;
     } catch (error) {
       console.error('Error loading slideshow history:', error);
       return [];
     }
   };
-  
+
   // Load slideshow history when showing the history panel
   useEffect(() => {
     if (showSlideshowHistory) {
@@ -215,7 +222,7 @@ const Modal: React.FC<ModalProps> = ({
       setSlideshowHistory(history);
     }
   }, [showSlideshowHistory]);
-  
+
   // Start slideshow with effect dependency on autoStartSlideshow
   useEffect(() => {
     // Start slideshow automatically if specified
@@ -296,21 +303,33 @@ const Modal: React.FC<ModalProps> = ({
   }, []);
 
   const isVideo = mediaUrl.endsWith('.mp4');
-  
+
   // Preload the next image if we're in a slideshow
   useEffect(() => {
-    if (!isVideo && currentAssets && currentAssets.length > 1 && hasNext && mediaUrl) {
+    if (
+      !isVideo &&
+      currentAssets &&
+      currentAssets.length > 1 &&
+      hasNext &&
+      mediaUrl
+    ) {
       // Find the current asset index
-      const currentIndex = currentAssets.findIndex(id => id === currentItemId);
-      
+      const currentIndex = currentAssets.findIndex(
+        (id) => id === currentItemId
+      );
+
       // If there's a next asset and we know what it is
-      if (currentIndex !== -1 && currentIndex + 1 < currentAssets.length && onNext) {
+      if (
+        currentIndex !== -1 &&
+        currentIndex + 1 < currentAssets.length &&
+        onNext
+      ) {
         // We need to somehow get the URL of the next asset, but we don't have direct access
         // Instead, let's use the service worker to preload the current image
         // which will make navigation faster even if we can't preload the exact next one
         if ('serviceWorker' in navigator && 'caches' in window) {
-          caches.open('slideshow-images-v2').then(cache => {
-            cache.add(mediaUrl).catch(err => {
+          caches.open('slideshow-images-v2').then((cache) => {
+            cache.add(mediaUrl).catch((err) => {
               console.warn('Failed to cache current asset:', err);
             });
           });
@@ -352,13 +371,13 @@ const Modal: React.FC<ModalProps> = ({
 
       if (result.success && result.shareUrl) {
         setSlideshowUrl(result.shareUrl);
-        
+
         // Save to slideshow history
         try {
           // Extract slideshowId from URL (format: /slideshow/[id])
           const urlParts = result.shareUrl.split('/');
           const slideshowId = urlParts[urlParts.length - 1];
-          
+
           // Create new history item
           const newHistoryItem: SlideshowHistoryItem = {
             url: result.shareUrl,
@@ -366,16 +385,19 @@ const Modal: React.FC<ModalProps> = ({
             createdAt: Date.now(),
             slideshowId
           };
-          
+
           // Load existing history
           const existingHistory = loadAndCleanSlideshowHistory();
-          
+
           // Add new item to the beginning of the array
           const updatedHistory = [newHistoryItem, ...existingHistory];
-          
+
           // Save updated history
-          localStorage.setItem('slideshowHistory', JSON.stringify(updatedHistory));
-          
+          localStorage.setItem(
+            'slideshowHistory',
+            JSON.stringify(updatedHistory)
+          );
+
           // Update state if history panel is open
           if (showSlideshowHistory) {
             setSlideshowHistory(updatedHistory);
@@ -415,19 +437,21 @@ const Modal: React.FC<ModalProps> = ({
         });
     }
   };
-  
+
   // Handle deleting a slideshow from history
   const deleteSlideshowFromHistory = (slideshowId: string) => {
     try {
       // Load current history
       const history = loadAndCleanSlideshowHistory();
-      
+
       // Filter out the slideshow to delete
-      const updatedHistory = history.filter(item => item.slideshowId !== slideshowId);
-      
+      const updatedHistory = history.filter(
+        (item) => item.slideshowId !== slideshowId
+      );
+
       // Save updated history
       localStorage.setItem('slideshowHistory', JSON.stringify(updatedHistory));
-      
+
       // Update state
       setSlideshowHistory(updatedHistory);
     } catch (error) {
@@ -446,9 +470,11 @@ const Modal: React.FC<ModalProps> = ({
       let blob;
       if ('caches' in window) {
         try {
-          const cache = await caches.open(isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2');
+          const cache = await caches.open(
+            isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2'
+          );
           const cachedResponse = await cache.match(mediaUrl);
-          
+
           if (cachedResponse) {
             console.log('Using cached version for download');
             blob = await cachedResponse.blob();
@@ -458,16 +484,18 @@ const Modal: React.FC<ModalProps> = ({
           // Continue with network fetch
         }
       }
-      
+
       // If we couldn't get from cache, fetch from network
       if (!blob) {
         const response = await fetch(mediaUrl);
         blob = await response.blob();
-        
+
         // Add to cache for future use
         if ('caches' in window) {
           try {
-            const cache = await caches.open(isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2');
+            const cache = await caches.open(
+              isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2'
+            );
             const response = new Response(blob);
             await cache.put(mediaUrl, response);
           } catch (cacheError) {
@@ -515,7 +543,7 @@ const Modal: React.FC<ModalProps> = ({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragOverIndex(null);
     }
@@ -523,7 +551,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleThumbnailDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
+
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
       setDragOverIndex(null);
@@ -633,7 +661,6 @@ const Modal: React.FC<ModalProps> = ({
             </button>
           )}
 
-
           {/* Fullscreen toggle button */}
           <button
             onClick={toggleFullScreen}
@@ -655,35 +682,37 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Image Edit panel */}
         {showImageEditPane && (
-          <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-80">
-            <h3 className="text-lg font-bold mb-3">Edit Image</h3>
-            
+          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
+            <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">Edit Image</h3>
+
             <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Describe how you want to edit this image:
               </label>
               <textarea
                 value={editPrompt}
-                onChange={(e) => onEditPromptChange && onEditPromptChange(e.target.value)}
+                onChange={(e) =>
+                  onEditPromptChange && onEditPromptChange(e.target.value)
+                }
                 placeholder="e.g., change the background to a sunset, add a vintage filter, make it black and white..."
-                className="w-full p-3 rounded bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none resize-vertical"
+                className="w-full p-3 rounded bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none resize-vertical"
                 rows={4}
               />
             </div>
-            
+
             <div className="flex gap-2">
               <button
                 onClick={() => {
                   if (onEditPromptChange) onEditPromptChange('');
                 }}
-                className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white transition-colors"
+                className="flex-1 px-3 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 rounded text-gray-800 dark:text-white transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={onSubmitImageEdit}
                 disabled={!editPrompt.trim() || isEditingImage}
-                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-white transition-colors flex items-center justify-center"
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-white transition-colors flex items-center justify-center"
               >
                 {isEditingImage ? (
                   <>
@@ -700,11 +729,11 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow settings panel */}
         {showSettings && (
-          <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-64">
-            <h3 className="text-lg font-bold mb-1">Slideshow Settings</h3>
+          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-10 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
+            <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">Slideshow Settings</h3>
 
             <div className="mb-2">
-              <label className="block mb-2 text-sm">Interval (seconds)</label>
+              <label className="block mb-2 text-sm text-gray-700 dark:text-gray-300">Interval (seconds)</label>
               <input
                 type="range"
                 min="3"
@@ -719,7 +748,7 @@ const Modal: React.FC<ModalProps> = ({
                 }}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs mt-1">
+              <div className="flex justify-between text-xs mt-1 text-gray-600 dark:text-gray-400">
                 <span>3s</span>
                 <span>{slideInterval / 1000}s</span>
                 <span>20s</span>
@@ -727,14 +756,14 @@ const Modal: React.FC<ModalProps> = ({
             </div>
 
             <div className="mb-2">
-              <label className="block mb-1 text-sm">Direction</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-300">Direction</label>
               <div className="flex justify-between">
                 <button
                   onClick={() => {
                     setSlideDirection('backward');
                     saveToLocalStorage('slideshowDirection', 'backward');
                   }}
-                  className={`px-3 py-1 rounded ${slideDirection === 'backward' ? 'bg-blue-500' : 'bg-gray-600'}`}
+                  className={`px-3 py-1 rounded text-white ${slideDirection === 'backward' ? 'bg-blue-500' : 'bg-gray-500 dark:bg-gray-600'}`}
                 >
                   Backward
                 </button>
@@ -743,7 +772,7 @@ const Modal: React.FC<ModalProps> = ({
                     setSlideDirection('forward');
                     saveToLocalStorage('slideshowDirection', 'forward');
                   }}
-                  className={`px-3 py-1 rounded ${slideDirection === 'forward' ? 'bg-blue-500' : 'bg-gray-600'}`}
+                  className={`px-3 py-1 rounded text-white ${slideDirection === 'forward' ? 'bg-blue-500' : 'bg-gray-500 dark:bg-gray-600'}`}
                 >
                   Forward
                 </button>
@@ -753,9 +782,9 @@ const Modal: React.FC<ModalProps> = ({
             {/* Infinite Loop Toggle */}
             <div className="mb-3">
               <div className="flex items-center justify-start">
-                <label className="text-sm pr-2">Infinite Loop</label>
+                <label className="text-sm pr-2 text-gray-700 dark:text-gray-300">Infinite Loop</label>
                 <div
-                  className={`relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out rounded-full cursor-pointer ${infiniteLoop ? 'bg-blue-500' : 'bg-gray-600'}`}
+                  className={`relative inline-block w-12 h-6 transition-colors duration-200 ease-in-out rounded-full cursor-pointer ${infiniteLoop ? 'bg-blue-500' : 'bg-gray-400 dark:bg-gray-600'}`}
                   onClick={() => {
                     const newValue = !infiniteLoop;
                     setInfiniteLoop(newValue);
@@ -776,8 +805,8 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Share Slideshow */}
             {onCreateSlideshow && (
-              <div className="mt-4 border-t border-gray-600 pt-4">
-                <h4 className="text-md font-bold mb-3">Sharing</h4>
+              <div className="mt-4 border-t border-gray-300 dark:border-gray-600 pt-4">
+                <h4 className="text-md font-bold mb-3 text-gray-900 dark:text-white">Sharing</h4>
 
                 {!slideshowUrl ? (
                   <button
@@ -796,7 +825,7 @@ const Modal: React.FC<ModalProps> = ({
                   </button>
                 ) : (
                   <div className="flex flex-col">
-                    <div className="bg-gray-700 p-2 rounded text-xs mb-2 overflow-hidden text-ellipsis">
+                    <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs mb-2 overflow-hidden text-ellipsis text-gray-800 dark:text-gray-200">
                       {slideshowUrl}
                     </div>
                     <button
@@ -810,16 +839,18 @@ const Modal: React.FC<ModalProps> = ({
                 )}
 
                 {slideshowError && (
-                  <div className="mt-2 text-red-400 text-xs">
+                  <div className="mt-2 text-red-500 dark:text-red-400 text-xs">
                     {slideshowError}
                   </div>
                 )}
-                
+
                 {/* Slideshow History Section */}
                 <div className="mt-4">
                   <button
-                    onClick={() => setShowSlideshowHistory(!showSlideshowHistory)}
-                    className="flex items-center justify-between w-full px-2 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white text-left"
+                    onClick={() =>
+                      setShowSlideshowHistory(!showSlideshowHistory)
+                    }
+                    className="flex items-center justify-between w-full px-2 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white text-left"
                   >
                     <div className="flex items-center">
                       <FaHistory className="mr-2" />
@@ -827,27 +858,34 @@ const Modal: React.FC<ModalProps> = ({
                     </div>
                     {showSlideshowHistory ? <FaChevronUp /> : <FaChevronDown />}
                   </button>
-                  
+
                   {showSlideshowHistory && (
-                    <div className="mt-2 bg-gray-800 border border-gray-700 rounded p-2">
+                    <div className="mt-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded p-2">
                       {slideshowHistory.length === 0 ? (
-                        <p className="text-gray-400 text-sm text-center py-2">No slideshows yet</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-2">
+                          No slideshows yet
+                        </p>
                       ) : (
                         <ul className="max-h-40 overflow-y-auto">
                           {slideshowHistory.map((item, index) => (
-                            <li key={item.slideshowId} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
+                            <li
+                              key={item.slideshowId}
+                              className="flex items-center justify-between py-2 border-b border-gray-300 dark:border-gray-700 last:border-b-0"
+                            >
                               <div className="flex-grow overflow-hidden mr-2">
-                                <div className="text-sm truncate">
+                                <div className="text-sm truncate text-gray-800 dark:text-gray-200">
                                   {item.title}
                                 </div>
-                                <div className="text-xs text-gray-400">
-                                  {new Date(item.createdAt).toLocaleDateString()}
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {new Date(
+                                    item.createdAt
+                                  ).toLocaleDateString()}
                                 </div>
                               </div>
                               <div className="flex space-x-2">
-                                <a 
-                                  href={item.url} 
-                                  target="_blank" 
+                                <a
+                                  href={item.url}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-blue-400 hover:text-blue-300"
                                   title="Open slideshow"
@@ -857,12 +895,14 @@ const Modal: React.FC<ModalProps> = ({
                                 <button
                                   onClick={(event) => {
                                     navigator.clipboard.writeText(item.url);
-                                    
+
                                     // Show temporary tooltip
-                                    const tooltip = document.createElement('div');
+                                    const tooltip =
+                                      document.createElement('div');
                                     tooltip.textContent = 'Copied!';
                                     tooltip.style.position = 'absolute';
-                                    tooltip.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                                    tooltip.style.backgroundColor =
+                                      'rgba(0,0,0,0.7)';
                                     tooltip.style.color = 'white';
                                     tooltip.style.padding = '4px 8px';
                                     tooltip.style.borderRadius = '4px';
@@ -870,17 +910,25 @@ const Modal: React.FC<ModalProps> = ({
                                     tooltip.style.zIndex = '1000';
                                     tooltip.style.opacity = '0';
                                     tooltip.style.transition = 'opacity 0.3s';
-                                    
+
                                     // Position near button
-                                    const rect = (event.target as HTMLElement).getBoundingClientRect();
+                                    const rect = (
+                                      event.target as HTMLElement
+                                    ).getBoundingClientRect();
                                     tooltip.style.top = `${rect.top - 30}px`;
                                     tooltip.style.left = `${rect.left}px`;
-                                    
+
                                     document.body.appendChild(tooltip);
-                                    setTimeout(() => { tooltip.style.opacity = '1'; }, 10);
+                                    setTimeout(() => {
+                                      tooltip.style.opacity = '1';
+                                    }, 10);
                                     setTimeout(() => {
                                       tooltip.style.opacity = '0';
-                                      setTimeout(() => document.body.removeChild(tooltip), 300);
+                                      setTimeout(
+                                        () =>
+                                          document.body.removeChild(tooltip),
+                                        300
+                                      );
                                     }, 2000);
                                   }}
                                   className="text-gray-400 hover:text-gray-300"
@@ -889,7 +937,9 @@ const Modal: React.FC<ModalProps> = ({
                                   <FaCopy />
                                 </button>
                                 <button
-                                  onClick={() => deleteSlideshowFromHistory(item.slideshowId)}
+                                  onClick={() =>
+                                    deleteSlideshowFromHistory(item.slideshowId)
+                                  }
                                   className="text-red-500 hover:text-red-400"
                                   title="Delete from history"
                                 >
@@ -931,14 +981,16 @@ const Modal: React.FC<ModalProps> = ({
               // Cache in service worker if available
               if ('serviceWorker' in navigator && 'caches' in window) {
                 // Cache image or video in the appropriate cache
-                const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
-                caches.open(cacheName).then(cache => {
-                  cache.add(mediaUrl).catch(err => {
+                const cacheName = isVideo
+                  ? 'slideshow-assets-v2'
+                  : 'slideshow-images-v2';
+                caches.open(cacheName).then((cache) => {
+                  cache.add(mediaUrl).catch((err) => {
                     console.warn('Failed to cache asset in modal:', err);
                   });
                 });
               }
-              
+
               if (isVideo) {
                 return (
                   <video
@@ -971,12 +1023,10 @@ const Modal: React.FC<ModalProps> = ({
                   <div
                     key={asset.id}
                     className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                      index === currentAssetIndex 
-                        ? 'ring-2 ring-blue-500 scale-110' 
+                      index === currentAssetIndex
+                        ? 'ring-2 ring-blue-500 scale-110'
                         : 'hover:scale-105'
-                    } ${
-                      draggedIndex === index ? 'opacity-50' : ''
-                    } ${
+                    } ${draggedIndex === index ? 'opacity-50' : ''} ${
                       dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
                     }`}
                     draggable={onAssetReorder !== undefined}
@@ -1007,12 +1057,12 @@ const Modal: React.FC<ModalProps> = ({
                         loading="lazy"
                       />
                     )}
-                    
+
                     {/* Index indicator */}
                     <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {index + 1}
                     </div>
-                    
+
                     {/* Drag indicator */}
                     {onAssetReorder && (
                       <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-1">
@@ -1022,7 +1072,7 @@ const Modal: React.FC<ModalProps> = ({
                   </div>
                 ))}
               </div>
-              
+
               {onAssetReorder && (
                 <div className="text-center mt-2">
                   <span className="text-xs text-gray-300">

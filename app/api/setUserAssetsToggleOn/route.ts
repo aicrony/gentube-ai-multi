@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !assetUrl) {
       return NextResponse.json(
-        { error: 'Missing required parameters' }, 
+        { error: 'Missing required parameters' },
         { status: 400 }
       );
     }
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Failed to fetch user assets:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch user assets' }, 
+      { error: 'Failed to fetch user assets' },
       { status: 500 }
     );
   }

@@ -78,11 +78,11 @@ export default function TermsOfUsePage() {
 
               <h2>5. User Content</h2>
               <p>
-                Users may upload images and provide text prompts ("User
-                Content") to generate new content. You retain ownership of your
-                original User Content, but grant us a worldwide, non-exclusive
-                license to use, store, and process this content for the purpose
-                of providing our services.
+                Users may upload images and provide text prompts (&quot;User
+                Content&quot;) to generate new content. You retain ownership of
+                your original User Content, but grant us a worldwide,
+                non-exclusive license to use, store, and process this content
+                for the purpose of providing our services.
               </p>
               <p>
                 You are solely responsible for your User Content and must ensure
@@ -163,10 +163,10 @@ export default function TermsOfUsePage() {
 
               <h2>9. Disclaimers</h2>
               <p>
-                Our services are provided "as is" and "as available" without
-                warranties of any kind, either express or implied. We do not
-                guarantee that our services will be uninterrupted, secure, or
-                error-free.
+                Our services are provided &quot;as is&quot; and &quot;as
+                available&quot; without warranties of any kind, either express
+                or implied. We do not guarantee that our services will be
+                uninterrupted, secure, or error-free.
               </p>
               <p>
                 While we strive for high-quality output, we cannot guarantee

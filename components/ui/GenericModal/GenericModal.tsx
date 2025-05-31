@@ -8,8 +8,8 @@ interface ModalProps {
 }
 
 const GenericModal: React.FC<ModalProps> = ({ children, isOpen, onClose }) => {
-  if (!isOpen) return null;
   const { theme } = useTheme();
+  if (!isOpen) return null;
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();

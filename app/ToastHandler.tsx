@@ -12,7 +12,7 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
 
   const handleToastClick = (id: string, toastData: ToastData) => {
     console.log('Toast clicked:', id, toastData);
-    
+
     // Handle different toast types
     if (toastData.type === 'error') {
       // Navigate to pricing page for credit-related errors
@@ -22,11 +22,13 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('closeModal'));
       }
-      
+
       // Small delay to ensure modal closes before navigation
       setTimeout(() => {
         // Navigate to manage image page with specific image ID in URL
-        router.push(`/personal/manage-image?openImage=${toastData.editedImageId}`);
+        router.push(
+          `/personal/manage-image?openImage=${toastData.editedImageId}`
+        );
       }, 100);
     } else if (toastData.type === 'image' || toastData.type === 'image-edit') {
       router.push('/personal/manage-image');
@@ -36,8 +38,6 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
   };
 
   return (
-    <ToastProvider onToastClick={handleToastClick}>
-      {children}
-    </ToastProvider>
+    <ToastProvider onToastClick={handleToastClick}>{children}</ToastProvider>
   );
 }

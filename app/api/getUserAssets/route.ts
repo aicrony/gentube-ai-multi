@@ -13,18 +13,18 @@ export async function GET(request: NextRequest) {
   const includeGroups = searchParams.get('includeGroups') === 'true'; // Whether to include group info
 
   console.log('USER-IP: ' + userIp);
-  
+
   if (!userId || !userIp) {
     return NextResponse.json(
       { error: 'Missing required parameters' },
       { status: 400 }
     );
   }
-  
+
   if (userIp !== 'unknown') {
     try {
       let assets;
-      
+
       if (groupId || includeGroups) {
         // Use enhanced function that includes group information
         assets = await getUserAssetsWithGroups(
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           assetType || undefined
         );
       }
-      
+
       return NextResponse.json({ assets });
     } catch (error) {
       console.error('Failed to fetch user assets:', error);

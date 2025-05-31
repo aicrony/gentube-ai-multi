@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
               <p>
                 By using GenTube.ai, you consent to the data practices described
                 in this policy. We may update this policy periodically, and
-                we'll notify you of any significant changes.
+                we&apos;ll notify you of any significant changes.
               </p>
 
               <h2>2. Information We Collect</h2>
@@ -121,7 +121,7 @@ export default function PrivacyPolicyPage() {
                 features of our site.
               </p>
 
-              <h2>8. Children's Privacy</h2>
+              <h2>8. Children&apos;s Privacy</h2>
               <p>
                 Our services are not intended for children under 13 years of
                 age. We do not knowingly collect personal information from

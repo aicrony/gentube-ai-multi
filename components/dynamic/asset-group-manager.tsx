@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FaFolder, 
-  FaPlus, 
-  FaMinus, 
+import {
+  FaFolder,
+  FaPlus,
+  FaMinus,
   FaTimes,
   FaCheck,
   FaTag
@@ -40,9 +40,11 @@ const GroupCheckbox: React.FC<GroupCheckboxProps> = ({
   disabled = false
 }) => {
   return (
-    <label className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-      disabled ? 'opacity-50 cursor-not-allowed' : ''
-    }`}>
+    <label
+      className={`flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
+        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
       <div className="relative">
         <input
           type="checkbox"
@@ -61,7 +63,9 @@ const GroupCheckbox: React.FC<GroupCheckboxProps> = ({
       <div className="flex-1 min-w-0">
         <div className="font-medium truncate">{group.name}</div>
         {group.description && (
-          <div className="text-sm text-gray-500 truncate">{group.description}</div>
+          <div className="text-sm text-gray-500 truncate">
+            {group.description}
+          </div>
         )}
       </div>
     </label>
@@ -75,10 +79,14 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
   onUpdate
 }) => {
   const [groups, setGroups] = useState<UserGroup[]>([]);
-  const [assetGroupMemberships, setAssetGroupMemberships] = useState<{[assetId: string]: string[]}>({});
+  const [assetGroupMemberships, setAssetGroupMemberships] = useState<{
+    [assetId: string]: string[];
+  }>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [pendingChanges, setPendingChanges] = useState<{[groupId: string]: boolean}>({});
+  const [pendingChanges, setPendingChanges] = useState<{
+    [groupId: string]: boolean;
+  }>({});
   const userId = useUserId();
   const { showToast } = useToast();
 
@@ -99,26 +107,30 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
 
       // Fetch group memberships for each asset
       const membershipPromises = assetIds.map(async (assetId) => {
-        const response = await fetch(`/api/groups/assets?assetId=${assetId}&userId=${userId}`);
+        const response = await fetch(
+          `/api/groups/assets?assetId=${assetId}&userId=${userId}`
+        );
         const result = await response.json();
-        
+
         if (response.ok) {
           return { assetId, groupIds: result.groupIds || [] };
         } else {
-          console.error(`Failed to fetch groups for asset ${assetId}:`, result.error);
+          console.error(
+            `Failed to fetch groups for asset ${assetId}:`,
+            result.error
+          );
           return { assetId, groupIds: [] };
         }
       });
 
       const memberships = await Promise.all(membershipPromises);
-      const membershipMap: {[assetId: string]: string[]} = {};
-      
+      const membershipMap: { [assetId: string]: string[] } = {};
+
       memberships.forEach(({ assetId, groupIds }) => {
         membershipMap[assetId] = groupIds;
       });
 
       setAssetGroupMemberships(membershipMap);
-
     } catch (error) {
       console.error('Error fetching groups and memberships:', error);
       showToast({
@@ -139,7 +151,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
   }, [isOpen, userId, assetIds]);
 
   const getGroupMembershipStatus = (groupId: string) => {
-    const assetsInGroup = assetIds.filter(assetId => 
+    const assetsInGroup = assetIds.filter((assetId) =>
       assetGroupMemberships[assetId]?.includes(groupId)
     );
 
@@ -153,7 +165,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
   };
 
   const handleGroupToggle = (groupId: string, checked: boolean) => {
-    setPendingChanges(prev => ({
+    setPendingChanges((prev) => ({
       ...prev,
       [groupId]: checked
     }));
@@ -171,7 +183,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
 
       for (const [groupId, shouldBeInGroup] of Object.entries(pendingChanges)) {
         const { isChecked } = getGroupMembershipStatus(groupId);
-        
+
         if (shouldBeInGroup && !isChecked) {
           // Add assets to group
           promises.push(
@@ -185,7 +197,10 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
               })
             })
           );
-        } else if (!shouldBeInGroup && (isChecked || getGroupMembershipStatus(groupId).isIndeterminate)) {
+        } else if (
+          !shouldBeInGroup &&
+          (isChecked || getGroupMembershipStatus(groupId).isIndeterminate)
+        ) {
           // Remove assets from group
           promises.push(
             fetch('/api/groups/assets', {
@@ -202,10 +217,10 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
       }
 
       const results = await Promise.all(promises);
-      
+
       // Check if all operations succeeded
-      const failedOperations = results.filter(response => !response.ok);
-      
+      const failedOperations = results.filter((response) => !response.ok);
+
       if (failedOperations.length > 0) {
         throw new Error(`${failedOperations.length} operation(s) failed`);
       }
@@ -221,7 +236,6 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
       }
 
       onClose();
-
     } catch (error) {
       console.error('Error updating group memberships:', error);
       showToast({
@@ -255,9 +269,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <FaTag />
-            <h2 className="text-lg font-semibold">
-              Manage Groups
-            </h2>
+            <h2 className="text-lg font-semibold">Manage Groups</h2>
           </div>
           <button
             onClick={onClose}
@@ -270,10 +282,9 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
 
         <div className="p-4">
           <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {assetIds.length === 1 
+            {assetIds.length === 1
               ? 'Select groups for this asset:'
-              : `Select groups for ${assetIds.length} assets:`
-            }
+              : `Select groups for ${assetIds.length} assets:`}
           </div>
 
           {loading ? (
@@ -283,7 +294,9 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
           ) : groups.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <div className="mb-2">No groups available.</div>
-              <div className="text-sm">Create a group first to organize your assets.</div>
+              <div className="text-sm">
+                Create a group first to organize your assets.
+              </div>
             </div>
           ) : (
             <div className="space-y-1 max-h-60 overflow-y-auto">

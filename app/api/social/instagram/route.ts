@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToInstagram } from '@/services/socialMedia/instagramService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -25,7 +25,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!imageUrl) {
       return NextResponse.json(
-        { error: 'Bad Request', message: 'Image URL is required for Instagram posts' },
+        {
+          error: 'Bad Request',
+          message: 'Image URL is required for Instagram posts'
+        },
         { status: 400 }
       );
     }
@@ -33,10 +36,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Get Instagram access token and account ID from environment variables or database
     const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
     const instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID;
-    
+
     if (!accessToken || !instagramAccountId) {
       return NextResponse.json(
-        { error: 'Configuration Error', message: 'Instagram API credentials not configured' },
+        {
+          error: 'Configuration Error',
+          message: 'Instagram API credentials not configured'
+        },
         { status: 500 }
       );
     }

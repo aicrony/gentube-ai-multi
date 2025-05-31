@@ -22,9 +22,11 @@ export default function NameForm({ userName }: { userName: string }) {
         try {
           setIsLoading(true);
           console.log(`Fetching creator name for userId: ${userId}`);
-          const response = await fetch(`/api/getUserCreatorName?userId=${userId}`);
+          const response = await fetch(
+            `/api/getUserCreatorName?userId=${userId}`
+          );
           const data = await response.json();
-          
+
           if (response.ok && data.creatorName) {
             console.log(`Found creator name: ${data.creatorName}`);
             setDisplayName(data.creatorName);
@@ -71,17 +73,22 @@ export default function NameForm({ userName }: { userName: string }) {
     // Check if the name is unique before updating
     if (userId) {
       try {
-        console.log(`Checking if name "${newName}" is unique for userId: ${userId}`);
-        
+        console.log(
+          `Checking if name "${newName}" is unique for userId: ${userId}`
+        );
+
         // Check if the name is unique
-        const uniqueResponse = await fetch(`/api/checkNameUniqueness?name=${encodeURIComponent(newName)}&userId=${userId}`);
+        const uniqueResponse = await fetch(
+          `/api/checkNameUniqueness?name=${encodeURIComponent(newName)}&userId=${userId}`
+        );
         const uniqueResult = await uniqueResponse.json();
 
         if (!uniqueResponse.ok) {
           console.error('Failed to check name uniqueness:', uniqueResult);
           toast({
             title: 'Error',
-            description: 'Could not verify if the name is unique. Please try again.',
+            description:
+              'Could not verify if the name is unique. Please try again.',
             variant: 'destructive'
           });
           setIsSubmitting(false);
@@ -91,7 +98,8 @@ export default function NameForm({ userName }: { userName: string }) {
         if (!uniqueResult.isUnique) {
           toast({
             title: 'Name already taken',
-            description: 'This display name is already in use by another creator. Please choose a different name.',
+            description:
+              'This display name is already in use by another creator. Please choose a different name.',
             variant: 'destructive'
           });
           setIsSubmitting(false);
@@ -121,32 +129,34 @@ export default function NameForm({ userName }: { userName: string }) {
             console.error('Failed to update name in Datastore:', result);
             toast({
               title: 'Error',
-              description: 'Failed to update your name in our system. Please try again.',
+              description:
+                'Failed to update your name in our system. Please try again.',
               variant: 'destructive'
             });
             setIsSubmitting(false);
             return;
-          } 
-          
+          }
+
           console.log('Name successfully updated in Google Cloud Datastore');
-          
+
           // Show success toast before redirecting
           toast({
             title: 'Success',
             description: 'Your display name has been updated successfully.',
             variant: 'default'
           });
-          
+
           // Set the display name locally
           setDisplayName(newName);
           setIsSubmitting(false);
-          
+
           // No need to redirect, just stay on the same page
         } catch (error) {
           console.error('Error in update process:', error);
           toast({
             title: 'Error',
-            description: 'There was a problem updating your name. Some changes may not have been saved.',
+            description:
+              'There was a problem updating your name. Some changes may not have been saved.',
             variant: 'destructive'
           });
         }

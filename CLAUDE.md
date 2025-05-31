@@ -1,6 +1,7 @@
 # GENTUBE-AI-MULTI - DEVELOPMENT COMMANDS AND GUIDELINES
 
 ## Build & Run Commands
+
 - `npm run dev` - Start development server with Turbo
 - `npm run build` - Build production application
 - `npm run start` - Start production server
@@ -8,10 +9,12 @@
 - `npm run prettier-fix` - Run Prettier and fix issues
 
 ## Testing
+
 - `npm run test` - Run all tests
 - `npx jest tests/ipUtils.test.ts` - Run a specific test file
 
 ## Code Style Guidelines
+
 - **Imports**: Use absolute imports with `@/` prefix (e.g., `@/components/ui/Button`)
 - **Formatting**: Single quotes, 2-space indentation, trailing commas: none
 - **Components**: Use functional components with TypeScript (React.FC)
@@ -25,6 +28,7 @@
 - **State Management**: Use React contexts and hooks for shared state
 
 ## Project Structure
+
 - `/components` - UI components (dynamic, static, ui)
 - `/services` - API service functions
 - `/utils` - Utility functions

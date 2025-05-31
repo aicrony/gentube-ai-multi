@@ -53,7 +53,10 @@ export async function getUserGroups(userId: string): Promise<UserGroup[]> {
         updatedAt: group.updatedAt,
         color: group.color || '#3B82F6'
       }))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort newest first
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ); // Sort newest first
   } catch (error) {
     console.error('Error fetching user groups:', error);
     return [];
@@ -64,9 +67,9 @@ export async function getUserGroups(userId: string): Promise<UserGroup[]> {
  * Get groups for specific assets
  */
 export async function getGroupsForAssets(
-  assetIds: string[], 
+  assetIds: string[],
   userId: string
-): Promise<{[assetId: string]: UserGroup[]}> {
+): Promise<{ [assetId: string]: UserGroup[] }> {
   try {
     if (assetIds.length === 0) {
       return {};
@@ -88,7 +91,7 @@ export async function getGroupsForAssets(
     const groupIds = [...new Set(memberships.map((m: any) => m.groupId))];
 
     // Fetch group details
-    const groupKeys = groupIds.map(groupId =>
+    const groupKeys = groupIds.map((groupId) =>
       datastore.key({
         namespace: NAMESPACE,
         path: [USER_GROUP_KIND, datastore.int(Number(groupId))]
@@ -96,9 +99,9 @@ export async function getGroupsForAssets(
     );
 
     const [groups] = await datastore.get(groupKeys);
-    
+
     // Create a map of group ID to group data
-    const groupMap: {[groupId: string]: UserGroup} = {};
+    const groupMap: { [groupId: string]: UserGroup } = {};
     groups.forEach((group: any, index: number) => {
       if (group) {
         const groupId = groupIds[index];
@@ -115,8 +118,8 @@ export async function getGroupsForAssets(
     });
 
     // Organize by asset ID
-    const assetGroupMap: {[assetId: string]: UserGroup[]} = {};
-    
+    const assetGroupMap: { [assetId: string]: UserGroup[] } = {};
+
     for (const assetId of assetIds) {
       assetGroupMap[assetId] = [];
     }
@@ -124,7 +127,7 @@ export async function getGroupsForAssets(
     for (const membership of memberships) {
       const assetId = membership.assetId;
       const groupId = membership.groupId;
-      
+
       if (groupMap[groupId] && assetGroupMap[assetId]) {
         assetGroupMap[assetId].push(groupMap[groupId]);
       }
@@ -141,7 +144,7 @@ export async function getGroupsForAssets(
  * Get assets in a specific group
  */
 export async function getAssetsInGroup(
-  groupId: string, 
+  groupId: string,
   userId: string
 ): Promise<string[]> {
   try {
@@ -163,9 +166,9 @@ export async function getAssetsInGroup(
  * Get asset count for each group
  */
 export async function getGroupAssetCounts(
-  groupIds: string[], 
+  groupIds: string[],
   userId: string
-): Promise<{[groupId: string]: number}> {
+): Promise<{ [groupId: string]: number }> {
   try {
     if (groupIds.length === 0) {
       return {};
@@ -178,8 +181,8 @@ export async function getGroupAssetCounts(
 
     const [memberships] = await datastore.runQuery(query);
 
-    const counts: {[groupId: string]: number} = {};
-    
+    const counts: { [groupId: string]: number } = {};
+
     // Initialize all group counts to 0
     for (const groupId of groupIds) {
       counts[groupId] = 0;
@@ -214,13 +217,13 @@ export async function getUserAssetsWithGroups(
   try {
     // Import getUserAssets to avoid circular dependency
     const { getUserAssets } = await import('./userAssets');
-    
+
     let assets;
-    
+
     if (groupId) {
       // If filtering by group, get assets in that group first
       const assetIdsInGroup = await getAssetsInGroup(groupId, userId);
-      
+
       if (assetIdsInGroup.length === 0) {
         return [];
       }
@@ -228,14 +231,14 @@ export async function getUserAssetsWithGroups(
       // Get all assets for the user (we'll filter client-side for now)
       // TODO: Optimize this with a more complex query
       assets = await getUserAssets(userId, userIp, 1000, 0, assetType);
-      
+
       if (!assets) {
         return [];
       }
 
       // Filter to only include assets in the group
-      assets = assets.filter(asset => 
-        asset.id && assetIdsInGroup.includes(asset.id.toString())
+      assets = assets.filter(
+        (asset) => asset.id && assetIdsInGroup.includes(asset.id.toString())
       );
 
       // Apply pagination manually
@@ -251,15 +254,15 @@ export async function getUserAssetsWithGroups(
 
     // Get group information for all assets
     const assetIds = assets
-      .map(asset => asset.id?.toString())
+      .map((asset) => asset.id?.toString())
       .filter(Boolean) as string[];
 
     const assetGroupMap = await getGroupsForAssets(assetIds, userId);
 
     // Enhance assets with group information
-    const assetsWithGroups: AssetWithGroups[] = assets.map(asset => ({
+    const assetsWithGroups: AssetWithGroups[] = assets.map((asset) => ({
       ...asset,
-      groups: asset.id ? (assetGroupMap[asset.id.toString()] || []) : []
+      groups: asset.id ? assetGroupMap[asset.id.toString()] || [] : []
     }));
 
     return assetsWithGroups;

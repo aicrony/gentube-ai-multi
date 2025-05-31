@@ -15,12 +15,12 @@ import {
 } from 'react-icons/fa';
 
 // Define supported social media platforms
-export type SocialPlatform = 
-  | 'facebook' 
-  | 'instagram' 
-  | 'twitter' 
-  | 'tiktok' 
-  | 'pinterest' 
+export type SocialPlatform =
+  | 'facebook'
+  | 'instagram'
+  | 'twitter'
+  | 'tiktok'
+  | 'pinterest'
   | 'linkedin';
 
 interface SocialMediaAuthButtonProps {
@@ -76,15 +76,15 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  
+
   const Icon = platformIcons[platform];
   const platformColor = platformColors[platform];
   const platformName = platformNames[platform];
-  
+
   const handleConnect = async () => {
     setIsLoading(true);
     setHasError(false);
-    
+
     try {
       // For custom connect handler
       if (onConnect) {
@@ -99,11 +99,11 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
       setIsLoading(false);
     }
   };
-  
+
   const handleDisconnect = async () => {
     setIsLoading(true);
     setHasError(false);
-    
+
     try {
       // For custom disconnect handler
       if (onDisconnect) {
@@ -117,11 +117,11 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
           },
           body: JSON.stringify({ platform })
         });
-        
+
         if (!response.ok) {
           throw new Error(`Failed to disconnect from ${platform}`);
         }
-        
+
         // Reload page to update UI
         window.location.reload();
       }
@@ -132,7 +132,7 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
       setIsLoading(false);
     }
   };
-  
+
   // Handle button click based on connection state
   const handleClick = () => {
     if (isConnected) {
@@ -141,13 +141,13 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
       handleConnect();
     }
   };
-  
+
   // Icon size based on button size
   const iconSize = size === 'small' ? 16 : size === 'medium' ? 20 : 24;
-  
+
   // Button styling
   let buttonClasses = `flex items-center gap-2 transition-all ${className}`;
-  
+
   // Size-specific classes
   switch (size) {
     case 'small':
@@ -159,10 +159,10 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
     default: // medium
       buttonClasses += ' px-4 py-2';
   }
-  
+
   // Determine button styles (handle dark mode)
   let buttonStyle: React.CSSProperties = {};
-  
+
   if (isConnected) {
     // Connected state
     if (isDarkMode) {
@@ -186,7 +186,7 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
       border: `1px solid ${platformColor}`
     };
   }
-  
+
   return (
     <Button
       onClick={handleClick}
@@ -196,20 +196,21 @@ export const SocialMediaAuthButton: React.FC<SocialMediaAuthButtonProps> = ({
     >
       {/* Main icon (platform logo) */}
       <Icon size={iconSize} />
-      
+
       {/* Button text */}
       <span>
         {platformName}
-        {showStatus && isConnected && (
-          <span className="ml-1">(Connected)</span>
-        )}
+        {showStatus && isConnected && <span className="ml-1">(Connected)</span>}
       </span>
-      
+
       {/* Status indicator */}
       {showStatus && (
         <span className="ml-1">
           {hasError ? (
-            <FaExclamationTriangle size={iconSize - 4} className="text-amber-500" />
+            <FaExclamationTriangle
+              size={iconSize - 4}
+              className="text-amber-500"
+            />
           ) : isConnected ? (
             <FaUnlink size={iconSize - 4} />
           ) : (

@@ -10,12 +10,12 @@ interface ContextProviderWithErrorHandlingProps {
   children: ReactNode;
 }
 
-const ContextProviderWithErrorHandling: React.FC<ContextProviderWithErrorHandlingProps> = ({ 
-  children 
-}) => {
+const ContextProviderWithErrorHandling: React.FC<
+  ContextProviderWithErrorHandlingProps
+> = ({ children }) => {
   const [userIp, setUserIp] = useState<string>('unknown');
   const [userId, setUserId] = useState<string>('none');
-  
+
   // Fetch user IP on initial load to make it available for contexts
   useEffect(() => {
     const fetchUserIp = async () => {
@@ -28,10 +28,10 @@ const ContextProviderWithErrorHandling: React.FC<ContextProviderWithErrorHandlin
         console.error('Error fetching user IP:', error);
       }
     };
-    
+
     fetchUserIp();
   }, []);
-  
+
   // Handle user ID from client storage if possible
   useEffect(() => {
     // Check if we're in browser environment
@@ -41,21 +41,18 @@ const ContextProviderWithErrorHandling: React.FC<ContextProviderWithErrorHandlin
         // For example:
         // const storedUserId = localStorage.getItem('userId');
         // if (storedUserId) setUserId(storedUserId);
-        
         // For now, we'll continue with the default 'none'
       } catch (error) {
         console.error('Error accessing stored user data:', error);
       }
     }
   }, []);
-  
+
   return (
     <ContextErrorHandler>
       <UserIpProvider>
         <UserIdProvider userId={userId}>
-          <UserCreditsProvider>
-            {children}
-          </UserCreditsProvider>
+          <UserCreditsProvider>{children}</UserCreditsProvider>
         </UserIdProvider>
       </UserIpProvider>
     </ContextErrorHandler>
