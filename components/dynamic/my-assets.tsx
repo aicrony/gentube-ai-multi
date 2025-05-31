@@ -226,6 +226,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
 
+    // NOTE: assetType and groupId filtering is handled by the backend API
+    // Only apply client-side filters that aren't handled by the backend
+
     // Apply gallery filter
     if (filters.inGallery) {
       result = result.filter(

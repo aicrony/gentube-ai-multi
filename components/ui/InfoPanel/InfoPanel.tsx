@@ -257,7 +257,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                   <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="Tell us what you think! Share feature requests, bug reports, or general feedback..."
+                    placeholder="What is the one feature that would make you a subscriber for life? Share feature requests, bug reports, or general feedback... "
                     className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
                     rows={3}
                     maxLength={1000}
