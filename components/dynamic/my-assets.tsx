@@ -144,6 +144,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [isGroupManagerOpen, setIsGroupManagerOpen] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [showGroupsPanel, setShowGroupsPanel] = useState(false);
+  const [groupRefreshKey, setGroupRefreshKey] = useState(0); // Force re-render of GroupManager
 
   const limit = 10;
   const promptLength = 100;
@@ -1226,6 +1227,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Refresh the asset list to show updated group information
     fetchUserActivities(userId, userIp);
     setSelectedAssets([]);
+    // Force refresh of GroupManager to update asset counts
+    setGroupRefreshKey(prev => prev + 1);
   };
 
   // Slideshow preview functions
@@ -1463,6 +1466,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           {/* Groups Sidebar */}
           <div className="md:w-64 flex-shrink-0">
             <GroupManager
+              key={groupRefreshKey}
               onGroupSelect={handleGroupSelect}
               selectedGroupId={filters.groupId}
               showCreateButton={true}

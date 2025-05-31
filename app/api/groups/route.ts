@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
+import { getGroupAssetCounts } from '@/utils/gcloud/groupManager';
 
 const datastore = new Datastore({
   projectId: google_app_creds.projectId,
@@ -8,6 +9,7 @@ const datastore = new Datastore({
 });
 
 const USER_GROUP_KIND = 'UserGroup';
+const ASSET_GROUP_MEMBERSHIP_KIND = 'AssetGroupMembership';
 const NAMESPACE = 'GenTube';
 
 export interface UserGroup {
@@ -51,11 +53,25 @@ export async function GET(request: NextRequest) {
         createdAt: group.createdAt,
         updatedAt: group.updatedAt,
         color: group.color,
-        assetCount: 0 // Will be populated by separate query if needed
+        assetCount: 0 // Will be populated below
       }))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort newest first
 
-    console.log(`Found ${userGroups.length} groups for user ${userId}`);
+    // Get asset counts for all groups
+    if (userGroups.length > 0) {
+      const groupIds = userGroups.map(group => group.id!);
+      const assetCounts = await getGroupAssetCounts(groupIds, userId);
+      console.log('Asset counts fetched:', assetCounts);
+      
+      // Update groups with actual asset counts
+      userGroups.forEach(group => {
+        if (group.id && assetCounts[group.id] !== undefined) {
+          group.assetCount = assetCounts[group.id];
+        }
+      });
+    }
+
+    console.log(`Found ${userGroups.length} groups for user ${userId}`, userGroups.map(g => `${g.name}: ${g.assetCount}`));
 
     return NextResponse.json({
       success: true,
@@ -217,6 +233,10 @@ export async function PUT(request: NextRequest) {
 
       await transaction.commit();
 
+      // Get the asset count for the updated group
+      const assetCounts = await getGroupAssetCounts([groupId], userId);
+      const assetCount = assetCounts[groupId] || 0;
+
       const updatedGroup: UserGroup = {
         id: groupId,
         name: updatedData.name,
@@ -225,7 +245,7 @@ export async function PUT(request: NextRequest) {
         createdAt: updatedData.createdAt,
         updatedAt: updatedData.updatedAt,
         color: updatedData.color,
-        assetCount: 0 // Will be computed separately if needed
+        assetCount
       };
 
       console.log('Updated group:', updatedGroup);
@@ -291,11 +311,21 @@ export async function DELETE(request: NextRequest) {
         );
       }
 
+      // Delete all asset group memberships for this group first
+      const membershipQuery = datastore
+        .createQuery(NAMESPACE, ASSET_GROUP_MEMBERSHIP_KIND)
+        .filter('groupId', '=', groupId)
+        .filter('userId', '=', userId);
+
+      const [memberships] = await datastore.runQuery(membershipQuery);
+      const membershipKeys = memberships.map((membership: any) => membership[datastore.KEY]);
+      
+      if (membershipKeys.length > 0) {
+        transaction.delete(membershipKeys);
+      }
+
       // Delete the group
       transaction.delete(groupKey);
-
-      // TODO: Also delete all AssetGroupMembership entities for this group
-      // This will be handled in the asset-group relationship API
 
       await transaction.commit();
 
