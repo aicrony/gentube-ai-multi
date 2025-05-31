@@ -24,7 +24,8 @@ import {
   FaTag,
   FaFolder,
   FaTrophy,
-  FaTimes
+  FaTimes,
+  FaCog
 } from 'react-icons/fa';
 import Modal from '@/components/ui/Modal'; // Import the Modal component
 import { useToast } from '@/components/ui/Toast';
@@ -1021,10 +1022,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setIsEditingImage(false);
   };
 
-  // Function to start slideshow with the first displayed asset
+  // Function to start slideshow with the first displayed asset (directly play)
   const handleStartSlideshow = () => {
     if (filteredAndSortedActivities.length > 0) {
-      // Open modal with first asset
+      // Open modal with first asset and start playing immediately
       const firstActivity = filteredAndSortedActivities[0];
       const url =
         firstActivity.AssetType === 'vid'
@@ -1033,8 +1034,27 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
-      setShowSlideshowSettings(true); // Show slideshow options
+      setShowSlideshowSettings(false); // Don't show settings - start playing
       setAutoStartSlideshow(true); // Auto-start the slideshow
+      setIsModalOpen(true);
+      setIsFullScreenModal(false);
+    }
+  };
+
+  // Function to open slideshow settings without auto-starting
+  const handleOpenSlideshowSettings = () => {
+    if (filteredAndSortedActivities.length > 0) {
+      // Open modal with first asset but show settings instead of playing
+      const firstActivity = filteredAndSortedActivities[0];
+      const url =
+        firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
+
+      setCurrentModalIndex(0);
+      setModalMediaUrl(url);
+      setShowSlideshowSettings(true); // Show slideshow settings
+      setAutoStartSlideshow(false); // Don't auto-start - let user configure first
       setIsModalOpen(true);
       setIsFullScreenModal(false);
     }
@@ -1635,19 +1655,33 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       <div className="flex justify-between items-center mb-2">
         {/* Left side buttons */}
         <div className="flex items-center gap-2">
-          {/* Start Slideshow button */}
+          {/* Slideshow buttons */}
           {filteredAndSortedActivities.length > 0 && (
-            <button
-              onClick={handleStartSlideshow}
-              className="flex items-center gap-1 px-2 py-1 rounded"
-              style={{
-                backgroundColor: 'var(--primary-color)',
-                color: 'white'
-              }}
-              title="Start slideshow with the first asset"
-            >
-              <FaPlayCircle /> Slideshow
-            </button>
+            <>
+              <button
+                onClick={handleStartSlideshow}
+                className="flex items-center gap-1 px-2 py-1 rounded"
+                style={{
+                  backgroundColor: 'var(--primary-color)',
+                  color: 'white'
+                }}
+                title="Start slideshow immediately"
+              >
+                <FaPlayCircle /> Slideshow
+              </button>
+              <button
+                onClick={handleOpenSlideshowSettings}
+                className="flex items-center gap-1 px-2 py-1 rounded"
+                style={{
+                  backgroundColor: 'var(--secondary-color)',
+                  color: 'var(--primary-color)',
+                  border: `1px solid var(--primary-color)`
+                }}
+                title="Configure slideshow settings"
+              >
+                <FaCog />
+              </button>
+            </>
           )}
 
         </div>
@@ -1767,8 +1801,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
 
               {filters.groupId && (
-                <div className="text-sm text-gray-600">
-                  Showing assets in selected group
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-gray-600">
+                    Showing assets in selected group
+                  </div>
+                  <button
+                    onClick={() => handleGroupSelect(null)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Show all assets"
+                  >
+                    <FaTimes className="text-xs" />
+                  </button>
                 </div>
               )}
             </div>
