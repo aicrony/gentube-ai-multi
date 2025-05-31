@@ -17,6 +17,7 @@ export async function getLatestActivityByRequestId(
   const query = datastore
     .createQuery(namespace, kind)
     .filter('CreatedAssetUrl', '=', requestId)
+    .filter('AssetType', '=', 'que') // Only look for queued records
     .limit(1);
 
   const [activities] = await datastore.runQuery(query);
