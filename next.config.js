@@ -81,14 +81,6 @@ module.exports = {
       }
     ];
   },
-  api: {
-    // Configure the body parser for API routes
-    bodyParser: {
-      sizeLimit: '12mb'
-    },
-    // Enable response compression
-    responseLimit: false
-  },
   experimental: {
     serverComponentsExternalPackages: [
       '@google-cloud/datastore',

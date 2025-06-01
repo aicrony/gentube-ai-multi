@@ -2034,8 +2034,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
 
               {filters.groupId && (
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-gray-600">
+                <div className="flex items-center gap-1 ml-auto">
+                  <div className="text-sm text-gray-600 text-right">
                     Showing assets in selected group
                   </div>
                   <button
@@ -2086,8 +2086,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </div>
 
           {filters.groupId && (
-            <div className="flex items-center gap-2">
-              <div className="text-sm text-gray-600">
+            <div className="flex items-center gap-1 justify-end">
+              <div className="text-sm text-gray-600 text-right">
                 Showing assets in selected group
               </div>
               <button
@@ -2105,8 +2105,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {/* Group filter indicator when groups panel is closed and not in bulk mode */}
       {!showGroupsPanel && !bulkMode && filters.groupId && (
         <div className="flex justify-end mb-4">
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-gray-600">
+          <div className="flex items-center gap-1">
+            <div className="text-sm text-gray-600 text-right">
               Showing assets in selected group
             </div>
             <button

@@ -46,7 +46,7 @@ const AdminGallery: React.FC = () => {
     creatorName?: string;
     userId?: string;
     assetType?: string;
-  } | null>(null);
+  } | undefined>(undefined);
   
   const imagesPerLoad = 20;
   const [currentOffset, setCurrentOffset] = useState(0);
@@ -132,7 +132,7 @@ const AdminGallery: React.FC = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
     setShowGalleryInfoPane(false);
-    setCurrentAssetInfo(null);
+    setCurrentAssetInfo(undefined);
   };
 
   // Navigation functions for modal
@@ -318,8 +318,8 @@ const AdminGallery: React.FC = () => {
       setCurrentAssetInfo({
         id: currentItem.id,
         prompt: currentItem.Prompt,
-        creatorName: currentItem.CreatorName,
-        userId: currentItem.UserId,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
         assetType: currentItem.AssetType
       });
     } catch (error) {

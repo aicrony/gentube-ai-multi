@@ -1030,11 +1030,11 @@ const Modal: React.FC<ModalProps> = ({
                             Cancel
                           </button>
                           <button
-                            onClick={async () => {
+                            onClick={() => {
                               if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
                                 setIsSubmittingModify(true);
                                 try {
-                                  await onSubmitModifyFromGallery(modifyPrompt.trim());
+                                  onSubmitModifyFromGallery(modifyPrompt.trim());
                                   setIsModifyMode(false);
                                 } catch (error) {
                                   console.error('Error submitting modify:', error);
@@ -1091,16 +1091,14 @@ const Modal: React.FC<ModalProps> = ({
                           // If already in modify mode, submit the modification
                           if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
                             setIsSubmittingModify(true);
-                            onSubmitModifyFromGallery(modifyPrompt.trim())
-                              .then(() => {
-                                setIsModifyMode(false);
-                              })
-                              .catch((error) => {
-                                console.error('Error submitting modify:', error);
-                              })
-                              .finally(() => {
-                                setIsSubmittingModify(false);
-                              });
+                            try {
+                              onSubmitModifyFromGallery(modifyPrompt.trim());
+                              setIsModifyMode(false);
+                            } catch (error) {
+                              console.error('Error submitting modify:', error);
+                            } finally {
+                              setIsSubmittingModify(false);
+                            }
                           }
                         } else {
                           // Enter modify mode

@@ -84,7 +84,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     creatorName?: string;
     userId?: string;
     assetType?: string;
-  } | null>(null);
+  } | undefined>(undefined);
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -390,7 +390,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     setIsModalOpen(false);
     setModalMediaUrl('');
     setShowGalleryInfoPane(false);
-    setCurrentAssetInfo(null);
+    setCurrentAssetInfo(undefined);
   };
 
   // Handle downloading the current media
@@ -754,8 +754,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       setCurrentAssetInfo({
         id: currentItem.id,
         prompt: currentItem.Prompt,
-        creatorName: currentItem.CreatorName,
-        userId: currentItem.UserId,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
         assetType: currentItem.AssetType
       });
     } catch (error) {
