@@ -257,30 +257,30 @@ const Modal: React.FC<ModalProps> = ({
 
       // Set new timer
       slideshowTimerRef.current = setInterval(() => {
-        // Forward direction logic (oldest to newest chronologically)
+        // Forward direction logic (next item in sequence)
         if (slideDirection === 'forward') {
-          if (hasPrevious && onPrevious) {
-            // Forward means going to chronologically older images (higher index)
-            onPrevious();
-          } else if (!hasPrevious) {
-            if (infiniteLoop && onJumpToLast) {
-              // We've reached the oldest, jump to newest image
-              onJumpToLast();
+          if (hasNext && onNext) {
+            // Forward means going to next item (higher index)
+            onNext();
+          } else if (!hasNext) {
+            if (infiniteLoop && onJumpToFirst) {
+              // We've reached the end, jump to first item
+              onJumpToFirst();
             } else {
               // Not in infinite loop mode, stop slideshow
               setIsSlideshow(false);
             }
           }
         }
-        // Backward direction logic (newest to oldest chronologically)
+        // Backward direction logic (previous item in sequence)
         else if (slideDirection === 'backward') {
-          if (hasNext && onNext) {
-            // Backward means going to chronologically newer images (lower index)
-            onNext();
-          } else if (!hasNext) {
-            if (infiniteLoop && onJumpToFirst) {
-              // We've reached the newest, jump to oldest image
-              onJumpToFirst();
+          if (hasPrevious && onPrevious) {
+            // Backward means going to previous item (lower index)
+            onPrevious();
+          } else if (!hasPrevious) {
+            if (infiniteLoop && onJumpToLast) {
+              // We've reached the beginning, jump to last item
+              onJumpToLast();
             } else {
               // Not in infinite loop mode, stop slideshow
               setIsSlideshow(false);

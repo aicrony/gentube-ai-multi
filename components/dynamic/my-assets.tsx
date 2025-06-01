@@ -71,6 +71,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const userIp = useUserIp();
   const { showToast } = useToast();
   const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [pendingNavigation, setPendingNavigation] = useState(false);
+  const [currentModalIndex, setCurrentModalIndex] = useState(0);
+  const [modalMediaUrl, setModalMediaUrl] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
 
   // Check for URL parameter to open specific image
   React.useEffect(() => {
@@ -104,15 +111,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   }, [activities]); // Run when activities change
 
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMediaUrl, setModalMediaUrl] = useState('');
-  const [currentModalIndex, setCurrentModalIndex] = useState(0);
   const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(
     selectedUrl
   );
@@ -271,6 +274,32 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     return result;
   }, [activities, filters, searchTerm, sortDirection, assetLikes]);
+
+  // Handle automatic navigation after loading more data
+  useEffect(() => {
+    if (pendingNavigation && !loading && currentModalIndex < filteredAndSortedActivities.length - 1) {
+      // New data has loaded, now we can navigate to the next image
+      const nextIndex = currentModalIndex + 1;
+      const nextActivity = filteredAndSortedActivities[nextIndex];
+      if (nextActivity) {
+        const url = nextActivity.AssetType === 'vid' 
+          ? nextActivity.CreatedAssetUrl 
+          : nextActivity.CreatedAssetUrl;
+        setCurrentModalIndex(nextIndex);
+        setModalMediaUrl(url);
+        
+        // Update edit image URL for the new image
+        if (nextActivity.AssetType === 'img' || nextActivity.AssetType === 'upl') {
+          setEditImageUrl(nextActivity.CreatedAssetUrl);
+        } else {
+          setEditImageUrl('');
+        }
+        
+        setPendingNavigation(false);
+        console.log('Auto-navigated to newly loaded image');
+      }
+    }
+  }, [loading, pendingNavigation, currentModalIndex, filteredAndSortedActivities]);
 
   // Fetch likes for all displayed assets
   useEffect(() => {
@@ -958,7 +987,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handlePreviousInModal = () => {
     // "Previous" should go to older (chronologically earlier) image
     // Since array is sorted newest first (desc), we go forward in array for older
+    
     if (currentModalIndex < filteredAndSortedActivities.length - 1) {
+      // Normal case: navigate to next image in current data
       const prevActivity = filteredAndSortedActivities[currentModalIndex + 1];
       const url =
         prevActivity.AssetType === 'vid'
@@ -976,6 +1007,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       } else {
         setEditImageUrl(''); // Clear for videos
       }
+
+      // Auto-load next page when approaching end of current data
+      // Load more when user is within 3 images of the end and there's more data available
+      const isNearEnd = currentModalIndex + 1 >= filteredAndSortedActivities.length - 3;
+      const shouldLoadMore = isNearEnd && hasMore && !loading;
+      
+      if (shouldLoadMore) {
+        console.log('Auto-loading next page for modal navigation');
+        setPage((prev) => prev + 1);
+      }
+    } else if (currentModalIndex === filteredAndSortedActivities.length - 1 && hasMore && !loading) {
+      // Edge case: at the last image but more data is available
+      // Trigger loading of next page and set pending navigation
+      console.log('Loading next page from last image');
+      setPendingNavigation(true);
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -1274,7 +1321,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [showSlideshowSettings, setShowSlideshowSettings] = useState(false);
   const [autoStartSlideshow, setAutoStartSlideshow] = useState(false);
   const [showImageEditPane, setShowImageEditPane] = useState(false);
-  const [editImageUrl, setEditImageUrl] = useState('');
   const [editPrompt, setEditPrompt] = useState('');
   const [isEditingImage, setIsEditingImage] = useState(false);
 
@@ -2365,50 +2411,33 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   unoptimized
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
-                      // Hide the broken image
-                      e.currentTarget.style.display = 'none';
-                      // Create play icon with label - using the same icon as for AssetSource === 'none'
+                      // Hide the broken image and replace it with a play icon
                       const container = e.currentTarget.parentElement;
                       if (container) {
-                        const playIcon = document.createElement('div');
-                        playIcon.className =
-                          'w-full h-full flex flex-col items-center justify-center';
+                        // Check if a play icon already exists to prevent duplicates
+                        const existingPlayIcon = container.querySelector('.video-play-icon');
+                        if (!existingPlayIcon) {
+                          // Hide the broken image
+                          e.currentTarget.style.display = 'none';
+                          
+                          // Create play icon container
+                          const playIcon = document.createElement('div');
+                          playIcon.className = 'video-play-icon w-full h-full flex items-center justify-center';
 
-                        // Create the FaPlay icon element
-                        const iconElement = document.createElement('div');
-                        iconElement.className = 'w-8 h-8 text-gray-500';
+                          // Create the FaPlay icon element
+                          const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                          svgIcon.setAttribute('fill', 'currentColor');
+                          svgIcon.setAttribute('viewBox', '0 0 448 512');
+                          svgIcon.setAttribute('class', 'w-8 h-8 text-gray-500');
 
-                        // Use the same icon component styling as above
-                        const svgIcon = document.createElementNS(
-                          'http://www.w3.org/2000/svg',
-                          'svg'
-                        );
-                        svgIcon.setAttribute('fill', 'currentColor');
-                        svgIcon.setAttribute('viewBox', '0 0 448 512');
-                        svgIcon.setAttribute('class', 'w-8 h-8');
+                          // FaPlay path data
+                          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                          path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
 
-                        // This is the path data for FaPlay from react-icons
-                        const path = document.createElementNS(
-                          'http://www.w3.org/2000/svg',
-                          'path'
-                        );
-                        path.setAttribute(
-                          'd',
-                          'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z'
-                        );
-
-                        svgIcon.appendChild(path);
-                        iconElement.appendChild(svgIcon);
-
-                        // Add text
-                        const textElement = document.createElement('div');
-                        textElement.className = 'mt-2 text-gray-500';
-                        textElement.textContent = '';
-
-                        // Assemble the complete element
-                        playIcon.appendChild(iconElement);
-                        playIcon.appendChild(textElement);
-                        container.appendChild(playIcon);
+                          svgIcon.appendChild(path);
+                          playIcon.appendChild(svgIcon);
+                          container.appendChild(playIcon);
+                        }
                       }
                     }
                   }}
@@ -2662,12 +2691,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           mediaUrl={modalMediaUrl}
           onClose={closeModal}
           fullScreen={isFullScreenModal}
-          onNext={handleNextInModal}
-          onPrevious={handlePreviousInModal}
-          hasNext={currentModalIndex > 0}
-          hasPrevious={
-            currentModalIndex < filteredAndSortedActivities.length - 1
+          onNext={handlePreviousInModal}
+          onPrevious={handleNextInModal}
+          hasNext={
+            currentModalIndex < filteredAndSortedActivities.length - 1 || 
+            (currentModalIndex === filteredAndSortedActivities.length - 1 && hasMore)
           }
+          hasPrevious={currentModalIndex > 0}
           onLike={() => {
             const activity = filteredAndSortedActivities[currentModalIndex];
             if (activity && activity.id) {
