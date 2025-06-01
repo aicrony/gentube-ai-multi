@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getGalleryAssets } from '@/utils/gcloud/userAssets';
+import { getAllAssets } from '@/utils/gcloud/userAssets';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,16 +9,16 @@ export async function GET(request: NextRequest) {
   const offset = searchParams.get('offset') || '0';
 
   try {
-    // For admin, get all gallery assets including those marked for removal
-    // This could be extended to include additional admin-specific fields
-    const assetUrls = await getGalleryAssets(Number(limit), Number(offset));
+    // For admin, get ALL assets from UserActivity (not filtered by SubscriptionTier)
+    // This shows every image/video that has been generated, uploaded, or processed
+    const assetUrls = await getAllAssets(Number(limit), Number(offset));
     
     // Add admin-specific metadata if needed
-    const adminAssets = assetUrls.map(asset => ({
+    const adminAssets = assetUrls?.map(asset => ({
       ...asset,
       isAdmin: true, // Flag to indicate this is from admin view
       // Add other admin-specific fields here if needed
-    }));
+    })) || [];
     
     return NextResponse.json(adminAssets);
   } catch (error) {

@@ -220,3 +220,94 @@ export async function getGalleryAssets(
     };
   });
 }
+
+export async function getAllAssets(
+  limit: number,
+  offset: number,
+  assetType?: string | string[] | undefined
+): Promise<UserActivity[] | null> {
+  // Admin function to get ALL assets from UserActivity, not filtered by SubscriptionTier
+  let query = datastore
+    .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+    .limit(limit)
+    .offset(offset)
+    .order('DateTime', { descending: true });
+
+  // Handle multiple asset types (comma-separated)
+  if (assetType && assetType.length > 0) {
+    if (assetType.includes(',')) {
+      // For multiple asset types, use an 'IN' filter
+      const assetTypes = (
+        typeof assetType === 'string' ? assetType.split(',') : assetType
+      ).map((type: string) => type.trim());
+      query = query.filter('AssetType', 'IN', assetTypes);
+    } else {
+      // For a single asset type, use the '=' filter
+      query = query.filter('AssetType', '=', assetType);
+    }
+  }
+
+  const [results] = await datastore.runQuery(query);
+
+  // Log the raw results to debug
+  console.log(`Found ${results.length} total assets for admin`);
+  if (results.length > 0) {
+    console.log('First admin asset raw data:', JSON.stringify(results[0]));
+  }
+
+  // Get all unique user IDs from the results to fetch creator names in one batch
+  const userIds = results
+    .map((activity: any) => activity.UserId)
+    .filter((userId: string | undefined) => userId && userId !== 'none');
+
+  console.log('Admin asset user IDs extracted:', userIds);
+
+  // Fetch creator names for all user IDs
+  let creatorNames: { [key: string]: string } = {};
+  try {
+    // Dynamically import to avoid circular dependency
+    const { getCreatorNames } = await import('./getUserCreator');
+    if (userIds.length > 0) {
+      // Unique user IDs to avoid duplicates
+      const uniqueUserIds = [...new Set(userIds)];
+      console.log('Fetching creator names for unique user IDs:', uniqueUserIds);
+      creatorNames = await getCreatorNames(uniqueUserIds);
+      console.log('Creator names fetched:', creatorNames);
+    }
+  } catch (error) {
+    console.error('Error fetching creator names:', error);
+  }
+
+  return results.map((activity: any) => {
+    // Provide fallbacks for missing data
+    let prompt = activity.Prompt;
+    if (!prompt && activity.description) {
+      prompt = activity.description;
+    } else if (!prompt) {
+      prompt = '';
+    }
+
+    // Get creator name if available
+    let creatorName: string | null = null;
+    if (activity.UserId && creatorNames[activity.UserId]) {
+      creatorName = creatorNames[activity.UserId];
+      console.log(`Found creator name for ${activity.UserId}: ${creatorName}`);
+    } else if (activity.UserId) {
+      console.log(`No creator name found for user ID: ${activity.UserId}`);
+    } else {
+      console.log('No user ID associated with this activity');
+    }
+
+    return {
+      id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
+      CreatedAssetUrl: activity.CreatedAssetUrl || '',
+      Prompt: prompt,
+      AssetSource: activity.AssetSource || '',
+      AssetType: activity.AssetType || 'unknown',
+      DateTime: activity.DateTime,
+      UserId: activity.UserId || null,
+      CreatorName: creatorName,
+      SubscriptionTier: activity.SubscriptionTier || null // Keep original SubscriptionTier value
+    };
+  });
+}
