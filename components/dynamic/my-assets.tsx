@@ -1907,19 +1907,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             </>
           )}
 
-        </div>
-
-        {/* Right side buttons */}
-        <div className="flex items-center gap-2">
-          {isAutoRefreshing && (
-            <span
-              className="text-xs mr-2"
-              style={{ color: 'var(--primary-color)' }}
-            >
-              Auto-refreshing...
-            </span>
-          )}
-
           {/* Groups toggle button */}
           <button
             onClick={() => setShowGroupsPanel(!showGroupsPanel)}
@@ -1936,6 +1923,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
             )}
           </button>
+        </div>
+
+        {/* Right side buttons */}
+        <div className="flex items-center gap-2">
+          {isAutoRefreshing && (
+            <span
+              className="text-xs mr-2"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              Auto-refreshing...
+            </span>
+          )}
 
           {/* Filter toggle button */}
           <button
