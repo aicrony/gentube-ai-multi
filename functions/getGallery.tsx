@@ -54,6 +54,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting] = useState(false);
   const [regenerateInProgress, setRegenerateInProgress] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [showMyAssets, setShowMyAssets] = useState(false);
   const [assetLikes, setAssetLikes] = useState<{
     [key: string]: AssetLikeInfo;
@@ -93,6 +94,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   useEffect(() => {
     const fetchMedia = async () => {
       try {
+        setIsInitialLoading(true);
+        
         // Read the URL params to see if we have a direct link to an asset
         const urlParams = new URLSearchParams(window.location.search);
         const assetIdParam = urlParams.get('id');
@@ -114,7 +117,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             const parsedMedia = JSON.parse(cachedMedia);
             if (parsedMedia.length > 0 && parsedMedia[0].CreatedAssetUrl) {
               setMedia(parsedMedia);
-
+              setIsInitialLoading(false);
               return;
             }
           }
@@ -126,6 +129,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         await fetchAndSetMedia(assetIdParam, false);
       } catch (error) {
         console.error('Error fetching media:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -1173,6 +1178,28 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     }
   };
 
+  // Show loading state while initial data is being fetched
+  if (isInitialLoading) {
+    return (
+      <div>
+        <h1 className="text-center text-2xl font-bold pt-5">
+          {title}
+        </h1>
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+              Loading gallery...
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+              Please wait while we fetch the latest images and videos
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1 className="text-center text-2xl font-bold pt-5">
@@ -1217,6 +1244,28 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           </div>
           <div className="flex justify-center mt-5 flex-col">
             {renderMedia(media[currentIndex])}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state when no media is found */}
+      {!isInitialLoading && media.length === 0 && (
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center">
+            <div className="text-6xl mb-4">🖼️</div>
+            <p className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+              No images or videos found
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+              The gallery appears to be empty. Try refreshing the page or check back later.
+            </p>
+            <button
+              onClick={handleRefreshGallery}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+              disabled={isRefreshingGallery}
+            >
+              {isRefreshingGallery ? 'Refreshing...' : 'Refresh Gallery'}
+            </button>
           </div>
         </div>
       )}
