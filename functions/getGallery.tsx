@@ -452,7 +452,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     notification.textContent = message;
     notification.style.position = 'fixed';
     notification.style.bottom = '20px';
+    notification.style.left = '20px';
     notification.style.right = '20px';
+    notification.style.maxWidth = '90vw';
     notification.style.padding = '10px 15px';
     notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     notification.style.color = 'white';
@@ -460,6 +462,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     notification.style.zIndex = '1000';
     notification.style.opacity = '0';
     notification.style.transition = 'opacity 0.3s ease-in-out';
+    notification.style.fontSize = '14px';
+    notification.style.textAlign = 'center';
+    
+    // Add responsive behavior for larger screens
+    if (window.innerWidth >= 640) {
+      notification.style.left = 'auto';
+      notification.style.right = '20px';
+      notification.style.maxWidth = '420px';
+    }
 
     document.body.appendChild(notification);
 

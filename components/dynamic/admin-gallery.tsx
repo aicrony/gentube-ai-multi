@@ -274,10 +274,18 @@ const AdminGallery: React.FC = () => {
       const notification = document.createElement('div');
       notification.textContent = 'Share URL copied to clipboard!';
       notification.style.cssText = `
-        position: fixed; bottom: 20px; right: 20px; padding: 10px 15px;
-        background-color: rgba(0, 0, 0, 0.7); color: white; border-radius: 4px;
-        z-index: 1000; opacity: 0; transition: opacity 0.3s ease-in-out;
+        position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 90vw;
+        padding: 10px 15px; background-color: rgba(0, 0, 0, 0.7); color: white; 
+        border-radius: 4px; z-index: 1000; opacity: 0; transition: opacity 0.3s ease-in-out;
+        font-size: 14px; text-align: center;
       `;
+      
+      // Add responsive behavior for larger screens
+      if (window.innerWidth >= 640) {
+        notification.style.left = 'auto';
+        notification.style.right = '20px';
+        notification.style.maxWidth = '420px';
+      }
       
       document.body.appendChild(notification);
       setTimeout(() => notification.style.opacity = '1', 10);

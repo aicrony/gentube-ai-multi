@@ -194,14 +194,20 @@ button.danger:hover {
   .my-assets-container {
     width: 100%;
     margin-left: 0;
-    padding-left: 0.5rem; /* Minimal left padding */
-    padding-right: 0.5rem; /* Minimal right padding */
+    padding-left: 0; /* Remove padding since parent container already has it */
+    padding-right: 0; /* Remove padding since parent container already has it */
   }
   
-  /* Remove container padding on mobile */
+  /* Reduce container padding on mobile to just a minimal amount */
   .container {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important; /* 8px - minimal but sufficient */
+    padding-right: 0.5rem !important; /* 8px - minimal but sufficient */
+  }
+  
+  /* Specific override for manage assets pages container */
+  .container.max-w-4xl {
+    padding-left: 0.5rem !important; /* Single source of padding */
+    padding-right: 0.5rem !important; /* Single source of padding */
   }
   
   /* General layout padding reduction on mobile */
@@ -764,4 +770,30 @@ button.red:hover,
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Mobile-responsive toast notification styles */
+.mobile-toast {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  right: 20px !important;
+  max-width: 90vw !important;
+  padding: 10px 15px !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+  border-radius: 4px !important;
+  z-index: 1000 !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+/* Desktop responsive toast styles */
+@media (min-width: 640px) {
+  .mobile-toast {
+    left: auto !important;
+    right: 20px !important;
+    max-width: 420px !important;
+  }
 }

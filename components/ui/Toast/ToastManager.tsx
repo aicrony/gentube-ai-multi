@@ -73,7 +73,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       {children}
 
       {/* Render toasts */}
-      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 space-y-2 z-50">
         {toasts.map((toast, index) => (
           <div
             key={toast.id}

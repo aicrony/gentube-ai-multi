@@ -106,10 +106,10 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
-      className={`fixed bottom-4 right-4 max-w-2xl ${getToastColors()} text-white rounded-lg shadow-lg z-50 transition-all duration-300 transform ${
+      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-2xl ${getToastColors()} text-white rounded-lg shadow-lg z-50 transition-all duration-300 transform ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
-      style={{ minHeight: '80px', width: '32rem' }}
+      style={{ minHeight: '80px' }}
     >
       <div className="p-4">
         {/* Header */}
