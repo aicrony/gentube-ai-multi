@@ -373,20 +373,27 @@ const GroupManager: React.FC<GroupManagerProps> = ({
         {groups.map((group) => (
           <div
             key={group.id}
-            className={`group flex items-center justify-between p-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+            className={`group flex items-center justify-between p-2 rounded text-sm transition-all ${
               selectedGroupId === group.id
-                ? 'bg-blue-50 dark:bg-blue-900/20'
-                : ''
+                ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-300 dark:ring-blue-600'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
             <button
               onClick={() => onGroupSelect?.(group.id)}
               className="flex-1 text-left flex items-center gap-2"
             >
-              <FaFolder
-                style={{ color: group.color }}
-                className="flex-shrink-0"
-              />
+              {selectedGroupId === group.id ? (
+                <FaFolderOpen
+                  style={{ color: group.color }}
+                  className="flex-shrink-0"
+                />
+              ) : (
+                <FaFolder
+                  style={{ color: group.color }}
+                  className="flex-shrink-0"
+                />
+              )}
               <span className="truncate" title={group.name}>
                 {group.name}
               </span>
@@ -403,15 +410,33 @@ const GroupManager: React.FC<GroupManagerProps> = ({
                   <>
                     <button
                       onClick={() => onStartGroupSlideshow?.(group.id)}
-                      className="p-1 text-gray-400 hover:text-green-600"
-                      title="Start slideshow for this group"
+                      disabled={selectedGroupId !== group.id}
+                      className={`p-1 transition-colors ${
+                        selectedGroupId === group.id
+                          ? 'text-green-600 hover:text-green-700 cursor-pointer'
+                          : 'text-gray-300 cursor-not-allowed'
+                      }`}
+                      title={
+                        selectedGroupId === group.id
+                          ? 'Start slideshow for this group'
+                          : '    Activate this group first to enable slideshow'
+                      }
                     >
                       <FaPlay className="text-xs" />
                     </button>
                     <button
                       onClick={() => onOpenGroupSlideshowSettings?.(group.id)}
-                      className="p-1 text-gray-400 hover:text-blue-600"
-                      title="Open slideshow settings for this group"
+                      disabled={selectedGroupId !== group.id}
+                      className={`p-1 transition-colors ${
+                        selectedGroupId === group.id
+                          ? 'text-blue-600 hover:text-blue-700 cursor-pointer'
+                          : 'text-gray-300 cursor-not-allowed'
+                      }`}
+                      title={
+                        selectedGroupId === group.id
+                          ? 'Open slideshow settings for this group'
+                          : '    Activate this group first to enable settings'
+                      }
                     >
                       <FaCog className="text-xs" />
                     </button>
@@ -419,14 +444,14 @@ const GroupManager: React.FC<GroupManagerProps> = ({
                 )}
                 <button
                   onClick={() => handleEditGroup(group)}
-                  className="p-1 text-gray-400 hover:text-blue-600"
+                  className="p-1 text-blue-500 hover:text-blue-700 transition-colors"
                   title="Edit group"
                 >
                   <FaEdit className="text-xs" />
                 </button>
                 <button
                   onClick={() => handleDeleteGroup(group)}
-                  className="p-1 text-gray-400 hover:text-red-600"
+                  className="p-1 text-red-500 hover:text-red-700 transition-colors"
                   title="Delete group"
                 >
                   <FaTrash className="text-xs" />

@@ -61,6 +61,7 @@ interface ModalProps {
   currentAssetIndex?: number;
   onAssetClick?: (index: number) => void;
   onAssetReorder?: (fromIndex: number, toIndex: number) => void;
+  onSaveAssetOrder?: (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => Promise<void> | void;
   // New props for direct slideshow configuration
   slideshowInterval?: number;
   slideshowDirection?: 'forward' | 'backward';
@@ -100,6 +101,7 @@ const Modal: React.FC<ModalProps> = ({
   currentAssetIndex = 0,
   onAssetClick,
   onAssetReorder,
+  onSaveAssetOrder,
   // New props with defaults
   slideshowInterval,
   slideshowDirection,
@@ -182,6 +184,7 @@ const Modal: React.FC<ModalProps> = ({
   // States for thumbnail strip drag and drop
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
   
   // Local state for immediate visual feedback during reordering
   const [localSlideshowAssets, setLocalSlideshowAssets] = useState(slideshowAssets);
@@ -254,30 +257,30 @@ const Modal: React.FC<ModalProps> = ({
 
       // Set new timer
       slideshowTimerRef.current = setInterval(() => {
-        // Forward direction logic
+        // Forward direction logic (oldest to newest chronologically)
         if (slideDirection === 'forward') {
-          if (hasNext && onNext) {
-            // Normal forward navigation
-            onNext();
-          } else if (!hasNext) {
-            if (infiniteLoop && onJumpToFirst) {
-              // We've reached the end, jump directly to first image
-              onJumpToFirst();
+          if (hasPrevious && onPrevious) {
+            // Forward means going to chronologically older images (higher index)
+            onPrevious();
+          } else if (!hasPrevious) {
+            if (infiniteLoop && onJumpToLast) {
+              // We've reached the oldest, jump to newest image
+              onJumpToLast();
             } else {
               // Not in infinite loop mode, stop slideshow
               setIsSlideshow(false);
             }
           }
         }
-        // Backward direction logic
+        // Backward direction logic (newest to oldest chronologically)
         else if (slideDirection === 'backward') {
-          if (hasPrevious && onPrevious) {
-            // Normal backward navigation
-            onPrevious();
-          } else if (!hasPrevious) {
-            if (infiniteLoop && onJumpToLast) {
-              // We've reached the beginning, jump directly to last image
-              onJumpToLast();
+          if (hasNext && onNext) {
+            // Backward means going to chronologically newer images (lower index)
+            onNext();
+          } else if (!hasNext) {
+            if (infiniteLoop && onJumpToFirst) {
+              // We've reached the newest, jump to oldest image
+              onJumpToFirst();
             } else {
               // Not in infinite loop mode, stop slideshow
               setIsSlideshow(false);
@@ -515,76 +518,129 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleDownload = async () => {
     try {
-      // Determine file extension based on media type
-      const isVideoFile = mediaUrl.endsWith('.mp4');
-      const fileExtension = isVideoFile ? '.mp4' : '.jpg';
-      const fileName = `gentube-download${fileExtension}`;
-
-      // Try to get the file from cache first if service worker is active
-      let blob;
-      if ('caches' in window) {
-        try {
-          const cache = await caches.open(
-            isVideoFile ? 'slideshow-assets-v2' : 'slideshow-images-v2'
-          );
-          const cachedResponse = await cache.match(mediaUrl);
-
-          if (cachedResponse) {
-            console.log('Using cached version for download');
-            blob = await cachedResponse.blob();
-          }
-        } catch (cacheError) {
-          console.warn('Error accessing cache:', cacheError);
-          // Continue with network fetch
-        }
-      }
-
-      // If we couldn't get from cache, fetch from network
-      if (!blob) {
-        const response = await fetch(mediaUrl);
-        blob = await response.blob();
-
-        // Use safe caching to store for future use
-        if ('caches' in window) {
+      // Generate filename based on URL and current asset info
+      const generateFileName = (mediaUrl: string, currentAssetIndex?: number, slideshowAssets?: Array<{assetType: string}>): string => {
+        // Extract file extension from the original URL
+        let fileExtension = '.jpg'; // Default fallback
+        
+        // Check if it's a video first
+        if (mediaUrl.endsWith('.mp4')) {
+          fileExtension = '.mp4';
+        } else {
+          // Extract extension from URL for images/uploads
           try {
-            const cacheName = isVideoFile ? 'slideshow-assets-v2' : 'slideshow-images-v2';
-            const cache = await caches.open(cacheName);
-            
-            // Check if already cached to avoid duplicate storage
-            const cached = await cache.match(mediaUrl);
-            if (!cached) {
-              const responseClone = new Response(blob.slice());
-              await cache.put(mediaUrl, responseClone);
+            const urlPath = new URL(mediaUrl).pathname;
+            const match = urlPath.match(/\.[a-zA-Z0-9]+$/);
+            if (match) {
+              fileExtension = match[0].toLowerCase();
             }
-          } catch (cacheError: any) {
-            if (cacheError?.name === 'QuotaExceededError') {
-              console.warn('Cache quota exceeded during download, attempting cleanup...');
-              await cleanupCache(isVideoFile);
-            } else {
-              console.warn('Error adding to cache during download:', cacheError);
-            }
+          } catch (error) {
+            console.log('Could not extract file extension from URL, using default .jpg');
           }
+        }
+        
+        // Determine asset type - check if it's an uploaded asset
+        const isUploadedAsset = mediaUrl.includes('gentube-upload-image-storage') || 
+                               (slideshowAssets && currentAssetIndex !== undefined && 
+                                slideshowAssets[currentAssetIndex]?.assetType === 'upl');
+        
+        if (isUploadedAsset) {
+          return `downloaded-gentube-asset${fileExtension}`;
+        } else {
+          return `downloaded-gentube-asset${fileExtension}`;
+        }
+      };
+
+      const fileName = generateFileName(mediaUrl, currentAssetIndex, slideshowAssets);
+
+      // Check if this is an uploaded asset (likely to have CORS issues)
+      const isUploadedAsset = mediaUrl.includes('gentube-upload-image-storage') || 
+                             (slideshowAssets && currentAssetIndex !== undefined && 
+                              slideshowAssets[currentAssetIndex]?.assetType === 'upl');
+
+      // For uploaded assets, use proxy API to avoid CORS issues
+      if (isUploadedAsset) {
+        console.log('Using API proxy for uploaded asset to avoid CORS issues');
+        try {
+          // Use a Next.js API route to proxy the download and avoid CORS
+          const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(fileName)}`;
+          
+          const response = await fetch(proxyUrl);
+          if (!response.ok) {
+            throw new Error(`Proxy download failed: ${response.status}`);
+          }
+          
+          const blob = await response.blob();
+          
+          // Create download link from blob
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = fileName;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+          return;
+        } catch (error) {
+          console.log('Proxy download failed, trying direct approach:', error);
+          // If proxy fails, try direct download with Content-Disposition
+          const link = document.createElement('a');
+          link.href = mediaUrl;
+          link.download = fileName;
+          // Add additional attributes to force download
+          link.setAttribute('type', 'application/octet-stream');
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          return;
         }
       }
 
-      // Create an object URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
+      // Standard fetch approach for generated assets (external URLs typically have CORS configured)
+      try {
+        const response = await fetch(mediaUrl, {
+          mode: 'cors',
+          credentials: 'omit'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
 
-      // Create a temporary anchor element
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
+        // Create an object URL for the blob
+        const blobUrl = window.URL.createObjectURL(blob);
 
-      // Append to the document, click, and remove
-      document.body.appendChild(link);
-      link.click();
+        // Create a temporary anchor element
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
 
-      // Clean up
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+        // Append to the document, click, and remove
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (corsError) {
+        console.log('CORS error with generated asset, falling back to direct download:', corsError);
+        // Fallback to direct download if CORS fails
+        const link = document.createElement('a');
+        link.href = mediaUrl;
+        link.download = fileName;
+        link.setAttribute('crossorigin', 'anonymous');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
-      console.error('Error downloading media:', error);
-      alert('Failed to download the media');
+      console.error('Error downloading asset:', error);
+      alert('Failed to download the asset. The file may not be accessible or may have been moved.');
     }
   };
 
@@ -1222,11 +1278,42 @@ const Modal: React.FC<ModalProps> = ({
               ))}
             </div>
 
-            <div className="text-center mt-2">
+            <div className="flex items-center justify-center gap-3 mt-2">
               <span className="text-xs md:text-sm text-gray-300">
                 <span className="hidden md:inline">Drag thumbnails to reorder slideshow</span>
                 <span className="md:hidden">Drag to reorder</span>
               </span>
+              
+              {/* Save Order Button */}
+              <button
+                onClick={async () => {
+                  if (onSaveAssetOrder && !isSavingOrder) {
+                    try {
+                      setIsSavingOrder(true);
+                      // Pass the current reordered assets from local state
+                      await onSaveAssetOrder(localSlideshowAssets);
+                      // Success feedback is handled by parent component or can be added here
+                    } catch (error) {
+                      console.error('Error saving asset order:', error);
+                      // Could add error notification here
+                    } finally {
+                      setIsSavingOrder(false);
+                    }
+                  }
+                }}
+                disabled={!onSaveAssetOrder || isSavingOrder}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white text-xs md:text-sm px-2 md:px-3 py-1 rounded transition-colors flex items-center"
+                title="Save the current order to database"
+              >
+                {isSavingOrder ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                    Saving...
+                  </>
+                ) : (
+                  'Save Order'
+                )}
+              </button>
             </div>
           </div>
         )}

@@ -1484,7 +1484,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const generateSlideshowAssets = () => {
     return filteredAndSortedActivities
       .slice()
-      .reverse()
       .map((activity) => ({
         id: activity.id || '',
         url: activity.CreatedAssetUrl,
@@ -1498,8 +1497,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleSlideshowAssetClick = (index: number) => {
     if (index >= 0 && index < filteredAndSortedActivities.length) {
-      // Convert thumbnail index (creation order) to modal index (newest first)
-      const modalIndex = filteredAndSortedActivities.length - 1 - index;
+      // Slideshow index now matches modal index directly
+      const modalIndex = index;
       const activity = filteredAndSortedActivities[modalIndex];
       const url =
         activity.AssetType === 'vid'
@@ -1517,11 +1516,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const handleSlideshowAssetReorder = (fromIndex: number, toIndex: number) => {
-    // Since slideshow assets are in reverse order (.reverse() in generateSlideshowAssets),
-    // we need to convert the slideshow indices back to the original filteredAndSortedActivities indices
-    const totalAssets = filteredAndSortedActivities.length;
-    const originalFromIndex = totalAssets - 1 - fromIndex;
-    const originalToIndex = totalAssets - 1 - toIndex;
+    // Slideshow indices now match filteredAndSortedActivities indices directly
+    const originalFromIndex = fromIndex;
+    const originalToIndex = toIndex;
 
     // We need to update the main activities array, not the filtered one
     // The issue is that filteredAndSortedActivities is a computed value, not the source state
@@ -1545,12 +1542,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         updatedActivities.splice(actualToIndex, 0, movedItem);
         
         // Update DateTime values to preserve the new order when sorting
-        // We'll use the current time as base and increment by milliseconds to maintain order
+        // We'll use the current time as base and increment by seconds to maintain order
         const baseTime = Date.now();
         updatedActivities.forEach((activity, index) => {
-          // For desc sort (newest first), higher indices should have newer dates
-          // So we subtract index to make newer items (lower indices) have more recent dates
-          activity.DateTime = new Date(baseTime - (updatedActivities.length - 1 - index) * 1000);
+          // For desc sort (newest first), first item should have newest timestamp
+          activity.DateTime = new Date(baseTime - index * 1000);
         });
       }
       
@@ -1560,10 +1556,78 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Update current modal index to follow the moved item
     if (currentModalIndex === originalFromIndex) {
       setCurrentModalIndex(originalToIndex);
-    } else if (currentModalIndex > originalFromIndex && currentModalIndex <= originalToIndex) {
-      setCurrentModalIndex(currentModalIndex - 1);
-    } else if (currentModalIndex < originalFromIndex && currentModalIndex >= originalToIndex) {
-      setCurrentModalIndex(currentModalIndex + 1);
+    } else if (originalFromIndex < originalToIndex) {
+      // Moving item down: indices between fromIndex and toIndex shift up
+      if (currentModalIndex > originalFromIndex && currentModalIndex <= originalToIndex) {
+        setCurrentModalIndex(currentModalIndex - 1);
+      }
+    } else {
+      // Moving item up: indices between toIndex and fromIndex shift down
+      if (currentModalIndex >= originalToIndex && currentModalIndex < originalFromIndex) {
+        setCurrentModalIndex(currentModalIndex + 1);
+      }
+    }
+  };
+
+  const handleSaveAssetOrder = async (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => {
+    try {
+      // Use the reordered assets passed from the Modal instead of generating from current state
+      const slideshowAssets = orderedAssets;
+      
+      console.log('Saving asset order for slideshow assets:', slideshowAssets.length);
+
+      // Update the DateTime for all assets to match the current order
+      // We'll assign new timestamps to preserve the order
+      const baseTime = Date.now();
+      const promises = slideshowAssets.map(async (asset, index) => {
+        // Calculate new DateTime for this asset (first ordered item gets newest timestamp for desc sort)
+        const newDateTime = new Date(baseTime - index * 60000); // 1 minute intervals
+        
+        // Find the asset in the main activities array to update its timestamp
+        const foundActivity = filteredAndSortedActivities.find(activity => activity.id === asset.id);
+        if (foundActivity) {
+          foundActivity.DateTime = newDateTime;
+        }
+      });
+
+      await Promise.all(promises);
+
+      // Update the local state with the new order
+      setActivities(currentActivities => {
+        const updatedActivities = [...currentActivities];
+        
+        // Update DateTime values to preserve the slideshow order
+        slideshowAssets.forEach((slideshowAsset, index) => {
+          const activityIndex = updatedActivities.findIndex(activity => activity.id === slideshowAsset.id);
+          if (activityIndex !== -1) {
+            updatedActivities[activityIndex].DateTime = new Date(baseTime - index * 60000);
+          }
+        });
+        
+        return updatedActivities;
+      });
+
+      console.log('Asset order saved successfully to local state');
+
+      // Show success message
+      showToast({
+        type: 'image',
+        prompt: 'Asset order saved successfully!',
+        duration: 3000
+      });
+
+      // The order is now preserved in the local state and will be reflected in the UI
+      // Note: For a full implementation, you might want to also update the server-side order
+      // by calling an API endpoint that accepts the complete ordered list
+      
+    } catch (error) {
+      console.error('Error saving asset order:', error);
+      showToast({
+        type: 'error',
+        prompt: 'Failed to save asset order. Please try again.',
+        duration: 5000
+      });
+      throw error; // Re-throw to let Modal handle the error state
     }
   };
 
@@ -1674,51 +1738,59 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Group slideshow handlers
   const handleStartGroupSlideshow = (groupId: string) => {
-    // Set the group filter to show only this group's assets
-    setFilters((prev) => ({ ...prev, groupId }));
-    // Note: Page reset is handled by the useEffect for filters
+    // This function is now only called when the group is already activated
+    // So filteredAndSortedActivities should already contain the correct group assets
+    
+    if (filters.groupId !== groupId) {
+      // Group not activated yet - this shouldn't happen with new UI but handle gracefully
+      console.log('Group not activated yet. Please click the group name first to activate it.');
+      return;
+    }
 
-    // Wait a moment for the filter to take effect, then start slideshow
-    setTimeout(() => {
-      if (filteredAndSortedActivities.length > 0) {
-        const firstActivity = filteredAndSortedActivities[0];
-        const url =
-          firstActivity.AssetType === 'vid'
-            ? firstActivity.CreatedAssetUrl
-            : firstActivity.CreatedAssetUrl;
+    if (filteredAndSortedActivities.length > 0) {
+      const firstActivity = filteredAndSortedActivities[0];
+      const url =
+        firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
 
-        setCurrentModalIndex(0);
-        setModalMediaUrl(url);
-        setShowSlideshowSettings(true); // Show slideshow options
-        setAutoStartSlideshow(true); // Auto-start the slideshow
-        setIsModalOpen(true);
-        setIsFullScreenModal(false);
-      }
-    }, 100);
+      setCurrentModalIndex(0);
+      setModalMediaUrl(url);
+      setShowSlideshowSettings(false); // Don't show settings - just play
+      setAutoStartSlideshow(true); // Auto-start the slideshow
+      setIsModalOpen(true);
+      setIsFullScreenModal(false);
+    } else {
+      console.log('No activities found for the activated group:', groupId);
+    }
   };
 
   const handleOpenGroupSlideshowSettings = (groupId: string) => {
-    // Set the group filter to show only this group's assets
-    setFilters((prev) => ({ ...prev, groupId }));
-    // Note: Page reset is handled by the useEffect for filters
+    // This function is now only called when the group is already activated
+    // So filteredAndSortedActivities should already contain the correct group assets
+    
+    if (filters.groupId !== groupId) {
+      // Group not activated yet - this shouldn't happen with new UI but handle gracefully
+      console.log('Group not activated yet. Please click the group name first to activate it.');
+      return;
+    }
 
-    // Wait a moment for the filter to take effect, then open with settings
-    setTimeout(() => {
-      if (filteredAndSortedActivities.length > 0) {
-        const firstActivity = filteredAndSortedActivities[0];
-        const url =
-          firstActivity.AssetType === 'vid'
-            ? firstActivity.CreatedAssetUrl
-            : firstActivity.CreatedAssetUrl;
+    if (filteredAndSortedActivities.length > 0) {
+      const firstActivity = filteredAndSortedActivities[0];
+      const url =
+        firstActivity.AssetType === 'vid'
+          ? firstActivity.CreatedAssetUrl
+          : firstActivity.CreatedAssetUrl;
 
-        setCurrentModalIndex(0);
-        setModalMediaUrl(url);
-        setShowSlideshowSettings(true); // Show slideshow options but don't auto-start
-        setAutoStartSlideshow(false);
-        setIsModalOpen(true);
-        setIsFullScreenModal(false);
-      }
-    }, 100);
+      setCurrentModalIndex(0);
+      setModalMediaUrl(url);
+      setShowSlideshowSettings(true); // Show slideshow options but don't auto-start
+      setAutoStartSlideshow(false);
+      setIsModalOpen(true);
+      setIsFullScreenModal(false);
+    } else {
+      console.log('No activities found for the activated group:', groupId);
+    }
   };
 
   // Early return if user is not signed in
@@ -1964,9 +2036,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
               <button
                 onClick={() => handleGroupSelect(null)}
-                className="text-xs text-blue-600 hover:text-blue-700"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                title="Clear group filter"
               >
-                Clear Filter
+                <FaTimes className="text-xs" />
               </button>
             </div>
           )}
@@ -1982,9 +2055,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             </div>
             <button
               onClick={() => handleGroupSelect(null)}
-              className="text-xs text-blue-600 hover:text-blue-700"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              title="Clear group filter"
             >
-              Clear Filter
+              <FaTimes className="text-xs" />
             </button>
           </div>
         </div>
@@ -2627,11 +2701,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           autoStartSlideshow={autoStartSlideshow}
           showSlideshowSettings={showSlideshowSettings}
           slideshowAssets={generateSlideshowAssets()}
-          currentAssetIndex={
-            filteredAndSortedActivities.length - 1 - currentModalIndex
-          }
+          currentAssetIndex={currentModalIndex}
           onAssetClick={handleSlideshowAssetClick}
           onAssetReorder={handleSlideshowAssetReorder}
+          onSaveAssetOrder={handleSaveAssetOrder}
           showImageEditPane={showImageEditPane}
           editPrompt={editPrompt}
           onEditPromptChange={setEditPrompt}
