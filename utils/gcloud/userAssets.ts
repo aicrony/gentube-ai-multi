@@ -82,7 +82,7 @@ export async function getUserAssets(
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
-    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
+    id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
@@ -120,7 +120,7 @@ export async function getPublicAssets(
 
   const [results] = await datastore.runQuery(query);
   return results.map((activity: any) => ({
-    id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
+    id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
@@ -208,7 +208,7 @@ export async function getGalleryAssets(
     }
 
     return {
-      id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
+      id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
       CreatedAssetUrl: activity.CreatedAssetUrl || '',
       Prompt: prompt,
       AssetSource: activity.AssetSource || '',

@@ -13,7 +13,7 @@ import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
 import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
-import GalleryAssets from '@/components/dynamic/gallery-assets';
+import AdminGallery from '@/components/dynamic/admin-gallery';
 import { Label } from '@/components/ui/label';
 
 export default function Home() {
@@ -101,7 +101,7 @@ export default function Home() {
     } else if (isLocalhost && pathname === '/admin') {
       return (
         <>
-          <GalleryAssets />
+          <AdminGallery />
         </>
       );
     } else {

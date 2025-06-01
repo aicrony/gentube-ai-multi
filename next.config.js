@@ -54,7 +54,7 @@ module.exports = {
   },
   // Enable image optimization
   images: {
-    domains: ['storage.googleapis.com'],
+    domains: ['storage.googleapis.com', 'fal.media'],
     minimumCacheTTL: 86400 // 24 hours
   },
   async rewrites() {

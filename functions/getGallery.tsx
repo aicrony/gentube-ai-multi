@@ -41,7 +41,15 @@ interface ModifiedImage {
   originalIndex: number;
 }
 
-const ImageGallery: React.FC = () => {
+interface ImageGalleryProps {
+  apiEndpoint?: string; // Optional prop to specify different API endpoint
+  title?: string; // Optional prop to customize the title
+}
+
+const ImageGallery: React.FC<ImageGalleryProps> = ({ 
+  apiEndpoint = '/api/getGalleryAssets',
+  title = 'Public Media Gallery'
+}) => {
   const [media, setMedia] = useState<GalleryItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitting] = useState(false);
@@ -67,6 +75,16 @@ const ImageGallery: React.FC = () => {
   const [isLoadingMoreAssets, setIsLoadingMoreAssets] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
   const assetsPerLoad = 60;
+  // Gallery info state
+  const [showGalleryInfoPane, setShowGalleryInfoPane] = useState(false);
+  const [isLoadingGalleryInfo, setIsLoadingGalleryInfo] = useState(false);
+  const [currentAssetInfo, setCurrentAssetInfo] = useState<{
+    id?: string;
+    prompt?: string;
+    creatorName?: string;
+    userId?: string;
+    assetType?: string;
+  } | null>(null);
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -156,7 +174,7 @@ const ImageGallery: React.FC = () => {
       // Reset pagination state if this is a refresh
       const offset = isRefresh ? 0 : currentOffset;
       
-      const response = await fetch(`/api/getGalleryAssets?limit=${assetsPerLoad}&offset=${offset}`, {
+      const response = await fetch(`${apiEndpoint}?limit=${assetsPerLoad}&offset=${offset}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -247,7 +265,7 @@ const ImageGallery: React.FC = () => {
       setIsLoadingMoreAssets(true);
       console.log(`Loading more assets from offset ${currentOffset}`);
 
-      const response = await fetch(`/api/getGalleryAssets?limit=${assetsPerLoad}&offset=${currentOffset}`, {
+      const response = await fetch(`${apiEndpoint}?limit=${assetsPerLoad}&offset=${currentOffset}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -371,6 +389,8 @@ const ImageGallery: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
+    setShowGalleryInfoPane(false);
+    setCurrentAssetInfo(null);
   };
 
   // Handle downloading the current media
@@ -699,6 +719,67 @@ const ImageGallery: React.FC = () => {
     } finally {
       setRegenerateInProgress(false);
     }
+  };
+
+  // Gallery info handlers
+  const handleToggleGalleryInfoPane = async () => {
+    if (!showGalleryInfoPane && !currentAssetInfo) {
+      // Load gallery info when opening the pane
+      await loadGalleryInfo();
+    }
+    setShowGalleryInfoPane(!showGalleryInfoPane);
+  };
+
+  const loadGalleryInfo = async () => {
+    const currentItem = media[currentIndex];
+    if (!currentItem) return;
+
+    setIsLoadingGalleryInfo(true);
+    
+    try {
+      // Simulate loading (in a real implementation, you might fetch additional data)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName,
+        userId: currentItem.UserId,
+        assetType: currentItem.AssetType
+      });
+    } catch (error) {
+      console.error('Error loading gallery info:', error);
+    } finally {
+      setIsLoadingGalleryInfo(false);
+    }
+  };
+
+  // Gallery action handlers for modal
+  const handleModalModifyImage = (prompt: string) => {
+    // Close modal and redirect to image generation page with pre-filled prompt
+    closeModal();
+    const encodedPrompt = encodeURIComponent(prompt);
+    router.push(`/?prompt=${encodedPrompt}&action=modify`);
+  };
+
+  const handleModalCreateVideo = () => {
+    // Close modal and redirect to home page, trigger asset refresh
+    closeModal();
+    router.push('/');
+    // Note: The home page will show the My Assets component which auto-refreshes
+  };
+
+  const handleSubmitModifyFromGallery = async (prompt: string) => {
+    // Close modal and redirect to image generation with the modified prompt
+    closeModal();
+    const encodedPrompt = encodeURIComponent(prompt);
+    router.push(`/?prompt=${encodedPrompt}&action=modify`);
+  };
+
+  const handleModalStartFresh = () => {
+    // Close modal and redirect to home page
+    closeModal();
+    router.push('/');
   };
 
   const renderMedia = (mediaItem: GalleryItem) => {
@@ -1084,7 +1165,7 @@ const ImageGallery: React.FC = () => {
   return (
     <div>
       <h1 className="text-center text-2xl font-bold pt-5">
-        Public Media Gallery
+        {title}
       </h1>
       <div className="text-center mb-4">
         <button
@@ -1189,6 +1270,15 @@ const ImageGallery: React.FC = () => {
           currentItemId={media[currentIndex].id}
           onShare={() => handleShareUrl(media[currentIndex])}
           showShareButton={true}
+          // Gallery info props
+          showGalleryInfoPane={showGalleryInfoPane}
+          onToggleGalleryInfoPane={handleToggleGalleryInfoPane}
+          currentAssetInfo={currentAssetInfo}
+          onModifyImage={handleModalModifyImage}
+          onCreateVideo={handleModalCreateVideo}
+          onStartFresh={handleModalStartFresh}
+          isLoadingGalleryInfo={isLoadingGalleryInfo}
+          onSubmitModifyFromGallery={handleSubmitModifyFromGallery}
         />
       )}
     </div>

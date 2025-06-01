@@ -18,7 +18,8 @@ import {
   FaTrash,
   FaExternalLinkAlt,
   FaEdit,
-  FaSort
+  FaSort,
+  FaInfoCircle
 } from 'react-icons/fa';
 
 interface SlideshowHistoryItem {
@@ -75,6 +76,21 @@ interface ModalProps {
   onSubmitImageEdit?: () => void;
   onToggleImageEditPane?: () => void;
   isEditingImage?: boolean;
+  // Gallery info props
+  showGalleryInfoPane?: boolean;
+  onToggleGalleryInfoPane?: () => void;
+  currentAssetInfo?: {
+    id?: string;
+    prompt?: string;
+    creatorName?: string;
+    userId?: string;
+    assetType?: string;
+  };
+  onModifyImage?: (prompt: string) => void;
+  onCreateVideo?: () => void;
+  onStartFresh?: () => void;
+  isLoadingGalleryInfo?: boolean;
+  onSubmitModifyFromGallery?: (prompt: string) => void;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -114,7 +130,16 @@ const Modal: React.FC<ModalProps> = ({
   onEditPromptChange,
   onSubmitImageEdit,
   onToggleImageEditPane,
-  isEditingImage = false
+  isEditingImage = false,
+  // Gallery info props with defaults
+  showGalleryInfoPane = false,
+  onToggleGalleryInfoPane,
+  currentAssetInfo,
+  onModifyImage,
+  onCreateVideo,
+  onStartFresh,
+  isLoadingGalleryInfo = false,
+  onSubmitModifyFromGallery
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
@@ -190,11 +215,34 @@ const Modal: React.FC<ModalProps> = ({
   const [localSlideshowAssets, setLocalSlideshowAssets] = useState(slideshowAssets);
   const [localCurrentAssetIndex, setLocalCurrentAssetIndex] = useState(currentAssetIndex);
   
+  // Gallery info pane state
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false);
+  const [isModifyMode, setIsModifyMode] = useState(false);
+  const [modifyPrompt, setModifyPrompt] = useState('');
+  const [isSubmittingModify, setIsSubmittingModify] = useState(false);
+  
   // Update local slideshow assets when props change
   useEffect(() => {
     setLocalSlideshowAssets(slideshowAssets);
     setLocalCurrentAssetIndex(currentAssetIndex);
   }, [slideshowAssets, currentAssetIndex]);
+
+  // Reset gallery info state when pane closes or asset changes
+  useEffect(() => {
+    if (!showGalleryInfoPane) {
+      setIsPromptExpanded(false);
+      setIsModifyMode(false);
+      setModifyPrompt('');
+      setIsSubmittingModify(false);
+    }
+  }, [showGalleryInfoPane]);
+
+  // Update modify prompt when currentAssetInfo changes
+  useEffect(() => {
+    if (currentAssetInfo?.prompt) {
+      setModifyPrompt(currentAssetInfo.prompt);
+    }
+  }, [currentAssetInfo]);
 
   // Load slideshow history from localStorage and clean up old entries
   const loadAndCleanSlideshowHistory = () => {
@@ -804,6 +852,29 @@ const Modal: React.FC<ModalProps> = ({
               <FaEdit />
             </button>
           )}
+
+          {/* Gallery Info button */}
+          {onToggleGalleryInfoPane && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Close other panes if open, then toggle gallery info pane
+                if (onToggleImageEditPane && showImageEditPane) {
+                  onToggleImageEditPane();
+                }
+                setShowSettings(false);
+                setShowReorderMode(false);
+                // Toggle the gallery info pane state by calling parent component
+                if (onToggleGalleryInfoPane) {
+                  onToggleGalleryInfoPane();
+                }
+              }}
+              className={`${showGalleryInfoPane ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
+              title="Gallery info"
+            >
+              <FaInfoCircle />
+            </button>
+          )}
           {/* Download button */}
           <button
             onClick={handleDownload}
@@ -895,6 +966,185 @@ const Modal: React.FC<ModalProps> = ({
                 )}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Gallery Info panel */}
+        {showGalleryInfoPane && (
+          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-[600px] max-w-[90vw] border border-gray-200 dark:border-gray-600 max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">
+              Gallery Information
+            </h3>
+
+            {isLoadingGalleryInfo ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+                <span>Loading gallery info...</span>
+              </div>
+            ) : currentAssetInfo ? (
+              <>
+                {/* Asset ID */}
+                {currentAssetInfo.id && (
+                  <div className="mb-4">
+                    <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Asset ID:
+                    </label>
+                    <p className="text-xs font-mono bg-gray-100 dark:bg-gray-700 p-2 rounded border break-all">
+                      {currentAssetInfo.id}
+                    </p>
+                  </div>
+                )}
+
+                {/* Prompt */}
+                {currentAssetInfo.prompt && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Prompt:
+                      </label>
+                      {!isModifyMode && currentAssetInfo.prompt.length > 150 && (
+                        <button
+                          onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          {isPromptExpanded ? 'Show less' : 'Show more'}
+                        </button>
+                      )}
+                    </div>
+                    {isModifyMode ? (
+                      <div className="space-y-3">
+                        <textarea
+                          value={modifyPrompt}
+                          onChange={(e) => setModifyPrompt(e.target.value)}
+                          className="w-full h-32 text-sm bg-gray-50 dark:bg-gray-700 p-3 rounded border resize-vertical focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Modify your prompt here..."
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setIsModifyMode(false);
+                              setModifyPrompt(currentAssetInfo.prompt || '');
+                            }}
+                            className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 rounded text-gray-800 dark:text-white transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
+                                setIsSubmittingModify(true);
+                                try {
+                                  await onSubmitModifyFromGallery(modifyPrompt.trim());
+                                  setIsModifyMode(false);
+                                } catch (error) {
+                                  console.error('Error submitting modify:', error);
+                                } finally {
+                                  setIsSubmittingModify(false);
+                                }
+                              }
+                            }}
+                            disabled={!modifyPrompt.trim() || isSubmittingModify}
+                            className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-white transition-colors flex items-center gap-1"
+                          >
+                            {isSubmittingModify ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                                Submitting...
+                              </>
+                            ) : (
+                              'Submit Modify'
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm bg-gray-50 dark:bg-gray-700 p-3 rounded border">
+                        <p className={isPromptExpanded ? '' : 'line-clamp-3'}>
+                          {currentAssetInfo.prompt}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Creator */}
+                <div className="mb-6">
+                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Created by:
+                  </label>
+                  <p className="text-sm">
+                    {currentAssetInfo.creatorName ? (
+                      currentAssetInfo.creatorName
+                    ) : (
+                      <span className="text-gray-500">Anonymous</span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  {/* Modify Image Button */}
+                  {currentAssetInfo.assetType !== 'vid' && currentAssetInfo.prompt && (
+                    <button
+                      onClick={() => {
+                        if (isModifyMode) {
+                          // If already in modify mode, submit the modification
+                          if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
+                            setIsSubmittingModify(true);
+                            onSubmitModifyFromGallery(modifyPrompt.trim())
+                              .then(() => {
+                                setIsModifyMode(false);
+                              })
+                              .catch((error) => {
+                                console.error('Error submitting modify:', error);
+                              })
+                              .finally(() => {
+                                setIsSubmittingModify(false);
+                              });
+                          }
+                        } else {
+                          // Enter modify mode
+                          setIsModifyMode(true);
+                          setIsPromptExpanded(true);
+                          setModifyPrompt(currentAssetInfo.prompt || '');
+                        }
+                      }}
+                      disabled={isModifyMode && (!modifyPrompt.trim() || isSubmittingModify)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                    >
+                      <FaEdit />
+                      {isModifyMode ? (isSubmittingModify ? 'Submitting...' : 'Submit Modify') : 'Modify Image'}
+                    </button>
+                  )}
+
+                  {/* Create Video Button */}
+                  {onCreateVideo && (
+                    <button
+                      onClick={onCreateVideo}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      <FaPlay />
+                      Create Video
+                    </button>
+                  )}
+
+                  {/* Start Fresh Button */}
+                  {onStartFresh && (
+                    <button
+                      onClick={onStartFresh}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      <FaExternalLinkAlt />
+                      Start Fresh
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                No gallery information available
+              </div>
+            )}
           </div>
         )}
 
