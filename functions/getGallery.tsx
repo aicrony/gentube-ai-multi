@@ -62,6 +62,11 @@ const ImageGallery: React.FC = () => {
     [key: number]: ModifiedImage[];
   }>({});
   const [modifyPromptValue, setModifyPromptValue] = useState('');
+  // Add pagination state
+  const [hasMoreAssets, setHasMoreAssets] = useState(true);
+  const [isLoadingMoreAssets, setIsLoadingMoreAssets] = useState(false);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const assetsPerLoad = 60;
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -98,7 +103,9 @@ const ImageGallery: React.FC = () => {
         }
 
         // Always fetch fresh data if we have an asset ID
-        await fetchAndSetMedia(assetIdParam);
+        setCurrentOffset(0);
+        setHasMoreAssets(true);
+        await fetchAndSetMedia(assetIdParam, false);
       } catch (error) {
         console.error('Error fetching media:', error);
       }
@@ -144,9 +151,12 @@ const ImageGallery: React.FC = () => {
     fetchLikesForCurrentItem();
   }, [userId, media, currentIndex]);
 
-  const fetchAndSetMedia = async (targetAssetId: string | null = null) => {
+  const fetchAndSetMedia = async (targetAssetId: string | null = null, isRefresh: boolean = false) => {
     try {
-      const response = await fetch('/api/getGalleryAssets?limit=60', {
+      // Reset pagination state if this is a refresh
+      const offset = isRefresh ? 0 : currentOffset;
+      
+      const response = await fetch(`/api/getGalleryAssets?limit=${assetsPerLoad}&offset=${offset}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -166,7 +176,19 @@ const ImageGallery: React.FC = () => {
         AssetSource: item.AssetSource || ''
       }));
 
-      setMedia(processedMedia);
+      // Update pagination state
+      setHasMoreAssets(mediaData.length === assetsPerLoad);
+      
+      if (isRefresh) {
+        // For refresh, replace all media
+        setMedia(processedMedia);
+        setCurrentOffset(assetsPerLoad);
+      } else {
+        // For initial load or when not refreshing, replace all media
+        setMedia(processedMedia);
+        setCurrentOffset(assetsPerLoad);
+      }
+      
       localStorage.setItem('mediaUrls', JSON.stringify(processedMedia));
       localStorage.setItem('mediaUrlsTimestamp', new Date().toISOString());
 
@@ -215,16 +237,81 @@ const ImageGallery: React.FC = () => {
     }
   };
 
+  // Function to load more assets and append them to the current media array
+  const loadMoreAssets = async () => {
+    if (isLoadingMoreAssets || !hasMoreAssets) {
+      return;
+    }
+
+    try {
+      setIsLoadingMoreAssets(true);
+      console.log(`Loading more assets from offset ${currentOffset}`);
+
+      const response = await fetch(`/api/getGalleryAssets?limit=${assetsPerLoad}&offset=${currentOffset}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const newMediaData = await response.json();
+
+      if (newMediaData.length > 0) {
+        // Process new media data
+        const processedNewMedia = newMediaData.map((item: any) => ({
+          ...item,
+          id: item.id || null,
+          Prompt: item.Prompt || 'No prompt available',
+          AssetType: item.AssetType || 'unknown',
+          AssetSource: item.AssetSource || ''
+        }));
+
+        // Append to existing media
+        setMedia(prevMedia => [...prevMedia, ...processedNewMedia]);
+        setCurrentOffset(prevOffset => prevOffset + assetsPerLoad);
+        setHasMoreAssets(newMediaData.length === assetsPerLoad);
+
+        console.log(`Loaded ${newMediaData.length} more assets. Total: ${media.length + newMediaData.length}`);
+      } else {
+        setHasMoreAssets(false);
+        console.log('No more assets available');
+      }
+    } catch (error) {
+      console.error('Error loading more assets:', error);
+      setHasMoreAssets(false);
+    } finally {
+      setIsLoadingMoreAssets(false);
+    }
+  };
+
   const handlePrevious = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : media.length - 1
-    );
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex > 0) {
+        return prevIndex - 1;
+      } else {
+        // At the beginning, wrap to the end
+        return media.length - 1;
+      }
+    });
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex < media.length - 1 ? prevIndex + 1 : 0
-    );
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      
+      // Check if we're near the end and should preload more assets
+      const loadThreshold = Math.max(5, Math.ceil(media.length * 0.1)); // Load when within 5 items or 10% of the end
+      if (nextIndex >= media.length - loadThreshold && hasMoreAssets && !isLoadingMoreAssets) {
+        console.log(`Near end of gallery (${nextIndex}/${media.length}), preloading more assets...`);
+        loadMoreAssets();
+      }
+      
+      if (nextIndex < media.length) {
+        return nextIndex;
+      } else {
+        // At the end, wrap to the beginning
+        return 0;
+      }
+    });
   };
 
   // We're using openModal directly now for both normal and fullscreen views
@@ -257,9 +344,18 @@ const ImageGallery: React.FC = () => {
 
   // Navigate to the next item in the modal
   const handleNextInModal = () => {
-    if (currentIndex < media.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setModalMediaUrl(media[currentIndex + 1].CreatedAssetUrl);
+    const nextIndex = currentIndex + 1;
+    
+    // Check if we're near the end and should preload more assets
+    const loadThreshold = Math.max(5, Math.ceil(media.length * 0.1));
+    if (nextIndex >= media.length - loadThreshold && hasMoreAssets && !isLoadingMoreAssets) {
+      console.log(`Near end of gallery in modal (${nextIndex}/${media.length}), preloading more assets...`);
+      loadMoreAssets();
+    }
+    
+    if (nextIndex < media.length) {
+      setCurrentIndex(nextIndex);
+      setModalMediaUrl(media[nextIndex].CreatedAssetUrl);
     }
   };
 
@@ -972,7 +1068,10 @@ const ImageGallery: React.FC = () => {
     console.log('Manually refreshing gallery data');
     setIsRefreshingGallery(true);
     try {
-      await fetchAndSetMedia();
+      // Reset pagination state
+      setCurrentOffset(0);
+      setHasMoreAssets(true);
+      await fetchAndSetMedia(null, true);
       // Reset to first image after refresh
       setCurrentIndex(0);
     } catch (error) {
@@ -1041,6 +1140,16 @@ const ImageGallery: React.FC = () => {
             <p className="text-sm text-gray-600 mt-2">
               This may take a few moments.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading indicator for more assets */}
+      {isLoadingMoreAssets && (
+        <div className="text-center mt-4">
+          <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+            <span className="text-sm text-blue-700 dark:text-blue-300">Loading more gallery assets...</span>
           </div>
         </div>
       )}
