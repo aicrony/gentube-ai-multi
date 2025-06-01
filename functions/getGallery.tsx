@@ -174,6 +174,39 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     fetchLikesForCurrentItem();
   }, [userId, media, currentIndex]);
 
+  // Gallery info function
+  const loadGalleryInfo = async () => {
+    const currentItem = media[currentIndex];
+    if (!currentItem) return;
+
+    setIsLoadingGalleryInfo(true);
+    
+    try {
+      // Simulate loading (in a real implementation, you might fetch additional data)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
+        assetType: currentItem.AssetType
+      });
+    } catch (error) {
+      console.error('Error loading gallery info:', error);
+    } finally {
+      setIsLoadingGalleryInfo(false);
+    }
+  };
+
+  // Update gallery info when currentIndex changes and gallery info pane is open
+  useEffect(() => {
+    if (showGalleryInfoPane && media.length > 0) {
+      // Load gallery info for the current item when navigating between images
+      loadGalleryInfo();
+    }
+  }, [currentIndex, showGalleryInfoPane, media]);
+
   const fetchAndSetMedia = async (targetAssetId: string | null = null, isRefresh: boolean = false) => {
     try {
       // Reset pagination state if this is a refresh
@@ -739,35 +772,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   // Gallery info handlers
   const handleToggleGalleryInfoPane = async () => {
-    if (!showGalleryInfoPane && !currentAssetInfo) {
-      // Load gallery info when opening the pane
+    if (!showGalleryInfoPane) {
+      // Always load gallery info when opening the pane to ensure current item data
       await loadGalleryInfo();
     }
     setShowGalleryInfoPane(!showGalleryInfoPane);
-  };
-
-  const loadGalleryInfo = async () => {
-    const currentItem = media[currentIndex];
-    if (!currentItem) return;
-
-    setIsLoadingGalleryInfo(true);
-    
-    try {
-      // Simulate loading (in a real implementation, you might fetch additional data)
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCurrentAssetInfo({
-        id: currentItem.id,
-        prompt: currentItem.Prompt,
-        creatorName: currentItem.CreatorName || undefined,
-        userId: currentItem.UserId || undefined,
-        assetType: currentItem.AssetType
-      });
-    } catch (error) {
-      console.error('Error loading gallery info:', error);
-    } finally {
-      setIsLoadingGalleryInfo(false);
-    }
   };
 
   // Gallery action handlers for modal
