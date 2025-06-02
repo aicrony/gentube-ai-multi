@@ -454,6 +454,39 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
+  // Helper function to close all panes
+  const closeAllPanes = () => {
+    setShowSettings(false);
+    setShowReorderMode(false);
+    if (onToggleImageEditPane && showImageEditPane) {
+      onToggleImageEditPane();
+    }
+    if (onToggleGalleryInfoPane && showGalleryInfoPane) {
+      onToggleGalleryInfoPane();
+    }
+  };
+
+  // Handle clicks on the modal content area (but not on panes themselves)
+  const handleModalContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Close all panes when clicking on the modal content area
+    // But don't close if clicking on buttons or pane content
+    const target = e.target as HTMLElement;
+    
+    // Don't close if clicking on buttons or interactive elements
+    if (target.closest('button') || 
+        target.closest('.modal-pane') || 
+        target.closest('input') || 
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('video') ||
+        target.closest('img')) {
+      return;
+    }
+    
+    // Close all panes when clicking elsewhere in the modal
+    closeAllPanes();
+  };
+
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
@@ -776,6 +809,7 @@ const Modal: React.FC<ModalProps> = ({
             ? 'fixed inset-0 m-0 p-0 bg-black'
             : 'bg-white p-4 rounded shadow-lg max-w-5xl w-11/12 relative'
         }`}
+        onClick={handleModalContentClick}
       >
         <div className="absolute top-2 right-2 flex space-x-2 z-10">
           {/* Slideshow button */}
@@ -797,11 +831,15 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close edit pane and reorder mode if open, then toggle settings
+                // Close all other panes first
                 if (onToggleImageEditPane && showImageEditPane) {
                   onToggleImageEditPane();
                 }
+                if (onToggleGalleryInfoPane && showGalleryInfoPane) {
+                  onToggleGalleryInfoPane();
+                }
                 setShowReorderMode(false);
+                // Then toggle settings
                 setShowSettings(!showSettings);
               }}
               className={`${showSettings ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
@@ -816,15 +854,19 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close edit pane and settings if open, then toggle reorder mode
+                // Close all other panes first
                 if (onToggleImageEditPane && showImageEditPane) {
                   onToggleImageEditPane();
+                }
+                if (onToggleGalleryInfoPane && showGalleryInfoPane) {
+                  onToggleGalleryInfoPane();
                 }
                 setShowSettings(false);
                 // Exit full-screen mode if enabled so user can see reorder interface
                 if (isFullScreen) {
                   setIsFullScreen(false);
                 }
+                // Then toggle reorder mode
                 setShowReorderMode(!showReorderMode);
               }}
               className={`${showReorderMode ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
@@ -839,10 +881,13 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close settings and reorder mode if open, then toggle edit pane
+                // Close all other panes first
+                if (onToggleGalleryInfoPane && showGalleryInfoPane) {
+                  onToggleGalleryInfoPane();
+                }
                 setShowSettings(false);
                 setShowReorderMode(false);
-                // Toggle the edit pane state by calling parent component
+                // Then toggle the edit pane state by calling parent component
                 if (onToggleImageEditPane) {
                   onToggleImageEditPane();
                 }
@@ -859,13 +904,13 @@ const Modal: React.FC<ModalProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Close other panes if open, then toggle gallery info pane
+                // Close all other panes first
                 if (onToggleImageEditPane && showImageEditPane) {
                   onToggleImageEditPane();
                 }
                 setShowSettings(false);
                 setShowReorderMode(false);
-                // Toggle the gallery info pane state by calling parent component
+                // Then toggle the gallery info pane state by calling parent component
                 if (onToggleGalleryInfoPane) {
                   onToggleGalleryInfoPane();
                 }
@@ -923,7 +968,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Image Edit panel */}
         {showImageEditPane && (
-          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
+          <div className="modal-pane absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-80 border border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">
               Edit Image
             </h3>
@@ -972,7 +1017,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Gallery Info panel */}
         {showGalleryInfoPane && (
-          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-[600px] max-w-[90vw] border border-gray-200 dark:border-gray-600 max-h-[80vh] overflow-y-auto">
+          <div className="modal-pane absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-[600px] max-w-[90vw] border border-gray-200 dark:border-gray-600 max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">
               Gallery Information
             </h3>
@@ -1144,7 +1189,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow settings panel */}
         {showSettings && (
-          <div className="absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
+          <div className="modal-pane absolute top-14 right-2 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-90 p-4 rounded-lg text-gray-900 dark:text-white z-30 shadow-lg transition-all w-64 border border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">
               Slideshow Settings
             </h3>
@@ -1456,7 +1501,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow thumbnail strip - positioned below the image */}
         {showReorderMode && localSlideshowAssets.length > 0 && (
-          <div className="mt-4 bg-gray-800 bg-opacity-90 p-2 md:p-3 rounded-lg w-full overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="modal-pane mt-4 bg-gray-800 bg-opacity-90 p-2 md:p-3 rounded-lg w-full overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex space-x-1 md:space-x-2 justify-start md:justify-center pb-1 min-w-max">
               {localSlideshowAssets.map((asset, index) => (
                 <div
