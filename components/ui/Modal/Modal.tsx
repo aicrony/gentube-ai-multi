@@ -472,18 +472,16 @@ const Modal: React.FC<ModalProps> = ({
     // But don't close if clicking on buttons or pane content
     const target = e.target as HTMLElement;
     
-    // Don't close if clicking on buttons or interactive elements
+    // Don't close if clicking on buttons or interactive elements (but allow image/video clicks to close)
     if (target.closest('button') || 
         target.closest('.modal-pane') || 
         target.closest('input') || 
         target.closest('textarea') ||
-        target.closest('select') ||
-        target.closest('video') ||
-        target.closest('img')) {
+        target.closest('select')) {
       return;
     }
     
-    // Close all panes when clicking elsewhere in the modal
+    // Close all panes when clicking elsewhere in the modal (including on images/videos)
     closeAllPanes();
   };
 
