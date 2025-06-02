@@ -89,20 +89,46 @@ export async function POST(request: NextRequest) {
           console.log('userActivity: ', userActivity);
 
           if (userActivity) {
-            userActivity.CreatedAssetUrl = body.payload.images[0].url;
-            userActivity.AssetType = 'img';
+            // Create a new user activity record for the edited image instead of updating the original
+            const newActivityKey = datastore.key({
+              namespace: 'GenTube',
+              path: ['UserActivity']
+            });
+
+            const newActivity = {
+              AssetSource: userActivity.AssetSource, // Keep reference to original image
+              AssetType: 'img', // Mark as completed image
+              CountedAssetPreviousState: userActivity.CountedAssetPreviousState,
+              CountedAssetState: userActivity.CountedAssetState,
+              CreatedAssetUrl: body.payload.images[0].url, // New edited image URL
+              DateTime: new Date().toISOString(), // New timestamp for edited image
+              Prompt: userActivity.Prompt, // Keep the edit prompt
+              SubscriptionTier: 0, // Start with default gallery setting
+              UserId: userActivity.UserId,
+              UserIp: userActivity.UserIp
+            };
+
+            // Save the new edited image record
+            transaction.save({
+              key: newActivityKey,
+              data: newActivity
+            });
+
+            // Update the original queue record to mark it as processed
+            userActivity.AssetType = 'processed'; // Mark original as processed but don't change URL
             transaction.save({
               key: userActivityKey,
               data: userActivity
             });
+
             await transaction.commit();
-            console.log('UserActivity updated successfully');
+            console.log('New UserActivity created for edited image and original marked as processed');
           } else {
             console.error('UserActivity not found');
             await transaction.rollback();
           }
         } catch (error) {
-          console.error('Error updating UserActivity:', error);
+          console.error('Error creating new UserActivity for edited image:', error);
           await transaction.rollback();
         }
       }

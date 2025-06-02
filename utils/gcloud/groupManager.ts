@@ -231,6 +231,7 @@ export async function getUserAssetsWithGroups(
 
       // Get all assets for the user (we'll filter client-side for now)
       // TODO: Optimize this with a more complex query
+      // Don't pass assetType here to let getUserAssets handle the 'processed' filter internally
       assets = await getUserAssets(userId, userIp, 1000, 0, assetType);
 
       if (!assets) {

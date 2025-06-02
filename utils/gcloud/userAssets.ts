@@ -1,4 +1,4 @@
-import { Datastore } from '@google-cloud/datastore';
+import { Datastore, PropertyFilter } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
 import { localIpConfig } from '@/utils/ipUtils';
 
@@ -43,7 +43,7 @@ export async function getUserAssets(
     console.log('Query UA1');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
+      .filter(new PropertyFilter('UserId', '=', userId))
       .limit(limit)
       .offset(offset)
       .order('DateTime', { descending: true });
@@ -51,7 +51,7 @@ export async function getUserAssets(
     console.log('Query UA2');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserIp', '=', normalizedIpAddress)
+      .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
       .order('DateTime', { descending: true });
@@ -59,8 +59,8 @@ export async function getUserAssets(
     console.log('Query UA3');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
-      .filter('UserIp', '=', normalizedIpAddress)
+      .filter(new PropertyFilter('UserId', '=', userId))
+      .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
       .order('DateTime', { descending: true });
@@ -73,15 +73,22 @@ export async function getUserAssets(
       const assetTypes = (
         typeof assetType === 'string' ? assetType.split(',') : assetType
       ).map((type: string) => type.trim());
-      query = query.filter('AssetType', 'IN', assetTypes);
+      query = query.filter(new PropertyFilter('AssetType', 'IN', assetTypes));
     } else {
       // For a single asset type, use the '=' filter
-      query = query.filter('AssetType', '=', assetType);
+      query = query.filter(new PropertyFilter('AssetType', '=', assetType));
     }
   }
 
   const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => ({
+  
+  // Filter out 'processed' items after query execution to avoid FAILED_PRECONDITION errors
+  // 'processed' items are queue records that have been completed and should not be shown
+  const filteredResults = assetType && assetType.length > 0 
+    ? results // If specific asset type is requested, don't filter out processed items
+    : results.filter((activity: any) => activity.AssetType !== 'processed');
+  
+  return filteredResults.map((activity: any) => ({
     id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
@@ -99,7 +106,7 @@ export async function getPublicAssets(
 ): Promise<UserActivity[] | null> {
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('UserId', '=', 'none')
+    .filter(new PropertyFilter('UserId', '=', 'none'))
     .limit(limit)
     .offset(offset)
     .order('DateTime', { descending: true });
@@ -111,10 +118,10 @@ export async function getPublicAssets(
       const assetTypes = (
         typeof assetType === 'string' ? assetType.split(',') : assetType
       ).map((type: string) => type.trim());
-      query = query.filter('AssetType', 'IN', assetTypes);
+      query = query.filter(new PropertyFilter('AssetType', 'IN', assetTypes));
     } else {
       // For a single asset type, use the '=' filter
-      query = query.filter('AssetType', '=', assetType);
+      query = query.filter(new PropertyFilter('AssetType', '=', assetType));
     }
   }
 
@@ -137,7 +144,7 @@ export async function getGalleryAssets(
 ): Promise<UserActivity[] | null> {
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('SubscriptionTier', '=', 3)
+    .filter(new PropertyFilter('SubscriptionTier', '=', 3))
     .limit(limit)
     .offset(offset)
     .order('DateTime', { descending: true });
@@ -149,10 +156,10 @@ export async function getGalleryAssets(
       const assetTypes = (
         typeof assetType === 'string' ? assetType.split(',') : assetType
       ).map((type: string) => type.trim());
-      query = query.filter('AssetType', 'IN', assetTypes);
+      query = query.filter(new PropertyFilter('AssetType', 'IN', assetTypes));
     } else {
       // For a single asset type, use the '=' filter
-      query = query.filter('AssetType', '=', assetType);
+      query = query.filter(new PropertyFilter('AssetType', '=', assetType));
     }
   }
 
@@ -240,10 +247,10 @@ export async function getAllAssets(
       const assetTypes = (
         typeof assetType === 'string' ? assetType.split(',') : assetType
       ).map((type: string) => type.trim());
-      query = query.filter('AssetType', 'IN', assetTypes);
+      query = query.filter(new PropertyFilter('AssetType', 'IN', assetTypes));
     } else {
       // For a single asset type, use the '=' filter
-      query = query.filter('AssetType', '=', assetType);
+      query = query.filter(new PropertyFilter('AssetType', '=', assetType));
     }
   }
 

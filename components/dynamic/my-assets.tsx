@@ -167,9 +167,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           userId: userId ? userId : 'none',
           userIp: userIp ? userIp : 'none',
           limit: limit.toString(),
-          offset: (page * limit).toString(),
-          includeGroups: 'true' // Always include group information
+          offset: (page * limit).toString()
         });
+        
+        // Only include groups when actually needed (when groups panel is shown or filtering by group)
+        if (showGroupsPanel || groupIdParam) {
+          params.append('includeGroups', 'true');
+        }
 
         if (assetTypeParam) {
           params.append('assetType', assetTypeParam);

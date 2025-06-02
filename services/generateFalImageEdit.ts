@@ -1,7 +1,7 @@
 import { fal, InProgressQueueStatus, QueueStatus } from '@fal-ai/client';
 require('dotenv').config();
 
-const apiEndpoint = 'fal-ai/flux-pro/kontext';
+const apiEndpoint = 'fal-ai/flux-pro/kontext/max';
 const falApiWebhook =
   process.env.FAL_API_IMAGE_WEBHOOK ||
   process.env.FAL_API_WEBHOOK?.replace('falvideoresult', 'falimageresult') ||
