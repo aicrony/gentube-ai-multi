@@ -78,7 +78,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   const assetsPerLoad = 60;
   // Gallery info state
   const [showGalleryInfoPane, setShowGalleryInfoPane] = useState(false);
-  const [isLoadingGalleryInfo, setIsLoadingGalleryInfo] = useState(false);
   const [currentAssetInfo, setCurrentAssetInfo] = useState<{
     id?: string;
     prompt?: string;
@@ -174,36 +173,28 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     fetchLikesForCurrentItem();
   }, [userId, media, currentIndex]);
 
-  // Gallery info function
-  const loadGalleryInfo = async () => {
+  // Set gallery info directly from media data to avoid async issues
+  const setGalleryInfoFromCurrentItem = () => {
     const currentItem = media[currentIndex];
-    if (!currentItem) return;
-
-    setIsLoadingGalleryInfo(true);
-    
-    try {
-      // Simulate loading (in a real implementation, you might fetch additional data)
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCurrentAssetInfo({
-        id: currentItem.id,
-        prompt: currentItem.Prompt,
-        creatorName: currentItem.CreatorName || undefined,
-        userId: currentItem.UserId || undefined,
-        assetType: currentItem.AssetType
-      });
-    } catch (error) {
-      console.error('Error loading gallery info:', error);
-    } finally {
-      setIsLoadingGalleryInfo(false);
+    if (!currentItem) {
+      setCurrentAssetInfo(undefined);
+      return;
     }
+
+    setCurrentAssetInfo({
+      id: currentItem.id,
+      prompt: currentItem.Prompt,
+      creatorName: currentItem.CreatorName || undefined,
+      userId: currentItem.UserId || undefined,
+      assetType: currentItem.AssetType
+    });
   };
 
   // Update gallery info when currentIndex changes and gallery info pane is open
   useEffect(() => {
     if (showGalleryInfoPane && media.length > 0) {
-      // Load gallery info for the current item when navigating between images
-      loadGalleryInfo();
+      // Set gallery info directly from current item to avoid async race conditions
+      setGalleryInfoFromCurrentItem();
     }
   }, [currentIndex, showGalleryInfoPane, media]);
 
@@ -771,10 +762,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   };
 
   // Gallery info handlers
-  const handleToggleGalleryInfoPane = async () => {
+  const handleToggleGalleryInfoPane = () => {
     if (!showGalleryInfoPane) {
-      // Always load gallery info when opening the pane to ensure current item data
-      await loadGalleryInfo();
+      // Set gallery info directly from current item data when opening the pane
+      setGalleryInfoFromCurrentItem();
     }
     setShowGalleryInfoPane(!showGalleryInfoPane);
   };
@@ -1346,7 +1337,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           onModifyImage={handleModalModifyImage}
           onCreateVideo={handleModalCreateVideo}
           onStartFresh={handleModalStartFresh}
-          isLoadingGalleryInfo={isLoadingGalleryInfo}
           onSubmitModifyFromGallery={handleSubmitModifyFromGallery}
         />
       )}

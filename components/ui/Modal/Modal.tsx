@@ -89,7 +89,6 @@ interface ModalProps {
   onModifyImage?: (prompt: string) => void;
   onCreateVideo?: () => void;
   onStartFresh?: () => void;
-  isLoadingGalleryInfo?: boolean;
   onSubmitModifyFromGallery?: (prompt: string) => void;
 }
 
@@ -138,7 +137,6 @@ const Modal: React.FC<ModalProps> = ({
   onModifyImage,
   onCreateVideo,
   onStartFresh,
-  isLoadingGalleryInfo = false,
   onSubmitModifyFromGallery
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
@@ -976,12 +974,7 @@ const Modal: React.FC<ModalProps> = ({
               Gallery Information
             </h3>
 
-            {isLoadingGalleryInfo ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
-                <span>Loading gallery info...</span>
-              </div>
-            ) : currentAssetInfo ? (
+            {currentAssetInfo ? (
               <>
                 {/* Asset ID */}
                 {currentAssetInfo.id && (
