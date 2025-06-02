@@ -111,6 +111,42 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   }, [activities]); // Run when activities change
 
+  // Listen for the custom event to refresh and show edited image
+  React.useEffect(() => {
+    const handleRefreshAndShowEditedImage = (event: CustomEvent) => {
+      const { editedImageId } = event.detail;
+      console.log('Received refreshAndShowEditedImage event for ID:', editedImageId);
+      
+      // Store the ID to open after refresh
+      sessionStorage.setItem('pendingEditedImageId', editedImageId);
+      
+      // Clear filters to ensure we show all assets
+      setFilters({
+        assetType: '',
+        inGallery: false,
+        minHearts: 0,
+        groupId: null
+      });
+      setSearchTerm('');
+      
+      // Do the same thing as handleRefresh
+      setLoading(true);
+      setPage(0);
+      setActivities([]); // Clear activities to ensure fresh load
+      
+      // Force a refresh by incrementing the refresh key
+      // This will trigger the useEffect that fetches data
+      setRefreshKey(prev => prev + 1);
+    };
+
+    // Add event listener
+    window.addEventListener('refreshAndShowEditedImage', handleRefreshAndShowEditedImage as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('refreshAndShowEditedImage', handleRefreshAndShowEditedImage as EventListener);
+    };
+  }, []);
 
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
@@ -151,6 +187,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [bulkMode, setBulkMode] = useState(false);
   const [showGroupsPanel, setShowGroupsPanel] = useState(false);
   const [groupRefreshKey, setGroupRefreshKey] = useState(0); // Force re-render of GroupManager
+  const [refreshKey, setRefreshKey] = useState(0); // Force refresh of activities
 
   const limit = 10;
   const promptLength = 100;
@@ -235,8 +272,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Effect for fetching data when page or filters change
   useEffect(() => {
     console.log('useEffect triggered - filters.groupId:', filters.groupId);
+    console.log('Refresh key:', refreshKey);
     fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, filters.assetType, filters.groupId]);
+  }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey]);
 
   // Effect for when filters change - reset pagination (separate from fetch to avoid race conditions)
   useEffect(() => {
@@ -357,6 +395,41 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     fetchLikes();
   }, [userId, activities]);
+
+  // Check for pending edited image after activities load
+  useEffect(() => {
+    if (activities.length > 0 && !loading) {
+      const pendingEditedImageId = sessionStorage.getItem('pendingEditedImageId');
+      if (pendingEditedImageId) {
+        console.log('Checking for pending edited image:', pendingEditedImageId);
+        console.log('Current activities count:', activities.length);
+        
+        // Find the image index in the filtered and sorted activities
+        const imageIndex = filteredAndSortedActivities.findIndex(
+          (activity) => activity.id === pendingEditedImageId
+        );
+        
+        if (imageIndex !== -1) {
+          console.log('Found pending edited image at index:', imageIndex);
+          // Clear the pending ID
+          sessionStorage.removeItem('pendingEditedImageId');
+          
+          // Open the modal with a small delay to ensure UI is ready
+          setTimeout(() => {
+            openModalForAsset(imageIndex, false);
+          }, 500);
+        } else if (page === 0 && hasMore) {
+          // If not found on first page and there are more pages, keep the pending ID
+          // It might be on a different page due to sorting
+          console.log('Image not found on first page, may need to load more data');
+        } else {
+          // Only clear if we've checked all available data
+          console.log('Image not found after checking available data');
+          sessionStorage.removeItem('pendingEditedImageId');
+        }
+      }
+    }
+  }, [activities, loading, filteredAndSortedActivities, page, hasMore]);
 
   // Update internal state when selectedUrl prop changes
   useEffect(() => {
