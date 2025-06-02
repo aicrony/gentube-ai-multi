@@ -109,6 +109,22 @@ export async function processUserImageEditRequest(
     return userResponse;
   }
 
+  // Deduct credits BEFORE processing the image edit
+  // This ensures credits are always deducted regardless of the processing path
+  const originalCredits = userResponse.credits;
+  userResponse.credits = userResponse.credits > 0 ? userResponse.credits - creditCost : 0;
+  console.log('Credits before edit:', originalCredits);
+  console.log('Credits after edit:', userResponse.credits);
+  console.log('Credit cost:', creditCost);
+  
+  // Update user credits in database immediately
+  await updateUserCredits(
+    userId,
+    normalizeIp(localIpConfig(userIp)),
+    userResponse.credits
+  );
+  console.log('User credits updated in database');
+
   let imageEditResult;
   let requestId;
   try {
@@ -217,7 +233,7 @@ export async function processUserImageEditRequest(
               id: undefined,
               AssetSource: imageUrl,
               AssetType: 'que', // Queue record that will be marked as processed
-              CountedAssetPreviousState: creditCost,
+              CountedAssetPreviousState: originalCredits,
               CountedAssetState: userResponse.credits,
               CreatedAssetUrl: requestId, // Use requestId for queue record
               DateTime: new Date().toISOString(),
@@ -232,7 +248,7 @@ export async function processUserImageEditRequest(
               id: undefined,
               AssetSource: imageUrl, // Keep reference to original image
               AssetType: 'img', // Mark as completed image
-              CountedAssetPreviousState: creditCost,
+              CountedAssetPreviousState: originalCredits,
               CountedAssetState: userResponse.credits,
               CreatedAssetUrl: completedImageUrl, // New edited image URL
               DateTime: new Date().toISOString(), // New timestamp for edited image
@@ -289,16 +305,8 @@ export async function processUserImageEditRequest(
       }
     }
 
-    // Update user credits
-    userResponse.credits && userResponse.credits > 0
-      ? (userResponse.credits -= creditCost)
-      : 0;
-    console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(
-      userId,
-      normalizeIp(localIpConfig(userIp)),
-      userResponse.credits
-    );
+    // Credits have already been deducted and updated at the beginning
+    // No need to update again here
 
     // Ensure we have a request ID
     if (!requestId || requestId.trim() === '') {
@@ -312,7 +320,7 @@ export async function processUserImageEditRequest(
       id: undefined,
       AssetSource: imageUrl,
       AssetType: 'que',
-      CountedAssetPreviousState: creditCost,
+      CountedAssetPreviousState: originalCredits,
       CountedAssetState: userResponse.credits,
       CreatedAssetUrl: requestId, // Should be populated at this point
       DateTime: new Date().toISOString(),
@@ -329,6 +337,18 @@ export async function processUserImageEditRequest(
     userResponse.result = 'InQueue';
     return userResponse;
   } catch (error) {
+    // If there's an error, refund the credits since the edit failed
+    console.log('Error occurred during image edit, refunding credits');
+    userResponse.credits = originalCredits; // Restore original credits
+    
+    // Update user credits in database to refund
+    await updateUserCredits(
+      userId,
+      normalizeIp(localIpConfig(userIp)),
+      userResponse.credits
+    );
+    console.log('Credits refunded due to error');
+    
     if (error instanceof Error) {
       userResponse.error = true;
       userResponse.result = error.message;
