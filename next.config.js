@@ -81,6 +81,7 @@ module.exports = {
       }
     ];
   },
+  reactStrictMode: true, // Re-enabled after fixing infinite loop issues
   experimental: {
     serverComponentsExternalPackages: [
       '@google-cloud/datastore',

@@ -221,8 +221,11 @@ const Modal: React.FC<ModalProps> = ({
   
   // Update local slideshow assets when props change
   useEffect(() => {
-    setLocalSlideshowAssets(slideshowAssets);
-    setLocalCurrentAssetIndex(currentAssetIndex);
+    // Only update if slideshowAssets is provided and has length
+    if (slideshowAssets && slideshowAssets.length > 0) {
+      setLocalSlideshowAssets(slideshowAssets);
+      setLocalCurrentAssetIndex(currentAssetIndex);
+    }
   }, [slideshowAssets, currentAssetIndex]);
 
   // Reset gallery info state when pane closes or asset changes

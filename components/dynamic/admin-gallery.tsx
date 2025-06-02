@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useUserId } from '@/context/UserIdContext';
@@ -55,28 +55,18 @@ const AdminGallery: React.FC = () => {
     loadImages(0, false);
   }, []);
 
-  // Set gallery info directly from media data to avoid async issues
-  const setGalleryInfoFromCurrentItem = () => {
-    const currentItem = media[currentModalIndex];
-    if (!currentItem) {
-      setCurrentAssetInfo(undefined);
-      return;
-    }
-
-    setCurrentAssetInfo({
-      id: currentItem.id,
-      prompt: currentItem.Prompt,
-      creatorName: currentItem.CreatorName || undefined,
-      userId: currentItem.UserId || undefined,
-      assetType: currentItem.AssetType
-    });
-  };
-
   // Update gallery info when currentModalIndex changes and gallery info pane is open
   useEffect(() => {
-    if (showGalleryInfoPane && media.length > 0) {
+    if (showGalleryInfoPane && media.length > 0 && media[currentModalIndex]) {
       // Set gallery info directly from current item to avoid async race conditions
-      setGalleryInfoFromCurrentItem();
+      const currentItem = media[currentModalIndex];
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
+        assetType: currentItem.AssetType
+      });
     }
   }, [currentModalIndex, showGalleryInfoPane, media]);
 
@@ -322,9 +312,16 @@ const AdminGallery: React.FC = () => {
 
   // Gallery info handlers
   const handleToggleGalleryInfoPane = () => {
-    if (!showGalleryInfoPane) {
+    if (!showGalleryInfoPane && media.length > 0 && media[currentModalIndex]) {
       // Set gallery info directly from current item data when opening the pane
-      setGalleryInfoFromCurrentItem();
+      const currentItem = media[currentModalIndex];
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
+        assetType: currentItem.AssetType
+      });
     }
     setShowGalleryInfoPane(!showGalleryInfoPane);
   };
@@ -404,6 +401,16 @@ const AdminGallery: React.FC = () => {
       return { success: false, error: 'An error occurred while creating the slideshow' };
     }
   };
+
+  // Memoize slideshowAssets to prevent infinite re-renders in Modal
+  const slideshowAssets = useMemo(() => {
+    return media.map(item => ({
+      id: item.id || '',
+      url: item.CreatedAssetUrl,
+      thumbnailUrl: item.AssetType === 'vid' ? item.AssetSource : item.CreatedAssetUrl,
+      assetType: item.AssetType
+    }));
+  }, [media]);
 
   if (loading) {
     return (
@@ -523,13 +530,8 @@ const AdminGallery: React.FC = () => {
           onJumpToLast={handleJumpToLast}
           currentAssets={media.map(item => item.id || '').filter(Boolean)}
           onCreateSlideshow={handleCreateSlideshow}
-          // Enable slideshow functionality with all assets
-          slideshowAssets={media.map(item => ({
-            id: item.id || '',
-            url: item.CreatedAssetUrl,
-            thumbnailUrl: item.AssetType === 'vid' ? item.AssetSource : item.CreatedAssetUrl,
-            assetType: item.AssetType
-          }))}
+          // Enable slideshow functionality with all assets - memoized to prevent infinite re-renders
+          slideshowAssets={slideshowAssets}
           currentAssetIndex={currentModalIndex}
           onAssetClick={(index) => {
             setCurrentModalIndex(index);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Button from '@/components/ui/Button';
 import {
   FaExternalLinkAlt,
@@ -173,28 +173,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     fetchLikesForCurrentItem();
   }, [userId, media, currentIndex]);
 
-  // Set gallery info directly from media data to avoid async issues
-  const setGalleryInfoFromCurrentItem = () => {
-    const currentItem = media[currentIndex];
-    if (!currentItem) {
-      setCurrentAssetInfo(undefined);
-      return;
-    }
-
-    setCurrentAssetInfo({
-      id: currentItem.id,
-      prompt: currentItem.Prompt,
-      creatorName: currentItem.CreatorName || undefined,
-      userId: currentItem.UserId || undefined,
-      assetType: currentItem.AssetType
-    });
-  };
 
   // Update gallery info when currentIndex changes and gallery info pane is open
   useEffect(() => {
-    if (showGalleryInfoPane && media.length > 0) {
+    if (showGalleryInfoPane && media.length > 0 && media[currentIndex]) {
       // Set gallery info directly from current item to avoid async race conditions
-      setGalleryInfoFromCurrentItem();
+      const currentItem = media[currentIndex];
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
+        assetType: currentItem.AssetType
+      });
     }
   }, [currentIndex, showGalleryInfoPane, media]);
 
@@ -763,9 +754,16 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   // Gallery info handlers
   const handleToggleGalleryInfoPane = () => {
-    if (!showGalleryInfoPane) {
+    if (!showGalleryInfoPane && media.length > 0 && media[currentIndex]) {
       // Set gallery info directly from current item data when opening the pane
-      setGalleryInfoFromCurrentItem();
+      const currentItem = media[currentIndex];
+      setCurrentAssetInfo({
+        id: currentItem.id,
+        prompt: currentItem.Prompt,
+        creatorName: currentItem.CreatorName || undefined,
+        userId: currentItem.UserId || undefined,
+        assetType: currentItem.AssetType
+      });
     }
     setShowGalleryInfoPane(!showGalleryInfoPane);
   };
@@ -797,6 +795,16 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     closeModal();
     router.push('/');
   };
+
+  // Memoize slideshowAssets to prevent infinite re-renders in Modal
+  const slideshowAssets = useMemo(() => {
+    return media.map(item => ({
+      id: item.id || '',
+      url: item.CreatedAssetUrl,
+      thumbnailUrl: item.AssetType === 'vid' ? item.AssetSource : item.CreatedAssetUrl,
+      assetType: item.AssetType
+    }));
+  }, [media]);
 
   const renderMedia = (mediaItem: GalleryItem) => {
     const url = mediaItem.CreatedAssetUrl;
@@ -1330,6 +1338,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           currentItemId={media[currentIndex].id}
           onShare={() => handleShareUrl(media[currentIndex])}
           showShareButton={true}
+          // Slideshow props - memoized to prevent infinite re-renders
+          slideshowAssets={slideshowAssets}
+          currentAssetIndex={currentIndex}
           // Gallery info props
           showGalleryInfoPane={showGalleryInfoPane}
           onToggleGalleryInfoPane={handleToggleGalleryInfoPane}
