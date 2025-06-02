@@ -45,7 +45,7 @@ export default async function generateFalImage(
       result = await fal.queue.submit(apiEndpoint, {
         input: {
           prompt: imagePrompt,
-          safety_tolerance: 6,
+          safety_tolerance: 2,
           output_format: 'png',
           aspect_ratio: '16:9'
         },
