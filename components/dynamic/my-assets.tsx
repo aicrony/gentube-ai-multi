@@ -946,10 +946,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Original function for backward compatibility - opens the modal by URL
   const openModal = (url: string, fullScreen = false) => {
     // Find the index of the asset with this URL
-    const index = filteredAndSortedActivities.findIndex(
-      (activity) =>
-        activity.CreatedAssetUrl === url || activity.AssetSource === url
+    // Prioritize exact CreatedAssetUrl matches over AssetSource matches to avoid opening edited images when clicking originals
+    let index = filteredAndSortedActivities.findIndex(
+      (activity) => activity.CreatedAssetUrl === url
     );
+    
+    // Only fall back to AssetSource matching if no CreatedAssetUrl match found
+    if (index === -1) {
+      index = filteredAndSortedActivities.findIndex(
+        (activity) => activity.AssetSource === url
+      );
+    }
 
     if (index !== -1) {
       openModalForAsset(index, fullScreen);

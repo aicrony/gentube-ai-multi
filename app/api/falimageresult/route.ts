@@ -70,6 +70,8 @@ export async function POST(request: NextRequest) {
       );
 
       console.log('Queue Record:', JSON.stringify(userQueueRecord));
+      console.log('Queue Record AssetSource (original image URL):', userQueueRecord?.AssetSource);
+      console.log('New edited image URL:', body.payload.images[0].url);
 
       if (userQueueRecord && userQueueRecord.UserId) {
         console.log('Queue Record - UserId:', userQueueRecord.UserId);

@@ -207,22 +207,66 @@ export async function processUserImageEditRequest(
 
           // If the image is already completed, we need to handle it differently
           if (isCompleted) {
-            // Save the completed image directly instead of queuing
-            console.log('Saving completed image edit result immediately');
+            // Save the completed image edit using data integrity logic
+            console.log('Saving completed image edit result immediately with data integrity');
+            console.log('Original image URL (AssetSource):', imageUrl);
+            console.log('New edited image URL:', completedImageUrl);
 
-            const completedActivityResponse = await saveUserActivity({
+            // First, save a queue record that will be marked as processed
+            const queueActivityResponse = await saveUserActivity({
               id: undefined,
               AssetSource: imageUrl,
-              AssetType: 'img', // Changed from 'que' to 'img' since it's completed
+              AssetType: 'que', // Queue record that will be marked as processed
               CountedAssetPreviousState: creditCost,
               CountedAssetState: userResponse.credits,
-              CreatedAssetUrl: completedImageUrl, // Use the actual completed image URL
+              CreatedAssetUrl: requestId, // Use requestId for queue record
               DateTime: new Date().toISOString(),
               Prompt: editPrompt ? editPrompt : '',
               SubscriptionTier: 0,
               UserId: userId,
               UserIp: localizedIpAddress
             });
+
+            // Then save the actual completed edited image as a new record
+            const completedActivityResponse = await saveUserActivity({
+              id: undefined,
+              AssetSource: imageUrl, // Keep reference to original image
+              AssetType: 'img', // Mark as completed image
+              CountedAssetPreviousState: creditCost,
+              CountedAssetState: userResponse.credits,
+              CreatedAssetUrl: completedImageUrl, // New edited image URL
+              DateTime: new Date().toISOString(), // New timestamp for edited image
+              Prompt: editPrompt ? editPrompt : '', // Keep the edit prompt
+              SubscriptionTier: 0, // Start with default gallery setting
+              UserId: userId,
+              UserIp: localizedIpAddress
+            });
+
+            // Mark the queue record as processed (requires direct datastore access)
+            try {
+              const queueKey = datastore.key({
+                namespace: 'GenTube',
+                path: ['UserActivity', datastore.int(Number(queueActivityResponse))]
+              });
+              
+              const transaction = datastore.transaction();
+              await transaction.run();
+              const [queueActivity] = await transaction.get(queueKey);
+              
+              if (queueActivity) {
+                queueActivity.AssetType = 'processed'; // Mark as processed
+                transaction.save({
+                  key: queueKey,
+                  data: queueActivity
+                });
+                await transaction.commit();
+                console.log('Queue record marked as processed for immediate completion');
+              } else {
+                await transaction.rollback();
+              }
+            } catch (error) {
+              console.error('Error marking queue record as processed:', error);
+            }
 
             console.log(
               'Completed image edit saved with ID:',
