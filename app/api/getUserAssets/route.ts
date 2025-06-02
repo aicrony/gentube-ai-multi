@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
   const includeGroups = searchParams.get('includeGroups') === 'true'; // Whether to include group info
 
   console.log('USER-IP: ' + userIp);
+  console.log('API groupId received:', groupId, 'type:', typeof groupId);
+  console.log('API includeGroups:', includeGroups);
 
   if (!userId || !userIp) {
     return NextResponse.json(

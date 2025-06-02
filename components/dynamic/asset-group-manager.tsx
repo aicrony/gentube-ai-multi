@@ -5,7 +5,8 @@ import {
   FaMinus,
   FaTimes,
   FaCheck,
-  FaTag
+  FaTag,
+  FaPalette
 } from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
 import { useToast } from '@/components/ui/Toast';
@@ -31,6 +32,164 @@ interface GroupCheckboxProps {
   onChange: (groupId: string, checked: boolean) => void;
   disabled?: boolean;
 }
+
+interface GroupCreateFormProps {
+  onSave: (group: UserGroup) => void;
+  onCancel: () => void;
+}
+
+const PRESET_COLORS = [
+  '#3B82F6', // Blue
+  '#10B981', // Green
+  '#F59E0B', // Yellow
+  '#EF4444', // Red
+  '#8B5CF6', // Purple
+  '#06B6D4', // Cyan
+  '#F97316', // Orange
+  '#84CC16', // Lime
+  '#EC4899', // Pink
+  '#6B7280' // Gray
+];
+
+const GroupCreateForm: React.FC<GroupCreateFormProps> = ({
+  onSave,
+  onCancel
+}) => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const userId = useUserId();
+  const { showToast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      setError('Group name is required');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/groups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          description: description.trim(),
+          color,
+          userId
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create group');
+      }
+
+      onSave(result.group);
+
+      showToast({
+        type: 'image',
+        prompt: `Group "${name}" created successfully!`,
+        duration: 3000
+      });
+    } catch (error) {
+      console.error('Error creating group:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create group');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="text-red-600 text-sm bg-red-50 dark:bg-red-900/20 p-2 rounded">
+          {error}
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Group Name *
+        </label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
+          placeholder="Enter group name"
+          maxLength={50}
+          required
+          autoFocus
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Description
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm"
+          placeholder="Optional description"
+          rows={2}
+          maxLength={200}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          <FaPalette className="inline mr-1" />
+          Color
+        </label>
+        <div className="grid grid-cols-5 gap-2">
+          {PRESET_COLORS.map((presetColor) => (
+            <button
+              key={presetColor}
+              type="button"
+              onClick={() => setColor(presetColor)}
+              className={`w-8 h-8 rounded-full border-2 ${
+                color === presetColor
+                  ? 'border-gray-800 dark:border-white scale-110'
+                  : 'border-gray-300 dark:border-gray-600'
+              } transition-transform`}
+              style={{ backgroundColor: presetColor }}
+              title={presetColor}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          disabled={isLoading}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isLoading || !name.trim()}
+          className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Creating...' : 'Create Group'}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const GroupCheckbox: React.FC<GroupCheckboxProps> = ({
   group,
@@ -87,6 +246,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
   const [pendingChanges, setPendingChanges] = useState<{
     [groupId: string]: boolean;
   }>({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const userId = useUserId();
   const { showToast } = useToast();
 
@@ -147,6 +307,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
     if (isOpen) {
       fetchGroupsAndMemberships();
       setPendingChanges({});
+      setShowCreateForm(false);
     }
   }, [isOpen, userId, assetIds]);
 
@@ -261,6 +422,22 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
     }
   };
 
+  const handleCreateGroup = (newGroup: UserGroup) => {
+    // Add the new group to the list
+    setGroups([newGroup, ...groups]);
+    // Automatically check the new group for the current assets
+    setPendingChanges((prev) => ({
+      ...prev,
+      [newGroup.id]: true
+    }));
+    // Hide the create form
+    setShowCreateForm(false);
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreateForm(false);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -281,43 +458,68 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
         </div>
 
         <div className="p-4">
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            {assetIds.length === 1
-              ? 'Select groups for this asset:'
-              : `Select groups for ${assetIds.length} assets:`}
-          </div>
-
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">
-              Loading groups...
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <div className="mb-2">No groups available.</div>
-              <div className="text-sm">
-                Create a group first to organize your assets.
+          {!showCreateForm ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {assetIds.length === 1
+                    ? 'Select groups for this asset:'
+                    : `Select groups for ${assetIds.length} assets:`}
+                </div>
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                  title="Create new group"
+                  disabled={saving}
+                >
+                  <FaPlus className="text-xs" />
+                  New Group
+                </button>
               </div>
-            </div>
+
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">
+                  Loading groups...
+                </div>
+              ) : groups.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="mb-2">No groups available.</div>
+                  <div className="text-sm">
+                    Create your first group to organize assets.
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1 max-h-60 overflow-y-auto">
+                  {groups.map((group) => {
+                    const effectiveStatus = getEffectiveGroupStatus(group.id);
+                    return (
+                      <GroupCheckbox
+                        key={group.id}
+                        group={group}
+                        isChecked={effectiveStatus.isChecked}
+                        isIndeterminate={effectiveStatus.isIndeterminate}
+                        onChange={handleGroupToggle}
+                        disabled={saving}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </>
           ) : (
-            <div className="space-y-1 max-h-60 overflow-y-auto">
-              {groups.map((group) => {
-                const effectiveStatus = getEffectiveGroupStatus(group.id);
-                return (
-                  <GroupCheckbox
-                    key={group.id}
-                    group={group}
-                    isChecked={effectiveStatus.isChecked}
-                    isIndeterminate={effectiveStatus.isIndeterminate}
-                    onChange={handleGroupToggle}
-                    disabled={saving}
-                  />
-                );
-              })}
-            </div>
+            <>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Create a new group for your assets:
+              </div>
+              <GroupCreateForm
+                onSave={handleCreateGroup}
+                onCancel={handleCancelCreate}
+              />
+            </>
           )}
         </div>
 
-        {groups.length > 0 && (
+        {!showCreateForm && groups.length > 0 && (
           <div className="flex justify-end space-x-2 p-4 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={onClose}

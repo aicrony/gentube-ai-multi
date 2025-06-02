@@ -162,6 +162,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         const assetTypeParam = filters.assetType || '';
         const groupIdParam = filters.groupId || '';
 
+        console.log('fetchUserActivities called with filters:', filters);
+        console.log('groupIdParam:', groupIdParam);
+
         // Build query parameters
         const params = new URLSearchParams({
           userId: userId ? userId : 'none',
@@ -183,12 +186,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           params.append('groupId', groupIdParam);
         }
 
-        const response = await fetch(`/api/getUserAssets?${params.toString()}`);
+        const finalUrl = `/api/getUserAssets?${params.toString()}`;
+        console.log('Final API URL:', finalUrl);
+        console.log('Request includes groupId param:', !!groupIdParam);
+
+        const response = await fetch(finalUrl);
         if (!response.ok) {
           console.log('Error fetching user assets.');
           throw new Error('Failed to fetch user assets');
         }
         const data = await response.json();
+        console.log('API response data:', data);
         
         if (page === 0) {
           setActivities([]);
@@ -226,6 +234,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Effect for fetching data when page or filters change
   useEffect(() => {
+    console.log('useEffect triggered - filters.groupId:', filters.groupId);
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, page, filters.assetType, filters.groupId]);
 
@@ -1450,7 +1459,27 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Group management functions
   const handleGroupSelect = (groupId: string | null) => {
-    setFilters((prev) => ({ ...prev, groupId }));
+    console.log('handleGroupSelect called with groupId:', groupId);
+    const prevGroupId = filters.groupId;
+    
+    setFilters((prev) => {
+      console.log('Previous filters:', prev);
+      const newFilters = { ...prev, groupId };
+      console.log('New filters:', newFilters);
+      return newFilters;
+    });
+    
+    // Force a refresh if we're clearing the group filter and state is already null
+    // This handles the case where the visual state and actual state are out of sync
+    if (groupId === null && prevGroupId === null) {
+      console.log('Forcing refresh for All Assets (state sync fix)');
+      setPage(0);
+      // Force refresh by calling fetchUserActivities directly
+      setTimeout(() => {
+        fetchUserActivities(userId, userIp);
+      }, 0);
+    }
+    
     // Note: Page reset is handled by the useEffect for filters
   };
 

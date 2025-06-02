@@ -216,12 +216,18 @@ export async function getUserAssetsWithGroups(
   groupId?: string // Optional filter by group
 ): Promise<AssetWithGroups[]> {
   try {
+    console.log('getUserAssetsWithGroups called with:');
+    console.log('- userId:', userId);
+    console.log('- groupId:', groupId, 'type:', typeof groupId);
+    console.log('- assetType:', assetType);
+    
     // Import getUserAssets to avoid circular dependency
     const { getUserAssets } = await import('./userAssets');
 
     let assets;
 
     if (groupId) {
+      console.log('Filtering by group:', groupId);
       // If filtering by group, get assets in that group first
       const assetIdsInGroup = await getAssetsInGroup(groupId, userId);
 
@@ -246,8 +252,10 @@ export async function getUserAssetsWithGroups(
       // Apply pagination manually
       assets = assets.slice(offset, offset + limit);
     } else {
+      console.log('No groupId - fetching all assets');
       // Regular asset fetch
       assets = await getUserAssets(userId, userIp, limit, offset, assetType);
+      console.log('All assets fetched, count:', assets?.length);
     }
 
     if (!assets || assets.length === 0) {

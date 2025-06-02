@@ -78,17 +78,16 @@ export async function getUserAssets(
       // For a single asset type, use the '=' filter
       query = query.filter(new PropertyFilter('AssetType', '=', assetType));
     }
+  } else {
+    // When no specific asset type is requested (All Assets), exclude 'processed' items
+    // by filtering for common asset types to ensure we get actual displayable assets
+    const displayableTypes = ['img', 'vid', 'upl', 'que', 'err'];
+    query = query.filter(new PropertyFilter('AssetType', 'IN', displayableTypes));
   }
 
   const [results] = await datastore.runQuery(query);
   
-  // Filter out 'processed' items after query execution to avoid FAILED_PRECONDITION errors
-  // 'processed' items are queue records that have been completed and should not be shown
-  const filteredResults = assetType && assetType.length > 0 
-    ? results // If specific asset type is requested, don't filter out processed items
-    : results.filter((activity: any) => activity.AssetType !== 'processed');
-  
-  return filteredResults.map((activity: any) => ({
+  return results.map((activity: any) => ({
     id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
