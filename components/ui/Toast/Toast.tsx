@@ -106,56 +106,68 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
-      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 lg:w-[28rem] xl:w-[32rem] ${getToastColors()} text-white rounded-lg shadow-lg z-50 transition-all duration-300 transform ${
+      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 lg:w-[36rem] xl:w-[42rem] 2xl:w-[48rem] ${getToastColors()} text-white rounded-lg shadow-lg z-50 transition-all duration-300 transform ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
       style={{ minHeight: '80px' }}
     >
-      <div className="p-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {getIcon()}
-            <span className="font-semibold text-sm">
-              {getTypeText()} Ready!
-            </span>
+      <div className="p-4 lg:p-5">
+        {/* Header and Content in horizontal layout on larger screens */}
+        <div className="lg:flex lg:items-start lg:gap-4">
+          {/* Icon and Title section */}
+          <div className="flex items-center justify-between mb-2 lg:mb-0 lg:flex-shrink-0">
+            <div className="flex items-center gap-2">
+              {getIcon()}
+              <span className="font-semibold text-sm lg:text-base">
+                {getTypeText()} Ready!
+              </span>
+            </div>
+            <button
+              onClick={handleClose}
+              className="text-white hover:text-gray-200 transition-colors lg:hidden"
+              title="Close notification"
+            >
+              <FaTimes className="text-xs" />
+            </button>
           </div>
+
+          {/* Content section - grows to fill available space */}
+          <div
+            className={`cursor-pointer flex-grow ${type === 'error' ? 'hover:bg-red-700' : 'hover:bg-blue-700'} -m-4 p-4 lg:-m-5 lg:p-5 rounded-lg transition-colors`}
+            onClick={handleClick}
+            title={
+              type === 'error'
+                ? 'Click to go to pricing page'
+                : type === 'image-edit'
+                  ? 'Click to view edited image'
+                  : 'Click to view'
+            }
+          >
+            <p
+              className={`text-xs lg:text-sm mb-1 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}
+            >
+              &quot;{truncatePrompt(prompt)}&quot;
+            </p>
+            <p
+              className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}
+            >
+              {type === 'error'
+                ? 'Click to get credits'
+                : type === 'image-edit'
+                  ? 'Click to view edited image'
+                  : 'Click to view'}{' '}
+              • Auto-close in {timeLeft}s
+            </p>
+          </div>
+
+          {/* Close button for larger screens */}
           <button
             onClick={handleClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="hidden lg:block text-white hover:text-gray-200 transition-colors lg:ml-2"
             title="Close notification"
           >
-            <FaTimes className="text-xs" />
+            <FaTimes className="text-sm" />
           </button>
-        </div>
-
-        {/* Content */}
-        <div
-          className={`cursor-pointer ${type === 'error' ? 'hover:bg-red-700' : 'hover:bg-blue-700'} -m-4 p-4 rounded-lg transition-colors`}
-          onClick={handleClick}
-          title={
-            type === 'error'
-              ? 'Click to go to pricing page'
-              : type === 'image-edit'
-                ? 'Click to view edited image'
-                : 'Click to view'
-          }
-        >
-          <p
-            className={`text-xs mb-2 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}
-          >
-            &quot;{truncatePrompt(prompt)}&quot;
-          </p>
-          <p
-            className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}
-          >
-            {type === 'error'
-              ? 'Click to get credits'
-              : type === 'image-edit'
-                ? 'Click to view edited image'
-                : 'Click to view'}{' '}
-            • Auto-close in {timeLeft}s
-          </p>
         </div>
       </div>
     </div>
