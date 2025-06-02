@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useUserId } from '@/context/UserIdContext';
 import { useUserIp } from '@/context/UserIpContext';
+import { useRouter } from 'next/navigation';
 import {
   FaExternalLinkAlt,
   FaCopy,
@@ -1265,6 +1266,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
+  const router = useRouter();
+
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
@@ -1274,6 +1277,127 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setEditImageUrl('');
     setEditPrompt('');
     setIsEditingImage(false);
+  };
+
+  // Handler for "Modify Image" button - same functionality as gallery
+  const handleModifyImageFromModal = (prompt: string) => {
+    if (!userId) {
+      router.push('/signin');
+      return;
+    }
+
+    if (!prompt || !prompt.trim()) {
+      alert('No prompt available for modification');
+      return;
+    }
+
+    // Check prompt length before proceeding
+    const MAX_PROMPT_LENGTH = 1500;
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      alert(
+        `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${prompt.length} characters.`
+      );
+      return;
+    }
+
+    // Set the edit prompt and show the edit pane
+    setEditPrompt(prompt);
+    setShowImageEditPane(true);
+    
+    // Make sure we have the current image URL for editing
+    const currentActivity = filteredAndSortedActivities[currentModalIndex];
+    if (currentActivity) {
+      setEditImageUrl(currentActivity.CreatedAssetUrl);
+    }
+  };
+
+  // Handler for "Create Video" button - same functionality as gallery
+  const handleCreateVideoFromModal = async () => {
+    if (!userId) {
+      router.push('/signin');
+      return;
+    }
+
+    const currentActivity = filteredAndSortedActivities[currentModalIndex];
+    if (!currentActivity) {
+      console.error('No current activity found');
+      return;
+    }
+
+    // Check prompt length before proceeding
+    if (currentActivity.Prompt) {
+      const MAX_PROMPT_LENGTH = 1500;
+      if (currentActivity.Prompt.length > MAX_PROMPT_LENGTH) {
+        alert(
+          `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters. Your prompt is ${currentActivity.Prompt.length} characters.`
+        );
+        return;
+      }
+    }
+
+    try {
+      // Use AssetSource if the current item is a video, otherwise use CreatedAssetUrl
+      const imageUrl =
+        currentActivity.AssetType === 'vid' 
+          ? currentActivity.AssetSource 
+          : currentActivity.CreatedAssetUrl;
+
+      console.log('Creating video with:', {
+        imageUrl,
+        prompt: currentActivity.Prompt,
+        assetType: currentActivity.AssetType
+      });
+
+      // Don't proceed if we don't have an image URL
+      if (!imageUrl) {
+        console.error('Cannot create video: Missing image URL');
+        alert('Cannot create video: Missing source image');
+        return;
+      }
+
+      const response = await fetch('/api/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': userId || 'none',
+          'x-forwarded-for': userIp
+        },
+        body: JSON.stringify({
+          url: imageUrl,
+          description: currentActivity.Prompt || 'Generate a video from this image',
+          duration: '5',
+          motion: '2'
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToast({
+          type: 'video',
+          prompt: `Video creation started! ${currentActivity.Prompt || 'Creating video...'}`,
+          duration: 10000
+        });
+
+        // Close the modal and refresh assets to show the new video in queue
+        closeModal();
+        setRefreshKey(prev => prev + 1);
+      } else {
+        const errorMessage = data.error || 'Failed to create video';
+        if (response.status === 429) {
+          showToast({
+            type: 'error',
+            prompt: errorMessage,
+            duration: 10000
+          });
+        } else {
+          alert(`Error: ${errorMessage}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error creating video:', error);
+      alert('An error occurred while creating the video. Please try again.');
+    }
   };
 
   // Function to start slideshow with the first displayed asset (directly play)
@@ -2864,6 +2988,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onSubmitImageEdit={handleSubmitImageEdit}
           onToggleImageEditPane={handleToggleImageEditPane}
           isEditingImage={isEditingImage}
+          onModifyImage={handleModifyImageFromModal}
+          onCreateVideo={handleCreateVideoFromModal}
+          currentAssetInfo={{
+            id: filteredAndSortedActivities[currentModalIndex]?.id,
+            prompt: filteredAndSortedActivities[currentModalIndex]?.Prompt,
+            assetType: filteredAndSortedActivities[currentModalIndex]?.AssetType
+          }}
         />
       )}
 
