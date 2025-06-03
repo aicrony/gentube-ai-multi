@@ -62,10 +62,11 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       const toast = toasts.find((t) => t.id === id);
       if (toast && onToastClick) {
         onToastClick(id, toast);
+        // Close the toast after handling the click
+        removeToast(id);
       }
-      // Don't auto-close when clicked, let the parent handle it
     },
-    [toasts, onToastClick]
+    [toasts, onToastClick, removeToast]
   );
 
   return (

@@ -138,6 +138,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // Force a refresh by incrementing the refresh key
       // This will trigger the useEffect that fetches data
       setRefreshKey(prev => prev + 1);
+      
+      // Scroll to the first queued asset (if any) or first asset after a delay
+      setTimeout(() => {
+        const firstQueuedAsset = document.getElementById('first-queued-asset');
+        const firstAsset = document.getElementById('first-asset');
+        const targetElement = firstQueuedAsset || firstAsset;
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 1000);
     };
 
     // Add event listener
@@ -146,6 +156,33 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Cleanup
     return () => {
       window.removeEventListener('refreshAndShowEditedImage', handleRefreshAndShowEditedImage as EventListener);
+    };
+  }, []);
+
+  // Listen for the custom event to refresh assets (for regular image/video toasts)
+  React.useEffect(() => {
+    const handleRefreshAssets = () => {
+      console.log('Received refreshAssets event');
+      // Simply trigger a refresh
+      setRefreshKey(prev => prev + 1);
+      
+      // Scroll to the first queued asset (if any) or first asset after a delay to allow content to load
+      setTimeout(() => {
+        const firstQueuedAsset = document.getElementById('first-queued-asset');
+        const firstAsset = document.getElementById('first-asset');
+        const targetElement = firstQueuedAsset || firstAsset;
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 1000);
+    };
+
+    // Add event listener
+    window.addEventListener('refreshAssets', handleRefreshAssets);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('refreshAssets', handleRefreshAssets);
     };
   }, []);
 
@@ -2527,6 +2564,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.map((activity, index) => (
         <div
           key={activity.id || index}
+          id={
+            index === 0 ? 'first-asset' : 
+            (activity.AssetType === 'que' && !filteredAndSortedActivities.slice(0, index).some(a => a.AssetType === 'que')) ? 'first-queued-asset' : 
+            undefined
+          }
           className={`border p-4 asset-item ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
           } ${

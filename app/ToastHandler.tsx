@@ -18,7 +18,7 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
     if (toastData.type === 'error') {
       // Navigate to pricing page for credit-related errors
       router.push('/pricing');
-    } else if (toastData.type === 'image-edit' && toastData.editedImageId) {
+    } else if (toastData.type === 'image' || toastData.type === 'image-edit' || toastData.type === 'video') {
       // Check if we're on a page that has MyAssets component
       const pagesWithMyAssets = [
         '/personal/manage-image',
@@ -42,38 +42,61 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
         '/text-to-video'
       ];
 
+      // Ensure pathname is defined and handle edge cases
+      const currentPath = pathname || '/';
+      
       const isOnPageWithMyAssets = pagesWithMyAssets.some(page => {
         // Special handling for root path
         if (page === '/') {
-          return pathname === '/';
+          return currentPath === '/' || currentPath === '';
         }
         // For other paths, check if pathname includes the page
-        return pathname?.includes(page);
+        return currentPath.includes(page);
+      });
+      
+      console.log('Toast click debug:', {
+        pathname,
+        currentPath,
+        isOnPageWithMyAssets,
+        toastType: toastData.type,
+        editedImageId: toastData.editedImageId
       });
 
       if (isOnPageWithMyAssets) {
-        // If we're already on a page with MyAssets, dispatch an event to refresh and show the image
+        // If we're already on a page with MyAssets, just refresh
         if (typeof window !== 'undefined') {
           // First close any open modal
           window.dispatchEvent(new CustomEvent('closeModal'));
           
-          // Then dispatch event to refresh assets and open the edited image
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('refreshAndShowEditedImage', {
-              detail: { editedImageId: toastData.editedImageId }
-            }));
-          }, 100);
+          // For image-edit with editedImageId, dispatch special event
+          if (toastData.type === 'image-edit' && toastData.editedImageId) {
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('refreshAndShowEditedImage', {
+                detail: { editedImageId: toastData.editedImageId }
+              }));
+            }, 100);
+          } else {
+            // For regular image/video toasts, just refresh the assets
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('refreshAssets'));
+            }, 100);
+          }
         }
       } else {
-        // If not on a page with MyAssets, navigate to manage-image
-        router.push(
-          `/personal/manage-image?openImage=${toastData.editedImageId}`
-        );
+        // If not on a page with MyAssets, navigate to the appropriate manage-image page
+        const isBusinessContext = currentPath.includes('/business/');
+        
+        // Include openImage parameter only for image-edit toasts with editedImageId
+        if (toastData.type === 'image-edit' && toastData.editedImageId) {
+          const targetPath = isBusinessContext 
+            ? `/business/manage-image?openImage=${toastData.editedImageId}`
+            : `/personal/manage-image?openImage=${toastData.editedImageId}`;
+          router.push(targetPath);
+        } else {
+          // For regular image/video toasts
+          router.push(isBusinessContext ? '/business/manage-image' : '/personal/manage-image');
+        }
       }
-    } else if (toastData.type === 'image' || toastData.type === 'image-edit') {
-      router.push('/personal/manage-image');
-    } else if (toastData.type === 'video') {
-      router.push('/personal/manage-image'); // Same page handles both
     }
   };
 
