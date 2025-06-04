@@ -6,6 +6,7 @@ const falApiWebhook =
   process.env.FAL_API_IMAGE_WEBHOOK ||
   process.env.FAL_API_WEBHOOK?.replace('falvideoresult', 'falimageresult') ||
   'https://gentube.ai/api/falimageresult';
+const defaultSafetyTolerance = process.env.DEFAULT_SAFETY_TOLERANCE as string;
 
 export default async function generateFalImageEdit(
   imageUrl: string,
@@ -39,12 +40,14 @@ export default async function generateFalImageEdit(
       console.log('- editPrompt:', editPrompt);
       console.log('- apiEndpoint:', apiEndpoint);
       console.log('- webhook:', falApiWebhook);
+      console.log('- safety_tolerance:', defaultSafetyTolerance);
 
       // Use fal.subscribe for Flux Pro Kontext endpoint
       result = await fal.subscribe(apiEndpoint, {
         input: {
           prompt: editPrompt,
-          image_url: imageUrl
+          image_url: imageUrl,
+          safety_tolerance: defaultSafetyTolerance
         },
         logs: true,
         onQueueUpdate: (update: QueueStatus) => {

@@ -1499,8 +1499,28 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Slideshow thumbnail strip - positioned below the image */}
         {showReorderMode && localSlideshowAssets.length > 0 && (
-          <div className="modal-pane mt-4 bg-gray-800 bg-opacity-90 p-2 md:p-3 rounded-lg w-full overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <div className="flex space-x-1 md:space-x-2 justify-start md:justify-center pb-1 min-w-max">
+          <div className="modal-pane mt-4 bg-gray-800 bg-opacity-90 p-2 md:p-3 rounded-lg w-full">
+            {/* Instructions */}
+            <div className="text-center mb-3">
+              <p className="text-xs md:text-sm text-gray-300 mb-1">
+                <span className="hidden md:inline">Drag thumbnails to reorder slideshow • </span>
+                <span className="md:hidden">Drag to reorder • </span>
+                Scroll horizontally to see all images
+              </p>
+              <div className="text-xs text-gray-400">
+                Total images: {localSlideshowAssets.length}
+              </div>
+            </div>
+            {/* Horizontal scroll container with visible scrollbar */}
+            <div 
+              className="overflow-x-auto overflow-y-hidden pb-2 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#6B7280 #374151'
+              }}
+            >
+              <div className="flex space-x-1 md:space-x-2 justify-start pb-1 min-w-max">
               {localSlideshowAssets.map((asset, index) => (
                 <div
                   key={asset.id}
@@ -1563,14 +1583,10 @@ const Modal: React.FC<ModalProps> = ({
                   </div>
                 </div>
               ))}
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-3 mt-2">
-              <span className="text-xs md:text-sm text-gray-300">
-                <span className="hidden md:inline">Drag thumbnails to reorder slideshow</span>
-                <span className="md:hidden">Drag to reorder</span>
-              </span>
-              
               {/* Save Order Button */}
               <button
                 onClick={async () => {

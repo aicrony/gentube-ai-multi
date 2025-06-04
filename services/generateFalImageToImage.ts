@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const apiEndpoint = process.env.BRIA_API_ENDPOINT as string;
 const falApiWebhook = process.env.FAL_IMAGE_API_WEBHOOK as string;
+const defaultSafetyTolerance = process.env.DEFAULT_SAFETY_TOLERANCE as string;
 
 interface ProductImageParams {
   image_url: string;
@@ -60,7 +61,8 @@ export default async function generateFalImageToImage(
           placement_type: params.placement_type ?? 'manual_placement',
           shot_size: params.shot_size ?? [1000, 1000],
           manual_placement_selection:
-            params.manual_placement_selection ?? 'bottom_center'
+            params.manual_placement_selection ?? 'bottom_center',
+          safety_tolerance: defaultSafetyTolerance
         },
         webhookUrl: falApiWebhook
       });

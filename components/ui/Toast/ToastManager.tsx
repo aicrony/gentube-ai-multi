@@ -3,7 +3,7 @@ import Toast from './Toast';
 
 export interface ToastData {
   id: string;
-  type: 'image' | 'video' | 'image-edit' | 'error';
+  type: 'image' | 'video' | 'image-edit' | 'error' | 'success';
   prompt: string;
   assetUrl?: string;
   duration?: number;
@@ -62,8 +62,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       const toast = toasts.find((t) => t.id === id);
       if (toast && onToastClick) {
         onToastClick(id, toast);
-        // Close the toast after handling the click
-        removeToast(id);
+        // Close the toast after handling the click (except for success toasts which shouldn't be clickable)
+        if (toast.type !== 'success') {
+          removeToast(id);
+        }
       }
     },
     [toasts, onToastClick, removeToast]

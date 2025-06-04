@@ -18,6 +18,9 @@ export default function ToastHandler({ children }: ToastHandlerProps) {
     if (toastData.type === 'error') {
       // Navigate to pricing page for credit-related errors
       router.push('/pricing');
+    } else if (toastData.type === 'success') {
+      // Success toasts are non-clickable, do nothing
+      return;
     } else if (toastData.type === 'image' || toastData.type === 'image-edit' || toastData.type === 'video') {
       // Check if we're on a page that has MyAssets component
       const pagesWithMyAssets = [

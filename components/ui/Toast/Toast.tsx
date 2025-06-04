@@ -4,12 +4,13 @@ import {
   FaImage,
   FaVideo,
   FaEdit,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaCheckCircle
 } from 'react-icons/fa';
 
 interface ToastProps {
   id: string;
-  type: 'image' | 'video' | 'image-edit' | 'error';
+  type: 'image' | 'video' | 'image-edit' | 'error' | 'success';
   prompt: string;
   onClose: (id: string) => void;
   onClick: (id: string) => void;
@@ -72,6 +73,8 @@ const Toast: React.FC<ToastProps> = ({
         return <FaEdit className="text-white" />;
       case 'error':
         return <FaExclamationTriangle className="text-white" />;
+      case 'success':
+        return <FaCheckCircle className="text-white" />;
       default:
         return <FaImage className="text-white" />;
     }
@@ -87,6 +90,8 @@ const Toast: React.FC<ToastProps> = ({
         return 'Edited Image';
       case 'error':
         return 'Error';
+      case 'success':
+        return 'Success';
       default:
         return 'Asset';
     }
@@ -100,6 +105,9 @@ const Toast: React.FC<ToastProps> = ({
   const getToastColors = () => {
     if (type === 'error') {
       return 'bg-red-600 border-red-500';
+    }
+    if (type === 'success') {
+      return 'bg-green-600 border-green-500';
     }
     return 'bg-blue-600 border-blue-500';
   };
@@ -132,33 +140,56 @@ const Toast: React.FC<ToastProps> = ({
           </div>
 
           {/* Content section - grows to fill available space */}
-          <div
-            className={`cursor-pointer flex-grow ${type === 'error' ? 'hover:bg-red-700' : 'hover:bg-blue-700'} -m-4 p-4 lg:-m-5 lg:p-5 rounded-lg transition-colors`}
-            onClick={handleClick}
-            title={
-              type === 'error'
-                ? 'Click to go to pricing page'
-                : type === 'image-edit'
-                  ? 'Click to view edited image'
-                  : 'Click to view'
-            }
-          >
-            <p
-              className={`text-xs lg:text-sm mb-1 ${type === 'error' ? 'text-red-100' : 'text-blue-100'}`}
+          {type === 'success' ? (
+            /* Non-clickable success toast */
+            <div className="flex-grow -m-4 p-4 lg:-m-5 lg:p-5 rounded-lg">
+              <p className="text-xs lg:text-sm mb-1 text-green-100">
+                {truncatePrompt(prompt)}
+              </p>
+              <p className="text-xs text-green-200">
+                Auto-close in {timeLeft}s
+              </p>
+            </div>
+          ) : (
+            /* Clickable toast for other types */
+            <div
+              className={`cursor-pointer flex-grow ${
+                type === 'error' 
+                  ? 'hover:bg-red-700' 
+                  : type === 'success' 
+                    ? '' 
+                    : 'hover:bg-blue-700'
+              } -m-4 p-4 lg:-m-5 lg:p-5 rounded-lg transition-colors`}
+              onClick={handleClick}
+              title={
+                type === 'error'
+                  ? 'Click to go to pricing page'
+                  : type === 'image-edit'
+                    ? 'Click to view edited image'
+                    : 'Click to view'
+              }
             >
-              &quot;{truncatePrompt(prompt)}&quot;
-            </p>
-            <p
-              className={`text-xs ${type === 'error' ? 'text-red-200' : 'text-blue-200'}`}
-            >
-              {type === 'error'
-                ? 'Click to get credits'
-                : type === 'image-edit'
-                  ? 'Click to view edited image'
-                  : 'Click to view'}{' '}
-              • Auto-close in {timeLeft}s
-            </p>
-          </div>
+              <p
+                className={`text-xs lg:text-sm mb-1 ${
+                  type === 'error' ? 'text-red-100' : 'text-blue-100'
+                }`}
+              >
+                &quot;{truncatePrompt(prompt)}&quot;
+              </p>
+              <p
+                className={`text-xs ${
+                  type === 'error' ? 'text-red-200' : 'text-blue-200'
+                }`}
+              >
+                {type === 'error'
+                  ? 'Click to get credits'
+                  : type === 'image-edit'
+                    ? 'Click to view edited image'
+                    : 'Click to view'}{' '}
+                • Auto-close in {timeLeft}s
+              </p>
+            </div>
+          )}
 
           {/* Close button for larger screens */}
           <button
