@@ -69,8 +69,18 @@ export async function DELETE(request: NextRequest) {
 
       // Prefer entity ID for deletion if available, fall back to assetUrl
       if (entityId) {
-        await deleteUserActivity(userId, undefined, entityId);
-        console.log('DELETE deleteUserActivity by entityId:', entityId);
+        try {
+          await deleteUserActivity(userId, undefined, entityId);
+          console.log('DELETE deleteUserActivity by entityId:', entityId);
+        } catch (error) {
+          console.error('Failed to delete by entityId, falling back to URL:', error);
+          if (assetUrl) {
+            await deleteUserActivity(userId, assetUrl);
+            console.log('DELETE deleteUserActivity by url after entityId failure:', assetUrl);
+          } else {
+            throw new Error('Failed to delete by entityId and no assetUrl provided');
+          }
+        }
       } else {
         await deleteUserActivity(userId, assetUrl);
         console.log('DELETE deleteUserActivity by url:', assetUrl);

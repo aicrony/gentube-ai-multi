@@ -26,6 +26,14 @@ export const deleteUserActivity = async (
           path: ['UserActivity', datastore.int(entityId)]
         });
 
+        // Verify entity exists before deleting
+        const [entity] = await datastore.get(key);
+        
+        if (!entity) {
+          console.log('Entity not found with ID:', entityId);
+          throw new Error(`Entity with ID ${entityId} not found`);
+        }
+
         // Delete the entity
         await datastore.delete(key);
         console.log('Successfully deleted entity with ID:', entityId);
@@ -84,6 +92,12 @@ export const deleteUserActivity = async (
         const keys = matchingActivities.map(
           (activity) => activity[datastore.KEY]
         );
+        
+        // Log keys for debugging
+        keys.forEach((key, index) => {
+          console.log(`Queued Key ${index}:`, JSON.stringify(key));
+        });
+        
         if (keys.length > 0) {
           await datastore.delete(keys);
           console.log('Deleted queued activities:', keys.length);
@@ -98,6 +112,12 @@ export const deleteUserActivity = async (
     if (activities.length > 0) {
       console.log('Found activities to delete:', activities.length);
       const keys = activities.map((activity) => activity[datastore.KEY]);
+      
+      // Log keys for debugging
+      keys.forEach((key, index) => {
+        console.log(`Key ${index}:`, JSON.stringify(key));
+      });
+      
       await datastore.delete(keys);
       console.log('Deleted activities:', keys.length);
     } else {

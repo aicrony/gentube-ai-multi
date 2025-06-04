@@ -682,6 +682,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleDelete = async (activity: UserActivity) => {
     if (confirm('Are you sure you want to delete this asset?')) {
       try {
+        // Log asset details before deletion
+        console.log('Deleting asset:', {
+          id: activity.id,
+          url: activity.CreatedAssetUrl,
+          type: activity.AssetType,
+          prompt: activity.Prompt,
+          timestamp: activity.Timestamp
+        });
+        
         const response = await fetch('/api/deleteUserAsset', {
           method: 'DELETE',
           headers: {
@@ -694,10 +703,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             assetType: activity.AssetType
           })
         });
+        
+        // Parse response data for logging
+        let responseData;
+        try {
+          responseData = await response.json();
+          console.log('Deletion API response:', responseData);
+        } catch (jsonError) {
+          console.log('Response is not JSON:', await response.text());
+        }
+        
         if (!response.ok) {
-          throw new Error('Failed to delete asset');
+          throw new Error(`Failed to delete asset: ${response.status} ${response.statusText}${responseData ? ' - ' + JSON.stringify(responseData) : ''}`);
         }
 
+        console.log('Asset deleted successfully:', activity.id);
+        
         // Instead of refreshing, just remove the deleted asset from the state
         setActivities((currentActivities) =>
           currentActivities.filter((item) => item.id !== activity.id)
@@ -743,8 +764,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           }, 300);
         }, 3000);
       } catch (error) {
-        console.error('Error deleting asset:', error);
-        alert('Failed to delete asset. Please try again.');
+        // Enhanced error logging
+        console.error('Error deleting asset:', {
+          error,
+          message: error.message,
+          stack: error.stack,
+          assetId: activity.id,
+          assetUrl: activity.CreatedAssetUrl
+        });
+        
+        // More informative error message to the user
+        alert(`Failed to delete asset: ${error.message}. Check console for details.`);
       }
     }
   };
@@ -1314,6 +1344,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setEditImageUrl('');
     setEditPrompt('');
     setIsEditingImage(false);
+    
+    // Restore original activities if we were in group slideshow mode
+    if (isGroupSlideshow && originalActivities.length > 0) {
+      console.log('Restoring original activities after group slideshow');
+      setActivities(originalActivities);
+      setIsGroupSlideshow(false);
+      setOriginalActivities([]);
+    }
   };
 
   // Handler for "Modify Image" button - same functionality as gallery
@@ -1594,6 +1632,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Group slideshow state
+  const [isGroupSlideshow, setIsGroupSlideshow] = useState(false);
+  const [originalActivities, setOriginalActivities] = useState<UserActivity[]>([]);
+
   // Listen for closeModal event from toast clicks
   useEffect(() => {
     const handleCloseModal = () => {
@@ -1606,6 +1648,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         setEditImageUrl('');
         setEditPrompt('');
         setIsEditingImage(false);
+        
+        // Restore original activities if we were in group slideshow mode
+        if (isGroupSlideshow && originalActivities.length > 0) {
+          console.log('Restoring original activities after group slideshow (from event)');
+          setActivities(originalActivities);
+          setIsGroupSlideshow(false);
+          setOriginalActivities([]);
+        }
       }
     };
 
@@ -1794,7 +1844,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         setGroupRefreshKey((prev) => prev + 1);
 
         showToast({
-          type: 'image',
+          type: 'success',
           prompt: `Asset removed from "${groupName}" group`,
           duration: 3000
         });
@@ -1902,34 +1952,36 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleSaveAssetOrder = async (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => {
     try {
-      // Use the reordered assets passed from the Modal instead of generating from current state
-      const slideshowAssets = orderedAssets;
+      console.log('Saving asset order to database for assets:', orderedAssets.length);
       
-      console.log('Saving asset order for slideshow assets:', slideshowAssets.length);
-
-      // Update the DateTime for all assets to match the current order
-      // We'll assign new timestamps to preserve the order
-      const baseTime = Date.now();
-      const promises = slideshowAssets.map(async (asset, index) => {
-        // Calculate new DateTime for this asset (first ordered item gets newest timestamp for desc sort)
-        const newDateTime = new Date(baseTime - index * 60000); // 1 minute intervals
-        
-        // Find the asset in the main activities array to update its timestamp
-        const foundActivity = filteredAndSortedActivities.find(activity => activity.id === asset.id);
-        if (foundActivity) {
-          foundActivity.DateTime = newDateTime;
-        }
+      // Create a new API endpoint for batch order updates
+      const response = await fetch('/api/saveAssetOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId,
+          orderedAssetIds: orderedAssets.map(asset => asset.id)
+        }),
       });
 
-      await Promise.all(promises);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to save asset order: ${errorData.error}`);
+      }
 
-      // Update the local state with the new order
+      const result = await response.json();
+      console.log('Asset order saved to database:', result);
+      
+      // The database update is complete, now update local state to reflect the new order
+      const baseTime = Date.now();
       setActivities(currentActivities => {
         const updatedActivities = [...currentActivities];
         
-        // Update DateTime values to preserve the slideshow order
-        slideshowAssets.forEach((slideshowAsset, index) => {
-          const activityIndex = updatedActivities.findIndex(activity => activity.id === slideshowAsset.id);
+        // Update DateTime values to reflect the database changes
+        orderedAssets.forEach((orderedAsset, index) => {
+          const activityIndex = updatedActivities.findIndex(activity => activity.id === orderedAsset.id);
           if (activityIndex !== -1) {
             updatedActivities[activityIndex].DateTime = new Date(baseTime - index * 60000);
           }
@@ -1938,11 +1990,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         return updatedActivities;
       });
 
-      console.log('Asset order saved successfully to local state');
+      console.log('Asset order saved successfully to database and local state');
 
       // Show success message
       showToast({
-        type: 'image',
+        type: 'success',
         prompt: 'Asset order saved successfully!',
         duration: 3000
       });
@@ -2043,7 +2095,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       // Show success toast
       showToast({
-        type: 'image',
+        type: 'success',
         prompt: 'Asset order updated successfully!',
         duration: 3000
       });
@@ -2067,19 +2119,53 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setIsDragging(false);
   };
 
-  // Group slideshow handlers
-  const handleStartGroupSlideshow = (groupId: string) => {
-    // This function is now only called when the group is already activated
-    // So filteredAndSortedActivities should already contain the correct group assets
-    
-    if (filters.groupId !== groupId) {
-      // Group not activated yet - this shouldn't happen with new UI but handle gracefully
-      console.log('Group not activated yet. Please click the group name first to activate it.');
-      return;
-    }
+  // Helper function to fetch all assets for a group (no pagination)
+  const fetchAllGroupAssets = async (groupId: string): Promise<UserActivity[]> => {
+    try {
+      console.log('Fetching all assets for group:', groupId);
+      
+      // Fetch with a very high limit to get all assets
+      const params = new URLSearchParams({
+        userId: userId ? userId : 'none',
+        userIp: userIp ? userIp : 'none',
+        limit: '1000', // High limit to get all assets
+        offset: '0',
+        groupId: groupId,
+        includeGroups: 'true'
+      });
 
-    if (filteredAndSortedActivities.length > 0) {
-      const firstActivity = filteredAndSortedActivities[0];
+      const url = `/api/getUserAssets?${params.toString()}`;
+      console.log('Fetching all group assets from URL:', url);
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch group assets: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Fetched all group assets:', data.assets?.length || 0, 'assets');
+      
+      return data.assets || [];
+    } catch (error) {
+      console.error('Error fetching all group assets:', error);
+      return [];
+    }
+  };
+
+  // Group slideshow handlers
+  const handleStartGroupSlideshow = async (groupId: string) => {
+    console.log('Starting group slideshow for group:', groupId);
+    
+    // Fetch ALL assets for this group to ensure complete slideshow
+    const allGroupAssets = await fetchAllGroupAssets(groupId);
+    
+    if (allGroupAssets.length > 0) {
+      // Store original activities and enable group slideshow mode
+      setOriginalActivities(activities);
+      setIsGroupSlideshow(true);
+      setActivities(allGroupAssets);
+      
+      const firstActivity = allGroupAssets[0];
       const url =
         firstActivity.AssetType === 'vid'
           ? firstActivity.CreatedAssetUrl
@@ -2092,22 +2178,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setIsModalOpen(true);
       setIsFullScreenModal(false);
     } else {
-      console.log('No activities found for the activated group:', groupId);
+      console.log('No assets found for group:', groupId);
     }
   };
 
-  const handleOpenGroupSlideshowSettings = (groupId: string) => {
-    // This function is now only called when the group is already activated
-    // So filteredAndSortedActivities should already contain the correct group assets
+  const handleOpenGroupSlideshowSettings = async (groupId: string) => {
+    console.log('Opening group slideshow settings for group:', groupId);
     
-    if (filters.groupId !== groupId) {
-      // Group not activated yet - this shouldn't happen with new UI but handle gracefully
-      console.log('Group not activated yet. Please click the group name first to activate it.');
-      return;
-    }
-
-    if (filteredAndSortedActivities.length > 0) {
-      const firstActivity = filteredAndSortedActivities[0];
+    // Fetch ALL assets for this group to ensure complete slideshow
+    const allGroupAssets = await fetchAllGroupAssets(groupId);
+    
+    if (allGroupAssets.length > 0) {
+      // Store original activities and enable group slideshow mode
+      setOriginalActivities(activities);
+      setIsGroupSlideshow(true);
+      setActivities(allGroupAssets);
+      
+      const firstActivity = allGroupAssets[0];
       const url =
         firstActivity.AssetType === 'vid'
           ? firstActivity.CreatedAssetUrl
@@ -2120,7 +2207,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setIsModalOpen(true);
       setIsFullScreenModal(false);
     } else {
-      console.log('No activities found for the activated group:', groupId);
+      console.log('No assets found for group:', groupId);
     }
   };
 
