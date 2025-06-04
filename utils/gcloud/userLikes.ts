@@ -12,6 +12,12 @@ const ASSET_LIKES_KIND = 'AssetLikes';
 const USER_LIKES_KIND = 'UserLikes';
 const NAMESPACE = 'GenTube';
 
+// Interface for like information
+export interface LikeInfo {
+  likesCount: number;
+  isLiked: boolean;
+}
+
 interface AssetLikesEntity {
   assetId: string;
   totalLikes: number;
@@ -31,10 +37,7 @@ interface UserLikesEntity {
 export async function getAssetLikes(
   assetId: string,
   userId?: string
-): Promise<{
-  likesCount: number;
-  isLiked: boolean;
-}> {
+): Promise<LikeInfo> {
   try {
     // Create a key for the asset likes entity
     const assetLikesKey = datastore.key({
@@ -64,6 +67,73 @@ export async function getAssetLikes(
       likesCount: 0,
       isLiked: false
     };
+  }
+}
+
+/**
+ * Get likes information for multiple assets in a single request
+ * @param assetIds Array of asset IDs to get likes information for
+ * @param userId Optional user ID to check if the user has liked each asset
+ * @returns Object mapping asset IDs to their likes information
+ */
+export async function getBulkAssetLikes(
+  assetIds: string[],
+  userId?: string
+): Promise<{ [assetId: string]: LikeInfo }> {
+  try {
+    console.log(`Fetching likes info for ${assetIds.length} assets in bulk`);
+    
+    if (!assetIds || assetIds.length === 0) {
+      return {};
+    }
+
+    // Create keys for all assets
+    const assetLikesKeys = assetIds.map(assetId => 
+      datastore.key({
+        namespace: NAMESPACE,
+        path: [ASSET_LIKES_KIND, assetId]
+      })
+    );
+
+    // Get all asset likes entities in a single batch request
+    const [assetLikesResults] = await datastore.get(assetLikesKeys);
+
+    // Create result map with default values for all requested assets
+    const likesMap: { [assetId: string]: LikeInfo } = {};
+    
+    // Initialize with default values
+    assetIds.forEach(assetId => {
+      likesMap[assetId] = {
+        likesCount: 0,
+        isLiked: false
+      };
+    });
+
+    // Update the map with actual values for assets that have likes
+    assetLikesResults.forEach((assetLikes: AssetLikesEntity, index: number) => {
+      if (assetLikes) {
+        const assetId = assetIds[index];
+        likesMap[assetId] = {
+          likesCount: assetLikes.totalLikes || 0,
+          isLiked: userId ? (assetLikes.likedBy || []).includes(userId) : false
+        };
+      }
+    });
+
+    return likesMap;
+  } catch (error) {
+    console.error('Error getting bulk asset likes:', error);
+    
+    // Return default values on error
+    const defaultMap: { [assetId: string]: LikeInfo } = {};
+    assetIds.forEach(assetId => {
+      defaultMap[assetId] = {
+        likesCount: 0,
+        isLiked: false
+      };
+    });
+    
+    return defaultMap;
   }
 }
 
@@ -101,10 +171,7 @@ export async function toggleAssetLike(
   userId: string,
   assetId: string,
   action: 'like' | 'unlike'
-): Promise<{
-  likesCount: number;
-  isLiked: boolean;
-}> {
+): Promise<LikeInfo> {
   try {
     // Create transaction to ensure consistency
     const transaction = datastore.transaction();

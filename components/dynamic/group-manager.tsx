@@ -264,9 +264,24 @@ const GroupManager: React.FC<GroupManagerProps> = ({
     }
   };
 
+  // Ref to track ongoing fetches to prevent duplicates
+  const isFetchingRef = React.useRef(false);
+  const lastFetchTimeRef = React.useRef(0);
+  
   useEffect(() => {
-    fetchGroups();
-  }, [userId, fetchGroups]);
+    // Skip if already fetching or if last fetch was less than 1 second ago
+    const now = Date.now();
+    if (isFetchingRef.current || (now - lastFetchTimeRef.current < 1000)) {
+      return;
+    }
+    
+    isFetchingRef.current = true;
+    lastFetchTimeRef.current = now;
+    
+    fetchGroups().finally(() => {
+      isFetchingRef.current = false;
+    });
+  }, [userId]);
 
   const handleGroupSave = (savedGroup: UserGroup) => {
     if (editingGroup) {
@@ -408,38 +423,32 @@ const GroupManager: React.FC<GroupManagerProps> = ({
               <div className="flex items-center gap-1">
                 {group.assetCount && group.assetCount > 0 && (
                   <>
-                    <button
-                      onClick={() => onStartGroupSlideshow?.(group.id)}
-                      disabled={selectedGroupId !== group.id}
-                      className={`p-1 transition-colors ${
-                        selectedGroupId === group.id
-                          ? 'text-green-600 hover:text-green-700 cursor-pointer'
-                          : 'text-gray-300 cursor-not-allowed'
-                      }`}
-                      title={
-                        selectedGroupId === group.id
-                          ? 'Start slideshow for this group'
-                          : '    Activate this group first to enable slideshow'
-                      }
-                    >
-                      <FaPlay className="text-xs" />
-                    </button>
-                    <button
-                      onClick={() => onOpenGroupSlideshowSettings?.(group.id)}
-                      disabled={selectedGroupId !== group.id}
-                      className={`p-1 transition-colors ${
-                        selectedGroupId === group.id
-                          ? 'text-blue-600 hover:text-blue-700 cursor-pointer'
-                          : 'text-gray-300 cursor-not-allowed'
-                      }`}
-                      title={
-                        selectedGroupId === group.id
-                          ? 'Open slideshow settings for this group'
-                          : '    Activate this group first to enable settings'
-                      }
-                    >
-                      <FaCog className="text-xs" />
-                    </button>
+                    {selectedGroupId === group.id ? (
+                      <>
+                        <button
+                          onClick={() => onStartGroupSlideshow?.(group.id)}
+                          className="p-1 text-green-600 hover:text-green-700 cursor-pointer transition-colors"
+                          title="Start slideshow for this group"
+                        >
+                          <FaPlay className="text-xs" />
+                        </button>
+                        <button
+                          onClick={() => onOpenGroupSlideshowSettings?.(group.id)}
+                          className="p-1 text-blue-600 hover:text-blue-700 cursor-pointer transition-colors"
+                          title="Open slideshow settings for this group"
+                        >
+                          <FaCog className="text-xs" />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => onGroupSelect?.(group.id)}
+                        className="px-2 py-1 text-blue-600 hover:text-white bg-white hover:bg-blue-600 border border-blue-600 rounded text-xs transition-colors"
+                        title="Open this group"
+                      >
+                        Open
+                      </button>
+                    )}
                   </>
                 )}
                 <button

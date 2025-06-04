@@ -307,12 +307,28 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
+  // Ref to track ongoing fetches to prevent duplicates
+  const isFetchingRef = React.useRef(false);
+  const lastFetchParamsRef = React.useRef('');
+
   // Effect for fetching data when page or filters change
   useEffect(() => {
-    console.log('useEffect triggered - filters.groupId:', filters.groupId);
-    console.log('Refresh key:', refreshKey);
-    fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey, fetchUserActivities]);
+    // Generate a params string to compare with last fetch
+    const paramsString = `${userId}-${userIp}-${page}-${filters.assetType}-${filters.groupId}-${refreshKey}`;
+    
+    // Skip if already fetching or same params as last fetch
+    if (isFetchingRef.current || paramsString === lastFetchParamsRef.current) {
+      return;
+    }
+    
+    console.log('Fetching assets with params:', paramsString);
+    isFetchingRef.current = true;
+    lastFetchParamsRef.current = paramsString;
+    
+    fetchUserActivities(userId, userIp).finally(() => {
+      isFetchingRef.current = false;
+    });
+  }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey]);
 
   // Effect for when filters change - reset pagination (separate from fetch to avoid race conditions)
   useEffect(() => {
@@ -390,49 +406,53 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   }, [loading, pendingNavigation, currentModalIndex, filteredAndSortedActivities]);
 
-  // Fetch likes for all displayed assets
+  // Ref to track which asset IDs we've already fetched likes for
+  const fetchedLikesRef = React.useRef<Set<string>>(new Set());
+  
+  // Fetch likes for displayed assets that we haven't fetched yet
   useEffect(() => {
     const fetchLikes = async () => {
       if (!userId || !activities.length) return;
 
       try {
-        // Fetch all likes for this user
-        const response = await fetch(`/api/getAssetLikes?userId=${userId}`);
-        const likedAssets = await response.json();
-
-        // Fetch individual like counts for each asset
-        const likesPromises = activities.map(async (activity) => {
-          if (!activity.id) return null;
-
-          const response = await fetch(
-            `/api/getAssetLikes?assetId=${activity.id}&userId=${userId}`
-          );
-          const likeInfo = await response.json();
-
-          return {
-            assetId: activity.id,
-            likeInfo
-          };
-        });
-
-        const likesResults = await Promise.all(likesPromises);
-
-        // Update the asset likes state
-        const newAssetLikes = { ...assetLikes };
-        likesResults.forEach((result) => {
-          if (result && result.assetId) {
-            newAssetLikes[result.assetId] = result.likeInfo;
-          }
-        });
-
-        setAssetLikes(newAssetLikes);
+        // Collect asset IDs that we haven't fetched likes for yet
+        const newAssetIds = activities
+          .filter(activity => activity.id && !fetchedLikesRef.current.has(activity.id as string))
+          .map(activity => activity.id as string);
+        
+        if (newAssetIds.length === 0) return;
+        
+        console.log(`Fetching likes for ${newAssetIds.length} new assets`);
+        
+        // Fetch likes for new assets only
+        const response = await fetch(
+          `/api/getAssetLikes?assetIds=${newAssetIds.join(',')}&userId=${userId}`
+        );
+        
+        const bulkLikesData = await response.json();
+        
+        // Add these IDs to our tracking set
+        newAssetIds.forEach(id => fetchedLikesRef.current.add(id));
+        
+        // Update the state by merging with existing likes data
+        setAssetLikes(prevLikes => ({
+          ...prevLikes,
+          ...bulkLikesData
+        }));
       } catch (error) {
         console.error('Error fetching likes:', error);
       }
     };
 
     fetchLikes();
-  }, [userId, activities, assetLikes]);
+    
+    // Return cleanup function to reset the tracking if userId changes
+    return () => {
+      if (!userId) {
+        fetchedLikesRef.current.clear();
+      }
+    };
+  }, [userId, activities]);
 
   // Check for pending edited image after activities load
   useEffect(() => {

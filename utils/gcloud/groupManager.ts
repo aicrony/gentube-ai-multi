@@ -235,22 +235,33 @@ export async function getUserAssetsWithGroups(
         return [];
       }
 
-      // Get all assets for the user (we'll filter client-side for now)
-      // TODO: Optimize this with a more complex query
-      // Don't pass assetType here to let getUserAssets handle the 'processed' filter internally
-      assets = await getUserAssets(userId, userIp, 1000, 0, assetType);
-
-      if (!assets) {
+      // Import the new utility function
+      const { getUserActivityByIds } = await import('./getUserActivityById');
+      
+      // Apply pagination to the asset IDs before fetching them
+      const paginatedAssetIds = assetIdsInGroup.slice(offset, offset + limit);
+      
+      // Directly fetch only the assets needed by their IDs
+      console.log(`Fetching ${paginatedAssetIds.length} assets for group ${groupId}`);
+      assets = await getUserActivityByIds(paginatedAssetIds);
+      
+      if (!assets || assets.length === 0) {
         return [];
       }
-
-      // Filter to only include assets in the group
-      assets = assets.filter(
-        (asset) => asset.id && assetIdsInGroup.includes(asset.id.toString())
-      );
-
-      // Apply pagination manually
-      assets = assets.slice(offset, offset + limit);
+      
+      // Apply asset type filtering if needed
+      if (assetType) {
+        if (assetType.includes(',')) {
+          const types = assetType.split(',').map((t: string) => t.trim());
+          assets = assets.filter((asset) => 
+            asset.AssetType && types.includes(asset.AssetType.toString())
+          );
+        } else {
+          assets = assets.filter((asset) => 
+            asset.AssetType === assetType
+          );
+        }
+      }
     } else {
       console.log('No groupId - fetching all assets');
       // Regular asset fetch

@@ -303,13 +303,29 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
     }
   };
 
+  // Ref to track ongoing fetches to prevent duplicates
+  const isFetchingRef = React.useRef(false);
+  const lastFetchTimeRef = React.useRef(0);
+  
   useEffect(() => {
     if (isOpen) {
-      fetchGroupsAndMemberships();
+      // Skip if already fetching or if last fetch was less than 1 second ago
+      const now = Date.now();
+      if (isFetchingRef.current || (now - lastFetchTimeRef.current < 1000)) {
+        return;
+      }
+      
+      isFetchingRef.current = true;
+      lastFetchTimeRef.current = now;
+      
+      fetchGroupsAndMemberships().finally(() => {
+        isFetchingRef.current = false;
+      });
+      
       setPendingChanges({});
       setShowCreateForm(false);
     }
-  }, [isOpen, userId, assetIds, fetchGroupsAndMemberships]);
+  }, [isOpen, userId, assetIds]);
 
   const getGroupMembershipStatus = (groupId: string) => {
     const assetsInGroup = assetIds.filter((assetId) =>
