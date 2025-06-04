@@ -2189,12 +2189,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           ? firstActivity.CreatedAssetUrl
           : firstActivity.CreatedAssetUrl;
 
+      // Step 1: First set all necessary state for the first image BEFORE opening the modal
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
-      setShowSlideshowSettings(false); // Don't show settings - just play
-      setAutoStartSlideshow(true); // Auto-start the slideshow
-      setIsModalOpen(true);
+      setShowSlideshowSettings(false);
       setIsFullScreenModal(false);
+      
+      // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
+      setAutoStartSlideshow(false);
+      
+      // Step 3: Now open the modal which will display the first image
+      setIsModalOpen(true);
+      
+      // Step 4: Wait for modal to fully render and display first image before auto-starting
+      // This delay is crucial - it ensures the first image is fully visible
+      // before the slideshow starts advancing
+      setTimeout(() => {
+        console.log('First image displayed, now starting slideshow from index 0');
+        setAutoStartSlideshow(true);
+      }, 1500); // Using a longer delay (1.5s) to ensure the first image is fully visible
     } else {
       console.log('No assets found for group:', groupId);
     }
