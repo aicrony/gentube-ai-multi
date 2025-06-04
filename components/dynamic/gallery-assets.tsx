@@ -137,7 +137,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
   useEffect(() => {
     fetchUserActivities();
-  }, [userId, page, assetType, subscriptionTier]); // Add subscriptionTier to dependencies
+  }, [userId, page, assetType, subscriptionTier, fetchUserActivities]); // Add subscriptionTier to dependencies
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);

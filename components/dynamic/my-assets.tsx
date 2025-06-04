@@ -312,7 +312,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     console.log('useEffect triggered - filters.groupId:', filters.groupId);
     console.log('Refresh key:', refreshKey);
     fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey]);
+  }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey, fetchUserActivities]);
 
   // Effect for when filters change - reset pagination (separate from fetch to avoid race conditions)
   useEffect(() => {
@@ -432,7 +432,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     };
 
     fetchLikes();
-  }, [userId, activities]);
+  }, [userId, activities, assetLikes]);
 
   // Check for pending edited image after activities load
   useEffect(() => {
@@ -688,7 +688,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           url: activity.CreatedAssetUrl,
           type: activity.AssetType,
           prompt: activity.Prompt,
-          timestamp: activity.Timestamp
+          timestamp: activity.DateTime
         });
         
         const response = await fetch('/api/deleteUserAsset', {
@@ -767,14 +767,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Enhanced error logging
         console.error('Error deleting asset:', {
           error,
-          message: error.message,
-          stack: error.stack,
           assetId: activity.id,
           assetUrl: activity.CreatedAssetUrl
         });
         
         // More informative error message to the user
-        alert(`Failed to delete asset: ${error.message}. Check console for details.`);
+        alert(`Failed to delete asset. Check console for details.`);
       }
     }
   };
@@ -1666,7 +1664,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         window.removeEventListener('closeModal', handleCloseModal);
       };
     }
-  }, [isModalOpen]); // Include isModalOpen as dependency to ensure we have the latest state
+  }, [isModalOpen, isGroupSlideshow, originalActivities]); // Include isModalOpen as dependency to ensure we have the latest state
 
   if (loading) {
     return <p>Loading...</p>;

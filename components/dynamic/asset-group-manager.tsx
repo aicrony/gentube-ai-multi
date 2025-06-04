@@ -309,7 +309,7 @@ const AssetGroupManager: React.FC<AssetGroupManagerProps> = ({
       setPendingChanges({});
       setShowCreateForm(false);
     }
-  }, [isOpen, userId, assetIds]);
+  }, [isOpen, userId, assetIds, fetchGroupsAndMemberships]);
 
   const getGroupMembershipStatus = (groupId: string) => {
     const assetsInGroup = assetIds.filter((assetId) =>

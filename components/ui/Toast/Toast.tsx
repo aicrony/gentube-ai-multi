@@ -156,9 +156,7 @@ const Toast: React.FC<ToastProps> = ({
               className={`cursor-pointer flex-grow ${
                 type === 'error' 
                   ? 'hover:bg-red-700' 
-                  : type === 'success' 
-                    ? '' 
-                    : 'hover:bg-blue-700'
+                  : 'hover:bg-blue-700'
               } -m-4 p-4 lg:-m-5 lg:p-5 rounded-lg transition-colors`}
               onClick={handleClick}
               title={

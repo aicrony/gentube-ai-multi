@@ -266,7 +266,7 @@ const GroupManager: React.FC<GroupManagerProps> = ({
 
   useEffect(() => {
     fetchGroups();
-  }, [userId]);
+  }, [userId, fetchGroups]);
 
   const handleGroupSave = (savedGroup: UserGroup) => {
     if (editingGroup) {
