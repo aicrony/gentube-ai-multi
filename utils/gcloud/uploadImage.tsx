@@ -38,8 +38,8 @@ export async function uploadImageToGCSFromBase64(
     const stream = file.createWriteStream({
       metadata: {
         contentType: 'image/png'
-      },
-      predefinedAcl: 'publicRead'
+      }
+      // Removed predefinedAcl: 'publicRead' as it's incompatible with uniform bucket-level access
     });
     stream.on('error', reject);
     stream.on('finish', resolve);
@@ -57,9 +57,13 @@ export default async function uploadImageToGCSFromUrl(
 ): Promise<string> {
   console.log('IMAGE GOING TO GCS: ' + imageUrl);
 
+  // Generate a unique filename to prevent collisions
   const urlParts = new URL(imageUrl);
   const pathParts = urlParts.pathname.split('/');
-  const fileName = pathParts[pathParts.length - 1];
+  const originalFileName = pathParts[pathParts.length - 1];
+  const fileExtension = originalFileName.includes('.') ? 
+    originalFileName.substring(originalFileName.lastIndexOf('.')) : '.png';
+  const fileName = `${uuidv4()}${fileExtension}`;
 
   bucketName = getBucketName(bucketName);
   const file = setBucketFile(fileName, bucketName);
@@ -77,8 +81,8 @@ export default async function uploadImageToGCSFromUrl(
           metadata: {
             contentType: 'image/png',
             validation: 'md5'
-          },
-          predefinedAcl: 'publicRead'
+          }
+          // Removed predefinedAcl: 'publicRead' as it's incompatible with uniform bucket-level access
         })
       )
       .on('error', reject)

@@ -97,12 +97,26 @@ export async function POST(request: NextRequest) {
               path: ['UserActivity']
             });
 
+            // Save image to GCloud bucket first
+            let imageUrl = body.payload.images[0].url;
+            try {
+              // Import dynamically to avoid issues with circular dependencies
+              const { default: uploadImageToGCSFromUrl } = await import('@/utils/gcloud/uploadImage');
+              // Upload to GCS and get the new URL
+              imageUrl = await uploadImageToGCSFromUrl('gen-image-storage', body.payload.images[0].url);
+              console.log('Image saved to GCS bucket:', imageUrl);
+            } catch (uploadError) {
+              console.error('Error uploading image to GCS bucket:', uploadError);
+              // Continue with original URL if upload fails
+              console.log('Continuing with original URL:', body.payload.images[0].url);
+            }
+
             const newActivity = {
               AssetSource: userActivity.AssetSource, // Keep reference to original image
               AssetType: 'img', // Mark as completed image
               CountedAssetPreviousState: userActivity.CountedAssetPreviousState,
               CountedAssetState: userActivity.CountedAssetState,
-              CreatedAssetUrl: body.payload.images[0].url, // New edited image URL
+              CreatedAssetUrl: imageUrl, // Use GCS URL if upload succeeded, otherwise original URL
               DateTime: new Date().toISOString(), // New timestamp for edited image
               Prompt: userActivity.Prompt, // Keep the edit prompt
               SubscriptionTier: 0, // Start with default gallery setting

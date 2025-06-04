@@ -89,14 +89,28 @@ export async function POST(request: NextRequest) {
           console.log('userActivity: ', userActivity);
 
           if (userActivity) {
-            userActivity.CreatedAssetUrl = body.payload.video.url;
+            // Save video to GCloud bucket first
+            let videoUrl = body.payload.video.url;
+            try {
+              // Import dynamically to avoid issues with circular dependencies
+              const { default: uploadImageToGCSFromUrl } = await import('@/utils/gcloud/uploadImage');
+              // Upload to GCS and get the new URL
+              videoUrl = await uploadImageToGCSFromUrl('gen-video-storage', body.payload.video.url);
+              console.log('Video saved to GCS bucket:', videoUrl);
+            } catch (uploadError) {
+              console.error('Error uploading video to GCS bucket:', uploadError);
+              // Continue with original URL if upload fails
+              console.log('Continuing with original URL:', body.payload.video.url);
+            }
+            
+            userActivity.CreatedAssetUrl = videoUrl;
             userActivity.AssetType = 'vid';
             transaction.save({
               key: userActivityKey,
               data: userActivity
             });
             await transaction.commit();
-            console.log('UserActivity updated successfully');
+            console.log('UserActivity updated successfully with video URL:', videoUrl);
           } else {
             console.error('UserActivity not found');
             await transaction.rollback();
