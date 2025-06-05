@@ -140,7 +140,10 @@ const Modal: React.FC<ModalProps> = ({
   onSubmitModifyFromGallery
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
-  const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
+  const [isSlideshow, setIsSlideshow] = useState(false);
+  const [slideshowStartTime, setSlideshowStartTime] = useState<number | null>(null);
+  const firstSlideShownRef = useRef(false);
+  const initialRenderRef = useRef(true); // Track initial render
   // Safe localStorage accessor functions
   const getFromLocalStorage = (key: string, defaultValue: string): string => {
     if (typeof window !== 'undefined') {
@@ -223,6 +226,12 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     // Only update if slideshowAssets is provided and has length
     if (slideshowAssets && slideshowAssets.length > 0) {
+      console.log('===== SLIDESHOW ASSETS UPDATED =====');
+      console.log('slideshowAssets length:', slideshowAssets.length);
+      console.log('currentAssetIndex:', currentAssetIndex);
+      console.log('First asset URL:', slideshowAssets[0]?.url);
+      console.log('Current asset URL:', slideshowAssets[currentAssetIndex]?.url);
+      console.log('===================================');
       setLocalSlideshowAssets(slideshowAssets);
       setLocalCurrentAssetIndex(currentAssetIndex);
     }
@@ -292,61 +301,138 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     // Start slideshow automatically if specified
     if (autoStartSlideshow) {
-      setIsSlideshow(true);
-    }
-  }, [autoStartSlideshow]);
-
-  // Slideshow logic
-  useEffect(() => {
-    if (isSlideshow) {
-      // Clear any existing timer
-      if (slideshowTimerRef.current) {
-        clearInterval(slideshowTimerRef.current);
+      console.log('===== SLIDESHOW AUTO-START =====');
+      console.log('autoStartSlideshow set to true');
+      console.log('currentAssetIndex:', currentAssetIndex);
+      console.log('slideshowAssets length:', slideshowAssets?.length || 0);
+      console.log('================================');
+      
+      // Record the start time when slideshow is activated
+      // This helps us ensure the first slide gets its full viewing time
+      if (!isSlideshow) {
+        console.log('Starting new slideshow and recording start time');
+        setSlideshowStartTime(Date.now());
+        firstSlideShownRef.current = false;
       }
+      
+      // Actually start the slideshow
+      setIsSlideshow(true);
+    } else {
+      console.log('autoStartSlideshow is false - not starting slideshow');
+      setIsSlideshow(false);
+      setSlideshowStartTime(null);
+      firstSlideShownRef.current = false;
+    }
+  }, [autoStartSlideshow, isSlideshow]);
 
-      // Set new timer
-      slideshowTimerRef.current = setInterval(() => {
-        // Forward direction logic (next item in sequence)
-        if (slideDirection === 'forward') {
-          if (hasNext && onNext) {
-            // Forward means going to next item (higher index)
-            onNext();
-          } else if (!hasNext) {
-            if (infiniteLoop && onJumpToFirst) {
-              // We've reached the end, jump to first item
-              onJumpToFirst();
-            } else {
-              // Not in infinite loop mode, stop slideshow
-              setIsSlideshow(false);
-            }
-          }
-        }
-        // Backward direction logic (previous item in sequence)
-        else if (slideDirection === 'backward') {
-          if (hasPrevious && onPrevious) {
-            // Backward means going to previous item (lower index)
-            onPrevious();
-          } else if (!hasPrevious) {
-            if (infiniteLoop && onJumpToLast) {
-              // We've reached the beginning, jump to last item
-              onJumpToLast();
-            } else {
-              // Not in infinite loop mode, stop slideshow
-              setIsSlideshow(false);
-            }
-          }
-        }
+  // Initialize modal with delay when first opened
+  useEffect(() => {
+    // Reset the initial render flag when mediaUrl changes
+    initialRenderRef.current = true;
+    
+    // Log when media URL changes
+    console.log('Media URL changed to:', mediaUrl);
+    
+    // Reset slideshow state when mediaUrl changes
+    // This ensures we properly show the first image
+    if (autoStartSlideshow) {
+      // This was directly triggered with autoStartSlideshow=true
+      // We need to ensure we see the first image, so we'll temporarily disable autostart
+      setIsSlideshow(false);
+      setSlideshowStartTime(Date.now());
+      firstSlideShownRef.current = false;
+      
+      // Set a delay before enabling slideshow
+      setTimeout(() => {
+        console.log('Starting slideshow after initial delay');
+        setIsSlideshow(true);
+      }, 2000); // 2-second delay to ensure first image is visible
+    }
+  }, [mediaUrl, autoStartSlideshow]);
+  
+  // Completely rewritten slideshow logic with simpler approach
+  useEffect(() => {
+    // Only run this effect when slideshow is active
+    if (!isSlideshow) return;
+
+    console.log('===== SLIDESHOW STATUS =====');
+    console.log('Slideshow is active');
+    console.log('Current asset index:', currentAssetIndex);
+    console.log('Slideshow start time:', slideshowStartTime);
+    console.log('First slide shown:', firstSlideShownRef.current);
+    console.log('============================');
+    
+    // Clear any existing timer to prevent issues
+    if (slideshowTimerRef.current) {
+      clearTimeout(slideshowTimerRef.current);
+      clearInterval(slideshowTimerRef.current);
+      slideshowTimerRef.current = null;
+    }
+
+    // Special handling for the first slide when slideshow starts
+    if (slideshowStartTime && !firstSlideShownRef.current) {
+      console.log('First slide being shown - will display for full duration');
+      firstSlideShownRef.current = true;
+      
+      // Create a timeout for the first slide to ensure it's shown for the full duration
+      slideshowTimerRef.current = setTimeout(() => {
+        console.log(`First slide shown for full ${slideInterval}ms, advancing to next slide`);
+        advanceSlideshow();
+        
+        // After the first slide has been shown, set up the regular interval for subsequent slides
+        slideshowTimerRef.current = setInterval(() => {
+          console.log('Regular interval triggered, advancing to next slide');
+          advanceSlideshow();
+        }, slideInterval);
       }, slideInterval);
+    } else {
+      // Normal operation for subsequent slides
+      console.log('Setting up regular slideshow interval');
+      slideshowTimerRef.current = setInterval(() => {
+        console.log('Regular interval triggered, advancing to next slide');
+        advanceSlideshow();
+      }, slideInterval);
+    }
+
+    // Helper function to advance the slideshow based on direction
+    function advanceSlideshow() {
+      if (slideDirection === 'forward') {
+        if (hasNext && onNext) {
+          onNext();
+        } else if (!hasNext) {
+          if (infiniteLoop && onJumpToFirst) {
+            onJumpToFirst();
+          } else {
+            // Not in infinite loop mode, stop slideshow
+            setIsSlideshow(false);
+          }
+        }
+      } else if (slideDirection === 'backward') {
+        if (hasPrevious && onPrevious) {
+          onPrevious();
+        } else if (!hasPrevious) {
+          if (infiniteLoop && onJumpToLast) {
+            onJumpToLast();
+          } else {
+            // Not in infinite loop mode, stop slideshow
+            setIsSlideshow(false);
+          }
+        }
+      }
     }
 
     // Cleanup function
     return () => {
       if (slideshowTimerRef.current) {
+        clearTimeout(slideshowTimerRef.current);
         clearInterval(slideshowTimerRef.current);
+        slideshowTimerRef.current = null;
       }
     };
   }, [
     isSlideshow,
+    slideshowStartTime,
+    currentAssetIndex,
     slideInterval,
     slideDirection,
     hasNext,
@@ -445,7 +531,20 @@ const Modal: React.FC<ModalProps> = ({
   }, [mediaUrl, currentAssets, currentItemId, isVideo, hasNext, onNext, safeCacheAdd]);
 
   const toggleSlideshow = () => {
-    setIsSlideshow(!isSlideshow);
+    const newValue = !isSlideshow;
+    console.log(`Toggling slideshow to: ${newValue ? 'ON' : 'OFF'}`);
+    
+    if (newValue) {
+      // When turning on slideshow manually, record start time
+      console.log('Setting slideshow start time on manual toggle');
+      setSlideshowStartTime(Date.now());
+      firstSlideShownRef.current = false;
+    } else {
+      // When turning off, reset the start time
+      setSlideshowStartTime(null);
+    }
+    
+    setIsSlideshow(newValue);
   };
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -1475,6 +1574,14 @@ const Modal: React.FC<ModalProps> = ({
                       height: 'auto'
                     }}
                     priority
+                    onLoad={() => {
+                      console.log('Image loaded:', mediaUrl);
+                      // Mark when first image is fully loaded
+                      if (initialRenderRef.current) {
+                        console.log('INITIAL IMAGE FULLY LOADED');
+                        initialRenderRef.current = false;
+                      }
+                    }}
                   />
                 );
               }

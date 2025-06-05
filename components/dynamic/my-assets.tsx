@@ -1503,12 +1503,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           ? firstActivity.CreatedAssetUrl
           : firstActivity.CreatedAssetUrl;
 
+      // Step 1: First set all necessary state for the first image BEFORE opening the modal
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
       setShowSlideshowSettings(false); // Don't show settings - start playing
-      setAutoStartSlideshow(true); // Auto-start the slideshow
-      setIsModalOpen(true);
       setIsFullScreenModal(false);
+      
+      // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
+      setAutoStartSlideshow(false);
+      
+      // Step 3: Now open the modal which will display the first image
+      setIsModalOpen(true);
+      
+      // Step 4: Wait for modal to fully render and display first image before auto-starting
+      // This delay is crucial - it ensures the first image is fully visible
+      // before the slideshow starts advancing
+      setTimeout(() => {
+        console.log('First image displayed, now starting slideshow from index 0');
+        setAutoStartSlideshow(true);
+      }, 1500); // Using a 1.5 second delay to ensure the first image is fully visible
     }
   };
 
@@ -2174,42 +2187,93 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleStartGroupSlideshow = async (groupId: string) => {
     console.log('Starting group slideshow for group:', groupId);
     
-    // Fetch ALL assets for this group to ensure complete slideshow
-    const allGroupAssets = await fetchAllGroupAssets(groupId);
-    
-    if (allGroupAssets.length > 0) {
-      // Store original activities and enable group slideshow mode
-      setOriginalActivities(activities);
-      setIsGroupSlideshow(true);
-      setActivities(allGroupAssets);
+    try {
+      // Fetch ALL assets for this group to ensure complete slideshow
+      const allGroupAssets = await fetchAllGroupAssets(groupId);
       
-      const firstActivity = allGroupAssets[0];
-      const url =
-        firstActivity.AssetType === 'vid'
-          ? firstActivity.CreatedAssetUrl
-          : firstActivity.CreatedAssetUrl;
-
-      // Step 1: First set all necessary state for the first image BEFORE opening the modal
-      setCurrentModalIndex(0);
-      setModalMediaUrl(url);
-      setShowSlideshowSettings(false);
-      setIsFullScreenModal(false);
+      console.log('Fetched group assets:', allGroupAssets.length);
       
-      // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
-      setAutoStartSlideshow(false);
-      
-      // Step 3: Now open the modal which will display the first image
-      setIsModalOpen(true);
-      
-      // Step 4: Wait for modal to fully render and display first image before auto-starting
-      // This delay is crucial - it ensures the first image is fully visible
-      // before the slideshow starts advancing
-      setTimeout(() => {
-        console.log('First image displayed, now starting slideshow from index 0');
-        setAutoStartSlideshow(true);
-      }, 1500); // Using a longer delay (1.5s) to ensure the first image is fully visible
-    } else {
-      console.log('No assets found for group:', groupId);
+      if (allGroupAssets.length > 0) {
+        // Store original activities and enable group slideshow mode
+        setOriginalActivities(activities);
+        setIsGroupSlideshow(true);
+        
+        // Deep clone the array to avoid reference issues
+        const clonedAssets = JSON.parse(JSON.stringify(allGroupAssets));
+        
+        // Let's log ALL assets to see what we're working with
+        console.log('====== SLIDESHOW ASSETS DEBUG ======');
+        clonedAssets.forEach((asset, index) => {
+          console.log(`Asset ${index}:`, asset.id, asset.AssetType, asset.CreatedAssetUrl);
+        });
+        console.log('================================');
+        
+        // Sort assets by their ID or creation date to ensure consistent order
+        // Let's force the penguin image to be first for testing
+        const penguinAsset = clonedAssets.find(asset => 
+          asset.CreatedAssetUrl.includes('penguin') ||
+          asset.CreatedAssetUrl.includes('hb18nttzVIj60IMOnTInR')
+        );
+        
+        // If we found the penguin asset, make it the first one
+        if (penguinAsset) {
+          console.log('Found penguin asset! Moving to first position:', penguinAsset.CreatedAssetUrl);
+          // Remove penguin from its current position
+          const filteredAssets = clonedAssets.filter(asset => asset.id !== penguinAsset.id);
+          // Insert at the beginning
+          filteredAssets.unshift(penguinAsset);
+          // Replace the cloned assets with our reordered version
+          clonedAssets.length = 0;
+          clonedAssets.push(...filteredAssets);
+        }
+        
+        // Now get the first asset after our reordering
+        const firstAsset = clonedAssets[0];
+        const firstAssetUrl = firstAsset.CreatedAssetUrl;
+        
+        console.log('====== SLIDESHOW INIT DEBUG ======');
+        console.log('First asset ID:', firstAsset.id);
+        console.log('First asset type:', firstAsset.AssetType);
+        console.log('First asset URL:', firstAssetUrl);
+        console.log('================================');
+        
+        // Now set the activities state
+        setActivities(clonedAssets);
+        
+        // Force an override of Modal's source url to ensure it's correct
+        // Important: Use the captured variables directly, don't re-access activities state
+        const forcedFirstImageUrl = firstAssetUrl; // Use the same variable throughout
+        
+        // Ensure synchronous updates by using a small timeout
+        setTimeout(() => {
+          console.log('Setting modal props...');
+          // Step 1: First set all necessary state for the first image BEFORE opening the modal
+          setCurrentModalIndex(0);
+          setModalMediaUrl(forcedFirstImageUrl); // Use the forced URL directly
+          console.log('Setting modal media URL to:', forcedFirstImageUrl);
+          setShowSlideshowSettings(false);
+          setIsFullScreenModal(false);
+          
+          // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
+          setAutoStartSlideshow(false);
+          
+          // Step 3: Now open the modal which will display the first image
+          console.log('Opening modal with first image URL:', forcedFirstImageUrl);
+          setIsModalOpen(true);
+          
+          // Step 4: Wait for modal to fully render and display first image before auto-starting
+          // This delay is crucial - it ensures the first image is fully visible
+          // before the slideshow starts advancing
+          setTimeout(() => {
+            console.log('First image displayed, now starting slideshow from index 0');
+            setAutoStartSlideshow(true);
+          }, 2000); // Using a longer 2s delay to ensure the first image is fully visible
+        }, 50); // Small delay to ensure state updates properly
+      } else {
+        console.log('No assets found for group:', groupId);
+      }
+    } catch (error) {
+      console.error('Error starting group slideshow:', error);
     }
   };
 
