@@ -53,33 +53,41 @@ export async function getUserActivityByIds(
     const [results] = await datastore.get(keys);
 
     // Process results, handling any missing or null entries
-    const activities = results
-      .filter((activity: any) => activity !== null && activity !== undefined)
-      .map((activity: any, index: number) => {
-        // Use the corresponding ID from the input array
-        // This ensures we maintain the correct ID even if Datastore returns results in a different order
-        const id = activityIds[index];
-        
-        // Provide fallbacks for potentially missing fields
-        let prompt = activity.Prompt;
-        if (!prompt && activity.description) {
-          prompt = activity.description;
-        } else if (!prompt) {
-          prompt = '';
-        }
+    const activities: UserActivity[] = [];
+    
+    // Create a map to associate each result with its corresponding ID
+    // This ensures we maintain the correct relationship between results and IDs
+    results.forEach((activity: any, index: number) => {
+      if (activity === null || activity === undefined) {
+        console.log(`Activity at index ${index} is null or undefined`);
+        return; // Skip this item
+      }
+      
+      // Get the key from the activity
+      const key = activity[datastore.KEY];
+      const keyId = key.id?.toString();
+      
+      // Provide fallbacks for potentially missing fields
+      let prompt = activity.Prompt;
+      if (!prompt && activity.description) {
+        prompt = activity.description;
+      } else if (!prompt) {
+        prompt = '';
+      }
 
-        return {
-          id: id,
-          CreatedAssetUrl: activity.CreatedAssetUrl || '',
-          Prompt: prompt,
-          AssetSource: activity.AssetSource || '',
-          AssetType: activity.AssetType || 'unknown',
-          DateTime: activity.DateTime || new Date(),
-          UserId: activity.UserId || null,
-          CreatorName: activity.CreatorName || null,
-          SubscriptionTier: activity.SubscriptionTier || null
-        };
+      // Build the user activity object with the correct ID
+      activities.push({
+        id: keyId,
+        CreatedAssetUrl: activity.CreatedAssetUrl || '',
+        Prompt: prompt,
+        AssetSource: activity.AssetSource || '',
+        AssetType: activity.AssetType || 'unknown',
+        DateTime: activity.DateTime || new Date(),
+        UserId: activity.UserId || null,
+        CreatorName: activity.CreatorName || null,
+        SubscriptionTier: activity.SubscriptionTier || null
       });
+    });
 
     console.log(`Successfully fetched ${activities.length} of ${activityIds.length} requested activities`);
     return activities;
