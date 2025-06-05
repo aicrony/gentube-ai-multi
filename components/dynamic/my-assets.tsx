@@ -189,6 +189,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
   }>({});
+  const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(
     selectedUrl
@@ -1985,17 +1986,38 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     try {
       console.log('Saving asset order to database for assets:', orderedAssets.length);
       
-      // Create a new API endpoint for batch order updates
-      const response = await fetch('/api/saveAssetOrder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: userId,
-          orderedAssetIds: orderedAssets.map(asset => asset.id)
-        }),
-      });
+      // Declare response variable before if/else block to make it accessible throughout the function
+      let response;
+      
+      // Determine if we need to use group-specific ordering
+      if (isGroupSlideshow && currentGroupId) {
+        console.log('Using group-specific ordering for group:', currentGroupId);
+        
+        // Use the group-specific API endpoint
+        response = await fetch('/api/saveGroupAssetOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            groupId: currentGroupId,
+            orderedAssetIds: orderedAssets.map(asset => asset.id)
+          }),
+        });
+      } else {
+        // Use the global asset ordering API
+        response = await fetch('/api/saveAssetOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            orderedAssetIds: orderedAssets.map(asset => asset.id)
+          }),
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -2185,6 +2207,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Group slideshow handlers
   const handleStartGroupSlideshow = async (groupId: string) => {
+    // Set current group ID for tracking
+    setCurrentGroupId(groupId);
     console.log('Starting group slideshow for group:', groupId);
     
     try {

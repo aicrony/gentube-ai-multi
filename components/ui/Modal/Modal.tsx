@@ -63,6 +63,7 @@ interface ModalProps {
   onAssetClick?: (index: number) => void;
   onAssetReorder?: (fromIndex: number, toIndex: number) => void;
   onSaveAssetOrder?: (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => Promise<void> | void;
+  groupId?: string; // Optional group ID for group-specific ordering
   // New props for direct slideshow configuration
   slideshowInterval?: number;
   slideshowDirection?: 'forward' | 'backward';

@@ -30,6 +30,7 @@ export interface AssetWithGroups {
   DateTime: Date | string;
   SubscriptionTier?: number;
   groups?: UserGroup[]; // Groups this asset belongs to
+  order?: number; // Order within a group
 }
 
 /**
@@ -149,10 +150,12 @@ export async function getAssetsInGroup(
   userId: string
 ): Promise<string[]> {
   try {
+    // Create query with proper ordering using the index
     const query = datastore
       .createQuery(NAMESPACE, ASSET_GROUP_MEMBERSHIP_KIND)
       .filter('groupId', '=', groupId)
-      .filter('userId', '=', userId);
+      .filter('userId', '=', userId)
+      .order('order'); // Order by the order field
 
     const [memberships] = await datastore.runQuery(query);
 

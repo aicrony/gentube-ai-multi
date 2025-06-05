@@ -42,6 +42,13 @@ indexes:
       - name: groupId
       - name: userId
 
+  # Group asset ordering index
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+      - name: order
+
   - kind: AssetGroupMembership
     properties:
       - name: assetId
