@@ -516,6 +516,41 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   }, [currentModalIndex, filteredAndSortedActivities]);
 
+  // Keep modalMediaUrl in sync with currentModalIndex when modal opens/closes
+  useEffect(() => {
+    if (isModalOpen) {
+      // Verify currentModalIndex is valid
+      if (filteredAndSortedActivities.length > 0 && 
+          currentModalIndex >= 0 && 
+          currentModalIndex < filteredAndSortedActivities.length) {
+        
+        // Get the activity at current index
+        const activity = filteredAndSortedActivities[currentModalIndex];
+        console.log('Modal sync effect - Current activity:', activity.id, 'Index:', currentModalIndex);
+        
+        // Determine the URL based on asset type
+        const url = activity.CreatedAssetUrl;
+        
+        // Update modalMediaUrl and editImageUrl based on the current activity
+        setModalMediaUrl(url);
+        
+        // Update editImageUrl for images and uploads only
+        if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
+          setEditImageUrl(activity.CreatedAssetUrl);
+          console.log('Modal sync effect - Updated editImageUrl:', activity.CreatedAssetUrl);
+        } else {
+          setEditImageUrl(''); // Clear for videos
+          console.log('Modal sync effect - Cleared editImageUrl for video');
+        }
+      } else {
+        console.warn('Modal sync effect - Invalid currentModalIndex or empty activities');
+      }
+    } else {
+      // Modal is closed, consider resetting values or performing cleanup
+      console.log('Modal sync effect - Modal closed');
+    }
+  }, [isModalOpen, currentModalIndex, filteredAndSortedActivities]);
+
   // Auto-refresh logic for queued items
   useEffect(() => {
     // Only proceed if autoRefreshQueued is true
@@ -1176,13 +1211,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // "Next" should go to newer (chronologically later) image
     // Since array is sorted newest first (desc), we go backward in array for newer
     if (currentModalIndex > 0) {
+      console.log('Navigating to next image (newer), current index:', currentModalIndex);
       const nextActivity = filteredAndSortedActivities[currentModalIndex - 1];
       const url =
         nextActivity.AssetType === 'vid'
           ? nextActivity.CreatedAssetUrl
           : nextActivity.CreatedAssetUrl;
-      setCurrentModalIndex(currentModalIndex - 1);
+      
+      // First update the URL to ensure correct image is displayed
       setModalMediaUrl(url);
+      // Then update the index for proper tracking
+      setCurrentModalIndex(currentModalIndex - 1);
 
       // Update edit image URL for the new image
       if (
@@ -1201,14 +1240,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Since array is sorted newest first (desc), we go forward in array for older
     
     if (currentModalIndex < filteredAndSortedActivities.length - 1) {
+      console.log('Navigating to previous image (older), current index:', currentModalIndex);
       // Normal case: navigate to next image in current data
       const prevActivity = filteredAndSortedActivities[currentModalIndex + 1];
       const url =
         prevActivity.AssetType === 'vid'
           ? prevActivity.CreatedAssetUrl
           : prevActivity.CreatedAssetUrl;
-      setCurrentModalIndex(currentModalIndex + 1);
+      
+      // First update the URL to ensure correct image is displayed
       setModalMediaUrl(url);
+      // Then update the index for proper tracking
+      setCurrentModalIndex(currentModalIndex + 1);
 
       // Update edit image URL for the new image
       if (
@@ -1241,13 +1284,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Jump to first image in slideshow mode (for infinite looping)
   const handleJumpToFirstImage = () => {
     if (filteredAndSortedActivities.length > 0) {
+      console.log('Jumping to first image in slideshow');
       const firstActivity = filteredAndSortedActivities[0];
       const url =
         firstActivity.AssetType === 'vid'
           ? firstActivity.CreatedAssetUrl
           : firstActivity.CreatedAssetUrl;
-      setCurrentModalIndex(0);
+      
+      // First update the URL to ensure correct image is displayed
       setModalMediaUrl(url);
+      // Then update the index for proper tracking
+      setCurrentModalIndex(0);
 
       // Update edit image URL for the first image
       if (
@@ -1264,14 +1311,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Jump to last image in slideshow mode (for infinite looping)
   const handleJumpToLastImage = () => {
     if (filteredAndSortedActivities.length > 0) {
+      console.log('Jumping to last image in slideshow');
       const lastIndex = filteredAndSortedActivities.length - 1;
       const lastActivity = filteredAndSortedActivities[lastIndex];
       const url =
         lastActivity.AssetType === 'vid'
           ? lastActivity.CreatedAssetUrl
           : lastActivity.CreatedAssetUrl;
-      setCurrentModalIndex(lastIndex);
+      
+      // First update the URL to ensure correct image is displayed
       setModalMediaUrl(url);
+      // Then update the index for proper tracking
+      setCurrentModalIndex(lastIndex);
 
       // Update edit image URL for the last image
       if (
@@ -3160,8 +3211,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
           }
           currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
-          onJumpToFirst={handleJumpToLastImage}
-          onJumpToLast={handleJumpToFirstImage}
+          onJumpToFirst={handleJumpToFirstImage}
+          onJumpToLast={handleJumpToLastImage}
           currentAssets={
             filteredAndSortedActivities
               .map((a) => a.id)

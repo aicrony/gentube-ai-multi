@@ -288,13 +288,24 @@ const Modal: React.FC<ModalProps> = ({
     }
   }, [showSlideshowHistory]);
 
+  // Slideshow trigger and media URL synchronization
+  // This useEffect runs only when mediaUrl changes, to ensure we're displaying the correct image
+  useEffect(() => {
+    console.log('Modal: mediaUrl changed to:', mediaUrl ? mediaUrl.substring(0, 20) + '...' : 'none');
+  }, [mediaUrl]);
+
   // Start slideshow with effect dependency on autoStartSlideshow
   useEffect(() => {
-    // Start slideshow automatically if specified
     if (autoStartSlideshow) {
-      setIsSlideshow(true);
+      console.log('Modal: Starting slideshow, currentIndex =', currentAssetIndex);
+      
+      // Wait for next render cycle to ensure the correct image is shown
+      // This is critical to fix the issue where the wrong image is displayed
+      setTimeout(() => {
+        setIsSlideshow(true);
+      }, 250);
     }
-  }, [autoStartSlideshow]);
+  }, [autoStartSlideshow, currentAssetIndex]);
 
   // Slideshow logic
   useEffect(() => {
@@ -304,47 +315,61 @@ const Modal: React.FC<ModalProps> = ({
         clearInterval(slideshowTimerRef.current);
       }
 
-      // Set new timer
-      slideshowTimerRef.current = setInterval(() => {
-        // Forward direction logic (next item in sequence)
-        if (slideDirection === 'forward') {
-          if (hasNext && onNext) {
-            // Forward means going to next item (higher index)
-            onNext();
-          } else if (!hasNext) {
-            if (infiniteLoop && onJumpToFirst) {
-              // We've reached the end, jump to first item
-              onJumpToFirst();
-            } else {
-              // Not in infinite loop mode, stop slideshow
-              setIsSlideshow(false);
+      console.log('Setting up new slideshow timer, currentIndex =', currentAssetIndex);
+      
+      // Add a significant initial delay before starting the slideshow timer
+      // This ensures the first image is shown for a long enough time to be seen
+      const initialDelay = setTimeout(() => {
+        console.log('Starting slideshow interval timer after delay');
+        
+        // Set new timer after initial delay
+        slideshowTimerRef.current = setInterval(() => {
+          console.log('Slideshow advancing, currentIndex =', currentAssetIndex);
+          
+          // Forward direction logic (next item in sequence)
+          if (slideDirection === 'forward') {
+            if (hasNext && onNext) {
+              // Forward means going to next item (higher index)
+              onNext();
+            } else if (!hasNext) {
+              if (infiniteLoop && onJumpToFirst) {
+                // We've reached the end, jump to first item
+                onJumpToFirst();
+              } else {
+                // Not in infinite loop mode, stop slideshow
+                setIsSlideshow(false);
+              }
             }
           }
-        }
-        // Backward direction logic (previous item in sequence)
-        else if (slideDirection === 'backward') {
-          if (hasPrevious && onPrevious) {
-            // Backward means going to previous item (lower index)
-            onPrevious();
-          } else if (!hasPrevious) {
-            if (infiniteLoop && onJumpToLast) {
-              // We've reached the beginning, jump to last item
-              onJumpToLast();
-            } else {
-              // Not in infinite loop mode, stop slideshow
-              setIsSlideshow(false);
+          // Backward direction logic (previous item in sequence)
+          else if (slideDirection === 'backward') {
+            if (hasPrevious && onPrevious) {
+              // Backward means going to previous item (lower index)
+              onPrevious();
+            } else if (!hasPrevious) {
+              if (infiniteLoop && onJumpToLast) {
+                // We've reached the beginning, jump to last item
+                onJumpToLast();
+              } else {
+                // Not in infinite loop mode, stop slideshow
+                setIsSlideshow(false);
+              }
             }
           }
+        }, slideInterval);
+      }, 2000); // Long initial delay (2 seconds) to ensure first image is properly displayed
+      
+      // Clean up both timers
+      return () => {
+        clearTimeout(initialDelay);
+        if (slideshowTimerRef.current) {
+          clearInterval(slideshowTimerRef.current);
         }
-      }, slideInterval);
+      };
     }
 
-    // Cleanup function
-    return () => {
-      if (slideshowTimerRef.current) {
-        clearInterval(slideshowTimerRef.current);
-      }
-    };
+    // Empty return for the else branch
+    return () => {};
   }, [
     isSlideshow,
     slideInterval,
@@ -355,7 +380,8 @@ const Modal: React.FC<ModalProps> = ({
     onPrevious,
     infiniteLoop,
     onJumpToFirst,
-    onJumpToLast
+    onJumpToLast,
+    currentAssetIndex
   ]);
 
   // Stop slideshow when modal is closed
