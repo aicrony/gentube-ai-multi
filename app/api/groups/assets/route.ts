@@ -20,6 +20,7 @@ export interface AssetGroupMembership {
   groupId: string;
   userId: string;
   createdAt: string;
+  order?: number;
 }
 
 // GET - Fetch assets in a group or groups for an asset
@@ -65,15 +66,29 @@ export async function GET(request: NextRequest) {
       assetId: membership.assetId,
       groupId: membership.groupId,
       userId: membership.userId,
-      createdAt: membership.createdAt
+      createdAt: membership.createdAt,
+      order: membership.order
     }));
 
     if (groupId) {
-      // Return asset IDs for the group
+      // Return asset IDs for the group, ordered by the order field
+      // Sort the results by the order field if present
+      const sortedResult = result.sort((a, b) => {
+        // If order exists on both, sort by order
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        // If order only exists on one, put the one with order first
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        // Default to sorting by createdAt
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      
       return NextResponse.json({
         success: true,
-        assetIds: result.map((m) => m.assetId),
-        memberships: result
+        assetIds: sortedResult.map((m) => m.assetId),
+        memberships: sortedResult
       });
     } else {
       // Return group IDs for the asset
