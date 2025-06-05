@@ -150,16 +150,34 @@ export async function getAssetsInGroup(
   userId: string
 ): Promise<string[]> {
   try {
-    // Create query with proper ordering using the index
-    const query = datastore
+    console.log(`getAssetsInGroup called for groupId: ${groupId}, userId: ${userId}`);
+    
+    // Create query without the order first to check if we get results
+    let query = datastore
       .createQuery(NAMESPACE, ASSET_GROUP_MEMBERSHIP_KIND)
       .filter('groupId', '=', groupId)
-      .filter('userId', '=', userId)
-      .order('order'); // Order by the order field
-
+      .filter('userId', '=', userId);
+      
+    // Execute the query
     const [memberships] = await datastore.runQuery(query);
-
-    return memberships.map((membership: any) => membership.assetId);
+    
+    console.log(`Found ${memberships.length} memberships for group ${groupId}`);
+    
+    // For debugging, log the first few membership objects
+    if (memberships.length > 0) {
+      console.log('Sample membership:', JSON.stringify(memberships[0], null, 2));
+    }
+    
+    // Extract asset IDs, logging any potential issues
+    const assetIds = memberships.map((membership: any) => {
+      if (!membership.assetId) {
+        console.log('Found membership without assetId:', membership);
+      }
+      return membership.assetId;
+    }).filter(Boolean); // Remove any undefined/null entries
+    
+    console.log(`Returning ${assetIds.length} asset IDs for group ${groupId}`);
+    return assetIds;
   } catch (error) {
     console.error('Error fetching assets in group:', error);
     return [];

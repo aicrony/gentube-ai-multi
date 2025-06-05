@@ -37,20 +37,41 @@ export async function getUserActivityByIds(
   }
 
   try {
-    console.log(`Fetching ${activityIds.length} activities by ID`);
+    console.log(`Fetching ${activityIds.length} activities by ID:`, activityIds);
     
     // Create keys for each activity ID
     const keys = activityIds.map(id => {
       // Handle numeric vs string IDs
       const idValue = /^\d+$/.test(id) ? datastore.int(Number(id)) : id;
-      return datastore.key({
+      const key = datastore.key({
         namespace: NAMESPACE,
         path: [USER_ACTIVITY_KIND, idValue]
       });
+      console.log(`Created key for ID ${id}:`, key);
+      return key;
     });
 
     // Fetch all activities in a single batch
     const [results] = await datastore.get(keys);
+    
+    console.log(`Retrieved ${results.length} results from datastore`);
+    
+    // For debugging, log the first result if available
+    if (results.length > 0) {
+      const firstResult = { ...results[0] };
+      if (firstResult[datastore.KEY]) {
+        // Extract key info for logging
+        const keyInfo = {
+          id: firstResult[datastore.KEY].id,
+          name: firstResult[datastore.KEY].name,
+          kind: firstResult[datastore.KEY].kind,
+          path: firstResult[datastore.KEY].path
+        };
+        firstResult._key = keyInfo; // Add a safe-to-log version of the key
+      }
+      delete firstResult[datastore.KEY]; // Remove non-serializable field for logging
+      console.log('First result:', JSON.stringify(firstResult, null, 2));
+    }
 
     // Process results, handling any missing or null entries
     const activities: UserActivity[] = [];
@@ -66,6 +87,13 @@ export async function getUserActivityByIds(
       // Get the key from the activity
       const key = activity[datastore.KEY];
       const keyId = key.id?.toString();
+      console.log(`Processing result at index ${index}, key ID: ${keyId}`);
+      
+      // Verify we have an ID
+      if (!keyId) {
+        console.log(`Missing key ID for result at index ${index}:`, key);
+        return; // Skip items without proper IDs
+      }
       
       // Provide fallbacks for potentially missing fields
       let prompt = activity.Prompt;
