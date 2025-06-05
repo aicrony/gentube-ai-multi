@@ -494,6 +494,28 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setSelectedAssetUrl(selectedUrl);
   }, [selectedUrl]);
 
+  // Ensure modalMediaUrl stays synchronized with currentModalIndex
+  useEffect(() => {
+    if (filteredAndSortedActivities.length > 0 && currentModalIndex >= 0 && currentModalIndex < filteredAndSortedActivities.length) {
+      const activity = filteredAndSortedActivities[currentModalIndex];
+      const url = activity.AssetType === 'vid' 
+        ? activity.CreatedAssetUrl 
+        : activity.CreatedAssetUrl;
+      
+      // Only update if it's different to avoid infinite loops
+      if (modalMediaUrl !== url) {
+        setModalMediaUrl(url);
+        
+        // Update edit image URL for images and uploads
+        if (activity.AssetType === 'img' || activity.AssetType === 'upl') {
+          setEditImageUrl(activity.CreatedAssetUrl);
+        } else {
+          setEditImageUrl(''); // Clear for videos
+        }
+      }
+    }
+  }, [currentModalIndex, filteredAndSortedActivities]);
+
   // Auto-refresh logic for queued items
   useEffect(() => {
     // Only proceed if autoRefreshQueued is true
@@ -1496,6 +1518,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Function to start slideshow with the first displayed asset (directly play)
   const handleStartSlideshow = () => {
     if (filteredAndSortedActivities.length > 0) {
+      console.log('Starting slideshow from handleStartSlideshow');
+      
       // Open modal with first asset and start playing immediately
       const firstActivity = filteredAndSortedActivities[0];
       const url =
@@ -1503,12 +1527,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           ? firstActivity.CreatedAssetUrl
           : firstActivity.CreatedAssetUrl;
 
+      // Step 1: First set all necessary state for the first image
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
-      setShowSlideshowSettings(false); // Don't show settings - start playing
-      setAutoStartSlideshow(true); // Auto-start the slideshow
-      setIsModalOpen(true);
+      setShowSlideshowSettings(false); // Don't show settings
       setIsFullScreenModal(false);
+      
+      // Step 2: First open modal without auto-starting
+      setAutoStartSlideshow(false); 
+      setIsModalOpen(true);
+      
+      // Step 3: Wait for modal to fully render before starting slideshow
+      setTimeout(() => {
+        console.log('Enabling slideshow auto-start after delay');
+        setAutoStartSlideshow(true);
+      }, 1500);
     }
   };
 
@@ -3098,13 +3131,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           mediaUrl={modalMediaUrl}
           onClose={closeModal}
           fullScreen={isFullScreenModal}
-          onNext={handlePreviousInModal}
-          onPrevious={handleNextInModal}
-          hasNext={
+          onNext={handleNextInModal}
+          onPrevious={handlePreviousInModal}
+          hasNext={currentModalIndex > 0}
+          hasPrevious={
             currentModalIndex < filteredAndSortedActivities.length - 1 || 
             (currentModalIndex === filteredAndSortedActivities.length - 1 && hasMore)
           }
-          hasPrevious={currentModalIndex > 0}
           onLike={() => {
             const activity = filteredAndSortedActivities[currentModalIndex];
             if (activity && activity.id) {
