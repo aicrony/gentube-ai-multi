@@ -55,20 +55,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate new DateTime values to preserve the order
-    // Use current time as base, then subtract intervals for subsequent items
-    // This ensures the first item is newest (highest DateTime) for DESC sorting
-    const baseTime = Date.now();
-    const hourInterval = 60 * 60 * 1000; // 1 hour in milliseconds for safe spacing
+    // Calculate new order values to preserve the order
+    // Use index-based ordering with spacing for future insertions
+    const orderInterval = 10; // 10-unit intervals for spacing
 
     const transaction = datastore.transaction();
     await transaction.run();
 
     try {
-      // Update each asset with its new DateTime based on position in ordered array
+      // Update each asset with its new order based on position in ordered array
       for (let index = 0; index < orderedAssetIds.length; index++) {
         const assetId = orderedAssetIds[index];
-        const newDateTime = new Date(baseTime - index * hourInterval);
+        const newOrder = index * orderInterval;
         
         const key = datastore.key({
           namespace: 'GenTube',
@@ -77,13 +75,16 @@ export async function POST(request: NextRequest) {
 
         const [asset] = await transaction.get(key);
         if (asset) {
-          asset.DateTime = newDateTime.toISOString();
+          // Set the order field while maintaining DateTime for backward compatibility
+          asset.order = newOrder;
+          asset.DateTime = asset.DateTime || new Date().toISOString();
+          
           transaction.save({
             key,
             data: asset
           });
           
-          console.log(`Updated asset ${assetId} to position ${index} with DateTime ${newDateTime.toISOString()}`);
+          console.log(`Updated asset ${assetId} to position ${index} with order ${newOrder}`);
         }
       }
 

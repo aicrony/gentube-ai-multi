@@ -22,6 +22,7 @@ interface UserActivity {
   UserId?: string | null; // Added for creator info
   CreatorName?: string | null; // Added for creator display
   SubscriptionTier?: number; // Added for gallery status
+  order?: number; // Added for explicit ordering
 }
 
 export async function getUserAssets(
@@ -46,6 +47,7 @@ export async function getUserAssets(
       .filter(new PropertyFilter('UserId', '=', userId))
       .limit(limit)
       .offset(offset)
+      .order('order')
       .order('DateTime', { descending: true });
   } else if (userIp && userIp.length > 4) {
     console.log('Query UA2');
@@ -54,6 +56,7 @@ export async function getUserAssets(
       .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
+      .order('order')
       .order('DateTime', { descending: true });
   } else {
     console.log('Query UA3');
@@ -63,6 +66,7 @@ export async function getUserAssets(
       .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
+      .order('order')
       .order('DateTime', { descending: true });
   }
 
@@ -94,7 +98,8 @@ export async function getUserAssets(
     AssetSource: activity.AssetSource,
     AssetType: activity.AssetType,
     DateTime: activity.DateTime,
-    SubscriptionTier: activity.SubscriptionTier
+    SubscriptionTier: activity.SubscriptionTier,
+    order: activity.order
   }));
 }
 
@@ -108,6 +113,7 @@ export async function getPublicAssets(
     .filter(new PropertyFilter('UserId', '=', 'none'))
     .limit(limit)
     .offset(offset)
+    .order('order')
     .order('DateTime', { descending: true });
 
   // Handle multiple asset types (comma-separated)
@@ -132,7 +138,8 @@ export async function getPublicAssets(
     AssetSource: activity.AssetSource,
     AssetType: activity.AssetType,
     DateTime: activity.DateTime,
-    SubscriptionTier: activity.SubscriptionTier
+    SubscriptionTier: activity.SubscriptionTier,
+    order: activity.order
   }));
 }
 
@@ -146,6 +153,7 @@ export async function getGalleryAssets(
     .filter(new PropertyFilter('SubscriptionTier', '=', 3))
     .limit(limit)
     .offset(offset)
+    .order('order')
     .order('DateTime', { descending: true });
 
   // Handle multiple asset types (comma-separated)
@@ -222,7 +230,8 @@ export async function getGalleryAssets(
       DateTime: activity.DateTime,
       UserId: activity.UserId || null,
       CreatorName: creatorName,
-      SubscriptionTier: activity.SubscriptionTier || 3 // Default to 3 for gallery assets
+      SubscriptionTier: activity.SubscriptionTier || 3, // Default to 3 for gallery assets
+      order: activity.order
     };
   });
 }
@@ -237,6 +246,7 @@ export async function getAllAssets(
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
     .limit(limit)
     .offset(offset)
+    .order('order')
     .order('DateTime', { descending: true });
 
   // Handle multiple asset types (comma-separated)
@@ -313,7 +323,8 @@ export async function getAllAssets(
       DateTime: activity.DateTime,
       UserId: activity.UserId || null,
       CreatorName: creatorName,
-      SubscriptionTier: activity.SubscriptionTier || null // Keep original SubscriptionTier value
+      SubscriptionTier: activity.SubscriptionTier || null, // Keep original SubscriptionTier value
+      order: activity.order
     };
   });
 }

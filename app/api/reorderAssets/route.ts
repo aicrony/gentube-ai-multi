@@ -40,13 +40,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No assets found' }, { status: 404 });
     }
 
-    // Sort assets by current DateTime to get proper ordering
+    // Sort assets by order if available, otherwise fallback to DateTime
     const sortedAssets = assets
-      .filter((asset) => asset && asset.DateTime)
-      .sort(
-        (a, b) =>
-          new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime()
-      );
+      .filter((asset) => asset)
+      .sort((a, b) => {
+        // If both assets have order field, use it for sorting
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        // If only one has order, prioritize the one with order
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        // Fallback to DateTime if order is not available
+        return new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime();
+      });
 
     console.log(
       'Sorted assets:',
@@ -65,75 +72,75 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
     }
 
-    // Calculate new DateTime based on target position
-    let newDateTime: Date;
+    // Calculate new order value based on target position
+    let newOrder: number;
 
     if (targetIndex === 0) {
-      // Moving to the top (newest)
-      const newestAsset = sortedAssets[0];
-      const newestTime = new Date(newestAsset.DateTime).getTime();
-      newDateTime = new Date(newestTime + 60000); // Add 1 minute to be newest
+      // Moving to the top (first position)
+      const firstAsset = sortedAssets[0];
+      newOrder = firstAsset.order !== undefined ? firstAsset.order - 10 : 0;
     } else if (targetIndex >= sortedAssets.length - 1) {
-      // Moving to the bottom (oldest)
-      const oldestAsset = sortedAssets[sortedAssets.length - 1];
-      const oldestTime = new Date(oldestAsset.DateTime).getTime();
-      newDateTime = new Date(oldestTime - 60000); // Subtract 1 minute to be oldest
+      // Moving to the bottom (last position)
+      const lastAsset = sortedAssets[sortedAssets.length - 1];
+      newOrder = lastAsset.order !== undefined ? lastAsset.order + 10 : sortedAssets.length * 10;
     } else {
       // Moving between two assets
       const beforeAsset = sortedAssets[targetIndex - 1];
       const afterAsset = sortedAssets[targetIndex];
 
-      const beforeTime = new Date(beforeAsset.DateTime).getTime();
-      const afterTime = new Date(afterAsset.DateTime).getTime();
+      // If both assets have order, calculate the midpoint
+      if (beforeAsset.order !== undefined && afterAsset.order !== undefined) {
+        // Calculate midpoint between the two order values
+        newOrder = beforeAsset.order + Math.floor((afterAsset.order - beforeAsset.order) / 2);
 
-      // Calculate midpoint
-      const midpoint = beforeTime + (afterTime - beforeTime) / 2;
+        // If the difference is too small, we need to redistribute order values
+        if (Math.abs(afterAsset.order - beforeAsset.order) <= 1) {
+          console.log('Order difference too small, redistributing order values');
 
-      // If the difference is too small (less than 1 second), we need to redistribute
-      if (Math.abs(beforeTime - afterTime) < 2000) {
-        console.log('DateTime difference too small, redistributing timestamps');
+          // Redistribute order values for all assets
+          const redistributedAssets = await redistributeOrderValues(
+            sortedAssets,
+            assetId,
+            targetIndex
+          );
 
-        // Redistribute timestamps for all assets
-        const redistributedAssets = await redistributeTimestamps(
-          sortedAssets,
-          assetId,
-          targetIndex
-        );
+          // Update all assets with new order values
+          const transaction = datastore.transaction();
+          await transaction.run();
 
-        // Update all assets with new timestamps
-        const transaction = datastore.transaction();
-        await transaction.run();
-
-        try {
-          for (const asset of redistributedAssets) {
-            const key = datastore.key({
-              namespace: 'GenTube',
-              path: ['UserActivity', datastore.int(Number(asset.id))]
-            });
-
-            const [existingAsset] = await transaction.get(key);
-            if (existingAsset) {
-              existingAsset.DateTime = asset.newDateTime;
-              transaction.save({
-                key,
-                data: existingAsset
+          try {
+            for (const asset of redistributedAssets) {
+              const key = datastore.key({
+                namespace: 'GenTube',
+                path: ['UserActivity', datastore.int(Number(asset.id))]
               });
+
+              const [existingAsset] = await transaction.get(key);
+              if (existingAsset) {
+                existingAsset.order = asset.newOrder;
+                transaction.save({
+                  key,
+                  data: existingAsset
+                });
+              }
             }
+
+            await transaction.commit();
+            console.log('Successfully redistributed order values for all assets');
+
+            return NextResponse.json({
+              success: true,
+              message: 'Assets reordered with redistributed order values'
+            });
+          } catch (error) {
+            await transaction.rollback();
+            throw error;
           }
-
-          await transaction.commit();
-          console.log('Successfully redistributed timestamps for all assets');
-
-          return NextResponse.json({
-            success: true,
-            message: 'Assets reordered with redistributed timestamps'
-          });
-        } catch (error) {
-          await transaction.rollback();
-          throw error;
         }
       } else {
-        newDateTime = new Date(midpoint);
+        // If order values are not available, create a new sequence
+        // Use position-based ordering (target index * 10 for even spacing)
+        newOrder = targetIndex * 10;
       }
     }
 
@@ -159,7 +166,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       }
 
-      asset.DateTime = newDateTime.toISOString();
+      // Set the new order value
+      asset.order = newOrder;
+      
+      // Keep DateTime for backward compatibility
+      asset.DateTime = asset.DateTime || new Date().toISOString();
 
       transaction.save({
         key: assetKey,
@@ -169,13 +180,13 @@ export async function POST(request: NextRequest) {
       await transaction.commit();
 
       console.log(
-        `Successfully updated asset ${assetId} DateTime to:`,
-        newDateTime.toISOString()
+        `Successfully updated asset ${assetId} order to:`,
+        newOrder
       );
 
       return NextResponse.json({
         success: true,
-        newDateTime: newDateTime.toISOString()
+        newOrder: newOrder
       });
     } catch (error) {
       await transaction.rollback();
@@ -190,12 +201,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to redistribute timestamps evenly
-async function redistributeTimestamps(
+// Helper function to redistribute order values evenly
+async function redistributeOrderValues(
   sortedAssets: any[],
   movedAssetId: string,
   targetIndex: number
-): Promise<Array<{ id: string; newDateTime: string }>> {
+): Promise<Array<{ id: string; newOrder: number }>> {
   // Remove the moved asset from current position
   const filteredAssets = sortedAssets.filter(
     (asset) => asset[datastore.KEY].id.toString() !== movedAssetId.toString()
@@ -213,12 +224,13 @@ async function redistributeTimestamps(
   // Insert moved asset at target position
   filteredAssets.splice(targetIndex, 0, movedAsset);
 
-  // Create new timestamps with 1-hour intervals starting from now
-  const now = Date.now();
-  const hourInterval = 60 * 60 * 1000; // 1 hour in milliseconds
+  // Create new order values with 10-unit intervals for even spacing
+  // This provides plenty of space for future inserts
+  const orderInterval = 10;
 
   return filteredAssets.map((asset, index) => ({
     id: asset[datastore.KEY].id.toString(),
-    newDateTime: new Date(now - index * hourInterval).toISOString()
+    newOrder: index * orderInterval
   }));
+}
 }

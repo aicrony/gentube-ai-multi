@@ -39,7 +39,8 @@ interface UserActivity {
   Prompt: string;
   AssetSource: string;
   AssetType: string;
-  DateTime?: Date; // Added for sorting
+  DateTime?: Date; // For backward compatibility
+  order?: number; // Added for explicit ordering
   SubscriptionTier?: number;
   isInGallery?: boolean; // Helper property
   likesCount?: number; // Added for filtering by heart count
@@ -370,6 +371,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     // Apply sorting
     result.sort((a, b) => {
+      // If both have order field, use it for sorting
+      if (a.order !== undefined && b.order !== undefined) {
+        return sortDirection === 'asc'
+          ? a.order - b.order // Lower order value first
+          : b.order - a.order; // Higher order value first
+      }
+      
+      // If only one has order field, prioritize it
+      if (a.order !== undefined) return sortDirection === 'asc' ? -1 : 1;
+      if (b.order !== undefined) return sortDirection === 'asc' ? 1 : -1;
+      
+      // Fallback to DateTime if order is not available
       const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
       const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
 
@@ -1954,12 +1967,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Insert it at the new position
         updatedActivities.splice(actualToIndex, 0, movedItem);
         
-        // Update DateTime values to preserve the new order when sorting
-        // We'll use the current time as base and increment by seconds to maintain order
-        const baseTime = Date.now();
+        // Update order values to preserve the new order when sorting
+        // Use 10-unit intervals for spacing (similar to the API endpoints)
+        const orderInterval = 10;
         updatedActivities.forEach((activity, index) => {
-          // For desc sort (newest first), first item should have newest timestamp
-          activity.DateTime = new Date(baseTime - index * 1000);
+          // Use index-based ordering with spacing to match API behavior
+          activity.order = index * orderInterval;
+          // Keep DateTime for backward compatibility
+          activity.DateTime = activity.DateTime || new Date();
         });
       }
       
@@ -2028,15 +2043,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       console.log('Asset order saved to database:', result);
       
       // The database update is complete, now update local state to reflect the new order
-      const baseTime = Date.now();
+      const orderInterval = 10;
       setActivities(currentActivities => {
         const updatedActivities = [...currentActivities];
         
-        // Update DateTime values to reflect the database changes
+        // Update order values to reflect the database changes
         orderedAssets.forEach((orderedAsset, index) => {
           const activityIndex = updatedActivities.findIndex(activity => activity.id === orderedAsset.id);
           if (activityIndex !== -1) {
-            updatedActivities[activityIndex].DateTime = new Date(baseTime - index * 60000);
+            // Set the order field to match server-side ordering
+            updatedActivities[activityIndex].order = index * orderInterval;
+            // Keep DateTime for backward compatibility
+            updatedActivities[activityIndex].DateTime = updatedActivities[activityIndex].DateTime || new Date();
           }
         });
         

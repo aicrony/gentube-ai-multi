@@ -21,6 +21,7 @@ export interface UserActivity {
   UserId?: string | null;
   CreatorName?: string | null;
   SubscriptionTier?: number;
+  order?: number; // New field for explicit ordering
 }
 
 /**
@@ -113,7 +114,8 @@ export async function getUserActivityByIds(
         DateTime: activity.DateTime || new Date(),
         UserId: activity.UserId || null,
         CreatorName: activity.CreatorName || null,
-        SubscriptionTier: activity.SubscriptionTier || null
+        SubscriptionTier: activity.SubscriptionTier || null,
+        order: activity.order !== undefined ? activity.order : null // Include the order field if it exists
       });
     });
 
