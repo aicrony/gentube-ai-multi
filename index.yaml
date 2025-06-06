@@ -42,7 +42,7 @@ indexes:
       - name: groupId
       - name: userId
 
-  # Group asset ordering index
+  # Group asset ordering indexes
   - kind: AssetGroupMembership
     properties:
       - name: groupId
@@ -51,11 +51,19 @@ indexes:
 
   - kind: AssetGroupMembership
     properties:
+      - name: groupId
+      - name: userId
+      - name: order
+      - name: createdAt
+        direction: desc
+
+  - kind: AssetGroupMembership
+    properties:
       - name: assetId
       - name: userId
 
   # Feedback feature index
-  - kind: Feedback
-    properties:
-      - name: createdAt
-        direction: desc
+#  - kind: Feedback
+#    properties:
+#      - name: createdAt
+#        direction: desc
