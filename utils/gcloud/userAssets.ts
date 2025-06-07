@@ -19,6 +19,10 @@ export async function migrateActivityOrderValues(activities: UserActivity[]): Pr
   console.log('Some assets missing order values, initiating migration');
   
   // Sort by DateTime first to establish the initial order
+  // NOTE: We first sort by DateTime in descending order (newest first)
+  // but then assign order values in ASCENDING order (lower values come first)
+  // This creates a consistent behavior with drag-n-drop where visually ordered items
+  // from top to bottom get order values from low to high (e.g., 0, 10, 20...)
   activities.sort((a, b) => {
     const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
     const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
@@ -26,6 +30,8 @@ export async function migrateActivityOrderValues(activities: UserActivity[]): Pr
   });
   
   // Assign order values with 10-unit spacing
+  // IMPORTANT: We're assigning LOWER values to items that should appear FIRST in the UI
+  // This means the first item in the array gets the lowest order value (0)
   const orderInterval = 10;
   const transaction = datastore.transaction();
   
@@ -39,6 +45,7 @@ export async function migrateActivityOrderValues(activities: UserActivity[]): Pr
     activities.forEach((activity, index) => {
       if (activity.order === undefined && activity.id) {
         // Set the new order value based on current position (after DateTime sort)
+        // Lower order values (0, 10, 20) appear first in the UI when sorted by order
         const newOrder = index * orderInterval;
         
         // Update the local object
@@ -127,33 +134,39 @@ export async function getUserAssets(
   // Primary case: Valid userId - Use this even if IP is unknown
   if (isValidUserId) {
     console.log('Query UA1: Filtering by userId');
+    // First sort by order field (ascending - lower values first), then by DateTime (descending)
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserId', '=', userId))
       .limit(limit)
       .offset(offset)
-      .order('DateTime', { descending: true });
+      .order('order') // Primary sort by order field (ascending by default)
+      .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
   } 
   // Secondary case: Only valid IP, no userId
   else if (isValidIp) {
     console.log('Query UA2: Filtering by userIp');
+    // First sort by order field (ascending - lower values first), then by DateTime (descending)
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
-      .order('DateTime', { descending: true });
+      .order('order') // Primary sort by order field (ascending by default)
+      .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
   } 
   // Fallback case: No valid userId or IP - use both (will likely return no results)
   else {
     console.log('Query UA3: Fallback with both filters');
+    // First sort by order field (ascending - lower values first), then by DateTime (descending)
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserId', '=', userId))
       .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
-      .order('DateTime', { descending: true });
+      .order('order') // Primary sort by order field (ascending by default)
+      .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
   }
 
   // Handle multiple asset types (comma-separated)
@@ -203,12 +216,14 @@ export async function getPublicAssets(
   assetType?: string | string[] | undefined,
   migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
+  // First sort by order field (ascending - lower values first), then by DateTime (descending)
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
     .filter(new PropertyFilter('UserId', '=', 'none'))
     .limit(limit)
     .offset(offset)
-    .order('DateTime', { descending: true });
+    .order('order') // Primary sort by order field (ascending by default)
+    .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
 
   // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
@@ -252,12 +267,14 @@ export async function getGalleryAssets(
   assetType?: string | string[] | undefined,
   migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
+  // First sort by order field (ascending - lower values first), then by DateTime (descending)
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
     .filter(new PropertyFilter('SubscriptionTier', '=', 3))
     .limit(limit)
     .offset(offset)
-    .order('DateTime', { descending: true });
+    .order('order') // Primary sort by order field (ascending by default)
+    .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
 
   // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
@@ -354,11 +371,13 @@ export async function getAllAssets(
   migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
   // Admin function to get ALL assets from UserActivity, not filtered by SubscriptionTier
+  // First sort by order field (ascending - lower values first), then by DateTime (descending)
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
     .limit(limit)
     .offset(offset)
-    .order('DateTime', { descending: true });
+    .order('order') // Primary sort by order field (ascending by default)
+    .order('DateTime', { descending: true }); // Secondary sort by DateTime when order is same/missing
 
   // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {

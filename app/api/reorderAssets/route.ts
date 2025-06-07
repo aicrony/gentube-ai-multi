@@ -45,8 +45,9 @@ export async function POST(request: NextRequest) {
       .filter((asset) => asset)
       .sort((a, b) => {
         // If both assets have order field, use it for sorting
+        // IMPORTANT: We're using ascending order - lower values come first
         if (a.order !== undefined && b.order !== undefined) {
-          return a.order - b.order;
+          return a.order - b.order; // Lower order value first in the UI
         }
         // If only one has order, prioritize the one with order
         if (a.order !== undefined) return -1;
@@ -73,14 +74,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate new order value based on target position
+    // IMPORTANT: Lower order values (e.g., 0, 10, 20) appear FIRST in the UI (ascending order)
     let newOrder: number;
 
     if (targetIndex === 0) {
       // Moving to the top (first position)
+      // For top position, we need a value smaller than the current smallest order
       const firstAsset = sortedAssets[0];
       newOrder = firstAsset.order !== undefined ? firstAsset.order - 10 : 0;
     } else if (targetIndex >= sortedAssets.length - 1) {
       // Moving to the bottom (last position)
+      // For bottom position, we need a value larger than the current largest order
       const lastAsset = sortedAssets[sortedAssets.length - 1];
       newOrder = lastAsset.order !== undefined ? lastAsset.order + 10 : sortedAssets.length * 10;
     } else {
@@ -183,6 +187,7 @@ export async function POST(request: NextRequest) {
         `Successfully updated asset ${assetId} order to:`,
         newOrder
       );
+      console.log('Order mapping direction: Lower order values (e.g., 0, 10, 20) appear FIRST in the UI');
 
       return NextResponse.json({
         success: true,

@@ -81,9 +81,12 @@ export async function POST(request: NextRequest) {
       });
       
       // Update each membership with its new order based on position in ordered array
+      // IMPORTANT: We're using the same consistent ordering as in saveAssetOrder and reorderAssets
+      // Lower order values (0, 10, 20) appear FIRST in the UI when sorted by order ASC
+      const orderInterval = 10; // Use 10-unit intervals for spacing like other endpoints
       for (let index = 0; index < orderedAssetIds.length; index++) {
         const assetId = orderedAssetIds[index];
-        const orderValue = index + 1; // Start from 1 for easier human readability
+        const orderValue = index * orderInterval; // First item gets 0, second gets 10, etc.
         
         if (membershipMap[assetId]) {
           // Update existing membership
@@ -119,6 +122,7 @@ export async function POST(request: NextRequest) {
 
       await transaction.commit();
       console.log('Successfully saved new group-specific asset order to database');
+      console.log('Order mapping direction: Lower order values (e.g., 0, 10, 20) appear FIRST in the UI');
 
       return NextResponse.json({
         success: true,

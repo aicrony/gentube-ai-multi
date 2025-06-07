@@ -248,7 +248,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     groupId: null as string | null // Add group filter
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc'); // show in arranged order by default (lower order values first)
   const [showFilters, setShowFilters] = useState(false);
 
   // Group management state
@@ -421,12 +421,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
 
     // Apply sorting
+    // IMPORTANT: In the backend, we store order values such that LOWER values appear FIRST in the UI
+    // This means 0 is the first item, followed by 10, 20, etc.
     result.sort((a, b) => {
       // If both have order field, use it for sorting
       if (a.order !== undefined && b.order !== undefined) {
+        // When sortDirection is 'asc', we show items in the order they were arranged
+        // (lower order values first, which is the default backend storage format)
+        // When sortDirection is 'desc', we reverse this order
         return sortDirection === 'asc'
-          ? a.order - b.order // Lower order value first
-          : b.order - a.order; // Higher order value first
+          ? a.order - b.order // Lower order value first (0, 10, 20...)
+          : b.order - a.order; // Higher order value first (reverse)
       }
       
       // If only one has order field, prioritize it
@@ -1836,7 +1841,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       groupId: null
     });
     setSearchTerm('');
-    setSortDirection('desc');
+    setSortDirection('asc'); // Reset to arranged order
   };
 
   // Group management functions
@@ -2024,10 +2029,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         
         // Update order values to preserve the new order when sorting
         // Use 10-unit intervals for spacing (similar to the API endpoints)
+        // IMPORTANT: We assign LOWER values to items that should appear FIRST in the UI
+        // This matches backend behavior in saveAssetOrder and reorderAssets
         const orderInterval = 10;
         updatedActivities.forEach((activity, index) => {
           // Use index-based ordering with spacing to match API behavior
-          activity.order = index * orderInterval;
+          activity.order = index * orderInterval; // First item gets 0, second gets 10, etc.
           // Keep DateTime for backward compatibility
           activity.DateTime = activity.DateTime || new Date();
         });
@@ -2054,6 +2061,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleSaveAssetOrder = async (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => {
     try {
+      // IMPORTANT: The order of assets in the orderedAssets array is preserved on the backend
+      // The backend assigns order values with lower values (0, 10, 20) to items that appear earlier in the array
+      // So the first item in this array will get the lowest order value and appear first when sorting by order ASC
       console.log('Saving asset order to database for assets:', orderedAssets.length);
       
       // Declare response variable before if/else block to make it accessible throughout the function
@@ -2098,6 +2108,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       console.log('Asset order saved to database:', result);
       
       // The database update is complete, now update local state to reflect the new order
+      // We're updating the local state to match the backend ordering logic:
+      // Items at the beginning of the array get lower order values (0, 10, 20...)
+      // These will appear first when sorted by order in ascending order
       const orderInterval = 10;
       setActivities(currentActivities => {
         const updatedActivities = [...currentActivities];
@@ -2107,6 +2120,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           const activityIndex = updatedActivities.findIndex(activity => activity.id === orderedAsset.id);
           if (activityIndex !== -1) {
             // Set the order field to match server-side ordering
+            // First item gets order=0, second gets order=10, etc.
             updatedActivities[activityIndex].order = index * orderInterval;
             // Keep DateTime for backward compatibility
             updatedActivities[activityIndex].DateTime = updatedActivities[activityIndex].DateTime || new Date();
@@ -2168,6 +2182,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
 
+    // Drag and drop reordering follows the consistent pattern:
+    // Items at the top of the list have lower order values (0, 10, 20...)
+    // Items at the bottom have higher order values
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
       setDragOverIndex(null);
@@ -2740,21 +2757,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
             {/* Sort Direction */}
             <div className="flex flex-col">
-              <label className="mb-1 font-medium">Sort By Date</label>
+              <label className="mb-1 font-medium">Sort Direction</label>
               <button
                 onClick={() =>
                   setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
                 }
                 className="flex items-center gap-1 p-2 border rounded"
                 style={{ borderColor: 'var(--border-color)' }}
+                title={sortDirection === 'desc' ? 'Currently showing newest first (by date) or reverse order (by arrangement)' : 'Currently showing oldest first (by date) or arranged order'}
               >
                 {sortDirection === 'desc' ? (
                   <>
-                    <FaSortAmountDown /> Newest First
+                    <FaSortAmountDown /> Newest/Reverse Order
                   </>
                 ) : (
                   <>
-                    <FaSortAmountUp /> Oldest First
+                    <FaSortAmountUp /> Original/Arranged Order
                   </>
                 )}
               </button>
