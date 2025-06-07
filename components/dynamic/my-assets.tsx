@@ -80,10 +80,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [currentModalIndex, setCurrentModalIndex] = useState(0);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
-  
+
   // Track if we've done the initial load
   const initialLoadDoneRef = React.useRef(false);
-  
+
   // Force initial load when component mounts
   React.useEffect(() => {
     if (!initialLoadDoneRef.current) {
@@ -91,16 +91,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       initialLoadDoneRef.current = true;
       // Small delay to ensure context values are set
       setTimeout(() => {
-        setRefreshKey(prev => prev + 1);
+        setRefreshKey((prev) => prev + 1);
       }, 100);
     }
   }, []);
-  
+
   // Also trigger a refresh when userId is available but userIp is still 'unknown'
   React.useEffect(() => {
-    if (userId && userId !== 'none' && userIp === 'unknown' && activities.length === 0 && !loading) {
-      console.log('userId available but userIp is unknown - triggering fetch with userId only');
-      setRefreshKey(prev => prev + 1);
+    if (
+      userId &&
+      userId !== 'none' &&
+      userIp === 'unknown' &&
+      activities.length === 0 &&
+      !loading
+    ) {
+      console.log(
+        'userId available but userIp is unknown - triggering fetch with userId only'
+      );
+      setRefreshKey((prev) => prev + 1);
     }
   }, [userId, userIp, activities.length, loading]);
 
@@ -140,11 +148,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   React.useEffect(() => {
     const handleRefreshAndShowEditedImage = (event: CustomEvent) => {
       const { editedImageId } = event.detail;
-      console.log('Received refreshAndShowEditedImage event for ID:', editedImageId);
-      
+      console.log(
+        'Received refreshAndShowEditedImage event for ID:',
+        editedImageId
+      );
+
       // Store the ID to open after refresh
       sessionStorage.setItem('pendingEditedImageId', editedImageId);
-      
+
       // Clear filters to ensure we show all assets
       setFilters({
         assetType: '',
@@ -153,16 +164,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         groupId: null
       });
       setSearchTerm('');
-      
+
       // Do the same thing as handleRefresh
       setLoading(true);
       setPage(0);
       setActivities([]); // Clear activities to ensure fresh load
-      
+
       // Force a refresh by incrementing the refresh key
       // This will trigger the useEffect that fetches data
-      setRefreshKey(prev => prev + 1);
-      
+      setRefreshKey((prev) => prev + 1);
+
       // Scroll to the first queued asset (if any) or first asset after a delay
       setTimeout(() => {
         const firstQueuedAsset = document.getElementById('first-queued-asset');
@@ -175,11 +186,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     };
 
     // Add event listener
-    window.addEventListener('refreshAndShowEditedImage', handleRefreshAndShowEditedImage as EventListener);
+    window.addEventListener(
+      'refreshAndShowEditedImage',
+      handleRefreshAndShowEditedImage as EventListener
+    );
 
     // Cleanup
     return () => {
-      window.removeEventListener('refreshAndShowEditedImage', handleRefreshAndShowEditedImage as EventListener);
+      window.removeEventListener(
+        'refreshAndShowEditedImage',
+        handleRefreshAndShowEditedImage as EventListener
+      );
     };
   }, []);
 
@@ -188,8 +205,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     const handleRefreshAssets = () => {
       console.log('Received refreshAssets event');
       // Simply trigger a refresh
-      setRefreshKey(prev => prev + 1);
-      
+      setRefreshKey((prev) => prev + 1);
+
       // Scroll to the first queued asset (if any) or first asset after a delay to allow content to load
       setTimeout(() => {
         const firstQueuedAsset = document.getElementById('first-queued-asset');
@@ -204,11 +221,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Add event listener
     window.addEventListener('refreshAssets', handleRefreshAssets);
 
-    // Trigger initial fetch after component mounts 
+    // Trigger initial fetch after component mounts
     // Fetch if either userId is valid OR userIp is valid (not 'unknown')
-    if (((userId && userId !== 'none') || (userIp && userIp !== 'unknown')) && activities.length === 0) {
+    if (
+      ((userId && userId !== 'none') || (userIp && userIp !== 'unknown')) &&
+      activities.length === 0
+    ) {
       console.log('Triggering initial fetch:', { userId, userIp });
-      setRefreshKey(prev => prev + 1);
+      setRefreshKey((prev) => prev + 1);
     }
 
     // Cleanup
@@ -258,17 +278,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [showGroupsPanel, setShowGroupsPanel] = useState(false);
   const [groupRefreshKey, setGroupRefreshKey] = useState(0); // Force re-render of GroupManager
   const [refreshKey, setRefreshKey] = useState(0); // Force refresh of activities
+  const [modalRefreshKey, setModalRefreshKey] = useState(0); // Force refresh of modal content
 
   const limit = 10;
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
     // Log user identity info for debugging
-    console.log(`fetchUserActivities called with userId: ${userId}, userIp: ${userIp}`);
-    
+    console.log(
+      `fetchUserActivities called with userId: ${userId}, userIp: ${userIp}`
+    );
+
     // Always attempt fetch if userId is valid, regardless of userIp status
     // Only skip if BOTH userId is invalid AND userIp is invalid/unknown
-    if ((userId && userId !== 'none') || (userIp && userIp !== 'none' && userIp !== 'unknown')) {
+    if (
+      (userId && userId !== 'none') ||
+      (userIp && userIp !== 'none' && userIp !== 'unknown')
+    ) {
       try {
         // Support comma-separated asset types - use the filters state
         const assetTypeParam = filters.assetType || '';
@@ -282,11 +308,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         const params = new URLSearchParams({
           userId: userId ? userId : 'none',
           // If userIp is 'unknown', treat it as 'none' to ensure consistent backend handling
-          userIp: (userIp && userIp !== 'unknown') ? userIp : 'none',
+          userIp: userIp && userIp !== 'unknown' ? userIp : 'none',
           limit: limit.toString(),
           offset: (page * limit).toString()
         });
-        
+
         // Only include groups when actually needed (when groups panel is shown or filtering by group)
         if (showGroupsPanel || groupIdParam) {
           params.append('includeGroups', 'true');
@@ -311,7 +337,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         }
         const data = await response.json();
         console.log('API response data:', data);
-        
+
         if (page === 0) {
           setActivities([]);
         }
@@ -357,25 +383,35 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       console.log('Skipping fetch - no user identifiers available yet');
       return;
     }
-    
+
     // Generate a params string to compare with last fetch
     // For caching purposes, treat 'unknown' userIp the same as 'none'
     const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
     const paramsString = `${userId}-${normalizedUserIp}-${page}-${filters.assetType}-${filters.groupId}-${refreshKey}`;
-    
+
     // Skip if already fetching or same params as last fetch
     // BUT still allow fetch when userIp changes from 'unknown' to an actual IP
-    if (isFetchingRef.current || (paramsString === lastFetchParamsRef.current && !(lastFetchParamsRef.current.includes('-unknown-') && userIp !== 'unknown'))) {
+    if (
+      isFetchingRef.current ||
+      (paramsString === lastFetchParamsRef.current &&
+        !(
+          lastFetchParamsRef.current.includes('-unknown-') &&
+          userIp !== 'unknown'
+        ))
+    ) {
       return;
     }
-    
-    console.log('User identifiers for fetch:', { userId, userIp: normalizedUserIp });
-    
+
+    console.log('User identifiers for fetch:', {
+      userId,
+      userIp: normalizedUserIp
+    });
+
     console.log('Fetching assets with params:', paramsString);
     setLoading(true);
     isFetchingRef.current = true;
     lastFetchParamsRef.current = paramsString;
-    
+
     // Use the normalized userIp for the fetch call to ensure consistent behavior
     fetchUserActivities(userId, normalizedUserIp).finally(() => {
       isFetchingRef.current = false;
@@ -433,11 +469,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           ? a.order - b.order // Lower order value first (0, 10, 20...)
           : b.order - a.order; // Higher order value first (reverse)
       }
-      
+
       // If only one has order field, prioritize it
       if (a.order !== undefined) return sortDirection === 'asc' ? -1 : 1;
       if (b.order !== undefined) return sortDirection === 'asc' ? 1 : -1;
-      
+
       // Fallback to DateTime if order is not available
       const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
       const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
@@ -452,33 +488,46 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Handle automatic navigation after loading more data
   useEffect(() => {
-    if (pendingNavigation && !loading && currentModalIndex < filteredAndSortedActivities.length - 1) {
+    if (
+      pendingNavigation &&
+      !loading &&
+      currentModalIndex < filteredAndSortedActivities.length - 1
+    ) {
       // New data has loaded, now we can navigate to the next image
       const nextIndex = currentModalIndex + 1;
       const nextActivity = filteredAndSortedActivities[nextIndex];
       if (nextActivity) {
-        const url = nextActivity.AssetType === 'vid' 
-          ? nextActivity.CreatedAssetUrl 
-          : nextActivity.CreatedAssetUrl;
+        const url =
+          nextActivity.AssetType === 'vid'
+            ? nextActivity.CreatedAssetUrl
+            : nextActivity.CreatedAssetUrl;
         setCurrentModalIndex(nextIndex);
         setModalMediaUrl(url);
-        
+
         // Update edit image URL for the new image
-        if (nextActivity.AssetType === 'img' || nextActivity.AssetType === 'upl') {
+        if (
+          nextActivity.AssetType === 'img' ||
+          nextActivity.AssetType === 'upl'
+        ) {
           setEditImageUrl(nextActivity.CreatedAssetUrl);
         } else {
           setEditImageUrl('');
         }
-        
+
         setPendingNavigation(false);
         console.log('Auto-navigated to newly loaded image');
       }
     }
-  }, [loading, pendingNavigation, currentModalIndex, filteredAndSortedActivities]);
+  }, [
+    loading,
+    pendingNavigation,
+    currentModalIndex,
+    filteredAndSortedActivities
+  ]);
 
   // Ref to track which asset IDs we've already fetched likes for
   const fetchedLikesRef = React.useRef<Set<string>>(new Set());
-  
+
   // Fetch likes for displayed assets that we haven't fetched yet
   useEffect(() => {
     const fetchLikes = async () => {
@@ -487,25 +536,28 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       try {
         // Collect asset IDs that we haven't fetched likes for yet
         const newAssetIds = activities
-          .filter(activity => activity.id && !fetchedLikesRef.current.has(activity.id as string))
-          .map(activity => activity.id as string);
-        
+          .filter(
+            (activity) =>
+              activity.id && !fetchedLikesRef.current.has(activity.id as string)
+          )
+          .map((activity) => activity.id as string);
+
         if (newAssetIds.length === 0) return;
-        
+
         console.log(`Fetching likes for ${newAssetIds.length} new assets`);
-        
+
         // Fetch likes for new assets only
         const response = await fetch(
           `/api/getAssetLikes?assetIds=${newAssetIds.join(',')}&userId=${userId}`
         );
-        
+
         const bulkLikesData = await response.json();
-        
+
         // Add these IDs to our tracking set
-        newAssetIds.forEach(id => fetchedLikesRef.current.add(id));
-        
+        newAssetIds.forEach((id) => fetchedLikesRef.current.add(id));
+
         // Update the state by merging with existing likes data
-        setAssetLikes(prevLikes => ({
+        setAssetLikes((prevLikes) => ({
           ...prevLikes,
           ...bulkLikesData
         }));
@@ -515,7 +567,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     };
 
     fetchLikes();
-    
+
     // Return cleanup function to reset the tracking if userId changes
     return () => {
       if (!userId) {
@@ -527,21 +579,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Check for pending edited image after activities load
   useEffect(() => {
     if (activities.length > 0 && !loading) {
-      const pendingEditedImageId = sessionStorage.getItem('pendingEditedImageId');
+      const pendingEditedImageId = sessionStorage.getItem(
+        'pendingEditedImageId'
+      );
       if (pendingEditedImageId) {
         console.log('Checking for pending edited image:', pendingEditedImageId);
         console.log('Current activities count:', activities.length);
-        
+
         // Find the image index in the filtered and sorted activities
         const imageIndex = filteredAndSortedActivities.findIndex(
           (activity) => activity.id === pendingEditedImageId
         );
-        
+
         if (imageIndex !== -1) {
           console.log('Found pending edited image at index:', imageIndex);
           // Clear the pending ID
           sessionStorage.removeItem('pendingEditedImageId');
-          
+
           // Open the modal with a small delay to ensure UI is ready
           setTimeout(() => {
             openModalForAsset(imageIndex, false);
@@ -549,7 +603,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         } else if (page === 0 && hasMore) {
           // If not found on first page and there are more pages, keep the pending ID
           // It might be on a different page due to sorting
-          console.log('Image not found on first page, may need to load more data');
+          console.log(
+            'Image not found on first page, may need to load more data'
+          );
         } else {
           // Only clear if we've checked all available data
           console.log('Image not found after checking available data');
@@ -782,7 +838,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           prompt: activity.Prompt,
           timestamp: activity.DateTime
         });
-        
+
         const response = await fetch('/api/deleteUserAsset', {
           method: 'DELETE',
           headers: {
@@ -795,7 +851,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             assetType: activity.AssetType
           })
         });
-        
+
         // Parse response data for logging
         let responseData;
         try {
@@ -804,13 +860,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         } catch (jsonError) {
           console.log('Response is not JSON:', await response.text());
         }
-        
+
         if (!response.ok) {
-          throw new Error(`Failed to delete asset: ${response.status} ${response.statusText}${responseData ? ' - ' + JSON.stringify(responseData) : ''}`);
+          throw new Error(
+            `Failed to delete asset: ${response.status} ${response.statusText}${responseData ? ' - ' + JSON.stringify(responseData) : ''}`
+          );
         }
 
         console.log('Asset deleted successfully:', activity.id);
-        
+
         // Instead of refreshing, just remove the deleted asset from the state
         setActivities((currentActivities) =>
           currentActivities.filter((item) => item.id !== activity.id)
@@ -833,7 +891,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         notification.style.transition = 'opacity 0.3s ease-in-out';
         notification.style.fontSize = '14px';
         notification.style.textAlign = 'center';
-        
+
         // Add responsive behavior for larger screens
         if (window.innerWidth >= 640) {
           notification.style.left = 'auto';
@@ -862,7 +920,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           assetId: activity.id,
           assetUrl: activity.CreatedAssetUrl
         });
-        
+
         // More informative error message to the user
         alert(`Failed to delete asset. Check console for details.`);
       }
@@ -871,13 +929,23 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleDownload = async (activity: UserActivity) => {
     try {
-      const { CreatedAssetUrl: url, AssetType: assetType, Prompt: prompt, id } = activity;
-      
+      const {
+        CreatedAssetUrl: url,
+        AssetType: assetType,
+        Prompt: prompt,
+        id
+      } = activity;
+
       // Generate filename based on prompt (first 25 chars, alphanumeric only, spaces to dashes)
-      const generateFileName = (prompt: string, assetType: string, originalUrl: string, assetId?: string): string => {
+      const generateFileName = (
+        prompt: string,
+        assetType: string,
+        originalUrl: string,
+        assetId?: string
+      ): string => {
         // Extract file extension from the original URL
         let fileExtension = '.jpg'; // Default fallback
-        
+
         if (assetType === 'vid') {
           fileExtension = '.mp4';
         } else {
@@ -889,10 +957,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               fileExtension = match[0].toLowerCase();
             }
           } catch (error) {
-            console.log('Could not extract file extension from URL, using default .jpg');
+            console.log(
+              'Could not extract file extension from URL, using default .jpg'
+            );
           }
         }
-        
+
         // Check if prompt exists and has content
         if (prompt && prompt.trim().length > 0) {
           // Take first 25 characters of prompt
@@ -903,8 +973,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           baseName = baseName.replace(/\s+/g, '-').trim();
           // Remove leading/trailing dashes
           baseName = baseName.replace(/^-+|-+$/g, '');
-          
-          return baseName ? `${baseName}${fileExtension}` : `downloaded-gentube-asset${fileExtension}`;
+
+          return baseName
+            ? `${baseName}${fileExtension}`
+            : `downloaded-gentube-asset${fileExtension}`;
         } else {
           // Fallback for uploads or assets without prompts
           return `downloaded-gentube-asset${fileExtension}`;
@@ -919,14 +991,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         try {
           // Use a Next.js API route to proxy the download and avoid CORS
           const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(fileName)}`;
-          
+
           const response = await fetch(proxyUrl);
           if (!response.ok) {
             throw new Error(`Proxy download failed: ${response.status}`);
           }
-          
+
           const blob = await response.blob();
-          
+
           // Create download link from blob
           const blobUrl = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -960,11 +1032,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           mode: 'cors',
           credentials: 'omit'
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const blob = await response.blob();
 
         // Create an object URL for the blob
@@ -983,7 +1055,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
       } catch (corsError) {
-        console.log('CORS error with generated asset, falling back to direct download:', corsError);
+        console.log(
+          'CORS error with generated asset, falling back to direct download:',
+          corsError
+        );
         // Fallback to direct download if CORS fails
         const link = document.createElement('a');
         link.href = url;
@@ -995,7 +1070,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       }
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert('Failed to download the asset. The file may not be accessible or may have been moved.');
+      alert(
+        'Failed to download the asset. The file may not be accessible or may have been moved.'
+      );
     }
   };
 
@@ -1190,7 +1267,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     let index = filteredAndSortedActivities.findIndex(
       (activity) => activity.CreatedAssetUrl === url
     );
-    
+
     // Only fall back to AssetSource matching if no CreatedAssetUrl match found
     if (index === -1) {
       index = filteredAndSortedActivities.findIndex(
@@ -1249,7 +1326,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handlePreviousInModal = () => {
     // "Previous" should go to older (chronologically earlier) image
     // Since array is sorted newest first (desc), we go forward in array for older
-    
+
     if (currentModalIndex < filteredAndSortedActivities.length - 1) {
       // Normal case: navigate to next image in current data
       const prevActivity = filteredAndSortedActivities[currentModalIndex + 1];
@@ -1272,14 +1349,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       // Auto-load next page when approaching end of current data
       // Load more when user is within 3 images of the end and there's more data available
-      const isNearEnd = currentModalIndex + 1 >= filteredAndSortedActivities.length - 3;
+      const isNearEnd =
+        currentModalIndex + 1 >= filteredAndSortedActivities.length - 3;
       const shouldLoadMore = isNearEnd && hasMore && !loading;
-      
+
       if (shouldLoadMore) {
         console.log('Auto-loading next page for modal navigation');
         setPage((prev) => prev + 1);
       }
-    } else if (currentModalIndex === filteredAndSortedActivities.length - 1 && hasMore && !loading) {
+    } else if (
+      currentModalIndex === filteredAndSortedActivities.length - 1 &&
+      hasMore &&
+      !loading
+    ) {
       // Edge case: at the last image but more data is available
       // Trigger loading of next page and set pending navigation
       console.log('Loading next page from last image');
@@ -1428,13 +1510,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
+    setModalRefreshKey((prev) => prev + 1); // Ensure clean modal state on next open
     setShowSlideshowSettings(false);
     setAutoStartSlideshow(false);
     setShowImageEditPane(false);
     setEditImageUrl('');
     setEditPrompt('');
     setIsEditingImage(false);
-    
+
     // Restore original activities if we were in group slideshow mode
     if (isGroupSlideshow && originalActivities.length > 0) {
       console.log('Restoring original activities after group slideshow');
@@ -1468,7 +1551,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Set the edit prompt and show the edit pane
     setEditPrompt(prompt);
     setShowImageEditPane(true);
-    
+
     // Make sure we have the current image URL for editing
     const currentActivity = filteredAndSortedActivities[currentModalIndex];
     if (currentActivity) {
@@ -1503,8 +1586,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     try {
       // Use AssetSource if the current item is a video, otherwise use CreatedAssetUrl
       const imageUrl =
-        currentActivity.AssetType === 'vid' 
-          ? currentActivity.AssetSource 
+        currentActivity.AssetType === 'vid'
+          ? currentActivity.AssetSource
           : currentActivity.CreatedAssetUrl;
 
       console.log('Creating video with:', {
@@ -1529,7 +1612,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         },
         body: JSON.stringify({
           url: imageUrl,
-          description: currentActivity.Prompt || 'Generate a video from this image',
+          description:
+            currentActivity.Prompt || 'Generate a video from this image',
           duration: '5',
           motion: '2'
         })
@@ -1546,7 +1630,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
         // Close the modal and refresh assets to show the new video in queue
         closeModal();
-        setRefreshKey(prev => prev + 1);
+        setRefreshKey((prev) => prev + 1);
       } else {
         const errorMessage = data.error || 'Failed to create video';
         if (response.status === 429) {
@@ -1580,18 +1664,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setModalMediaUrl(url);
       setShowSlideshowSettings(false); // Don't show settings - start playing
       setIsFullScreenModal(false);
-      
+
       // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
       setAutoStartSlideshow(false);
-      
+
       // Step 3: Now open the modal which will display the first image
       setIsModalOpen(true);
-      
+
       // Step 4: Wait for modal to fully render and display first image before auto-starting
       // This delay is crucial - it ensures the first image is fully visible
       // before the slideshow starts advancing
       setTimeout(() => {
-        console.log('First image displayed, now starting slideshow from index 0');
+        console.log(
+          'First image displayed, now starting slideshow from index 0'
+        );
         setAutoStartSlideshow(true);
       }, 1500); // Using a 1.5 second delay to ensure the first image is fully visible
     }
@@ -1737,7 +1823,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Group slideshow state
   const [isGroupSlideshow, setIsGroupSlideshow] = useState(false);
-  const [originalActivities, setOriginalActivities] = useState<UserActivity[]>([]);
+  const [originalActivities, setOriginalActivities] = useState<UserActivity[]>(
+    []
+  );
 
   // Listen for closeModal event from toast clicks
   useEffect(() => {
@@ -1745,16 +1833,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       if (isModalOpen) {
         setIsModalOpen(false);
         setModalMediaUrl('');
+        setModalRefreshKey((prev) => prev + 1); // Ensure clean modal state on next open
         setShowSlideshowSettings(false);
         setAutoStartSlideshow(false);
         setShowImageEditPane(false);
         setEditImageUrl('');
         setEditPrompt('');
         setIsEditingImage(false);
-        
+
         // Restore original activities if we were in group slideshow mode
         if (isGroupSlideshow && originalActivities.length > 0) {
-          console.log('Restoring original activities after group slideshow (from event)');
+          console.log(
+            'Restoring original activities after group slideshow (from event)'
+          );
           setActivities(originalActivities);
           setIsGroupSlideshow(false);
           setOriginalActivities([]);
@@ -1848,14 +1939,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleGroupSelect = (groupId: string | null) => {
     console.log('handleGroupSelect called with groupId:', groupId);
     const prevGroupId = filters.groupId;
-    
+
     setFilters((prev) => {
       console.log('Previous filters:', prev);
       const newFilters = { ...prev, groupId };
       console.log('New filters:', newFilters);
       return newFilters;
     });
-    
+
     // Force a refresh if we're clearing the group filter and state is already null
     // This handles the case where the visual state and actual state are out of sync
     if (groupId === null && prevGroupId === null) {
@@ -1867,7 +1958,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         fetchUserActivities(userId, normalizedUserIp);
       }, 0);
     }
-    
+
     // Note: Page reset is handled by the useEffect for filters
   };
 
@@ -1918,8 +2009,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleRemoveAssetFromGroup = (assetId: string) => {
     // Get the current asset's modal information
     const currentAsset = filteredAndSortedActivities[currentModalIndex];
-    if (currentAsset && currentAsset.groups && currentAsset.groups.length > 0 && currentGroupId) {
-      const group = currentAsset.groups.find(g => g.id === currentGroupId);
+    if (
+      currentAsset &&
+      currentAsset.groups &&
+      currentAsset.groups.length > 0 &&
+      currentGroupId
+    ) {
+      const group = currentAsset.groups.find((g) => g.id === currentGroupId);
       if (group) {
         handleRemoveFromGroup(assetId, currentGroupId, group.name);
       }
@@ -1929,20 +2025,35 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Function to handle removing an asset from the current group via Modal timeline
   const handleRemoveAssetFromTimelineGroup = (assetId: string) => {
     if (!filters.groupId) return;
-    
+
     // Find the asset in our filtered activities that has the same ID
-    const asset = filteredAndSortedActivities.find(activity => activity.id === assetId);
+    const asset = filteredAndSortedActivities.find(
+      (activity) => activity.id === assetId
+    );
     if (!asset || !asset.groups) return;
-    
+
     // Find the group info from the asset's groups property
-    const group = asset.groups.find(g => g.id === filters.groupId);
+    const group = asset.groups.find((g) => g.id === filters.groupId);
     if (!group) return;
-    
+
     // Call the existing remove function with the group name from the asset
     handleRemoveFromGroup(assetId, filters.groupId, group.name);
+
+    // The main handleRemoveFromGroup function will update the activities state,
+    // which will cause filteredAndSortedActivities to be recalculated,
+    // but we also need to force a refresh of the Modal's slideshowAssets
+    if (isModalOpen) {
+      // Force a refresh of the modal content by incrementing modalRefreshKey
+      // This will re-render the Modal with updated slideshowAssets
+      setModalRefreshKey((prev) => prev + 1);
+    }
   };
 
-  const handleRemoveFromGroup = async (assetId: string, groupId: string, groupName: string) => {
+  const handleRemoveFromGroup = async (
+    assetId: string,
+    groupId: string,
+    groupName: string
+  ) => {
     if (!userId || !assetId || !groupId) return;
 
     try {
@@ -1965,7 +2076,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             if (activity.id === assetId) {
               return {
                 ...activity,
-                groups: activity.groups?.filter(group => group.id !== groupId) || []
+                groups:
+                  activity.groups?.filter((group) => group.id !== groupId) || []
               };
             }
             return activity;
@@ -1995,17 +2107,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Slideshow preview functions
   const generateSlideshowAssets = () => {
-    return filteredAndSortedActivities
-      .slice()
-      .map((activity) => ({
-        id: activity.id || '',
-        url: activity.CreatedAssetUrl,
-        thumbnailUrl:
-          activity.AssetType === 'vid'
-            ? activity.AssetSource
-            : activity.CreatedAssetUrl,
-        assetType: activity.AssetType
-      }));
+    return filteredAndSortedActivities.slice().map((activity) => ({
+      id: activity.id || '',
+      url: activity.CreatedAssetUrl,
+      thumbnailUrl:
+        activity.AssetType === 'vid'
+          ? activity.AssetSource
+          : activity.CreatedAssetUrl,
+      assetType: activity.AssetType
+    }));
   };
 
   const handleSlideshowAssetClick = (index: number) => {
@@ -2035,7 +2145,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     // We need to update the main activities array, not the filtered one
     // The issue is that filteredAndSortedActivities is a computed value, not the source state
-    
+
     // First, let's identify which items from the main activities array correspond to our filtered items
     const itemToMove = filteredAndSortedActivities[originalFromIndex];
     const targetItem = filteredAndSortedActivities[originalToIndex];
@@ -2043,17 +2153,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Update the main activities state by finding the items in the original array and reordering them
     setActivities((currentActivities) => {
       const updatedActivities = [...currentActivities];
-      
+
       // Find the actual indices in the main activities array
-      const actualFromIndex = updatedActivities.findIndex(activity => activity.id === itemToMove?.id);
-      const actualToIndex = updatedActivities.findIndex(activity => activity.id === targetItem?.id);
-      
+      const actualFromIndex = updatedActivities.findIndex(
+        (activity) => activity.id === itemToMove?.id
+      );
+      const actualToIndex = updatedActivities.findIndex(
+        (activity) => activity.id === targetItem?.id
+      );
+
       if (actualFromIndex !== -1 && actualToIndex !== -1) {
         // Remove the item from its current position
         const [movedItem] = updatedActivities.splice(actualFromIndex, 1);
         // Insert it at the new position
         updatedActivities.splice(actualToIndex, 0, movedItem);
-        
+
         // Update order values to preserve the new order when sorting
         // Use 10-unit intervals for spacing (similar to the API endpoints)
         // IMPORTANT: We assign LOWER values to items that should appear FIRST in the UI
@@ -2066,7 +2180,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           activity.DateTime = activity.DateTime || new Date();
         });
       }
-      
+
       return updatedActivities;
     });
 
@@ -2075,54 +2189,70 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setCurrentModalIndex(originalToIndex);
     } else if (originalFromIndex < originalToIndex) {
       // Moving item down: indices between fromIndex and toIndex shift up
-      if (currentModalIndex > originalFromIndex && currentModalIndex <= originalToIndex) {
+      if (
+        currentModalIndex > originalFromIndex &&
+        currentModalIndex <= originalToIndex
+      ) {
         setCurrentModalIndex(currentModalIndex - 1);
       }
     } else {
       // Moving item up: indices between toIndex and fromIndex shift down
-      if (currentModalIndex >= originalToIndex && currentModalIndex < originalFromIndex) {
+      if (
+        currentModalIndex >= originalToIndex &&
+        currentModalIndex < originalFromIndex
+      ) {
         setCurrentModalIndex(currentModalIndex + 1);
       }
     }
   };
 
-  const handleSaveAssetOrder = async (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => {
+  const handleSaveAssetOrder = async (
+    orderedAssets: Array<{
+      id: string;
+      url: string;
+      thumbnailUrl?: string;
+      assetType: string;
+    }>
+  ) => {
     try {
       // IMPORTANT: The order of assets in the orderedAssets array is preserved on the backend
       // The backend assigns order values with lower values (0, 10, 20) to items that appear earlier in the array
       // So the first item in this array will get the lowest order value and appear first when sorting by order ASC
-      console.log('Saving asset order to database for assets:', orderedAssets.length);
-      
+      console.log(
+        'Saving asset order to database for assets:',
+        orderedAssets.length
+      );
+
       // Declare response variable before if/else block to make it accessible throughout the function
       let response;
-      
+
       // Determine if we need to use group-specific ordering
       if (isGroupSlideshow && currentGroupId) {
         console.log('Using group-specific ordering for group:', currentGroupId);
-        
+
         // Use the group-specific API endpoint
         response = await fetch('/api/saveGroupAssetOrder', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             userId: userId,
             groupId: currentGroupId,
-            orderedAssetIds: orderedAssets.map(asset => asset.id)
-          }),
+            orderedAssetIds: orderedAssets.map((asset) => asset.id)
+          })
         });
       } else {
         // Use the global asset ordering API
         response = await fetch('/api/saveAssetOrder', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             userId: userId,
-            orderedAssetIds: orderedAssets.map(asset => asset.id)
-          }),
+            orderedAssetIds: orderedAssets.map((asset) => asset.id)
+          })
         });
       }
 
@@ -2133,27 +2263,30 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       const result = await response.json();
       console.log('Asset order saved to database:', result);
-      
+
       // The database update is complete, now update local state to reflect the new order
       // We're updating the local state to match the backend ordering logic:
       // Items at the beginning of the array get lower order values (0, 10, 20...)
       // These will appear first when sorted by order in ascending order
       const orderInterval = 10;
-      setActivities(currentActivities => {
+      setActivities((currentActivities) => {
         const updatedActivities = [...currentActivities];
-        
+
         // Update order values to reflect the database changes
         orderedAssets.forEach((orderedAsset, index) => {
-          const activityIndex = updatedActivities.findIndex(activity => activity.id === orderedAsset.id);
+          const activityIndex = updatedActivities.findIndex(
+            (activity) => activity.id === orderedAsset.id
+          );
           if (activityIndex !== -1) {
             // Set the order field to match server-side ordering
             // First item gets order=0, second gets order=10, etc.
             updatedActivities[activityIndex].order = index * orderInterval;
             // Keep DateTime for backward compatibility
-            updatedActivities[activityIndex].DateTime = updatedActivities[activityIndex].DateTime || new Date();
+            updatedActivities[activityIndex].DateTime =
+              updatedActivities[activityIndex].DateTime || new Date();
           }
         });
-        
+
         return updatedActivities;
       });
 
@@ -2169,7 +2302,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // The order is now preserved in the local state and will be reflected in the UI
       // Note: For a full implementation, you might want to also update the server-side order
       // by calling an API endpoint that accepts the complete ordered list
-      
     } catch (error) {
       console.error('Error saving asset order:', error);
       showToast({
@@ -2290,10 +2422,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Helper function to fetch all assets for a group (no pagination)
-  const fetchAllGroupAssets = async (groupId: string): Promise<UserActivity[]> => {
+  const fetchAllGroupAssets = async (
+    groupId: string
+  ): Promise<UserActivity[]> => {
     try {
       console.log('Fetching all assets for group:', groupId);
-      
+
       // Fetch with a very high limit to get all assets
       const params = new URLSearchParams({
         userId: userId ? userId : 'none',
@@ -2306,15 +2440,19 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       const url = `/api/getUserAssets?${params.toString()}`;
       console.log('Fetching all group assets from URL:', url);
-      
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch group assets: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      console.log('Fetched all group assets:', data.assets?.length || 0, 'assets');
-      
+      console.log(
+        'Fetched all group assets:',
+        data.assets?.length || 0,
+        'assets'
+      );
+
       return data.assets || [];
     } catch (error) {
       console.error('Error fetching all group assets:', error);
@@ -2327,64 +2465,75 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Set current group ID for tracking
     setCurrentGroupId(groupId);
     console.log('Starting group slideshow for group:', groupId);
-    
+
     try {
       // Fetch ALL assets for this group to ensure complete slideshow
       const allGroupAssets = await fetchAllGroupAssets(groupId);
-      
+
       console.log('Fetched group assets:', allGroupAssets.length);
-      
+
       if (allGroupAssets.length > 0) {
         // Store original activities and enable group slideshow mode
         setOriginalActivities(activities);
         setIsGroupSlideshow(true);
-        
+
         // Deep clone the array to avoid reference issues
         const clonedAssets = JSON.parse(JSON.stringify(allGroupAssets));
-        
+
         // Let's log ALL assets to see what we're working with
         console.log('====== SLIDESHOW ASSETS DEBUG ======');
         clonedAssets.forEach((asset, index) => {
-          console.log(`Asset ${index}:`, asset.id, asset.AssetType, asset.CreatedAssetUrl);
+          console.log(
+            `Asset ${index}:`,
+            asset.id,
+            asset.AssetType,
+            asset.CreatedAssetUrl
+          );
         });
         console.log('================================');
-        
+
         // Sort assets by their ID or creation date to ensure consistent order
         // Let's force the penguin image to be first for testing
-        const penguinAsset = clonedAssets.find(asset => 
-          asset.CreatedAssetUrl.includes('penguin') ||
-          asset.CreatedAssetUrl.includes('hb18nttzVIj60IMOnTInR')
+        const penguinAsset = clonedAssets.find(
+          (asset) =>
+            asset.CreatedAssetUrl.includes('penguin') ||
+            asset.CreatedAssetUrl.includes('hb18nttzVIj60IMOnTInR')
         );
-        
+
         // If we found the penguin asset, make it the first one
         if (penguinAsset) {
-          console.log('Found penguin asset! Moving to first position:', penguinAsset.CreatedAssetUrl);
+          console.log(
+            'Found penguin asset! Moving to first position:',
+            penguinAsset.CreatedAssetUrl
+          );
           // Remove penguin from its current position
-          const filteredAssets = clonedAssets.filter(asset => asset.id !== penguinAsset.id);
+          const filteredAssets = clonedAssets.filter(
+            (asset) => asset.id !== penguinAsset.id
+          );
           // Insert at the beginning
           filteredAssets.unshift(penguinAsset);
           // Replace the cloned assets with our reordered version
           clonedAssets.length = 0;
           clonedAssets.push(...filteredAssets);
         }
-        
+
         // Now get the first asset after our reordering
         const firstAsset = clonedAssets[0];
         const firstAssetUrl = firstAsset.CreatedAssetUrl;
-        
+
         console.log('====== SLIDESHOW INIT DEBUG ======');
         console.log('First asset ID:', firstAsset.id);
         console.log('First asset type:', firstAsset.AssetType);
         console.log('First asset URL:', firstAssetUrl);
         console.log('================================');
-        
+
         // Now set the activities state
         setActivities(clonedAssets);
-        
+
         // Force an override of Modal's source url to ensure it's correct
         // Important: Use the captured variables directly, don't re-access activities state
         const forcedFirstImageUrl = firstAssetUrl; // Use the same variable throughout
-        
+
         // Ensure synchronous updates by using a small timeout
         setTimeout(() => {
           console.log('Setting modal props...');
@@ -2394,19 +2543,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           console.log('Setting modal media URL to:', forcedFirstImageUrl);
           setShowSlideshowSettings(false);
           setIsFullScreenModal(false);
-          
+
           // Step 2: Critical - ensure autoStartSlideshow is false when opening modal
           setAutoStartSlideshow(false);
-          
+
           // Step 3: Now open the modal which will display the first image
-          console.log('Opening modal with first image URL:', forcedFirstImageUrl);
+          console.log(
+            'Opening modal with first image URL:',
+            forcedFirstImageUrl
+          );
           setIsModalOpen(true);
-          
+
           // Step 4: Wait for modal to fully render and display first image before auto-starting
           // This delay is crucial - it ensures the first image is fully visible
           // before the slideshow starts advancing
           setTimeout(() => {
-            console.log('First image displayed, now starting slideshow from index 0');
+            console.log(
+              'First image displayed, now starting slideshow from index 0'
+            );
             setAutoStartSlideshow(true);
           }, 2000); // Using a longer 2s delay to ensure the first image is fully visible
         }, 50); // Small delay to ensure state updates properly
@@ -2420,16 +2574,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleOpenGroupSlideshowSettings = async (groupId: string) => {
     console.log('Opening group slideshow settings for group:', groupId);
-    
+
     // Fetch ALL assets for this group to ensure complete slideshow
     const allGroupAssets = await fetchAllGroupAssets(groupId);
-    
+
     if (allGroupAssets.length > 0) {
       // Store original activities and enable group slideshow mode
       setOriginalActivities(activities);
       setIsGroupSlideshow(true);
       setActivities(allGroupAssets);
-      
+
       const firstActivity = allGroupAssets[0];
       const url =
         firstActivity.AssetType === 'vid'
@@ -2451,7 +2605,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   if (!userId) {
     return (
       <div className="my-assets-container">
-        <h1 className="text-xl font-bold mb-2 text-left">My {assetTypeTitle} Assets</h1>
+        <h1 className="text-xl font-bold mb-2 text-left">
+          My {assetTypeTitle} Assets
+        </h1>
         <div className="text-center py-8">
           <p className="text-lg mb-4">Please sign in to view your assets.</p>
           <a
@@ -2469,8 +2625,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     <div className={`my-assets-container ${isDragging ? 'select-none' : ''}`}>
       {/* Title and Refresh section - same line on mobile */}
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-xl font-bold text-left">My {assetTypeTitle} Assets</h1>
-        <button 
+        <h1 className="text-xl font-bold text-left">
+          My {assetTypeTitle} Assets
+        </h1>
+        <button
           onClick={handleRefresh}
           className="md:hidden flex items-center gap-1 px-2 py-1 rounded text-sm"
           style={{
@@ -2648,7 +2806,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
             {bulkMode && (
               <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm text-blue-700 dark:text-blue-300">
-                <strong>Instructions:</strong> Check the box next to the images that you want to add to a group
+                <strong>Instructions:</strong> Check the box next to the images
+                that you want to add to a group
               </div>
             )}
           </div>
@@ -2791,7 +2950,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 }
                 className="flex items-center gap-1 p-2 border rounded"
                 style={{ borderColor: 'var(--border-color)' }}
-                title={sortDirection === 'desc' ? 'Currently showing newest first (by date) or reverse order (by arrangement)' : 'Currently showing oldest first (by date) or arranged order'}
+                title={
+                  sortDirection === 'desc'
+                    ? 'Currently showing newest first (by date) or reverse order (by arrangement)'
+                    : 'Currently showing oldest first (by date) or arranged order'
+                }
               >
                 {sortDirection === 'desc' ? (
                   <>
@@ -2889,9 +3052,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         <div
           key={activity.id || index}
           id={
-            index === 0 ? 'first-asset' : 
-            (activity.AssetType === 'que' && !filteredAndSortedActivities.slice(0, index).some(a => a.AssetType === 'que')) ? 'first-queued-asset' : 
-            undefined
+            index === 0
+              ? 'first-asset'
+              : activity.AssetType === 'que' &&
+                  !filteredAndSortedActivities
+                    .slice(0, index)
+                    .some((a) => a.AssetType === 'que')
+                ? 'first-queued-asset'
+                : undefined
           }
           className={`border p-4 asset-item ${
             onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
@@ -3012,15 +3180,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                                 : '/logo.png'
                     }
                     alt="Thumbnail"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain asset-image"
                     width={200}
                     height={200}
-                    style={{ 
-                      maxWidth: '100%', 
+                    style={{
+                      maxWidth: '100%',
                       maxHeight: '100%',
-                      width: 'auto', 
+                      width: 'auto',
                       height: 'auto',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      margin: 'auto',
+                      display: 'block',
+                      position: 'absolute',
+                      top: '0',
+                      left: '0',
+                      right: '0',
+                      bottom: '0'
                     }}
                     unoptimized
                     onError={(e) => {
@@ -3029,24 +3204,38 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                         const container = e.currentTarget.parentElement;
                         if (container) {
                           // Check if a play icon already exists to prevent duplicates
-                          const existingPlayIcon = container.querySelector('.video-play-icon');
+                          const existingPlayIcon =
+                            container.querySelector('.video-play-icon');
                           if (!existingPlayIcon) {
                             // Hide the broken image
                             e.currentTarget.style.display = 'none';
-                            
+
                             // Create play icon container
                             const playIcon = document.createElement('div');
-                            playIcon.className = 'video-play-icon w-full h-full flex items-center justify-center';
+                            playIcon.className =
+                              'video-play-icon w-full h-full flex items-center justify-center';
 
                             // Create the FaPlay icon element
-                            const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            const svgIcon = document.createElementNS(
+                              'http://www.w3.org/2000/svg',
+                              'svg'
+                            );
                             svgIcon.setAttribute('fill', 'currentColor');
                             svgIcon.setAttribute('viewBox', '0 0 448 512');
-                            svgIcon.setAttribute('class', 'w-8 h-8 text-gray-500');
+                            svgIcon.setAttribute(
+                              'class',
+                              'w-8 h-8 text-gray-500'
+                            );
 
                             // FaPlay path data
-                            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                            path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
+                            const path = document.createElementNS(
+                              'http://www.w3.org/2000/svg',
+                              'path'
+                            );
+                            path.setAttribute(
+                              'd',
+                              'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z'
+                            );
 
                             svgIcon.appendChild(path);
                             playIcon.appendChild(svgIcon);
@@ -3057,26 +3246,40 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     }}
                   />
                 )}
-                
+
                 {/* Trash can icon - only show when viewing a group */}
-                {filters.groupId !== null && activity.id && activity.groups && activity.groups.length > 0 && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const group = activity.groups?.find(g => g.id === filters.groupId);
-                      if (activity.id && group && confirm(`Remove this asset from the "${group.name}" group?`)) {
-                        handleRemoveFromGroup(activity.id, group.id, group.name);
-                      }
-                    }}
-                    className="absolute bottom-2 right-2 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-full p-1.5 text-white focus:outline-none transition-all shadow-md z-10"
-                    title="Remove from group"
-                  >
-                    <FaTrash className="text-xs" />
-                  </button>
-                )}
+                {filters.groupId !== null &&
+                  activity.id &&
+                  activity.groups &&
+                  activity.groups.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const group = activity.groups?.find(
+                          (g) => g.id === filters.groupId
+                        );
+                        if (
+                          activity.id &&
+                          group &&
+                          confirm(
+                            `Remove this asset from the "${group.name}" group?`
+                          )
+                        ) {
+                          handleRemoveFromGroup(
+                            activity.id,
+                            group.id,
+                            group.name
+                          );
+                        }
+                      }}
+                      className="absolute bottom-2 right-2 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-full p-1.5 text-white focus:outline-none transition-all shadow-md z-10"
+                      title="Remove from group"
+                    >
+                      <FaTrash className="text-xs" />
+                    </button>
+                  )}
               </div>
-              )}
             </div>
           </div>
 
@@ -3134,7 +3337,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               if (activity.id) {
-                                handleRemoveFromGroup(activity.id, group.id, group.name);
+                                handleRemoveFromGroup(
+                                  activity.id,
+                                  group.id,
+                                  group.name
+                                );
                               }
                             }}
                             className="ml-1 hover:opacity-70 transition-opacity"
@@ -3322,14 +3529,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         )}
       {isModalOpen && filteredAndSortedActivities.length > 0 && (
         <Modal
+          key={modalRefreshKey} // Adding key prop to force complete re-render when needed
           mediaUrl={modalMediaUrl}
           onClose={closeModal}
           fullScreen={isFullScreenModal}
           onNext={handlePreviousInModal}
           onPrevious={handleNextInModal}
           hasNext={
-            currentModalIndex < filteredAndSortedActivities.length - 1 || 
-            (currentModalIndex === filteredAndSortedActivities.length - 1 && hasMore)
+            currentModalIndex < filteredAndSortedActivities.length - 1 ||
+            (currentModalIndex === filteredAndSortedActivities.length - 1 &&
+              hasMore)
           }
           hasPrevious={currentModalIndex > 0}
           onLike={() => {
@@ -3377,15 +3586,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           isEditingImage={isEditingImage}
           onModifyImage={handleModifyImageFromModal}
           onCreateVideo={handleCreateVideoFromModal}
-          groupId={currentGroupId}
-          onRemoveFromGroup={handleRemoveAssetFromGroup}
           currentAssetInfo={{
             id: filteredAndSortedActivities[currentModalIndex]?.id,
             prompt: filteredAndSortedActivities[currentModalIndex]?.Prompt,
             assetType: filteredAndSortedActivities[currentModalIndex]?.AssetType
           }}
-          groupId={filters.groupId}
-          onRemoveFromGroup={filters.groupId ? handleRemoveAssetFromTimelineGroup : undefined}
+          groupId={filters.groupId || undefined}
+          onRemoveFromGroup={
+            filters.groupId ? handleRemoveAssetFromTimelineGroup : undefined
+          }
         />
       )}
 
