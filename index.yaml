@@ -63,6 +63,13 @@ indexes:
       - name: order
       - name: createdAt
         direction: desc
+        
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+      - name: createdAt
+        direction: desc
 
   - kind: AssetGroupMembership
     properties:
