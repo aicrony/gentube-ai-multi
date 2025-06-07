@@ -95,6 +95,14 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       }, 100);
     }
   }, []);
+  
+  // Also trigger a refresh when userId is available but userIp is still 'unknown'
+  React.useEffect(() => {
+    if (userId && userId !== 'none' && userIp === 'unknown' && activities.length === 0 && !loading) {
+      console.log('userId available but userIp is unknown - triggering fetch with userId only');
+      setRefreshKey(prev => prev + 1);
+    }
+  }, [userId, userIp, activities.length, loading]);
 
   // Check for URL parameter to open specific image
   React.useEffect(() => {
@@ -255,8 +263,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
-    // Skip the fetch only if both userId and userIp are missing/invalid
-    // Make sure to still attempt fetch if userIp is 'unknown' but userId is valid
+    // Log user identity info for debugging
+    console.log(`fetchUserActivities called with userId: ${userId}, userIp: ${userIp}`);
+    
+    // Always attempt fetch if userId is valid, regardless of userIp status
+    // Only skip if BOTH userId is invalid AND userIp is invalid/unknown
     if ((userId && userId !== 'none') || (userIp && userIp !== 'none' && userIp !== 'unknown')) {
       try {
         // Support comma-separated asset types - use the filters state

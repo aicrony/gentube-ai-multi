@@ -18,47 +18,60 @@ export async function GET(request: NextRequest) {
   console.log('API groupId received:', groupId, 'type:', typeof groupId);
   console.log('API includeGroups:', includeGroups);
 
-  if (!userId || !userIp) {
+  if (!userId && !userIp) {
     return NextResponse.json(
-      { error: 'Missing required parameters' },
+      { error: 'Missing required parameters - need either userId or userIp' },
       { status: 400 }
     );
   }
 
-  if (userIp !== 'unknown') {
-    try {
-      let assets;
+  try {
+    // Only return empty array if BOTH conditions are true:
+    // 1. userIp is 'unknown' or missing AND
+    // 2. userId is missing or 'none'
+    if ((userIp === 'unknown' || !userIp) && (!userId || userId === 'none')) {
+      console.log('Skipping fetch: no valid identification parameters');
+      return NextResponse.json({ assets: [] });
+    }
+    
+    // Log all valid parameters to help with debugging
+    const validUserId = userId && userId !== 'none';
+    const validUserIp = userIp && userIp !== 'unknown';
+    console.log(`Proceeding with fetch - Valid userId: ${validUserId}, Valid userIp: ${validUserIp}`);
+    
+    // If we got here, we have at least one valid parameter (userId or userIp)
 
-      if (groupId || includeGroups) {
-        // Use enhanced function that includes group information
-        assets = await getUserAssetsWithGroups(
-          userId,
-          userIp,
-          Number(limit),
-          Number(offset),
-          assetType || undefined,
-          groupId || undefined
-        );
-      } else {
-        // Use original function for backward compatibility
-        assets = await getUserAssets(
-          userId,
-          userIp,
-          Number(limit),
-          Number(offset),
-          assetType || undefined
-        );
-      }
+    let assets;
+    
+    console.log(`Fetching assets for userId: ${userId}, userIp: ${userIp}`);
 
-      return NextResponse.json({ assets });
-    } catch (error) {
-      console.error('Failed to fetch user assets:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch user assets' },
-        { status: 500 }
+    if (groupId || includeGroups) {
+      // Use enhanced function that includes group information
+      assets = await getUserAssetsWithGroups(
+        userId,
+        userIp,
+        Number(limit),
+        Number(offset),
+        assetType || undefined,
+        groupId || undefined
+      );
+    } else {
+      // Use original function for backward compatibility
+      assets = await getUserAssets(
+        userId,
+        userIp,
+        Number(limit),
+        Number(offset),
+        assetType || undefined
       );
     }
-  } else {
-    return NextResponse.json({ assets: [] });
+
+    return NextResponse.json({ assets });
+  } catch (error) {
+    console.error('Failed to fetch user assets:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch user assets' },
+      { status: 500 }
+    );
   }
 }
