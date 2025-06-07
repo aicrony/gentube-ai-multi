@@ -2965,69 +2965,90 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 }
               }}
             >
-              {activity.AssetType === 'vid' &&
-              activity.AssetSource === 'none' ? (
-                <FaPlay className="w-8 h-8 text-gray-500" />
-              ) : (
-                <Image
-                  src={
-                    activity.AssetType === 'vid'
-                      ? activity.AssetSource
-                      : activity.AssetType === 'img'
-                        ? activity.CreatedAssetUrl
-                        : activity.AssetType === 'upl'
+              <div className="relative w-full h-full">
+                {activity.AssetType === 'vid' &&
+                activity.AssetSource === 'none' ? (
+                  <FaPlay className="w-8 h-8 text-gray-500" />
+                ) : (
+                  <Image
+                    src={
+                      activity.AssetType === 'vid'
+                        ? activity.AssetSource
+                        : activity.AssetType === 'img'
                           ? activity.CreatedAssetUrl
-                          : activity.AssetType === 'que'
-                            ? '/logo.png'
-                            : activity.AssetType === 'err'
+                          : activity.AssetType === 'upl'
+                            ? activity.CreatedAssetUrl
+                            : activity.AssetType === 'que'
                               ? '/logo.png'
-                              : '/logo.png'
-                  }
-                  alt="Thumbnail"
-                  className="w-full h-full object-contain"
-                  width={200}
-                  height={200}
-                  style={{ 
-                    maxWidth: '100%', 
-                    maxHeight: '100%',
-                    width: 'auto', 
-                    height: 'auto',
-                    objectFit: 'contain'
-                  }}
-                  unoptimized
-                  onError={(e) => {
-                    if (activity.AssetType === 'vid') {
-                      // Hide the broken image and replace it with a play icon
-                      const container = e.currentTarget.parentElement;
-                      if (container) {
-                        // Check if a play icon already exists to prevent duplicates
-                        const existingPlayIcon = container.querySelector('.video-play-icon');
-                        if (!existingPlayIcon) {
-                          // Hide the broken image
-                          e.currentTarget.style.display = 'none';
-                          
-                          // Create play icon container
-                          const playIcon = document.createElement('div');
-                          playIcon.className = 'video-play-icon w-full h-full flex items-center justify-center';
+                              : activity.AssetType === 'err'
+                                ? '/logo.png'
+                                : '/logo.png'
+                    }
+                    alt="Thumbnail"
+                    className="w-full h-full object-contain"
+                    width={200}
+                    height={200}
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: '100%',
+                      width: 'auto', 
+                      height: 'auto',
+                      objectFit: 'contain'
+                    }}
+                    unoptimized
+                    onError={(e) => {
+                      if (activity.AssetType === 'vid') {
+                        // Hide the broken image and replace it with a play icon
+                        const container = e.currentTarget.parentElement;
+                        if (container) {
+                          // Check if a play icon already exists to prevent duplicates
+                          const existingPlayIcon = container.querySelector('.video-play-icon');
+                          if (!existingPlayIcon) {
+                            // Hide the broken image
+                            e.currentTarget.style.display = 'none';
+                            
+                            // Create play icon container
+                            const playIcon = document.createElement('div');
+                            playIcon.className = 'video-play-icon w-full h-full flex items-center justify-center';
 
-                          // Create the FaPlay icon element
-                          const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                          svgIcon.setAttribute('fill', 'currentColor');
-                          svgIcon.setAttribute('viewBox', '0 0 448 512');
-                          svgIcon.setAttribute('class', 'w-8 h-8 text-gray-500');
+                            // Create the FaPlay icon element
+                            const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                            svgIcon.setAttribute('fill', 'currentColor');
+                            svgIcon.setAttribute('viewBox', '0 0 448 512');
+                            svgIcon.setAttribute('class', 'w-8 h-8 text-gray-500');
 
-                          // FaPlay path data
-                          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                          path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
+                            // FaPlay path data
+                            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            path.setAttribute('d', 'M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z');
 
-                          svgIcon.appendChild(path);
-                          playIcon.appendChild(svgIcon);
-                          container.appendChild(playIcon);
+                            svgIcon.appendChild(path);
+                            playIcon.appendChild(svgIcon);
+                            container.appendChild(playIcon);
+                          }
                         }
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                )}
+                
+                {/* Trash can icon - only show when viewing a group */}
+                {filters.groupId !== null && activity.id && activity.groups && activity.groups.length > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      const group = activity.groups?.find(g => g.id === filters.groupId);
+                      if (activity.id && group && confirm(`Remove this asset from the "${group.name}" group?`)) {
+                        handleRemoveFromGroup(activity.id, group.id, group.name);
+                      }
+                    }}
+                    className="absolute bottom-2 right-2 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-full p-1.5 text-white focus:outline-none transition-all shadow-md z-10"
+                    title="Remove from group"
+                  >
+                    <FaTrash className="text-xs" />
+                  </button>
+                )}
+              </div>
               )}
             </div>
           </div>
