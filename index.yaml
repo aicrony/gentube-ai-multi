@@ -20,6 +20,13 @@ indexes:
       - name: DateTime
         direction: desc
 
+  - kind: UserActivity
+    properties:
+      - name: SubscriptionTier
+      - name: order
+      - name: DateTime
+        direction: desc
+
   # Groups feature indexes
   - kind: UserGroup
     properties:
