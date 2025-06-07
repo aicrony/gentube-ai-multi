@@ -236,7 +236,8 @@ export async function getUserAssetsWithGroups(
   limit: number,
   offset: number,
   assetType?: string,
-  groupId?: string // Optional filter by group
+  groupId?: string, // Optional filter by group
+  migrateOrderValues: boolean = true // Add parameter to control order migration
 ): Promise<AssetWithGroups[]> {
   try {
     console.log('getUserAssetsWithGroups called with:');
@@ -244,8 +245,8 @@ export async function getUserAssetsWithGroups(
     console.log('- groupId:', groupId, 'type:', typeof groupId);
     console.log('- assetType:', assetType);
     
-    // Import getUserAssets to avoid circular dependency
-    const { getUserAssets } = await import('./userAssets');
+    // Import needed functions to avoid circular dependency
+    const { getUserAssets, migrateActivityOrderValues } = await import('./userAssets');
 
     let assets;
 
@@ -285,10 +286,16 @@ export async function getUserAssetsWithGroups(
           );
         }
       }
+      
+      // Migrate order values if needed
+      if (migrateOrderValues && assets && assets.length > 0) {
+        console.log('Checking for order migration in group assets');
+        assets = await migrateActivityOrderValues(assets);
+      }
     } else {
       console.log('No groupId - fetching all assets');
       // Regular asset fetch
-      assets = await getUserAssets(userId, userIp, limit, offset, assetType);
+      assets = await getUserAssets(userId, userIp, limit, offset, assetType, migrateOrderValues);
       console.log('All assets fetched, count:', assets?.length);
     }
 

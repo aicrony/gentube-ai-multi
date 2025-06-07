@@ -4,6 +4,84 @@ import { localIpConfig } from '@/utils/ipUtils';
 
 require('dotenv').config();
 
+/**
+ * Helper function to migrate activities without order values
+ * This assigns order values based on DateTime sorting and updates the database
+ * @export This function is exported so it can be used by groupManager.ts
+ */
+export async function migrateActivityOrderValues(activities: UserActivity[]): Promise<UserActivity[]> {
+  const hasActivitiesWithoutOrder = activities.some(activity => activity.order === undefined);
+  
+  if (!hasActivitiesWithoutOrder || activities.length === 0) {
+    return activities;
+  }
+  
+  console.log('Some assets missing order values, initiating migration');
+  
+  // Sort by DateTime first to establish the initial order
+  activities.sort((a, b) => {
+    const dateA = a.DateTime ? new Date(a.DateTime).getTime() : 0;
+    const dateB = b.DateTime ? new Date(b.DateTime).getTime() : 0;
+    return dateB - dateA; // Newest first (descending)
+  });
+  
+  // Assign order values with 10-unit spacing
+  const orderInterval = 10;
+  const transaction = datastore.transaction();
+  
+  try {
+    // Start transaction to update all assets
+    await transaction.run();
+    
+    const updates: any[] = [];
+    
+    // For each activity without an order value, assign one and prepare update
+    activities.forEach((activity, index) => {
+      if (activity.order === undefined && activity.id) {
+        // Set the new order value based on current position (after DateTime sort)
+        const newOrder = index * orderInterval;
+        
+        // Update the local object
+        activity.order = newOrder;
+        
+        // Prepare transaction update
+        const key = datastore.key({
+          namespace: NAMESPACE,
+          path: [USER_ACTIVITY_KIND, datastore.int(Number(activity.id))]
+        });
+        
+        updates.push(transaction.get(key).then(([existingAsset]) => {
+          if (existingAsset) {
+            existingAsset.order = newOrder;
+            transaction.save({
+              key,
+              data: existingAsset
+            });
+            console.log(`Assigned order ${newOrder} to asset ${activity.id}`);
+          }
+        }));
+      }
+    });
+    
+    // Wait for all updates to be prepared
+    await Promise.all(updates);
+    
+    // Commit the transaction if we have updates
+    if (updates.length > 0) {
+      await transaction.commit();
+      console.log(`Migration complete: Updated order for ${updates.length} assets`);
+    } else {
+      await transaction.rollback();
+    }
+  } catch (error) {
+    console.error('Error migrating order values:', error);
+    await transaction.rollback();
+    // Continue with existing activities even if migration fails
+  }
+  
+  return activities;
+}
+
 const datastore = new Datastore({
   projectId: google_app_creds.projectId,
   credentials: google_app_creds
@@ -30,7 +108,8 @@ export async function getUserAssets(
   userIp: string | string[],
   limit: number,
   offset: number,
-  assetType?: string | string[] | undefined
+  assetType?: string | string[] | undefined,
+  migrateOrderValues: boolean = true // Add parameter to control order migration
 ): Promise<UserActivity[] | null> {
   // if (!userId || userId.length === 0) {
   //   console.log('Invalid userId');
@@ -91,7 +170,8 @@ export async function getUserAssets(
 
   const [results] = await datastore.runQuery(query);
   
-  return results.map((activity: any) => ({
+  // Create properly mapped activities
+  let mappedActivities = results.map((activity: any) => ({
     id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
@@ -101,12 +181,20 @@ export async function getUserAssets(
     SubscriptionTier: activity.SubscriptionTier,
     order: activity.order
   }));
+  
+  // Migrate order values if needed
+  if (migrateOrderValues) {
+    mappedActivities = await migrateActivityOrderValues(mappedActivities);
+  }
+  
+  return mappedActivities;
 }
 
 export async function getPublicAssets(
   limit: number,
   offset: number,
-  assetType?: string | string[] | undefined
+  assetType?: string | string[] | undefined,
+  migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
@@ -131,7 +219,9 @@ export async function getPublicAssets(
   }
 
   const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => ({
+  
+  // Create properly mapped activities
+  let mappedActivities = results.map((activity: any) => ({
     id: String(activity[datastore.KEY].name || activity[datastore.KEY].id), // Include entity ID as string
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
@@ -141,12 +231,20 @@ export async function getPublicAssets(
     SubscriptionTier: activity.SubscriptionTier,
     order: activity.order
   }));
+  
+  // Migrate order values if needed
+  if (migrateOrderValues) {
+    mappedActivities = await migrateActivityOrderValues(mappedActivities);
+  }
+  
+  return mappedActivities;
 }
 
 export async function getGalleryAssets(
   limit: number,
   offset: number,
-  assetType?: string | string[] | undefined
+  assetType?: string | string[] | undefined,
+  migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
@@ -201,7 +299,8 @@ export async function getGalleryAssets(
     console.error('Error fetching creator names:', error);
   }
 
-  return results.map((activity: any) => {
+  // Create properly mapped activities with creator names
+  let mappedActivities = results.map((activity: any) => {
     // Provide fallbacks for missing data
     let prompt = activity.Prompt;
     if (!prompt && activity.description) {
@@ -234,12 +333,20 @@ export async function getGalleryAssets(
       order: activity.order
     };
   });
+  
+  // Migrate order values if needed
+  if (migrateOrderValues) {
+    mappedActivities = await migrateActivityOrderValues(mappedActivities);
+  }
+  
+  return mappedActivities;
 }
 
 export async function getAllAssets(
   limit: number,
   offset: number,
-  assetType?: string | string[] | undefined
+  assetType?: string | string[] | undefined,
+  migrateOrderValues: boolean = true
 ): Promise<UserActivity[] | null> {
   // Admin function to get ALL assets from UserActivity, not filtered by SubscriptionTier
   let query = datastore
@@ -294,7 +401,8 @@ export async function getAllAssets(
     console.error('Error fetching creator names:', error);
   }
 
-  return results.map((activity: any) => {
+  // Create properly mapped activities with creator names
+  let mappedActivities = results.map((activity: any) => {
     // Provide fallbacks for missing data
     let prompt = activity.Prompt;
     if (!prompt && activity.description) {
@@ -327,4 +435,11 @@ export async function getAllAssets(
       order: activity.order
     };
   });
+  
+  // Migrate order values if needed
+  if (migrateOrderValues) {
+    mappedActivities = await migrateActivityOrderValues(mappedActivities);
+  }
+  
+  return mappedActivities;
 }
