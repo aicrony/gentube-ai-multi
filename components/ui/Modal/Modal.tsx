@@ -47,6 +47,7 @@ interface ModalProps {
   onJumpToFirst?: () => void;
   onJumpToLast?: () => void;
   currentAssets?: string[];
+  onRemoveFromGroup?: (assetId: string) => void;
   onCreateSlideshow?: (settings: {
     interval: number;
     direction: 'forward' | 'backward';
@@ -138,7 +139,10 @@ const Modal: React.FC<ModalProps> = ({
   onModifyImage,
   onCreateVideo,
   onStartFresh,
-  onSubmitModifyFromGallery
+  onSubmitModifyFromGallery,
+  // Group management props
+  groupId,
+  onRemoveFromGroup
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -1689,6 +1693,25 @@ const Modal: React.FC<ModalProps> = ({
                   <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-0.5 md:px-1">
                     <span className="text-xs">⋮⋮</span>
                   </div>
+                  
+                  {/* Trash icon - only show when viewing a group */}
+                  {groupId && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Remove this item from the group?`)) {
+                          // Call a callback to remove the asset
+                          if (onRemoveFromGroup) {
+                            onRemoveFromGroup(asset.id);
+                          }
+                        }
+                      }}
+                      className="absolute bottom-0 right-0 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-tl-md text-white p-1 focus:outline-none transition-all shadow-md z-10"
+                      title="Remove from group"
+                    >
+                      <FaTrash className="text-xs" />
+                    </button>
+                  )}
                 </div>
               ))}
               </div>

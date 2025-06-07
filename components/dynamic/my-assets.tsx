@@ -1915,6 +1915,29 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Function to remove an asset from a specific group
+  const handleRemoveAssetFromGroup = (assetId: string) => {
+    // Get the current asset's modal information
+    const currentAsset = filteredAndSortedActivities[currentModalIndex];
+    if (currentAsset && currentAsset.groups && currentAsset.groups.length > 0 && currentGroupId) {
+      const group = currentAsset.groups.find(g => g.id === currentGroupId);
+      if (group) {
+        handleRemoveFromGroup(assetId, currentGroupId, group.name);
+      }
+    }
+  };
+
+  // Function to handle removing an asset from the current group via Modal timeline
+  const handleRemoveAssetFromTimelineGroup = (assetId: string) => {
+    if (!filters.groupId) return;
+    
+    // Find the group name for the current group
+    const currentGroup = userGroups.find(g => g.id === filters.groupId);
+    if (!currentGroup) return;
+    
+    // Call the existing remove function
+    handleRemoveFromGroup(assetId, filters.groupId, currentGroup.name);
+  };
+
   const handleRemoveFromGroup = async (assetId: string, groupId: string, groupName: string) => {
     if (!userId || !assetId || !groupId) return;
 
@@ -3350,11 +3373,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           isEditingImage={isEditingImage}
           onModifyImage={handleModifyImageFromModal}
           onCreateVideo={handleCreateVideoFromModal}
+          groupId={currentGroupId}
+          onRemoveFromGroup={handleRemoveAssetFromGroup}
           currentAssetInfo={{
             id: filteredAndSortedActivities[currentModalIndex]?.id,
             prompt: filteredAndSortedActivities[currentModalIndex]?.Prompt,
             assetType: filteredAndSortedActivities[currentModalIndex]?.AssetType
           }}
+          groupId={filters.groupId}
+          onRemoveFromGroup={filters.groupId ? handleRemoveAssetFromTimelineGroup : undefined}
         />
       )}
 
