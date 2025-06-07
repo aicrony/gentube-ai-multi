@@ -80,6 +80,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [currentModalIndex, setCurrentModalIndex] = useState(0);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
+  
+  // Track if we've done the initial load
+  const initialLoadDoneRef = React.useRef(false);
+  
+  // Force initial load when component mounts
+  React.useEffect(() => {
+    if (!initialLoadDoneRef.current) {
+      console.log('Forcing initial load on component mount');
+      initialLoadDoneRef.current = true;
+      // Small delay to ensure context values are set
+      setTimeout(() => {
+        setRefreshKey(prev => prev + 1);
+      }, 100);
+    }
+  }, []);
 
   // Check for URL parameter to open specific image
   React.useEffect(() => {
@@ -181,11 +196,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Add event listener
     window.addEventListener('refreshAssets', handleRefreshAssets);
 
+    // Trigger initial fetch after component mounts 
+    // Fetch if either userId is valid OR userIp is valid (not 'unknown')
+    if (((userId && userId !== 'none') || (userIp && userIp !== 'unknown')) && activities.length === 0) {
+      console.log('Triggering initial fetch:', { userId, userIp });
+      setRefreshKey(prev => prev + 1);
+    }
+
     // Cleanup
     return () => {
       window.removeEventListener('refreshAssets', handleRefreshAssets);
     };
-  }, []);
+  }, [userIp, activities.length]);
 
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
@@ -233,7 +255,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
-    if (userId || userIp) {
+    // Skip the fetch only if both userId and userIp are missing/invalid
+    // Make sure to still attempt fetch if userIp is 'unknown' but userId is valid
+    if ((userId && userId !== 'none') || (userIp && userIp !== 'none' && userIp !== 'unknown')) {
       try {
         // Support comma-separated asset types - use the filters state
         const assetTypeParam = filters.assetType || '';
@@ -241,11 +265,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
         console.log('fetchUserActivities called with filters:', filters);
         console.log('groupIdParam:', groupIdParam);
+        console.log('userIp value:', userIp);
 
         // Build query parameters
         const params = new URLSearchParams({
           userId: userId ? userId : 'none',
-          userIp: userIp ? userIp : 'none',
+          // If userIp is 'unknown', treat it as 'none' to ensure consistent backend handling
+          userIp: (userIp && userIp !== 'unknown') ? userIp : 'none',
           limit: limit.toString(),
           offset: (page * limit).toString()
         });
@@ -315,20 +341,34 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Effect for fetching data when page or filters change
   useEffect(() => {
-    // Generate a params string to compare with last fetch
-    const paramsString = `${userId}-${userIp}-${page}-${filters.assetType}-${filters.groupId}-${refreshKey}`;
-    
-    // Skip if already fetching or same params as last fetch
-    if (isFetchingRef.current || paramsString === lastFetchParamsRef.current) {
+    // Skip fetch if we have neither userId nor valid userIp
+    if ((!userId || userId === 'none') && (!userIp || userIp === 'none')) {
+      console.log('Skipping fetch - no user identifiers available yet');
       return;
     }
     
+    // Generate a params string to compare with last fetch
+    // For caching purposes, treat 'unknown' userIp the same as 'none'
+    const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
+    const paramsString = `${userId}-${normalizedUserIp}-${page}-${filters.assetType}-${filters.groupId}-${refreshKey}`;
+    
+    // Skip if already fetching or same params as last fetch
+    // BUT still allow fetch when userIp changes from 'unknown' to an actual IP
+    if (isFetchingRef.current || (paramsString === lastFetchParamsRef.current && !(lastFetchParamsRef.current.includes('-unknown-') && userIp !== 'unknown'))) {
+      return;
+    }
+    
+    console.log('User identifiers for fetch:', { userId, userIp: normalizedUserIp });
+    
     console.log('Fetching assets with params:', paramsString);
+    setLoading(true);
     isFetchingRef.current = true;
     lastFetchParamsRef.current = paramsString;
     
-    fetchUserActivities(userId, userIp).finally(() => {
+    // Use the normalized userIp for the fetch call to ensure consistent behavior
+    fetchUserActivities(userId, normalizedUserIp).finally(() => {
       isFetchingRef.current = false;
+      setLoading(false);
     });
   }, [userId, userIp, page, filters.assetType, filters.groupId, refreshKey]);
 
@@ -577,7 +617,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         console.log(
           `Auto-refreshing assets due to queued items (refresh #${refreshCount + 1})`
         );
-        fetchUserActivities(userId, userIp);
+        const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
+        fetchUserActivities(userId, normalizedUserIp);
         // Increment refresh count
         setRefreshCount((prevCount) => prevCount + 1);
         // Clear the countdown interval
@@ -708,7 +749,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleRefresh = () => {
     setLoading(true);
     setPage(0);
-    fetchUserActivities(userId, userIp);
+    const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
+    fetchUserActivities(userId, normalizedUserIp);
     // Reset refresh count for auto-refresh timing to start over
     setRefreshCount(0);
   };
@@ -1805,7 +1847,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       setPage(0);
       // Force refresh by calling fetchUserActivities directly
       setTimeout(() => {
-        fetchUserActivities(userId, userIp);
+        const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
+        fetchUserActivities(userId, normalizedUserIp);
       }, 0);
     }
     
@@ -1848,7 +1891,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleGroupManagerUpdate = () => {
     // Refresh the asset list to show updated group information
-    fetchUserActivities(userId, userIp);
+    const normalizedUserIp = userIp === 'unknown' ? 'none' : userIp;
+    fetchUserActivities(userId, normalizedUserIp);
     setSelectedAssets([]);
     // Force refresh of GroupManager to update asset counts
     setGroupRefreshKey((prev) => prev + 1);
