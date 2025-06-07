@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
 
     // Calculate new order values to preserve the order
     // Use index-based ordering with spacing for future insertions
-    // Lower order values should appear first in the UI (ascending)
+    // IMPORTANT: Lower order values (0, 10, 20) will appear FIRST in the UI when sorted
+    // This is consistent with standard array/list indexing where index 0 is the first item
     const orderInterval = 10; // 10-unit intervals for spacing
 
     const transaction = datastore.transaction();
@@ -65,7 +66,8 @@ export async function POST(request: NextRequest) {
 
     try {
       // Update each asset with its new order based on position in ordered array
-      // IMPORTANT: We're assigning LOWER values to items that should appear FIRST
+      // IMPORTANT: We're assigning LOWER values (0, 10, 20...) to items that should appear FIRST in UI
+      // The first item in orderedAssetIds will get order=0, second gets order=10, etc.
       // This means items at the START of the array get LOWER order values
       for (let index = 0; index < orderedAssetIds.length; index++) {
         const assetId = orderedAssetIds[index];

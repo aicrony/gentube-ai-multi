@@ -27,6 +27,15 @@ indexes:
       - name: DateTime
         direction: desc
 
+  # Index for UserActivity sorting by AssetType, UserId, order and DateTime
+  - kind: UserActivity
+    properties:
+      - name: AssetType
+      - name: UserId
+      - name: order
+      - name: DateTime
+        direction: desc
+
   # Groups feature indexes
   - kind: UserGroup
     properties:
