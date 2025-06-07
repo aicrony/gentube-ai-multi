@@ -1930,12 +1930,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleRemoveAssetFromTimelineGroup = (assetId: string) => {
     if (!filters.groupId) return;
     
-    // Find the group name for the current group
-    const currentGroup = userGroups.find(g => g.id === filters.groupId);
-    if (!currentGroup) return;
+    // Find the asset in our filtered activities that has the same ID
+    const asset = filteredAndSortedActivities.find(activity => activity.id === assetId);
+    if (!asset || !asset.groups) return;
     
-    // Call the existing remove function
-    handleRemoveFromGroup(assetId, filters.groupId, currentGroup.name);
+    // Find the group info from the asset's groups property
+    const group = asset.groups.find(g => g.id === filters.groupId);
+    if (!group) return;
+    
+    // Call the existing remove function with the group name from the asset
+    handleRemoveFromGroup(assetId, filters.groupId, group.name);
   };
 
   const handleRemoveFromGroup = async (assetId: string, groupId: string, groupName: string) => {
