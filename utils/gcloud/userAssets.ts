@@ -118,25 +118,35 @@ export async function getUserAssets(
 
   let query;
   const normalizedIpAddress = localIpConfig(userIp);
+  const isValidIp = userIp && userIp.length > 4 && userIp !== 'unknown';
+  const isValidUserId = userId && userId !== 'none';
 
-  if (userId && userId !== 'none') {
-    console.log('Query UA1');
+  // Log the query parameters to help with debugging
+  console.log('getUserAssets query params:', { isValidUserId, isValidIp, userId, normalizedIpAddress });
+
+  // Primary case: Valid userId - Use this even if IP is unknown
+  if (isValidUserId) {
+    console.log('Query UA1: Filtering by userId');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserId', '=', userId))
       .limit(limit)
       .offset(offset)
       .order('DateTime', { descending: true });
-  } else if (userIp && userIp.length > 4) {
-    console.log('Query UA2');
+  } 
+  // Secondary case: Only valid IP, no userId
+  else if (isValidIp) {
+    console.log('Query UA2: Filtering by userIp');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserIp', '=', normalizedIpAddress))
       .limit(limit)
       .offset(offset)
       .order('DateTime', { descending: true });
-  } else {
-    console.log('Query UA3');
+  } 
+  // Fallback case: No valid userId or IP - use both (will likely return no results)
+  else {
+    console.log('Query UA3: Fallback with both filters');
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter(new PropertyFilter('UserId', '=', userId))

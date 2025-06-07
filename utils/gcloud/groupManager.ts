@@ -245,6 +245,8 @@ export async function getUserAssetsWithGroups(
   migrateOrderValues: boolean = true // Add parameter to control order migration
 ): Promise<AssetWithGroups[]> {
   try {
+    // Allow fetch with userId even if userIp is 'unknown'
+    const isValidUserId = userId && userId !== 'none';
     console.log('getUserAssetsWithGroups called with:');
     console.log('- userId:', userId);
     console.log('- groupId:', groupId, 'type:', typeof groupId);
