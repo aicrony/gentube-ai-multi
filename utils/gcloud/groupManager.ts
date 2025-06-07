@@ -152,12 +152,11 @@ export async function getAssetsInGroup(
   try {
     console.log(`getAssetsInGroup called for groupId: ${groupId}, userId: ${userId}`);
     
-    // Create query with order by order field to ensure correct sorting
+    // Create query to get all assets in the group
     let query = datastore
       .createQuery(NAMESPACE, ASSET_GROUP_MEMBERSHIP_KIND)
       .filter('groupId', '=', groupId)
       .filter('userId', '=', userId)
-      .order('order')
       .order('createdAt', { descending: true });
       
     // Execute the query
