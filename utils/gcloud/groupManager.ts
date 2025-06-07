@@ -153,11 +153,14 @@ export async function getAssetsInGroup(
     console.log(`getAssetsInGroup called for groupId: ${groupId}, userId: ${userId}`);
     
     // Create query to get all assets in the group
+    // Important: Do not filter by order field as it may not exist in all records
     let query = datastore
       .createQuery(NAMESPACE, ASSET_GROUP_MEMBERSHIP_KIND)
       .filter('groupId', '=', groupId)
-      .filter('userId', '=', userId)
-      .order('createdAt', { descending: true });
+      .filter('userId', '=', userId);
+      
+    // Add order by createdAt as a fallback sorting mechanism
+    query = query.order('createdAt', { descending: true });
       
     // Execute the query
     const [memberships] = await datastore.runQuery(query);
@@ -169,11 +172,14 @@ export async function getAssetsInGroup(
       console.log('Sample membership:', JSON.stringify(memberships[0], null, 2));
     }
     
-    // Extract asset IDs, logging any potential issues
+    // Extract asset IDs with detailed logging
     const assetIds = memberships.map((membership: any) => {
+      const membershipId = membership[datastore.KEY].id?.toString() || 'unknown';
       if (!membership.assetId) {
-        console.log('Found membership without assetId:', membership);
+        console.log(`Found membership ${membershipId} without assetId:`, membership);
+        return null;
       }
+      console.log(`Found asset ID ${membership.assetId} in membership ${membershipId}`);
       return membership.assetId;
     }).filter(Boolean); // Remove any undefined/null entries
     
@@ -266,7 +272,9 @@ export async function getUserAssetsWithGroups(
       
       // Directly fetch only the assets needed by their IDs
       console.log(`Fetching ${paginatedAssetIds.length} assets for group ${groupId}`);
+      console.log('Asset IDs to fetch:', paginatedAssetIds);
       assets = await getUserActivityByIds(paginatedAssetIds);
+      console.log(`Retrieved ${assets?.length || 0} assets for group from datastore`);
       
       if (!assets || assets.length === 0) {
         return [];

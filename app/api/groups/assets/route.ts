@@ -52,12 +52,19 @@ export async function GET(request: NextRequest) {
     if (groupId) {
       // Get assets in a specific group
       query = query.filter('groupId', '=', groupId);
+      console.log(`Fetching assets for group ${groupId} and user ${userId}`);
     } else if (assetId) {
       // Get groups for a specific asset
       query = query.filter('assetId', '=', assetId);
+      console.log(`Fetching groups for asset ${assetId} and user ${userId}`);
     }
 
     const [memberships] = await datastore.runQuery(query);
+    console.log(`Found ${memberships.length} memberships`);
+    
+    if (memberships.length > 0) {
+      console.log('Sample membership:', JSON.stringify(memberships[0], null, 2));
+    }
 
     const result = memberships.map((membership: any) => ({
       id:
@@ -85,9 +92,13 @@ export async function GET(request: NextRequest) {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
       
+      const responseAssetIds = sortedResult.map((m) => m.assetId);
+      console.log(`Returning ${responseAssetIds.length} asset IDs for group ${groupId}`);
+      console.log('Asset IDs:', responseAssetIds);
+      
       return NextResponse.json({
         success: true,
-        assetIds: sortedResult.map((m) => m.assetId),
+        assetIds: responseAssetIds,
         memberships: sortedResult
       });
     } else {

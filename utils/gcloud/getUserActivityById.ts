@@ -103,6 +103,9 @@ export async function getUserActivityByIds(
       } else if (!prompt) {
         prompt = '';
       }
+      
+      // Add debug logging for troubleshooting
+      console.log(`Processing activity: id=${keyId}, has order=${activity.order !== undefined}, DateTime=${activity.DateTime}`);
 
       // Build the user activity object with the correct ID
       activities.push({
