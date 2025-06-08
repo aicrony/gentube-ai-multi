@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/utils/auth/session';
 import { saveSocialToken } from '@/utils/gcloud/socialTokens';
 
+export const dynamic = 'force-dynamic';
+
 // Constants for Facebook OAuth
 const FACEBOOK_AUTH_URL = 'https://www.facebook.com/v17.0/dialog/oauth';
 const FACEBOOK_TOKEN_URL = 'https://graph.facebook.com/v17.0/oauth/access_token';

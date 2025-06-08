@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/utils/auth/session';
 import { saveSocialToken } from '@/utils/gcloud/socialTokens';
 
+export const dynamic = 'force-dynamic';
+
 // Constants for TikTok OAuth
 const TIKTOK_AUTH_URL = 'https://www.tiktok.com/v2/auth/authorize/';
 

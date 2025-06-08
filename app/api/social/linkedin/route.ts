@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { postToLinkedIn } from '@/services/socialMedia/linkedinService';
 import { getServerSession } from "@/utils/auth/session";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get the authenticated user session

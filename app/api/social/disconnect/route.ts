@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/utils/auth/session';
 import { deleteSocialToken } from '@/utils/gcloud/socialTokens';
 
+export const dynamic = 'force-dynamic';
+
 // Disconnect a platform
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

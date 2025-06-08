@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserSlideshows } from '@/utils/gcloud/slideshowManager';
 import { apiErrorHandler } from '@/utils/apiErrorHandler.server';
 
+export const dynamic = 'force-dynamic';
+
 // Get all slideshows for a user
 export async function GET(req: NextRequest) {
   try {

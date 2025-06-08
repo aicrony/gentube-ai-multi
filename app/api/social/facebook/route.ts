@@ -3,6 +3,8 @@ import { postToFacebook } from '@/services/socialMedia/facebookService';
 import { getServerSession } from "@/utils/auth/session";
 import { getSocialToken } from '@/utils/gcloud/socialTokens';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get the authenticated user session
