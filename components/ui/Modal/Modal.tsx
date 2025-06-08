@@ -19,7 +19,8 @@ import {
   FaExternalLinkAlt,
   FaEdit,
   FaSort,
-  FaInfoCircle
+  FaInfoCircle,
+  FaSadCry
 } from 'react-icons/fa';
 
 interface SlideshowHistoryItem {
@@ -63,7 +64,14 @@ interface ModalProps {
   currentAssetIndex?: number;
   onAssetClick?: (index: number) => void;
   onAssetReorder?: (fromIndex: number, toIndex: number) => void;
-  onSaveAssetOrder?: (orderedAssets: Array<{id: string; url: string; thumbnailUrl?: string; assetType: string}>) => Promise<void> | void;
+  onSaveAssetOrder?: (
+    orderedAssets: Array<{
+      id: string;
+      url: string;
+      thumbnailUrl?: string;
+      assetType: string;
+    }>
+  ) => Promise<void> | void;
   groupId?: string; // Optional group ID for group-specific ordering
   // New props for direct slideshow configuration
   slideshowInterval?: number;
@@ -146,7 +154,9 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(false);
-  const [slideshowStartTime, setSlideshowStartTime] = useState<number | null>(null);
+  const [slideshowStartTime, setSlideshowStartTime] = useState<number | null>(
+    null
+  );
   const firstSlideShownRef = useRef(false);
   const initialRenderRef = useRef(true); // Track initial render
   // Safe localStorage accessor functions
@@ -216,17 +226,19 @@ const Modal: React.FC<ModalProps> = ({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
-  
+
   // Local state for immediate visual feedback during reordering
-  const [localSlideshowAssets, setLocalSlideshowAssets] = useState(slideshowAssets);
-  const [localCurrentAssetIndex, setLocalCurrentAssetIndex] = useState(currentAssetIndex);
-  
+  const [localSlideshowAssets, setLocalSlideshowAssets] =
+    useState(slideshowAssets);
+  const [localCurrentAssetIndex, setLocalCurrentAssetIndex] =
+    useState(currentAssetIndex);
+
   // Gallery info pane state
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [isModifyMode, setIsModifyMode] = useState(false);
   const [modifyPrompt, setModifyPrompt] = useState('');
   const [isSubmittingModify, setIsSubmittingModify] = useState(false);
-  
+
   // Update local slideshow assets when props change
   useEffect(() => {
     // Only update if slideshowAssets is provided and has length
@@ -235,7 +247,10 @@ const Modal: React.FC<ModalProps> = ({
       console.log('slideshowAssets length:', slideshowAssets.length);
       console.log('currentAssetIndex:', currentAssetIndex);
       console.log('First asset URL:', slideshowAssets[0]?.url);
-      console.log('Current asset URL:', slideshowAssets[currentAssetIndex]?.url);
+      console.log(
+        'Current asset URL:',
+        slideshowAssets[currentAssetIndex]?.url
+      );
       console.log('===================================');
       setLocalSlideshowAssets(slideshowAssets);
       setLocalCurrentAssetIndex(currentAssetIndex);
@@ -311,7 +326,7 @@ const Modal: React.FC<ModalProps> = ({
       console.log('currentAssetIndex:', currentAssetIndex);
       console.log('slideshowAssets length:', slideshowAssets?.length || 0);
       console.log('================================');
-      
+
       // Record the start time when slideshow is activated
       // This helps us ensure the first slide gets its full viewing time
       if (!isSlideshow) {
@@ -319,7 +334,7 @@ const Modal: React.FC<ModalProps> = ({
         setSlideshowStartTime(Date.now());
         firstSlideShownRef.current = false;
       }
-      
+
       // Actually start the slideshow
       setIsSlideshow(true);
     } else {
@@ -334,10 +349,10 @@ const Modal: React.FC<ModalProps> = ({
   useEffect(() => {
     // Reset the initial render flag when mediaUrl changes
     initialRenderRef.current = true;
-    
+
     // Log when media URL changes
     console.log('Media URL changed to:', mediaUrl);
-    
+
     // Reset slideshow state when mediaUrl changes
     // This ensures we properly show the first image
     if (autoStartSlideshow) {
@@ -346,7 +361,7 @@ const Modal: React.FC<ModalProps> = ({
       setIsSlideshow(false);
       setSlideshowStartTime(Date.now());
       firstSlideShownRef.current = false;
-      
+
       // Set a delay before enabling slideshow
       setTimeout(() => {
         console.log('Starting slideshow after initial delay');
@@ -354,7 +369,7 @@ const Modal: React.FC<ModalProps> = ({
       }, 2000); // 2-second delay to ensure first image is visible
     }
   }, [mediaUrl, autoStartSlideshow]);
-  
+
   // Completely rewritten slideshow logic with simpler approach
   useEffect(() => {
     // Only run this effect when slideshow is active
@@ -366,7 +381,7 @@ const Modal: React.FC<ModalProps> = ({
     console.log('Slideshow start time:', slideshowStartTime);
     console.log('First slide shown:', firstSlideShownRef.current);
     console.log('============================');
-    
+
     // Clear any existing timer to prevent issues
     if (slideshowTimerRef.current) {
       clearTimeout(slideshowTimerRef.current);
@@ -378,12 +393,14 @@ const Modal: React.FC<ModalProps> = ({
     if (slideshowStartTime && !firstSlideShownRef.current) {
       console.log('First slide being shown - will display for full duration');
       firstSlideShownRef.current = true;
-      
+
       // Create a timeout for the first slide to ensure it's shown for the full duration
       slideshowTimerRef.current = setTimeout(() => {
-        console.log(`First slide shown for full ${slideInterval}ms, advancing to next slide`);
+        console.log(
+          `First slide shown for full ${slideInterval}ms, advancing to next slide`
+        );
         advanceSlideshow();
-        
+
         // After the first slide has been shown, set up the regular interval for subsequent slides
         slideshowTimerRef.current = setInterval(() => {
           console.log('Regular interval triggered, advancing to next slide');
@@ -466,12 +483,12 @@ const Modal: React.FC<ModalProps> = ({
       const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
       const cache = await caches.open(cacheName);
       const requests = await cache.keys();
-      
+
       // Remove oldest entries (remove first 25% of cached items)
       const itemsToRemove = Math.ceil(requests.length * 0.25);
       const toRemove = requests.slice(0, itemsToRemove);
-      
-      await Promise.all(toRemove.map(request => cache.delete(request)));
+
+      await Promise.all(toRemove.map((request) => cache.delete(request)));
       console.log(`Cleaned up ${itemsToRemove} cached items`);
     } catch (error) {
       console.warn('Error during cache cleanup:', error);
@@ -479,35 +496,42 @@ const Modal: React.FC<ModalProps> = ({
   }, []);
 
   // Helper function to safely add to cache with quota management
-  const safeCacheAdd = React.useCallback(async (url: string, isVideo: boolean) => {
-    if (!('caches' in window)) return;
-    
-    try {
-      const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
-      const cache = await caches.open(cacheName);
-      
-      // Check if already cached to avoid duplicate storage
-      const cached = await cache.match(url);
-      if (cached) return;
-      
-      await cache.add(url);
-    } catch (error: any) {
-      if (error?.name === 'QuotaExceededError') {
-        console.warn('Cache quota exceeded, attempting cleanup...');
-        await cleanupCache(isVideo);
-        // Try once more after cleanup
-        try {
-          const cacheName = isVideo ? 'slideshow-assets-v2' : 'slideshow-images-v2';
-          const cache = await caches.open(cacheName);
-          await cache.add(url);
-        } catch (retryError) {
-          console.warn('Failed to cache after cleanup:', retryError);
+  const safeCacheAdd = React.useCallback(
+    async (url: string, isVideo: boolean) => {
+      if (!('caches' in window)) return;
+
+      try {
+        const cacheName = isVideo
+          ? 'slideshow-assets-v2'
+          : 'slideshow-images-v2';
+        const cache = await caches.open(cacheName);
+
+        // Check if already cached to avoid duplicate storage
+        const cached = await cache.match(url);
+        if (cached) return;
+
+        await cache.add(url);
+      } catch (error: any) {
+        if (error?.name === 'QuotaExceededError') {
+          console.warn('Cache quota exceeded, attempting cleanup...');
+          await cleanupCache(isVideo);
+          // Try once more after cleanup
+          try {
+            const cacheName = isVideo
+              ? 'slideshow-assets-v2'
+              : 'slideshow-images-v2';
+            const cache = await caches.open(cacheName);
+            await cache.add(url);
+          } catch (retryError) {
+            console.warn('Failed to cache after cleanup:', retryError);
+          }
+        } else {
+          console.warn('Failed to cache asset:', error);
         }
-      } else {
-        console.warn('Failed to cache asset:', error);
       }
-    }
-  }, [cleanupCache]);
+    },
+    [cleanupCache]
+  );
 
   // Preload the next image if we're in a slideshow
   useEffect(() => {
@@ -533,12 +557,20 @@ const Modal: React.FC<ModalProps> = ({
         safeCacheAdd(mediaUrl, false);
       }
     }
-  }, [mediaUrl, currentAssets, currentItemId, isVideo, hasNext, onNext, safeCacheAdd]);
+  }, [
+    mediaUrl,
+    currentAssets,
+    currentItemId,
+    isVideo,
+    hasNext,
+    onNext,
+    safeCacheAdd
+  ]);
 
   const toggleSlideshow = () => {
     const newValue = !isSlideshow;
     console.log(`Toggling slideshow to: ${newValue ? 'ON' : 'OFF'}`);
-    
+
     if (newValue) {
       // When turning on slideshow manually, record start time
       console.log('Setting slideshow start time on manual toggle');
@@ -548,7 +580,7 @@ const Modal: React.FC<ModalProps> = ({
       // When turning off, reset the start time
       setSlideshowStartTime(null);
     }
-    
+
     setIsSlideshow(newValue);
   };
 
@@ -575,16 +607,18 @@ const Modal: React.FC<ModalProps> = ({
     // Close all panes when clicking on the modal content area
     // But don't close if clicking on buttons or pane content
     const target = e.target as HTMLElement;
-    
+
     // Don't close if clicking on buttons or interactive elements (but allow image/video clicks to close)
-    if (target.closest('button') || 
-        target.closest('.modal-pane') || 
-        target.closest('input') || 
-        target.closest('textarea') ||
-        target.closest('select')) {
+    if (
+      target.closest('button') ||
+      target.closest('.modal-pane') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
+      target.closest('select')
+    ) {
       return;
     }
-    
+
     // Close all panes when clicking elsewhere in the modal (including on images/videos)
     closeAllPanes();
   };
@@ -703,10 +737,14 @@ const Modal: React.FC<ModalProps> = ({
   const handleDownload = async () => {
     try {
       // Generate filename based on URL and current asset info
-      const generateFileName = (mediaUrl: string, currentAssetIndex?: number, slideshowAssets?: Array<{assetType: string}>): string => {
+      const generateFileName = (
+        mediaUrl: string,
+        currentAssetIndex?: number,
+        slideshowAssets?: Array<{ assetType: string }>
+      ): string => {
         // Extract file extension from the original URL
         let fileExtension = '.jpg'; // Default fallback
-        
+
         // Check if it's a video first
         if (mediaUrl.endsWith('.mp4')) {
           fileExtension = '.mp4';
@@ -719,15 +757,19 @@ const Modal: React.FC<ModalProps> = ({
               fileExtension = match[0].toLowerCase();
             }
           } catch (error) {
-            console.log('Could not extract file extension from URL, using default .jpg');
+            console.log(
+              'Could not extract file extension from URL, using default .jpg'
+            );
           }
         }
-        
+
         // Determine asset type - check if it's an uploaded asset
-        const isUploadedAsset = mediaUrl.includes('gentube-upload-image-storage') || 
-                               (slideshowAssets && currentAssetIndex !== undefined && 
-                                slideshowAssets[currentAssetIndex]?.assetType === 'upl');
-        
+        const isUploadedAsset =
+          mediaUrl.includes('gentube-upload-image-storage') ||
+          (slideshowAssets &&
+            currentAssetIndex !== undefined &&
+            slideshowAssets[currentAssetIndex]?.assetType === 'upl');
+
         if (isUploadedAsset) {
           return `downloaded-gentube-asset${fileExtension}`;
         } else {
@@ -735,12 +777,18 @@ const Modal: React.FC<ModalProps> = ({
         }
       };
 
-      const fileName = generateFileName(mediaUrl, currentAssetIndex, slideshowAssets);
+      const fileName = generateFileName(
+        mediaUrl,
+        currentAssetIndex,
+        slideshowAssets
+      );
 
       // Check if this is an uploaded asset (likely to have CORS issues)
-      const isUploadedAsset = mediaUrl.includes('gentube-upload-image-storage') || 
-                             (slideshowAssets && currentAssetIndex !== undefined && 
-                              slideshowAssets[currentAssetIndex]?.assetType === 'upl');
+      const isUploadedAsset =
+        mediaUrl.includes('gentube-upload-image-storage') ||
+        (slideshowAssets &&
+          currentAssetIndex !== undefined &&
+          slideshowAssets[currentAssetIndex]?.assetType === 'upl');
 
       // For uploaded assets, use proxy API to avoid CORS issues
       if (isUploadedAsset) {
@@ -748,14 +796,14 @@ const Modal: React.FC<ModalProps> = ({
         try {
           // Use a Next.js API route to proxy the download and avoid CORS
           const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(mediaUrl)}&filename=${encodeURIComponent(fileName)}`;
-          
+
           const response = await fetch(proxyUrl);
           if (!response.ok) {
             throw new Error(`Proxy download failed: ${response.status}`);
           }
-          
+
           const blob = await response.blob();
-          
+
           // Create download link from blob
           const blobUrl = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -789,11 +837,11 @@ const Modal: React.FC<ModalProps> = ({
           mode: 'cors',
           credentials: 'omit'
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const blob = await response.blob();
 
         // Create an object URL for the blob
@@ -812,7 +860,10 @@ const Modal: React.FC<ModalProps> = ({
         document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
       } catch (corsError) {
-        console.log('CORS error with generated asset, falling back to direct download:', corsError);
+        console.log(
+          'CORS error with generated asset, falling back to direct download:',
+          corsError
+        );
         // Fallback to direct download if CORS fails
         const link = document.createElement('a');
         link.href = mediaUrl;
@@ -824,7 +875,9 @@ const Modal: React.FC<ModalProps> = ({
       }
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert('Failed to download the asset. The file may not be accessible or may have been moved.');
+      alert(
+        'Failed to download the asset. The file may not be accessible or may have been moved.'
+      );
     }
   };
 
@@ -870,16 +923,22 @@ const Modal: React.FC<ModalProps> = ({
     const [movedItem] = newLocalAssets.splice(draggedIndex, 1);
     newLocalAssets.splice(dropIndex, 0, movedItem);
     setLocalSlideshowAssets(newLocalAssets);
-    
+
     // Update local current asset index to follow the moved item
     let newLocalCurrentIndex = localCurrentAssetIndex;
     if (localCurrentAssetIndex === draggedIndex) {
       // The current asset was moved
       newLocalCurrentIndex = dropIndex;
-    } else if (localCurrentAssetIndex > draggedIndex && localCurrentAssetIndex <= dropIndex) {
+    } else if (
+      localCurrentAssetIndex > draggedIndex &&
+      localCurrentAssetIndex <= dropIndex
+    ) {
       // Current asset shifts down
       newLocalCurrentIndex = localCurrentAssetIndex - 1;
-    } else if (localCurrentAssetIndex < draggedIndex && localCurrentAssetIndex >= dropIndex) {
+    } else if (
+      localCurrentAssetIndex < draggedIndex &&
+      localCurrentAssetIndex >= dropIndex
+    ) {
       // Current asset shifts up
       newLocalCurrentIndex = localCurrentAssetIndex + 1;
     }
@@ -1145,14 +1204,17 @@ const Modal: React.FC<ModalProps> = ({
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Prompt:
                       </label>
-                      {!isModifyMode && currentAssetInfo.prompt.length > 150 && (
-                        <button
-                          onClick={() => setIsPromptExpanded(!isPromptExpanded)}
-                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          {isPromptExpanded ? 'Show less' : 'Show more'}
-                        </button>
-                      )}
+                      {!isModifyMode &&
+                        currentAssetInfo.prompt.length > 150 && (
+                          <button
+                            onClick={() =>
+                              setIsPromptExpanded(!isPromptExpanded)
+                            }
+                            className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            {isPromptExpanded ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
                     </div>
                     {isModifyMode ? (
                       <div className="space-y-3">
@@ -1174,19 +1236,29 @@ const Modal: React.FC<ModalProps> = ({
                           </button>
                           <button
                             onClick={() => {
-                              if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
+                              if (
+                                onSubmitModifyFromGallery &&
+                                modifyPrompt.trim()
+                              ) {
                                 setIsSubmittingModify(true);
                                 try {
-                                  onSubmitModifyFromGallery(modifyPrompt.trim());
+                                  onSubmitModifyFromGallery(
+                                    modifyPrompt.trim()
+                                  );
                                   setIsModifyMode(false);
                                 } catch (error) {
-                                  console.error('Error submitting modify:', error);
+                                  console.error(
+                                    'Error submitting modify:',
+                                    error
+                                  );
                                 } finally {
                                   setIsSubmittingModify(false);
                                 }
                               }
                             }}
-                            disabled={!modifyPrompt.trim() || isSubmittingModify}
+                            disabled={
+                              !modifyPrompt.trim() || isSubmittingModify
+                            }
                             className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-white transition-colors flex items-center gap-1"
                           >
                             {isSubmittingModify ? (
@@ -1227,36 +1299,50 @@ const Modal: React.FC<ModalProps> = ({
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   {/* Modify Image Button */}
-                  {currentAssetInfo.assetType !== 'vid' && currentAssetInfo.prompt && (
-                    <button
-                      onClick={() => {
-                        if (isModifyMode) {
-                          // If already in modify mode, submit the modification
-                          if (onSubmitModifyFromGallery && modifyPrompt.trim()) {
-                            setIsSubmittingModify(true);
-                            try {
-                              onSubmitModifyFromGallery(modifyPrompt.trim());
-                              setIsModifyMode(false);
-                            } catch (error) {
-                              console.error('Error submitting modify:', error);
-                            } finally {
-                              setIsSubmittingModify(false);
+                  {currentAssetInfo.assetType !== 'vid' &&
+                    currentAssetInfo.prompt && (
+                      <button
+                        onClick={() => {
+                          if (isModifyMode) {
+                            // If already in modify mode, submit the modification
+                            if (
+                              onSubmitModifyFromGallery &&
+                              modifyPrompt.trim()
+                            ) {
+                              setIsSubmittingModify(true);
+                              try {
+                                onSubmitModifyFromGallery(modifyPrompt.trim());
+                                setIsModifyMode(false);
+                              } catch (error) {
+                                console.error(
+                                  'Error submitting modify:',
+                                  error
+                                );
+                              } finally {
+                                setIsSubmittingModify(false);
+                              }
                             }
+                          } else {
+                            // Enter modify mode
+                            setIsModifyMode(true);
+                            setIsPromptExpanded(true);
+                            setModifyPrompt(currentAssetInfo.prompt || '');
                           }
-                        } else {
-                          // Enter modify mode
-                          setIsModifyMode(true);
-                          setIsPromptExpanded(true);
-                          setModifyPrompt(currentAssetInfo.prompt || '');
+                        }}
+                        disabled={
+                          isModifyMode &&
+                          (!modifyPrompt.trim() || isSubmittingModify)
                         }
-                      }}
-                      disabled={isModifyMode && (!modifyPrompt.trim() || isSubmittingModify)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
-                    >
-                      <FaEdit />
-                      {isModifyMode ? (isSubmittingModify ? 'Submitting...' : 'Submit Modify') : 'Modify Image'}
-                    </button>
-                  )}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                      >
+                        <FaEdit />
+                        {isModifyMode
+                          ? isSubmittingModify
+                            ? 'Submitting...'
+                            : 'Submit Modify'
+                          : 'Modify Image'}
+                      </button>
+                    )}
 
                   {/* Create Video Button */}
                   {onCreateVideo && (
@@ -1593,7 +1679,6 @@ const Modal: React.FC<ModalProps> = ({
             })()}
           </div>
 
-
           {/* Next button */}
           {hasNext && onNext && (
             <button
@@ -1615,7 +1700,9 @@ const Modal: React.FC<ModalProps> = ({
             {/* Instructions */}
             <div className="text-center mb-3">
               <p className="text-xs md:text-sm text-gray-300 mb-1">
-                <span className="hidden md:inline">Drag thumbnails to reorder slideshow • </span>
+                <span className="hidden md:inline">
+                  Drag thumbnails to reorder slideshow •{' '}
+                </span>
                 <span className="md:hidden">Drag to reorder • </span>
                 Scroll horizontally to see all images
               </p>
@@ -1624,96 +1711,141 @@ const Modal: React.FC<ModalProps> = ({
               </div>
             </div>
             {/* Horizontal scroll container with visible scrollbar */}
-            <div 
+            <div
               className="overflow-x-auto overflow-y-hidden pb-2 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400"
-              style={{ 
+              style={{
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'thin',
                 scrollbarColor: '#6B7280 #374151'
               }}
             >
               <div className="flex space-x-1 md:space-x-2 justify-start pb-1 min-w-max">
-              {localSlideshowAssets.map((asset, index) => (
-                <div
-                  key={asset.id}
-                  className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                    index === localCurrentAssetIndex
-                      ? 'ring-2 ring-blue-500 scale-110'
-                      : 'hover:scale-105'
-                  } ${draggedIndex === index ? 'opacity-50' : ''} ${
-                    dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
-                  }`}
-                  draggable={true}
-                  onDragStart={(e) => handleThumbnailDragStart(e, index)}
-                  onDragOver={(e) => handleThumbnailDragOver(e, index)}
-                  onDragLeave={handleThumbnailDragLeave}
-                  onDrop={(e) => handleThumbnailDrop(e, index)}
-                  onDragEnd={handleThumbnailDragEnd}
-                  onClick={(e) => {
-                    // Only handle click if we're not dragging
-                    if (draggedIndex === null && onAssetClick) {
-                      onAssetClick(index);
-                    }
-                  }}
-                >
-                  {asset.assetType === 'vid' ? (
-                    <div className="relative w-12 h-12 md:w-16 md:h-16 bg-gray-700 rounded overflow-hidden">
-                      <video
-                        src={asset.url}
-                        className="w-full h-full object-cover pointer-events-none"
-                        muted
-                        preload="metadata"
+                {localSlideshowAssets.map((asset, index) => (
+                  <div
+                    key={asset.id}
+                    className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                      index === localCurrentAssetIndex
+                        ? 'ring-2 ring-blue-500 scale-110'
+                        : 'hover:scale-105'
+                    } ${draggedIndex === index ? 'opacity-50' : ''} ${
+                      dragOverIndex === index ? 'ring-2 ring-yellow-500' : ''
+                    }`}
+                    draggable={true}
+                    onDragStart={(e) => handleThumbnailDragStart(e, index)}
+                    onDragOver={(e) => handleThumbnailDragOver(e, index)}
+                    onDragLeave={handleThumbnailDragLeave}
+                    onDrop={(e) => handleThumbnailDrop(e, index)}
+                    onDragEnd={handleThumbnailDragEnd}
+                    onClick={(e) => {
+                      // Only handle click if we're not dragging
+                      if (draggedIndex === null && onAssetClick) {
+                        onAssetClick(index);
+                      }
+                    }}
+                  >
+                    {asset.assetType === 'vid' ? (
+                      <div className="relative w-12 h-12 md:w-16 md:h-16 bg-gray-700 rounded overflow-hidden">
+                        <video
+                          src={asset.url}
+                          className="w-full h-full object-cover pointer-events-none"
+                          muted
+                          preload="metadata"
+                          draggable={false}
+                          onDragStart={(e) => e.preventDefault()}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <FaPlay className="text-white text-xs opacity-80" />
+                        </div>
+                      </div>
+                    ) : (
+                      <Image
+                        src={asset.thumbnailUrl || asset.url}
+                        alt={`Slideshow item ${index + 1}`}
+                        width={64}
+                        height={64}
+                        unoptimized
                         draggable={false}
+                        className="w-12 h-12 md:w-16 md:h-16 object-cover rounded pointer-events-none"
+                        style={{ objectFit: 'cover' }}
                         onDragStart={(e) => e.preventDefault()}
                       />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <FaPlay className="text-white text-xs opacity-80" />
-                      </div>
+                    )}
+
+                    {/* Index indicator */}
+                    <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+                      <span className="text-xs md:text-xs">{index + 1}</span>
                     </div>
-                  ) : (
-                    <Image
-                      src={asset.thumbnailUrl || asset.url}
-                      alt={`Slideshow item ${index + 1}`}
-                      width={64}
-                      height={64}
-                      unoptimized
-                      draggable={false}
-                      className="w-12 h-12 md:w-16 md:h-16 object-cover rounded pointer-events-none"
-                      style={{ objectFit: 'cover' }}
-                      onDragStart={(e) => e.preventDefault()}
-                    />
-                  )}
 
-                  {/* Index indicator */}
-                  <div className="absolute -top-1 -left-1 bg-gray-800 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
-                    <span className="text-xs md:text-xs">{index + 1}</span>
-                  </div>
+                    {/* Drag indicator */}
+                    <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-0.5 md:px-1">
+                      <span className="text-xs">⋮⋮</span>
+                    </div>
 
-                  {/* Drag indicator */}
-                  <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs rounded-bl px-0.5 md:px-1">
-                    <span className="text-xs">⋮⋮</span>
-                  </div>
-                  
-                  {/* Trash icon - only show when viewing a group */}
-                  {groupId && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(`Remove this item from the group?`)) {
-                          // Call a callback to remove the asset
-                          if (onRemoveFromGroup) {
-                            onRemoveFromGroup(asset.id);
+                    {/* Trash icon - only show when viewing a group */}
+                    {groupId && (
+                      <button
+                        // Inside the trash icon onClick handler
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          if (confirm(`Remove this item from the group?`)) {
+                            if (onRemoveFromGroup) {
+                              // First, ensure we keep track of the current view state
+                              const wasShowingReorderMode = showReorderMode;
+
+                              // Call the callback to remove the asset from the parent component
+                              onRemoveFromGroup(asset.id);
+
+                              // Update local state immediately for better UX
+                              const newLocalAssets =
+                                localSlideshowAssets.filter(
+                                  (item) => item.id !== asset.id
+                                );
+                              setLocalSlideshowAssets(newLocalAssets);
+
+                              // Adjust current asset index if needed
+                              if (
+                                localCurrentAssetIndex >= newLocalAssets.length
+                              ) {
+                                setLocalCurrentAssetIndex(
+                                  Math.max(0, newLocalAssets.length - 1)
+                                );
+                              } else if (localCurrentAssetIndex > index) {
+                                setLocalCurrentAssetIndex(
+                                  localCurrentAssetIndex - 1
+                                );
+                              }
+
+                              // Keep the timeline visible and ensure it refreshes with new data
+                              // Use a slightly longer timeout to ensure parent component completes its updates
+                              setTimeout(() => {
+                                if (!showReorderMode) {
+                                  setShowReorderMode(true);
+                                }
+
+                                // Force update the local assets again to ensure sync with parent
+                                if (
+                                  slideshowAssets &&
+                                  slideshowAssets.length > 0
+                                ) {
+                                  setLocalSlideshowAssets([
+                                    ...slideshowAssets.filter(
+                                      (item) => item.id !== asset.id
+                                    )
+                                  ]);
+                                }
+                              }, 200);
+                            }
                           }
-                        }
-                      }}
-                      className="absolute bottom-0 right-0 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-tl-md text-white p-1 focus:outline-none transition-all shadow-md z-10"
-                      title="Remove from group"
-                    >
-                      <FaTrash className="text-xs" />
-                    </button>
-                  )}
-                </div>
-              ))}
+                        }}
+                        className="absolute bottom-0 right-0 bg-red-600 bg-opacity-70 hover:bg-opacity-100 rounded-tl-md text-white p-1 focus:outline-none transition-all shadow-md z-10"
+                        title="Remove from group"
+                      >
+                        <FaSadCry className="text-xs" />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
