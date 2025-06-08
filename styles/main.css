@@ -524,6 +524,15 @@ button.red:hover, .button-red:hover {
   @apply bg-red-600 hover:bg-red-700 text-white;
 }
 
+/* Global steps container for all product pages */
+.steps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 5rem; /* ~320px top margin */
+  padding: 0 20px;
+  width: 100%;
+}
+
 /* Instruction text styling - consistent across application */
 .instruction-text {
   font-size: 0.875rem; /* text-sm */
@@ -557,7 +566,7 @@ button.red:hover, .button-red:hover {
 
 .rainbow-button {
   background: linear-gradient(
-    to right, 
+    to right,
     #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000
   );
   background-size: 200% 200%;
@@ -654,8 +663,8 @@ button.red:hover, .button-red:hover {
 
 /* Checkerboard background for transparent images */
 .bg-checkerboard {
-  background-image: 
-    linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+  background-image:
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
     linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
     linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
@@ -665,8 +674,8 @@ button.red:hover, .button-red:hover {
 
 /* Dark theme checkerboard pattern */
 [data-theme='dark'] .bg-checkerboard {
-  background-image: 
-    linear-gradient(45deg, #333333 25%, transparent 25%), 
+  background-image:
+    linear-gradient(45deg, #333333 25%, transparent 25%),
     linear-gradient(-45deg, #333333 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #333333 75%),
     linear-gradient(-45deg, transparent 75%, #333333 75%);

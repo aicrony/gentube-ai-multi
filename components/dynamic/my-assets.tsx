@@ -112,7 +112,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
         // Add a timestamp to prevent caching
         const timestamp = new Date().getTime();
-        
+
         const response = await fetch(
           `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}&_t=${timestamp}`
         );
@@ -121,7 +121,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           throw new Error('Failed to fetch user assets');
         }
         const data = await response.json();
-        
+
         // Process the assets to ensure gallery status is properly reflected
         const processedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
@@ -142,20 +142,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Check for duplicates before adding new assets
         if (page > 0) {
           // For pagination, filter out any duplicates using asset IDs
-          const existingIds = activities.map(asset => asset.id);
-          const uniqueNewAssets = processedAssets.filter(asset => 
-            asset.id && !existingIds.includes(asset.id)
+          const existingIds = activities.map((asset) => asset.id);
+          const uniqueNewAssets = processedAssets.filter(
+            (asset) => asset.id && !existingIds.includes(asset.id)
           );
-          
-          console.log(`Found ${uniqueNewAssets.length} unique new assets out of ${processedAssets.length}`);
-          
+
+          console.log(
+            `Found ${uniqueNewAssets.length} unique new assets out of ${processedAssets.length}`
+          );
+
           // Only append unique assets
-          setActivities(prev => [...prev, ...uniqueNewAssets]);
+          setActivities((prev) => [...prev, ...uniqueNewAssets]);
         } else {
           // For first page, just set the activities directly
           setActivities(processedAssets);
         }
-        
+
         // Use the hasMore flag returned by the API
         setHasMore(data.hasMore);
       } catch (error) {
@@ -174,7 +176,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setActivities([]); // Clear existing activities
     fetchUserActivities(userId, userIp);
   }, [userId, userIp, filters.assetType]);
-  
+
   // Separate effect for page changes - only trigger when page changes
   useEffect(() => {
     // Only fetch more activities when page changes and it's not the first page
@@ -1139,7 +1141,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               {/* Heart Count Filter */}
               <div className="flex-1">
                 <label className="text-xs font-medium mb-1 block">
-                  Min Hearts <FaHeart className="inline text-red-500 ml-1" />
+                  Min <FaHeart className="inline text-red-500 ml-1" />
+                  's
                 </label>
                 <input
                   type="number"
@@ -1171,7 +1174,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     className="mr-2"
                   />
                   <label>
-                    <FaStar className="inline text-yellow-500 mr-1" /> Only
+                    <FaStar className="inline text-yellow-500 mr-1" />
+                    's
                   </label>
                 </div>
               </div>

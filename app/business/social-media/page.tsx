@@ -197,7 +197,7 @@ function SocialMediaContent() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8 mt-16 pt-4">
+    <div className="steps-container py-8 pt-4">
       <div className="mb-8 text-center">
         <div className="relative inline-block">
           <h1 className="text-3xl font-bold mb-2 pr-6">
