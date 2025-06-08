@@ -65,6 +65,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [selectedAssetUrl, setSelectedAssetUrl] = useState<string | undefined>(
     selectedUrl
   );
+  // Image editing states
+  const [showImageEditPane, setShowImageEditPane] = useState(false);
+  const [editingImageUrl, setEditingImageUrl] = useState('');
+  const [editPrompt, setEditPrompt] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
   const [autoRefreshTimer, setAutoRefreshTimer] =
     useState<NodeJS.Timeout | null>(null);
   const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<
@@ -633,6 +639,101 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Enhanced modal open function that takes index and activity reference
+  // Toggle the image edit pane in the modal
+  const toggleImageEditPane = () => {
+    setShowImageEditPane(!showImageEditPane);
+    if (showImageEditPane) {
+      // Clear the edit state when closing the pane
+      setEditPrompt('');
+      setEditError('');
+    }
+  };
+
+  // Handle the submission of an image edit request
+  const handleSubmitImageEdit = async (prompt: string) => {
+    if (!editingImageUrl || !prompt.trim()) {
+      setEditError('Both image and edit instructions are required');
+      return;
+    }
+
+    setIsSubmittingEdit(true);
+    setEditError('');
+
+    try {
+      const response = await fetch('/api/image-edit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': userId || 'none'
+        },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          imageUrl: editingImageUrl
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Handle specific error responses
+        if (result.error) {
+          if (result.result === 'LimitExceeded') {
+            setEditError('You need more credits to edit images. Please purchase credits on the pricing page.');
+          } else {
+            setEditError(result.error);
+          }
+        } else {
+          setEditError('Failed to submit edit request. Please try again.');
+        }
+        return;
+      }
+
+      // Close the edit pane on successful submission
+      setShowImageEditPane(false);
+      setEditPrompt('');
+      
+      // Show a success notification
+      const notification = document.createElement('div');
+      notification.textContent = 'Image edit request submitted! Refresh in a few minutes to see your edited image.';
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.right = '20px';
+      notification.style.padding = '10px 15px';
+      notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      notification.style.color = 'white';
+      notification.style.borderRadius = '4px';
+      notification.style.zIndex = '1000';
+      notification.style.opacity = '0';
+      notification.style.transition = 'opacity 0.3s ease-in-out';
+
+      document.body.appendChild(notification);
+
+      // Fade in
+      setTimeout(() => {
+        notification.style.opacity = '1';
+      }, 10);
+
+      // Fade out and remove after 5 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 5000);
+      
+      // Automatically refresh the assets list after a delay
+      setTimeout(() => {
+        handleRefresh();
+      }, 6000);
+
+    } catch (error) {
+      console.error('Error submitting image edit:', error);
+      setEditError('An error occurred while submitting your edit request. Please try again.');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
   const openModalForAsset = (index: number, fullScreen = false) => {
     if (index >= 0 && index < filteredAndSortedActivities.length) {
       const activity = filteredAndSortedActivities[index];
@@ -642,6 +743,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : activity.CreatedAssetUrl;
       setCurrentModalIndex(index);
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Store the current image URL for editing
       setIsModalOpen(true);
       setIsFullScreenModal(fullScreen);
     }
@@ -660,6 +762,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     } else {
       // Fallback if no matching asset found
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Store the URL for image editing
       setIsModalOpen(true);
       setIsFullScreenModal(fullScreen);
     }
@@ -675,6 +778,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : nextActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex + 1);
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Update image URL for editing
+      // Reset edit state when changing images
+      setShowImageEditPane(false);
+      setEditPrompt('');
+      setEditError('');
     }
   };
 
@@ -687,6 +795,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : prevActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex - 1);
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Update image URL for editing
+      // Reset edit state when changing images
+      setShowImageEditPane(false);
+      setEditPrompt('');
+      setEditError('');
     }
   };
 
@@ -700,6 +813,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : firstActivity.CreatedAssetUrl;
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Update image URL for editing
+      // Reset edit state when changing images
+      setShowImageEditPane(false);
+      setEditPrompt('');
+      setEditError('');
     }
   };
 
@@ -714,6 +832,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           : lastActivity.CreatedAssetUrl;
       setCurrentModalIndex(lastIndex);
       setModalMediaUrl(url);
+      setEditingImageUrl(url); // Update image URL for editing
+      // Reset edit state when changing images
+      setShowImageEditPane(false);
+      setEditPrompt('');
+      setEditError('');
     }
   };
 
@@ -808,6 +931,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const closeModal = () => {
     setIsModalOpen(false);
     setModalMediaUrl('');
+    setShowImageEditPane(false);
+    setEditPrompt('');
+    setEditError('');
   };
 
   // Add state to track whether modal should open in full screen mode
@@ -1103,7 +1229,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredAndSortedActivities.map((activity, index) => (
           <div
             key={index}
@@ -1250,24 +1376,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               <div className="overflow-auto max-h-[60%] scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-transparent text-white text-sm">
                 {activity.AssetType !== 'upl' && (
                   <div>
-                    <p className="font-medium mb-1">Prompt:</p>
-                    <div className="flex items-start justify-between">
-                      <p className="text-sm text-gray-200 break-words pr-2 flex-grow">
-                        {activity.Prompt.length > 100
-                          ? `${activity.Prompt.substring(0, 100)}...`
-                          : activity.Prompt}
-                      </p>
+                    <p className="font-medium mb-1 flex items-center">
+                      <span className="mr-1">Prompt:</span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCopy(activity.Prompt, 'Prompt copied!');
                         }}
-                        className="flex-shrink-0 text-gray-400 hover:text-white transition-colors mt-0.5"
+                        className="text-gray-400 hover:text-white transition-colors"
                         title="Copy Full Prompt"
                       >
                         <FaCopy className="text-xs" />
                       </button>
-                    </div>
+                    </p>
+                    <p className="text-sm text-gray-200 break-words">
+                      {activity.Prompt.length > 100
+                        ? `${activity.Prompt.substring(0, 100)}...`
+                        : activity.Prompt}
+                    </p>
                   </div>
                 )}
               </div>
@@ -1422,6 +1548,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               .filter(Boolean) as string[]
           }
           onCreateSlideshow={userId ? handleCreateSlideshow : undefined}
+          onToggleImageEditPane={toggleImageEditPane}
+          showImageEditPane={showImageEditPane}
+          onSubmitImageEdit={handleSubmitImageEdit}
         />
       )}
     </div>

@@ -10,7 +10,8 @@ import {
   FaPlay,
   FaPause,
   FaCog,
-  FaCopy
+  FaCopy,
+  FaEdit
 } from 'react-icons/fa';
 
 interface ModalProps {
@@ -41,6 +42,14 @@ interface ModalProps {
   slideshowDirection?: 'forward' | 'backward';
   slideshowInfiniteLoop?: boolean;
   autoStartSlideshow?: boolean;
+  // Image editing props
+  onToggleImageEditPane?: () => void;
+  showImageEditPane?: boolean;
+  onToggleGalleryInfoPane?: () => void;
+  showGalleryInfoPane?: boolean;
+  showReorderMode?: boolean;
+  setShowReorderMode?: (show: boolean) => void;
+  onSubmitImageEdit?: (prompt: string) => Promise<void>;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -66,10 +75,21 @@ const Modal: React.FC<ModalProps> = ({
   slideshowInterval,
   slideshowDirection,
   slideshowInfiniteLoop,
-  autoStartSlideshow = false
+  autoStartSlideshow = false,
+  // Image editing props
+  onToggleImageEditPane,
+  showImageEditPane = false,
+  onToggleGalleryInfoPane,
+  showGalleryInfoPane = false,
+  showReorderMode = false,
+  setShowReorderMode = () => {},
+  onSubmitImageEdit
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
+  const [editPrompt, setEditPrompt] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
   // Safe localStorage accessor functions
   const getFromLocalStorage = (key: string, defaultValue: string): string => {
     if (typeof window !== 'undefined') {
@@ -344,6 +364,28 @@ const Modal: React.FC<ModalProps> = ({
               <FaCog />
             </button>
           )}
+          {/* Image Edit button - only show for images */}
+          {!isVideo && onSubmitImageEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Close all other panes first
+                if (onToggleGalleryInfoPane && showGalleryInfoPane) {
+                  onToggleGalleryInfoPane();
+                }
+                setShowSettings(false);
+                setShowReorderMode(false);
+                // Then toggle the edit pane state by calling parent component
+                if (onToggleImageEditPane) {
+                  onToggleImageEditPane();
+                }
+              }}
+              className={`${showImageEditPane ? 'bg-blue-600' : 'bg-gray-800 bg-opacity-70'} hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md`}
+              title="Edit image"
+            >
+              <FaEdit />
+            </button>
+          )}
           {/* Download button */}
           <button
             onClick={handleDownload}
@@ -403,6 +445,81 @@ const Modal: React.FC<ModalProps> = ({
           </button>
         </div>
 
+        {/* Image Edit Panel */}
+        {showImageEditPane && !isVideo && (
+          <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-80">
+            <h3 className="text-lg font-bold mb-3">Edit Image</h3>
+            
+            <div className="mb-4">
+              <label className="block mb-2 text-sm">Edit Instructions</label>
+              <textarea
+                value={editPrompt}
+                onChange={(e) => setEditPrompt(e.target.value)}
+                placeholder="Describe how you want to edit this image..."
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => {
+                  if (onToggleImageEditPane) onToggleImageEditPane();
+                }}
+                className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm"
+              >
+                Cancel
+              </button>
+              
+              <button
+                onClick={async () => {
+                  if (!editPrompt.trim()) {
+                    setEditError('Please enter edit instructions');
+                    return;
+                  }
+                  
+                  if (onSubmitImageEdit) {
+                    setIsSubmittingEdit(true);
+                    setEditError('');
+                    try {
+                      await onSubmitImageEdit(editPrompt);
+                      // Close the panel after submission
+                      if (onToggleImageEditPane) onToggleImageEditPane();
+                    } catch (error) {
+                      console.error('Error submitting image edit:', error);
+                      setEditError('Failed to submit edit. Please try again.');
+                    } finally {
+                      setIsSubmittingEdit(false);
+                    }
+                  }
+                }}
+                disabled={isSubmittingEdit || !editPrompt.trim()}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed rounded text-sm flex items-center"
+              >
+                {isSubmittingEdit ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>Apply Edit</>
+                )}
+              </button>
+            </div>
+            
+            {editError && (
+              <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded">
+                {editError}
+              </div>
+            )}
+            
+            <div className="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
+              <p>This will create a new edited version of your image. The original image will not be modified.</p>
+              <p className="mt-1">Image editing costs 10 credits.</p>
+            </div>
+          </div>
+        )}
+        
         {/* Slideshow settings panel */}
         {showSettings && (
           <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-64">

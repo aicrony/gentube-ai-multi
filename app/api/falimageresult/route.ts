@@ -69,6 +69,14 @@ export async function POST(request: NextRequest) {
       console.log('Status:', body.status);
       console.log('Incoming Payload: ', JSON.stringify(body.payload));
 
+      // For now, we don't need to try to determine if this is an image edit based on the request_id
+      // The external webhook won't have our custom prefix
+      console.log(`Processing image result from webhook`);
+
+      // Get the URL of the generated/edited image
+      const imageUrl = body.payload.images[0].url;
+      
+      // Use the standard process for all image updates
       const userQueueRecord = await getLatestActivityByRequestId(
         body.request_id
       );
@@ -93,14 +101,15 @@ export async function POST(request: NextRequest) {
           console.log('userActivity: ', userActivity);
 
           if (userActivity) {
-            userActivity.CreatedAssetUrl = body.payload.images[0].url;
+            // Update the record with the final image URL
+            userActivity.CreatedAssetUrl = imageUrl;
             userActivity.AssetType = 'img';
             transaction.save({
               key: userActivityKey,
               data: userActivity
             });
             await transaction.commit();
-            console.log('UserActivity updated successfully');
+            console.log('UserActivity updated successfully with URL:', imageUrl);
           } else {
             console.error('UserActivity not found');
             await transaction.rollback();

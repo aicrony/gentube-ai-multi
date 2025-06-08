@@ -124,21 +124,21 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
   };
 
   const latestFeatures = [
-    {
-      icon: <FaFolder className="text-blue-500" />,
-      title: 'Asset Groups',
-      description: userId
-        ? 'Organize your assets into custom groups for better management'
-        : 'Organize your assets into custom groups for better management (requires sign in)',
-      clickable: true
-    },
-    {
-      icon: <FaPlay className="text-green-500" />,
-      title: 'Group Slideshows',
-      description:
-        'Create and share slideshows from asset groups - customize timing, direction, and looping',
-      clickable: true
-    },
+    // {
+    //   icon: <FaFolder className="text-blue-500" />,
+    //   title: 'Asset Groups',
+    //   description: userId
+    //     ? 'Organize your assets into custom groups for better management'
+    //     : 'Organize your assets into custom groups for better management (requires sign in)',
+    //   clickable: true
+    // },
+    // {
+    //   icon: <FaPlay className="text-green-500" />,
+    //   title: 'Group Slideshows',
+    //   description:
+    //     'Create and share slideshows from asset groups - customize timing, direction, and looping',
+    //   clickable: true
+    // },
     {
       icon: <FaImage className="text-purple-500" />,
       title: 'Image Editing',
