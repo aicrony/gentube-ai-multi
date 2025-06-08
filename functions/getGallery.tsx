@@ -16,6 +16,7 @@ import { useUserIp } from '@/context/UserIpContext';
 import { useRouter } from 'next/navigation';
 import MyAssets from '@/components/dynamic/my-assets';
 import Modal from '@/components/ui/Modal';
+import LoadingAnimation from '@/components/ui/LoadingAnimation';
 
 interface GalleryItem {
   id?: string;
@@ -46,6 +47,7 @@ const ImageGallery: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const userId = useUserId();
   const userIp = useUserIp();
   const router = useRouter();
@@ -53,6 +55,7 @@ const ImageGallery: React.FC = () => {
   // Check for an asset ID in the URL
   useEffect(() => {
     const fetchMedia = async () => {
+      setIsInitialLoading(true);
       try {
         // Read the URL params to see if we have a direct link to an asset
         const urlParams = new URLSearchParams(window.location.search);
@@ -85,6 +88,8 @@ const ImageGallery: React.FC = () => {
         await fetchAndSetMedia(assetIdParam);
       } catch (error) {
         console.error('Error fetching media:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -785,6 +790,11 @@ const ImageGallery: React.FC = () => {
       setIsRefreshingGallery(false);
     }
   };
+  
+  // If initial loading, show loading animation
+  if (isInitialLoading) {
+    return <LoadingAnimation size="large" message="Loading gallery assets..." fullScreen={false} />;
+  }
 
   return (
     <div>
@@ -797,7 +807,12 @@ const ImageGallery: React.FC = () => {
           className="text-sm text-blue-500 hover:text-blue-700 underline"
           disabled={isRefreshingGallery}
         >
-          {isRefreshingGallery ? 'Refreshing...' : 'Refresh Gallery'}
+          {isRefreshingGallery ? (
+            <span className="flex items-center">
+              <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
+              Refreshing...
+            </span>
+          ) : 'Refresh Gallery'}
         </button>
         <span className="text-xs text-gray-500 ml-2">
           (Refresh to see your added assets)
@@ -836,15 +851,11 @@ const ImageGallery: React.FC = () => {
 
       {/* Loading indicator */}
       {regenerateInProgress && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-lg font-semibold">Processing your request...</p>
-            <p className="text-sm text-gray-600 mt-2">
-              This may take a few moments.
-            </p>
-          </div>
-        </div>
+        <LoadingAnimation 
+          size="medium" 
+          message="Processing your request..."
+          fullScreen={true} 
+        />
       )}
 
       {/* Show MyAssets component when regenerate is triggered */}

@@ -18,7 +18,8 @@ import {
   FaList,
   FaTimesCircle
 } from 'react-icons/fa';
-import Modal from '@/components/ui/Modal'; // Import the Modal component
+import Modal from '@/components/ui/Modal';
+import LoadingAnimation from '@/components/ui/LoadingAnimation'; // Import the Modal component
 
 interface UserActivity {
   id?: string;
@@ -60,6 +61,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
   }>({});
+  // Removed individual asset loading animations
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [currentModalIndex, setCurrentModalIndex] = useState(0);
@@ -972,7 +974,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <LoadingAnimation size="medium" message="Loading your assets..." fullScreen={false} />;
   }
 
   // Create a descriptive title for asset types
@@ -1017,6 +1019,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const assetTypeTitle = getAssetTypeTitle(assetType);
+
 
   // Handle filter changes
   const handleFilterChange = (filterName: string, value: any) => {
@@ -1328,7 +1331,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             </div>
 
             {/* Image Thumbnail */}
-            <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+            <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden relative">
+              
               {activity.AssetType === 'vid' &&
               activity.AssetSource === 'none' ? (
                 <FaPlay className="w-12 h-12 text-gray-400" />
@@ -1349,6 +1353,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   }
                   alt="Thumbnail"
                   className="w-full h-full object-cover transition-transform duration-300"
+                  onLoad={() => {
+                    // Image loaded successfully
+                  }}
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
                       // Hide the broken image
@@ -1523,11 +1530,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {/* Show load more button only if the API indicates there are more assets */}
       {activities.length > 0 && hasMore && (
         <button
-          onClick={() => setPage((prev) => prev + 1)}
-          className="mt-4 px-4 py-2 rounded border"
+          onClick={() => {
+            setPage((prev) => prev + 1);
+            // When clicking load more, we'll temporarily show a loading state
+            // This will automatically resolve when the new assets are loaded
+          }}
+          className="mt-4 px-4 py-2 rounded border flex items-center justify-center"
           style={{ borderColor: 'var(--border-color)' }}
+          disabled={page > 0 && loading}
         >
-          Load More
+          {page > 0 && loading ? (
+            <>
+              <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
+              <span>Loading more...</span>
+            </>
+          ) : 'Load More'}
         </button>
       )}
       {isModalOpen && filteredAndSortedActivities.length > 0 && (
