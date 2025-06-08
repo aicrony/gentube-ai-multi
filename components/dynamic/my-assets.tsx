@@ -923,114 +923,119 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             backgroundColor: 'var(--card-bg-hover)'
           }}
         >
-          <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {/* Search Box */}
+            <div>
+              <label className="text-xs font-medium mb-1 block">Search Prompts</label>
+              <div className="relative">
+                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className="p-1.5 pl-7 rounded border w-full text-sm"
+                  style={{ borderColor: 'var(--border-color)' }}
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <FaTimesCircle className="text-xs" />
+                  </button>
+                )}
+              </div>
+            </div>
+            
             {/* Asset Type Filter */}
-            <div className="flex flex-col">
-              <label className="mb-1 font-medium">Asset Type</label>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Asset Type</label>
               <select
                 value={filters.assetType}
                 onChange={(e) =>
                   handleFilterChange('assetType', e.target.value)
                 }
-                className="p-2 rounded border"
+                className="p-1.5 rounded border w-full text-sm"
                 style={{ borderColor: 'var(--border-color)' }}
               >
-                <option value=""></option>
+                <option value="">All</option>
                 <option value="img">Images</option>
                 <option value="vid">Videos</option>
-                <option value="que">In Queue</option>
+                <option value="que">Queue</option>
                 <option value="upl">Uploads</option>
               </select>
             </div>
 
-            {/* Gallery Filter */}
-            <div className="flex flex-col">
-              <label className="mb-1 font-medium">In Gallery</label>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={filters.inGallery}
-                  onChange={(e) =>
-                    handleFilterChange('inGallery', e.target.checked)
-                  }
-                  className="mr-2"
-                />
-                <label>
-                  Show only gallery items{' '}
-                  <FaStar className="inline text-yellow-500 ml-1" />
+            {/* Combined Min Hearts and Gallery Status Filter */}
+            <div className="flex space-x-3 items-start">
+              {/* Heart Count Filter */}
+              <div className="flex-1">
+                <label className="text-xs font-medium mb-1 block">
+                  Min Hearts <FaHeart className="inline text-red-500 ml-1" />
                 </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={filters.minHearts}
+                  onChange={(e) =>
+                    handleFilterChange('minHearts', parseInt(e.target.value) || 0)
+                  }
+                  className="p-1.5 rounded border w-full text-sm"
+                  style={{ borderColor: 'var(--border-color)' }}
+                />
+              </div>
+
+              {/* Gallery Filter */}
+              <div className="flex-1">
+                <label className="text-xs font-medium mb-1 block">Gallery</label>
+                <div className="flex items-center h-[34px] text-sm">
+                  <input
+                    type="checkbox"
+                    checked={filters.inGallery}
+                    onChange={(e) =>
+                      handleFilterChange('inGallery', e.target.checked)
+                    }
+                    className="mr-2"
+                  />
+                  <label>
+                    <FaStar className="inline text-yellow-500 mr-1" /> Only
+                  </label>
+                </div>
               </div>
             </div>
 
-            {/* Heart Count Filter */}
-            <div className="flex flex-col">
-              <label className="mb-1 font-medium">
-                Min Hearts <FaHeart className="inline text-red-500 ml-1" />
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={filters.minHearts}
-                onChange={(e) =>
-                  handleFilterChange('minHearts', parseInt(e.target.value) || 0)
-                }
-                className="p-2 rounded border w-20"
-                style={{ borderColor: 'var(--border-color)' }}
-              />
-            </div>
-
             {/* Sort Direction */}
-            <div className="flex flex-col">
-              <label className="mb-1 font-medium">Sort By Date</label>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Sort Order</label>
               <button
                 onClick={() =>
                   setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
                 }
-                className="flex items-center gap-1 p-2 border rounded"
+                className="flex items-center justify-start gap-1 p-1.5 border rounded w-full text-sm"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 {sortDirection === 'desc' ? (
                   <>
-                    <FaSortAmountDown /> Newest First
+                    <FaSortAmountDown className="text-xs ml-1" /> <span>Newest First</span>
                   </>
                 ) : (
                   <>
-                    <FaSortAmountUp /> Oldest First
+                    <FaSortAmountUp className="text-xs ml-1" /> <span>Oldest First</span>
                   </>
                 )}
               </button>
             </div>
-          </div>
-
-          {/* Search Box */}
-          <div className="mt-4">
-            <label className="mb-1 font-medium">Search Prompts</label>
-            <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search in prompts..."
-                className="p-2 pl-10 rounded border w-full"
-                style={{ borderColor: 'var(--border-color)' }}
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <FaTimesCircle />
-                </button>
-              )}
+            
+            {/* Reset Filters */}
+            <div className="flex items-end justify-end">
+              <button 
+                onClick={clearFilters} 
+                className="text-xs px-2 py-1.5 transition-colors"
+              >
+                Reset All Filters
+              </button>
             </div>
-          </div>
-
-          {/* Reset Filters */}
-          <div className="mt-4 flex justify-end">
-            <button onClick={clearFilters} className="text-sm">
-              Reset All Filters
-            </button>
           </div>
         </div>
       )}

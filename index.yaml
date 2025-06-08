@@ -20,5 +20,69 @@ indexes:
     - name: DateTime
       direction: desc
 
+  - kind: UserActivity
+    properties:
+      - name: SubscriptionTier
+      - name: order
+      - name: DateTime
+        direction: desc
+
+  # Index for UserActivity sorting by AssetType, UserId, order and DateTime
+  - kind: UserActivity
+    properties:
+      - name: AssetType
+      - name: UserId
+      - name: order
+      - name: DateTime
+        direction: desc
+
+  # Groups feature indexes
+  - kind: UserGroup
+    properties:
+      - name: userId
+      - name: createdAt
+        direction: desc
+
+  - kind: AssetGroupMembership
+    properties:
+      - name: userId
+      - name: groupId
 
 
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+
+  # Group asset ordering indexes
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+      - name: order
+
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+      - name: order
+      - name: createdAt
+        direction: desc
+
+  - kind: AssetGroupMembership
+    properties:
+      - name: groupId
+      - name: userId
+      - name: createdAt
+        direction: desc
+
+  - kind: AssetGroupMembership
+    properties:
+      - name: assetId
+      - name: userId
+
+  # Feedback feature index
+#  - kind: Feedback
+#    properties:
+#      - name: createdAt
+#        direction: desc
