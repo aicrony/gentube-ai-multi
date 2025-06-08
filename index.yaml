@@ -81,8 +81,8 @@ indexes:
       - name: assetId
       - name: userId
 
-  # Feedback feature index
-#  - kind: Feedback
-#    properties:
-#      - name: createdAt
-#        direction: desc
+#   Feedback feature index
+  - kind: Feedback
+    properties:
+      - name: createdAt
+        direction: desc

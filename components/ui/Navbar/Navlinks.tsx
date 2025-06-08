@@ -8,6 +8,8 @@ import { getRedirectMethod } from '@/utils/auth-helpers/settings';
 import { FaCheck } from 'react-icons/fa';
 import s from './Navbar.module.css';
 import ThemeToggle from '@/components/theme/ThemeToggle';
+import InfoPanel from '@/components/ui/InfoPanel';
+import { useUserId } from '@/context/UserIdContext';
 
 interface NavlinksProps {
   user: any | null;
@@ -15,6 +17,7 @@ interface NavlinksProps {
 
 export default function Navlinks({ user }: NavlinksProps) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
+  const userId = useUserId();
 
   return (
     <div className="relative flex flex-row justify-between py-1 align-center md:py-6">
@@ -42,7 +45,7 @@ export default function Navlinks({ user }: NavlinksProps) {
       <div className="flex items-center">
         <div>
           {user ? (
-            <div>
+            <div className="flex items-center gap-2">
               <form onSubmit={(e) => handleRequest(e, SignOut, router)}>
                 <input
                   type="hidden"
@@ -56,6 +59,8 @@ export default function Navlinks({ user }: NavlinksProps) {
                   &nbsp; Sign out
                 </button>
               </form>
+              {/* Only show feedback icon for signed in users */}
+              <InfoPanel userId={userId} />
             </div>
           ) : (
             <Link href="/signin" className={s.link}>
