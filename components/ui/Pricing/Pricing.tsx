@@ -298,8 +298,8 @@ export default function Pricing({
                   <tr>
                     <th className="py-3 px-4 text-left">Features</th>
                     <th className="py-3 px-4 text-center">Freemium</th>
-                    <th className="py-3 px-4 text-center">Personal</th>
-                    <th className="py-3 px-4 text-center">Business & Plus</th>
+                    <th className="py-3 px-4 text-center">Basic</th>
+                    <th className="py-3 px-4 text-center">Advanced & Plus</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
