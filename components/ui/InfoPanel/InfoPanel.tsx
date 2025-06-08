@@ -11,7 +11,8 @@ import {
   FaStar,
   FaHeart,
   FaTrophy,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaEdit
 } from 'react-icons/fa';
 // Don't import useUserId to avoid hook issues - we'll get userId from props or context differently
 
@@ -104,19 +105,19 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
       //   break;
       case 'Image Editing':
         // Try to open image editing with demo image if no assets
-        window.dispatchEvent(
-          new CustomEvent('openImageEdit', {
-            detail: { demoImage: '/panda-demo-image.png' }
-          })
-        );
+        // window.dispatchEvent(
+        //   new CustomEvent('openImageEdit', {
+        //     detail: { demoImage: '/panda-demo-image.png' }
+        //   })
+        // );
         break;
       case 'Gallery & Hearts':
         // Navigate to the gallery page
-        window.location.href = '/gallery';
+        // window.location.href = '/gallery';
         break;
       case 'Monthly Contest':
         // Navigate to the gallery page (where the contest is held)
-        window.location.href = '/gallery';
+        // window.location.href = '/gallery';
         break;
       default:
         break;
@@ -142,7 +143,13 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     {
       icon: <FaImage className="text-purple-500" />,
       title: 'Image Editing',
-      description: 'Edit your images directly with AI-powered modifications',
+      description: (
+        <>
+          Edit your images directly with AI-powered modifications. Generate an
+          image and click on it, then look for the{' '}
+          <FaEdit className="inline-block align-middle mx-0.5" /> edit icon.
+        </>
+      ),
       clickable: true
     },
     {
