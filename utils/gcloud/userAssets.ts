@@ -22,6 +22,7 @@ interface UserActivity {
   UserId?: string | null; // Added for creator info
   CreatorName?: string | null; // Added for creator display
   SubscriptionTier?: number; // Added for gallery status
+  hasMore?: boolean; // Flag to indicate if there are more assets
 }
 
 export async function getUserAssets(
@@ -31,81 +32,104 @@ export async function getUserAssets(
   offset: number,
   assetType?: string | string[] | undefined
 ): Promise<UserActivity[] | null> {
-  // We need to increase the limit to account for filtering out 'processed' assets
-  // For simplicity, we'll request additional items to ensure we still get enough results
-  const adjustedLimit = limit * 2; // Double the limit to account for filtered items
+  // We need to fetch enough assets to fill exactly the limit, even after filtering
+  const batchSize = limit * 2; // Fetch twice the needed amount per query
+  let allFilteredResults: any[] = [];
+  let hasMore = false;
+  
   // if (!userId || userId.length === 0) {
   //   console.log('Invalid userId');
   //   return null;
   // }
 
-  let query;
   const normalizedIpAddress = localIpConfig(userIp);
-
-  if (userId && userId !== 'none') {
-    console.log('Query UA1');
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
-      .limit(adjustedLimit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  } else if (userIp && userIp.length > 4) {
-    console.log('Query UA2');
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserIp', '=', normalizedIpAddress)
-      .limit(adjustedLimit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  } else {
-    console.log('Query UA3');
-    query = datastore
-      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('UserId', '=', userId)
-      .filter('UserIp', '=', normalizedIpAddress)
-      .limit(adjustedLimit)
-      .offset(offset)
-      .order('DateTime', { descending: true });
-  }
-
-  // Note: We filter out 'processed' assets after query execution to avoid multiple inequality filters
-  // Datastore only allows one inequality filter per query
-
-  // Handle multiple asset types (comma-separated)
-  if (assetType && assetType.length > 0) {
-    if (assetType.includes(',')) {
-      // For multiple asset types, use an 'IN' filter
-      const assetTypes = (
-        typeof assetType === 'string' ? assetType.split(',') : assetType
-      ).map((type: string) => type.trim());
-      query = query.filter('AssetType', 'IN', assetTypes);
+  
+  // Log the exact pagination parameters
+  console.log(`Fetching assets - limit: ${limit}, offset: ${offset}, batch size: ${batchSize}`);
+  
+  // Function to create a query with the provided offset
+  const createQuery = (queryOffset: number) => {
+    let query;
+    
+    if (userId && userId !== 'none') {
+      console.log(`Query UA1 with offset ${queryOffset}`);
+      query = datastore
+        .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+        .filter('UserId', '=', userId)
+        .limit(batchSize)
+        .offset(queryOffset)
+        .order('DateTime', { descending: true });
+    } else if (userIp && userIp.length > 4) {
+      console.log(`Query UA2 with offset ${queryOffset}`);
+      query = datastore
+        .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+        .filter('UserIp', '=', normalizedIpAddress)
+        .limit(batchSize)
+        .offset(queryOffset)
+        .order('DateTime', { descending: true });
     } else {
-      // For a single asset type, use the '=' filter
-      query = query.filter('AssetType', '=', assetType);
+      console.log(`Query UA3 with offset ${queryOffset}`);
+      query = datastore
+        .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+        .filter('UserId', '=', userId)
+        .filter('UserIp', '=', normalizedIpAddress)
+        .limit(batchSize)
+        .offset(queryOffset)
+        .order('DateTime', { descending: true });
     }
-  }
-
+    
+    // Handle multiple asset types (comma-separated)
+    if (assetType && assetType.length > 0) {
+      if (assetType.includes(',')) {
+        // For multiple asset types, use an 'IN' filter
+        const assetTypes = (
+          typeof assetType === 'string' ? assetType.split(',') : assetType
+        ).map((type: string) => type.trim());
+        query = query.filter('AssetType', 'IN', assetTypes);
+      } else {
+        // For a single asset type, use the '=' filter
+        query = query.filter('AssetType', '=', assetType);
+      }
+    }
+    
+    return query;
+  };
+  
+  // Execute a single query first
+  const query = createQuery(offset);
   const [results] = await datastore.runQuery(query);
   
-  // Filter out 'processed' assets after querying to avoid Datastore inequality filter limitations
-  const filteredResults = results.filter((activity: any) => activity.AssetType !== 'processed');
+  // Filter out 'processed' assets
+  const filteredBatch = results.filter((activity: any) => activity.AssetType !== 'processed');
+  allFilteredResults = [...filteredBatch];
   
-  // Ensure we only return up to the original limit requested
-  const limitedResults = filteredResults.slice(0, limit);
+  // Check if this batch returned the full amount requested
+  // If so, there might be more results available
+  hasMore = results.length === batchSize;
   
-  // Set hasMore flag based on whether we had to trim results
-  const hasMore = filteredResults.length > limit;
+  console.log(`Query returned ${results.length} results, ${filteredBatch.length} after filtering`);
   
-  return limitedResults.map((activity: any) => ({
+  // Return exactly the requested number of items (or all if we have fewer)
+  const limitedResults = allFilteredResults.slice(0, limit);
+  
+  // If we have more results than limit, there are definitely more
+  hasMore = hasMore || allFilteredResults.length > limit;
+  
+  console.log(`Returning ${limitedResults.length} results, hasMore: ${hasMore}`);
+  
+  // Attach the hasMore flag to the returned array for the API to use
+  const returnResults = limitedResults.map((activity: any) => ({
     id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
     AssetSource: activity.AssetSource,
     AssetType: activity.AssetType,
     DateTime: activity.DateTime,
-    SubscriptionTier: activity.SubscriptionTier
+    SubscriptionTier: activity.SubscriptionTier,
+    hasMore // Add the hasMore flag to each result (will be used by the API)
   }));
+  
+  return returnResults;
 }
 
 export async function getPublicAssets(

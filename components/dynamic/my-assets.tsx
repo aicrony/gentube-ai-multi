@@ -30,6 +30,7 @@ interface UserActivity {
   SubscriptionTier?: number;
   isInGallery?: boolean; // Helper property
   likesCount?: number; // Added for filtering by heart count
+  hasMore?: boolean; // Flag to indicate if there are more assets
 }
 
 interface AssetLikeInfo {
@@ -109,18 +110,18 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // This needs to be handled on the backend, adding a note here for future implementation
         // For now, we'll rely on client-side filtering
 
+        // Add a timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        
         const response = await fetch(
-          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
+          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}&_t=${timestamp}`
         );
         if (!response.ok) {
           console.log('Error fetching user assets.');
           throw new Error('Failed to fetch user assets');
         }
         const data = await response.json();
-        if (page == 0) {
-          setActivities([]);
-        }
-
+        
         // Process the assets to ensure gallery status is properly reflected
         const processedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
@@ -130,8 +131,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Log to help debug gallery status issues
         if (processedAssets.length > 0) {
           console.log(
-            'First asset SubscriptionTier:',
-            processedAssets[0].SubscriptionTier
+            `Loaded ${processedAssets.length} assets, page: ${page}, hasMore: ${data.hasMore}`
           );
           console.log(
             'Assets in gallery:',
@@ -139,8 +139,25 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           );
         }
 
-        setActivities((prev) => [...prev, ...processedAssets]);
-        setHasMore(data.assets.length === limit && data.assets.length > 0);
+        // Check for duplicates before adding new assets
+        if (page > 0) {
+          // For pagination, filter out any duplicates using asset IDs
+          const existingIds = activities.map(asset => asset.id);
+          const uniqueNewAssets = processedAssets.filter(asset => 
+            asset.id && !existingIds.includes(asset.id)
+          );
+          
+          console.log(`Found ${uniqueNewAssets.length} unique new assets out of ${processedAssets.length}`);
+          
+          // Only append unique assets
+          setActivities(prev => [...prev, ...uniqueNewAssets]);
+        } else {
+          // For first page, just set the activities directly
+          setActivities(processedAssets);
+        }
+        
+        // Use the hasMore flag returned by the API
+        setHasMore(data.hasMore);
       } catch (error) {
         console.error(error);
       } finally {
@@ -152,17 +169,26 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   useEffect(() => {
-    // Reset to page 0 when filters change
+    // Reset to page 0 when user ID, IP, or filter type changes
     setPage(0);
+    setActivities([]); // Clear existing activities
     fetchUserActivities(userId, userIp);
-  }, [userId, userIp, page, filters.assetType]);
+  }, [userId, userIp, filters.assetType]);
+  
+  // Separate effect for page changes - only trigger when page changes
+  useEffect(() => {
+    // Only fetch more activities when page changes and it's not the first page
+    if (page > 0) {
+      fetchUserActivities(userId, userIp);
+    }
+  }, [page]);
 
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
 
-    // Filter out assets with AssetType of 'processed'
-    result = result.filter((activity) => activity.AssetType !== 'processed');
+    // Filter out assets with AssetType of 'processed' or null/undefined
+    result = result.filter((activity) => activity.AssetType && activity.AssetType !== 'processed');
 
     // Apply gallery filter
     if (filters.inGallery) {
@@ -1490,18 +1516,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </div>
         ))}
       </div>
-      {/* Only show load more if we have more original assets and we're not applying client-side filters */}
-      {activities.length > 0 &&
-        hasMore &&
-        !(filters.inGallery || filters.minHearts > 0 || searchTerm.trim()) && (
-          <button
-            onClick={() => setPage((prev) => prev + 1)}
-            className="mt-4 px-4 py-2 rounded border"
-            style={{ borderColor: 'var(--border-color)' }}
-          >
-            Load More
-          </button>
-        )}
+      {/* Show load more button only if the API indicates there are more assets */}
+      {activities.length > 0 && hasMore && (
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="mt-4 px-4 py-2 rounded border"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
+          Load More
+        </button>
+      )}
       {isModalOpen && filteredAndSortedActivities.length > 0 && (
         <Modal
           mediaUrl={modalMediaUrl}

@@ -28,7 +28,19 @@ export async function GET(request: NextRequest) {
         assetType || undefined
       );
       
-      return NextResponse.json({ assets });
+      // Check if we have more assets available from the hasMore flag on the first asset
+      const hasMore = assets && assets.length > 0 ? assets[0].hasMore : false;
+      
+      // Remove the hasMore flag from each asset before returning (it was only for internal use)
+      const cleanAssets = assets ? assets.map(asset => {
+        const { hasMore, ...cleanAsset } = asset;
+        return cleanAsset;
+      }) : [];
+      
+      return NextResponse.json({ 
+        assets: cleanAssets,
+        hasMore: hasMore
+      });
     } catch (error) {
       console.error('Failed to fetch user assets:', error);
       return NextResponse.json(
@@ -37,6 +49,6 @@ export async function GET(request: NextRequest) {
       );
     }
   } else {
-    return NextResponse.json({ assets: [] });
+    return NextResponse.json({ assets: [], hasMore: false });
   }
 }
