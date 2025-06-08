@@ -31,6 +31,9 @@ export async function getUserAssets(
   offset: number,
   assetType?: string | string[] | undefined
 ): Promise<UserActivity[] | null> {
+  // We need to increase the limit to account for filtering out 'processed' assets
+  // For simplicity, we'll request additional items to ensure we still get enough results
+  const adjustedLimit = limit * 2; // Double the limit to account for filtered items
   // if (!userId || userId.length === 0) {
   //   console.log('Invalid userId');
   //   return null;
@@ -44,7 +47,7 @@ export async function getUserAssets(
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserId', '=', userId)
-      .limit(limit)
+      .limit(adjustedLimit)
       .offset(offset)
       .order('DateTime', { descending: true });
   } else if (userIp && userIp.length > 4) {
@@ -52,7 +55,7 @@ export async function getUserAssets(
     query = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserIp', '=', normalizedIpAddress)
-      .limit(limit)
+      .limit(adjustedLimit)
       .offset(offset)
       .order('DateTime', { descending: true });
   } else {
@@ -61,10 +64,13 @@ export async function getUserAssets(
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
       .filter('UserId', '=', userId)
       .filter('UserIp', '=', normalizedIpAddress)
-      .limit(limit)
+      .limit(adjustedLimit)
       .offset(offset)
       .order('DateTime', { descending: true });
   }
+
+  // Note: We filter out 'processed' assets after query execution to avoid multiple inequality filters
+  // Datastore only allows one inequality filter per query
 
   // Handle multiple asset types (comma-separated)
   if (assetType && assetType.length > 0) {
@@ -81,7 +87,17 @@ export async function getUserAssets(
   }
 
   const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => ({
+  
+  // Filter out 'processed' assets after querying to avoid Datastore inequality filter limitations
+  const filteredResults = results.filter((activity: any) => activity.AssetType !== 'processed');
+  
+  // Ensure we only return up to the original limit requested
+  const limitedResults = filteredResults.slice(0, limit);
+  
+  // Set hasMore flag based on whether we had to trim results
+  const hasMore = filteredResults.length > limit;
+  
+  return limitedResults.map((activity: any) => ({
     id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,
@@ -119,7 +135,17 @@ export async function getPublicAssets(
   }
 
   const [results] = await datastore.runQuery(query);
-  return results.map((activity: any) => ({
+  
+  // Filter out 'processed' assets after querying to avoid Datastore inequality filter limitations
+  const filteredResults = results.filter((activity: any) => activity.AssetType !== 'processed');
+  
+  // Ensure we only return up to the original limit requested
+  const limitedResults = filteredResults.slice(0, limit);
+  
+  // Set hasMore flag based on whether we had to trim results
+  const hasMore = filteredResults.length > limit;
+  
+  return limitedResults.map((activity: any) => ({
     id: activity[datastore.KEY].name || activity[datastore.KEY].id, // Include entity ID
     CreatedAssetUrl: activity.CreatedAssetUrl,
     Prompt: activity.Prompt,

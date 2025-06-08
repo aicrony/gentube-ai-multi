@@ -97,7 +97,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     if (userId || userIp) {
       try {
         // Support comma-separated asset types - use the filters state
-        const assetTypeParam = filters.assetType || '';
+        // Add exclusion for 'processed' assets in the API query
+        let assetTypeParam = filters.assetType || '';
+        // If no specific asset type is specified, exclude 'processed' with a NOT_EQUAL operator
+        // This needs to be handled on the backend, adding a note here for future implementation
+        // For now, we'll rely on client-side filtering
 
         const response = await fetch(
           `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${page * limit}&assetType=${assetTypeParam}`
@@ -150,6 +154,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
+    
+    // Filter out assets with AssetType of 'processed'
+    result = result.filter((activity) => activity.AssetType !== 'processed');
 
     // Apply gallery filter
     if (filters.inGallery) {
@@ -926,7 +933,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {/* Search Box */}
             <div>
-              <label className="text-xs font-medium mb-1 block">Search Prompts</label>
+              <label className="text-xs font-medium mb-1 block">
+                Search Prompts
+              </label>
               <div className="relative">
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
@@ -947,10 +956,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 )}
               </div>
             </div>
-            
+
             {/* Asset Type Filter */}
             <div>
-              <label className="text-xs font-medium mb-1 block">Asset Type</label>
+              <label className="text-xs font-medium mb-1 block">
+                Asset Type
+              </label>
               <select
                 value={filters.assetType}
                 onChange={(e) =>
@@ -979,7 +990,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   min="0"
                   value={filters.minHearts}
                   onChange={(e) =>
-                    handleFilterChange('minHearts', parseInt(e.target.value) || 0)
+                    handleFilterChange(
+                      'minHearts',
+                      parseInt(e.target.value) || 0
+                    )
                   }
                   className="p-1.5 rounded border w-full text-sm"
                   style={{ borderColor: 'var(--border-color)' }}
@@ -988,7 +1002,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
               {/* Gallery Filter */}
               <div className="flex-1">
-                <label className="text-xs font-medium mb-1 block">Gallery</label>
+                <label className="text-xs font-medium mb-1 block">
+                  Gallery
+                </label>
                 <div className="flex items-center h-[34px] text-sm">
                   <input
                     type="checkbox"
@@ -1007,7 +1023,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
             {/* Sort Direction */}
             <div>
-              <label className="text-xs font-medium mb-1 block">Sort Order</label>
+              <label className="text-xs font-medium mb-1 block">
+                Sort Order
+              </label>
               <button
                 onClick={() =>
                   setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
@@ -1017,20 +1035,22 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               >
                 {sortDirection === 'desc' ? (
                   <>
-                    <FaSortAmountDown className="text-xs ml-1" /> <span>Newest First</span>
+                    <FaSortAmountDown className="text-xs ml-1" />{' '}
+                    <span>Newest First</span>
                   </>
                 ) : (
                   <>
-                    <FaSortAmountUp className="text-xs ml-1" /> <span>Oldest First</span>
+                    <FaSortAmountUp className="text-xs ml-1" />{' '}
+                    <span>Oldest First</span>
                   </>
                 )}
               </button>
             </div>
-            
+
             {/* Reset Filters */}
             <div className="flex items-end justify-end">
-              <button 
-                onClick={clearFilters} 
+              <button
+                onClick={clearFilters}
                 className="text-xs px-2 py-1.5 transition-colors"
               >
                 Reset All Filters
@@ -1083,80 +1103,82 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
-      {filteredAndSortedActivities.map((activity, index) => (
-        <div
-          key={index}
-          className={`border p-4 ${
-            onSelectAsset ? 'cursor-pointer asset-item-hover' : ''
-          } ${
-            selectedAssetUrl === activity.CreatedAssetUrl ||
-            selectedAssetUrl === activity.AssetSource
-              ? 'asset-item-selected'
-              : ''
-          } flex flex-col md:flex-row md:items-center`}
-          onClick={(e) => {
-            if (onSelectAsset) {
-              // If in selection mode, make the whole row clickable
-              e.preventDefault();
-              const urlToSelect =
-                activity.AssetType === 'vid'
-                  ? activity.AssetSource || activity.CreatedAssetUrl
-                  : activity.CreatedAssetUrl;
-
-              // Check if this asset is already selected
-              const isAlreadySelected =
-                selectedAssetUrl === activity.CreatedAssetUrl ||
-                selectedAssetUrl === activity.AssetSource;
-
-              if (isAlreadySelected) {
-                // If already selected, deselect it
-                setSelectedAssetUrl(undefined);
-                onSelectAsset(''); // Pass empty string to deselect
-              } else {
-                // Otherwise select it
-                setSelectedAssetUrl(urlToSelect);
-                onSelectAsset(urlToSelect);
-              }
-            }
-          }}
-        >
-          {/* Image/thumbnail - larger on mobile */}
-          <div className="flex justify-center w-full md:w-auto mb-3 md:mb-0">
-            <div
-              className={`w-48 h-48 md:w-32 md:h-32 flex items-center justify-center md:mr-4 ${activity.AssetType === 'que' || activity.AssetType === 'err' ? 'disabled' : ''}`}
-              style={{ backgroundColor: 'var(--card-bg-hover)' }}
-              onClick={(e) => {
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {filteredAndSortedActivities.map((activity, index) => (
+          <div
+            key={index}
+            className={`relative rounded-lg overflow-hidden transition-transform duration-200 ${onSelectAsset ? 'cursor-pointer' : ''} ${
+              selectedAssetUrl === activity.CreatedAssetUrl ||
+              selectedAssetUrl === activity.AssetSource
+                ? 'ring-2 ring-primary scale-[0.98]'
+                : 'hover:scale-[0.98]'
+            }`}
+            onClick={(e) => {
+              if (onSelectAsset) {
+                // If in selection mode, make the whole card clickable
                 e.preventDefault();
-                if (onSelectAsset) {
-                  // If in selection mode, call the selection callback
-                  const urlToSelect =
-                    activity.AssetType === 'vid'
-                      ? activity.AssetSource || activity.CreatedAssetUrl
-                      : activity.CreatedAssetUrl;
+                const urlToSelect =
+                  activity.AssetType === 'vid'
+                    ? activity.AssetSource || activity.CreatedAssetUrl
+                    : activity.CreatedAssetUrl;
 
-                  // Check if this asset is already selected
-                  const isAlreadySelected =
-                    selectedAssetUrl === activity.CreatedAssetUrl ||
-                    selectedAssetUrl === activity.AssetSource;
+                // Check if this asset is already selected
+                const isAlreadySelected =
+                  selectedAssetUrl === activity.CreatedAssetUrl ||
+                  selectedAssetUrl === activity.AssetSource;
 
-                  if (isAlreadySelected) {
-                    // If already selected, deselect it
-                    setSelectedAssetUrl(undefined);
-                    onSelectAsset(''); // Pass empty string to deselect
-                  } else {
-                    // Otherwise select it
-                    setSelectedAssetUrl(urlToSelect);
-                    onSelectAsset(urlToSelect);
-                  }
+                if (isAlreadySelected) {
+                  setSelectedAssetUrl(undefined);
+                  onSelectAsset(''); // Pass empty string to deselect
                 } else {
-                  // Otherwise, open the modal as usual
-                  openModal(activity.CreatedAssetUrl, false); // Regular size initially
+                  setSelectedAssetUrl(urlToSelect);
+                  onSelectAsset(urlToSelect);
                 }
-              }}
-            >
+              } else {
+                // Open modal when clicking on the image
+                openModal(activity.CreatedAssetUrl, false);
+              }
+            }}
+          >
+            {/* Status Indicators shown on top of the image */}
+            <div className="absolute top-2 right-2 flex flex-col items-end space-y-1 z-10">
+              {/* Asset Type Badge */}
+              <div className="bg-gray-800 bg-opacity-70 text-white rounded-full px-2 py-0.5 text-xs">
+                {activity.AssetType === 'vid'
+                  ? 'Video'
+                  : activity.AssetType === 'img'
+                    ? 'Image'
+                    : activity.AssetType === 'upl'
+                      ? 'Upload'
+                      : activity.AssetType === 'que'
+                        ? 'Queue'
+                        : activity.AssetType === 'err'
+                          ? 'Error'
+                          : activity.AssetType}
+              </div>
+
+              {/* Gallery Status */}
+              {(activity.isInGallery || activity.SubscriptionTier === 3) && (
+                <div className="bg-gray-800 bg-opacity-70 text-yellow-500 rounded-full px-2 py-0.5 text-xs flex items-center">
+                  <FaStar className="mr-1" size={10} />
+                  <span>Gallery</span>
+                </div>
+              )}
+
+              {/* Hearts Count */}
+              {activity.id && assetLikes[activity.id]?.likesCount > 0 && (
+                <div className="bg-gray-800 bg-opacity-70 text-white rounded-full px-2 py-0.5 text-xs flex items-center">
+                  <FaHeart className="mr-1 text-red-500" size={10} />
+                  <span>{assetLikes[activity.id]?.likesCount}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Image Thumbnail */}
+            <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
               {activity.AssetType === 'vid' &&
               activity.AssetSource === 'none' ? (
-                <FaPlay className="w-8 h-8 text-gray-500" />
+                <FaPlay className="w-12 h-12 text-gray-400" />
               ) : (
                 <img
                   src={
@@ -1173,32 +1195,29 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                               : '/logo.png'
                   }
                   alt="Thumbnail"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover transition-transform duration-300"
                   onError={(e) => {
                     if (activity.AssetType === 'vid') {
                       // Hide the broken image
                       e.currentTarget.style.display = 'none';
-                      // Create play icon with label - using the same icon as for AssetSource === 'none'
+                      // Create play icon with label
                       const container = e.currentTarget.parentElement;
                       if (container) {
                         const playIcon = document.createElement('div');
                         playIcon.className =
                           'w-full h-full flex flex-col items-center justify-center';
 
-                        // Create the FaPlay icon element
                         const iconElement = document.createElement('div');
-                        iconElement.className = 'w-8 h-8 text-gray-500';
+                        iconElement.className = 'w-12 h-12 text-gray-400';
 
-                        // Use the same icon component styling as above
                         const svgIcon = document.createElementNS(
                           'http://www.w3.org/2000/svg',
                           'svg'
                         );
                         svgIcon.setAttribute('fill', 'currentColor');
                         svgIcon.setAttribute('viewBox', '0 0 448 512');
-                        svgIcon.setAttribute('class', 'w-8 h-8');
+                        svgIcon.setAttribute('class', 'w-12 h-12');
 
-                        // This is the path data for FaPlay from react-icons
                         const path = document.createElementNS(
                           'http://www.w3.org/2000/svg',
                           'path'
@@ -1211,12 +1230,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                         svgIcon.appendChild(path);
                         iconElement.appendChild(svgIcon);
 
-                        // Add text
                         const textElement = document.createElement('div');
                         textElement.className = 'mt-2 text-gray-500';
                         textElement.textContent = '';
 
-                        // Assemble the complete element
                         playIcon.appendChild(iconElement);
                         playIcon.appendChild(textElement);
                         container.appendChild(playIcon);
@@ -1226,165 +1243,130 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 />
               )}
             </div>
-          </div>
 
-          {/* Content */}
-          <div className="flex flex-col flex-grow w-full">
-            {/* Asset Type */}
-            <div className="mb-2 text-center md:text-left">
-              <p className="font-medium">
-                <strong>Type:</strong>{' '}
-                {activity.AssetType === 'vid'
-                  ? 'Video'
-                  : activity.AssetType === 'img'
-                    ? 'Image'
-                    : activity.AssetType === 'upl'
-                      ? 'Upload'
-                      : activity.AssetType === 'que'
-                        ? 'In Queue'
-                        : activity.AssetType === 'err'
-                          ? 'ERROR'
-                          : activity.AssetType}
-              </p>
-            </div>
-
-            {/* Prompt - with more space on mobile */}
-            {activity.AssetType !== 'upl' && (
-              <div className="mb-3 text-center md:text-left">
-                <p className="break-words">
-                  <strong>Prompt:</strong>{' '}
-                  {expandedPrompts[index] ||
-                  activity.Prompt.length <= promptLength
-                    ? activity.Prompt
-                    : `${activity.Prompt.substring(0, promptLength)}... `}
-                  {activity.Prompt.length > promptLength && (
-                    <button
-                      onClick={() => togglePrompt(index)}
-                      style={{ color: 'var(--primary-color)' }}
-                    >
-                      {expandedPrompts[index] ? 'less' : 'more'}
-                    </button>
-                  )}
-                  <button
-                    onClick={() =>
-                      handleCopy(activity.Prompt, 'Prompt copied!')
-                    }
-                    className="icon-size-small ml-2"
-                    title="Copy Prompt"
-                  >
-                    <FaCopy />
-                  </button>
-                </p>
+            {/* Hover Overlay - Only visible on hover */}
+            <div className="absolute inset-0 bg-black bg-opacity-0 opacity-0 hover:bg-opacity-70 hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-3">
+              {/* Top section with prompt */}
+              <div className="overflow-auto max-h-[60%] scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-transparent text-white text-sm">
+                {activity.AssetType !== 'upl' && (
+                  <div>
+                    <p className="font-medium mb-1">Prompt:</p>
+                    <div className="flex items-start justify-between">
+                      <p className="text-sm text-gray-200 break-words pr-2 flex-grow">
+                        {activity.Prompt.length > 100
+                          ? `${activity.Prompt.substring(0, 100)}...`
+                          : activity.Prompt}
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(activity.Prompt, 'Prompt copied!');
+                        }}
+                        className="flex-shrink-0 text-gray-400 hover:text-white transition-colors mt-0.5"
+                        title="Copy Full Prompt"
+                      >
+                        <FaCopy className="text-xs" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
 
-            {/* Action buttons - horizontally centered on mobile */}
-            <div className="flex justify-center md:justify-start">
-              <div className="flex items-center space-x-3 md:space-x-2">
+              {/* Bottom section with action buttons */}
+              <div className="flex flex-wrap justify-center gap-2 mt-2">
                 <button
-                  onClick={() => openModal(activity.CreatedAssetUrl, true)}
-                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openModal(activity.CreatedAssetUrl, true);
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Open in Full Screen"
                 >
-                  <FaExternalLinkAlt className="text-sm" />
+                  <FaExternalLinkAlt className="text-xs" />
                 </button>
+
                 <button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleCopy(
                       activity.AssetType === 'vid'
                         ? activity.AssetSource
                         : activity.CreatedAssetUrl,
                       'Image URL copied!'
-                    )
-                  }
-                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
-                  title="Copy Image URL"
+                    );
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Copy URL"
                 >
-                  <FaImage className="text-sm" />
+                  <FaCopy className="text-xs" />
                 </button>
-                {activity.AssetType === 'vid' && (
-                  <button
-                    onClick={() =>
-                      handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
-                    }
-                    className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
-                    title="Copy Video URL"
-                  >
-                    <FaVideo className="text-sm" />
-                  </button>
-                )}
+
                 <button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleDownload(
                       activity.AssetType === 'vid'
                         ? activity.CreatedAssetUrl
                         : activity.CreatedAssetUrl,
                       activity.AssetType
-                    )
-                  }
-                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                    );
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Download Asset"
                 >
-                  <FaDownload className="text-sm" />
+                  <FaDownload className="text-xs" />
                 </button>
+
                 {/* Heart/Like button */}
                 {activity.AssetType !== 'upl' && activity.id && (
                   <button
-                    onClick={() => handleToggleLike(activity)}
-                    className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${
-                      assetLikes[activity.id]?.isLiked
-                        ? 'text-red-500'
-                        : 'text-white'
-                    } focus:outline-none transition-all shadow-md flex items-center`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleLike(activity);
+                    }}
+                    className={`bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 ${assetLikes[activity.id]?.isLiked ? 'text-red-500' : 'text-white'} focus:outline-none transition-all shadow-md`}
                     title={assetLikes[activity.id]?.isLiked ? 'Unlike' : 'Like'}
                   >
-                    {assetLikes[activity.id]?.likesCount > 0 && (
-                      <span className="mr-1 text-xs font-medium">
-                        {assetLikes[activity.id]?.likesCount}
-                      </span>
-                    )}
-                    <FaHeart className="text-sm" />
+                    <FaHeart className="text-xs" />
                   </button>
                 )}
 
                 {/* Gallery toggle button */}
                 {activity.AssetType !== 'upl' && (
                   <button
-                    onClick={(e) => handleToggleGallery(activity, e)}
-                    className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${
-                      activity.isInGallery || activity.SubscriptionTier === 3
-                        ? 'text-yellow-500'
-                        : 'text-white'
-                    } focus:outline-none transition-all shadow-md ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleGallery(activity, e);
+                    }}
+                    className={`bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 ${activity.isInGallery || activity.SubscriptionTier === 3 ? 'text-yellow-500' : 'text-white'} focus:outline-none transition-all shadow-md ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                     title={
                       activity.isInGallery || activity.SubscriptionTier === 3
                         ? 'Remove from Gallery'
                         : 'Add to Gallery'
                     }
-                    disabled={galleryActionAssetId !== null} // Disable all gallery buttons while any operation is in progress
+                    disabled={galleryActionAssetId !== null}
                   >
                     <FaStar
-                      className={`text-sm ${
-                        galleryActionAssetId === activity.id
-                          ? 'animate-pulse'
-                          : ''
-                      }`}
+                      className={`text-xs ${galleryActionAssetId === activity.id ? 'animate-pulse' : ''}`}
                     />
                   </button>
                 )}
 
                 <button
-                  onClick={() => handleDelete(activity)}
-                  className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(activity);
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Delete Asset"
                 >
-                  <FaTrash className="text-sm" />
+                  <FaTrash className="text-xs" />
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
       {/* Only show load more if we have more original assets and we're not applying client-side filters */}
       {activities.length > 0 &&
         hasMore &&
