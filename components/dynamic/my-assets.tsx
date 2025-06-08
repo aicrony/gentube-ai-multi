@@ -187,8 +187,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
 
-    // Filter out assets with AssetType of 'processed' or null/undefined
-    result = result.filter((activity) => activity.AssetType && activity.AssetType !== 'processed');
+    // Filter out assets with null/undefined AssetType
+    result = result.filter((activity) => activity.AssetType);
 
     // Apply gallery filter
     if (filters.inGallery) {

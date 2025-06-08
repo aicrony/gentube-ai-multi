@@ -99,15 +99,15 @@ export async function getUserAssets(
   const query = createQuery(offset);
   const [results] = await datastore.runQuery(query);
   
-  // Filter out 'processed' assets
-  const filteredBatch = results.filter((activity: any) => activity.AssetType !== 'processed');
-  allFilteredResults = [...filteredBatch];
+  // Don't filter out 'processed' assets anymore - they should no longer be created
+  // Keep this comment for documentation purposes
+  allFilteredResults = [...results];
   
   // Check if this batch returned the full amount requested
   // If so, there might be more results available
   hasMore = results.length === batchSize;
   
-  console.log(`Query returned ${results.length} results, ${filteredBatch.length} after filtering`);
+  console.log(`Query returned ${results.length} results`);
   
   // Return exactly the requested number of items (or all if we have fewer)
   const limitedResults = allFilteredResults.slice(0, limit);
