@@ -160,7 +160,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Process and filter/sort the activities based on user preferences
   const filteredAndSortedActivities = useMemo(() => {
     let result = [...activities];
-    
+
     // Filter out assets with AssetType of 'processed'
     result = result.filter((activity) => activity.AssetType !== 'processed');
 
@@ -678,7 +678,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Handle specific error responses
         if (result.error) {
           if (result.result === 'LimitExceeded') {
-            setEditError('You need more credits to edit images. Please purchase credits on the pricing page.');
+            setEditError(
+              'You need more credits to edit images. Please purchase credits on the pricing page.'
+            );
           } else {
             setEditError(result.error);
           }
@@ -691,10 +693,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // Close the edit pane on successful submission
       setShowImageEditPane(false);
       setEditPrompt('');
-      
+
       // Show a success notification
       const notification = document.createElement('div');
-      notification.textContent = 'Image edit request submitted! Refresh in a few minutes to see your edited image.';
+      notification.textContent =
+        'Image edit request submitted! Refresh in a few minutes to see your edited image.';
       notification.style.position = 'fixed';
       notification.style.bottom = '20px';
       notification.style.right = '20px';
@@ -720,15 +723,16 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           document.body.removeChild(notification);
         }, 300);
       }, 5000);
-      
+
       // Automatically refresh the assets list after a delay
       setTimeout(() => {
         handleRefresh();
       }, 6000);
-
     } catch (error) {
       console.error('Error submitting image edit:', error);
-      setEditError('An error occurred while submitting your edit request. Please try again.');
+      setEditError(
+        'An error occurred while submitting your edit request. Please try again.'
+      );
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -1203,16 +1207,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       <div className="flex justify-between items-center mb-2">
         <p>
-          <strong>*New:</strong> Star your asset to add it to the{' '}
-          <a href={'/gallery'}>public gallery</a>. Heart your asset to be first
-          to love it.
-        </p>
-      </div>
-      <div className="flex justify-between items-center mb-2">
-        <p>
-          <strong>*WIN:</strong> 500 Credits EVERY MONTH for the most hearts in
-          the <a href={'/gallery'}>GenTube.ai gallery</a>. Next winner: June 30,
-          2025.
+          <strong>*WIN:</strong> 500 Credits EVERY MONTH - Star your images and
+          get the most hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>
+          . Next winner: June 30, 2025.
         </p>
       </div>
       <div className="flex justify-between items-center mb-2">
