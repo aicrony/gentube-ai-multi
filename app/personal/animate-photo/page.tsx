@@ -38,6 +38,7 @@ function AnimatePhotoContent() {
     'assets': false // Default to hidden assets
   });
   const [credits, setCredits] = useState<number | null>(null);
+  const [animationGenerated, setAnimationGenerated] = useState<boolean>(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -102,6 +103,7 @@ function AnimatePhotoContent() {
     console.log('Credits updated:', newCredits);
     // After animation is complete, expand step 3
     setOpenSteps((prev) => ({ ...prev, 3: true }));
+    setAnimationGenerated(true);
   };
 
   const toggleStep = (stepNumber: number) => {
@@ -252,7 +254,10 @@ function AnimatePhotoContent() {
 
         {openSteps[3] && (
           <div className="mt-4">
-            <MyAssets autoRefreshQueued={true} />
+            <MyAssets 
+              autoRefreshQueued={true}
+              refreshOnCredit={animationGenerated}
+            />
           </div>
         )}
       </div>

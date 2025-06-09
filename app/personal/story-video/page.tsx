@@ -79,6 +79,7 @@ function StoryVideoContent() {
   const handleUserCreditsUpdate = (newCredits: number | null) => {
     console.log('Credits updated:', newCredits);
     setVideoGenerated(true);
+    
     // After video generation is complete, expand step 2
     setOpenSteps((prev) => ({ ...prev, 2: true }));
   };
@@ -166,7 +167,10 @@ function StoryVideoContent() {
 
         {openSteps[2] && (
           <div className="mt-4">
-            <MyAssets autoRefreshQueued={true} />
+            <MyAssets 
+              autoRefreshQueued={true}
+              refreshOnCredit={videoGenerated}
+            />
           </div>
         )}
       </div>

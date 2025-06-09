@@ -44,13 +44,15 @@ interface MyAssetsProps {
   onSelectAsset?: (url: string) => void;
   selectedUrl?: string;
   autoRefreshQueued?: boolean; // New prop to trigger auto-refresh for queued items
+  refreshOnCredit?: boolean; // Flag to trigger a refresh when credits are used (new generation)
 }
 
 const MyAssets: React.FC<MyAssetsProps> = ({
   assetType,
   onSelectAsset,
   selectedUrl,
-  autoRefreshQueued = false
+  autoRefreshQueued = false,
+  refreshOnCredit = false
 }) => {
   const userId = useUserId();
   const userIp = useUserIp();
@@ -281,6 +283,63 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     setSelectedAssetUrl(selectedUrl);
   }, [selectedUrl]);
 
+  // Function to fetch only queued assets and add them to the top of the list
+  const fetchQueuedAssets = async () => {
+    if (!userId && !userIp) return;
+    
+    try {
+      // Add a timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      
+      // Specifically query for queued assets
+      const response = await fetch(
+        `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=50&offset=0&assetType=que&_t=${timestamp}`
+      );
+      
+      if (!response.ok) {
+        console.log('Error fetching queued assets.');
+        throw new Error('Failed to fetch queued assets');
+      }
+      
+      const data = await response.json();
+      
+      if (data.assets && data.assets.length > 0) {
+        console.log(`Found ${data.assets.length} queued assets`); 
+        
+        // Process the assets to ensure gallery status is properly reflected
+        const queuedAssets = data.assets.map((asset: UserActivity) => ({
+          ...asset,
+          isInGallery: asset.SubscriptionTier === 3
+        }));
+        
+        // Get existing asset IDs to prevent duplicates
+        const existingIds = activities.map(asset => asset.id);
+        
+        // Filter out any existing assets
+        const newQueuedAssets = queuedAssets.filter(
+          asset => asset.id && !existingIds.includes(asset.id)
+        );
+        
+        if (newQueuedAssets.length > 0) {
+          console.log(`Adding ${newQueuedAssets.length} new queued assets to the top of the list`);
+          // Add new queued assets to the beginning of the list
+          setActivities(prev => [...newQueuedAssets, ...prev]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching queued assets:', error);
+    }
+  };
+
+  // Handle refreshOnCredit prop - fetch queued assets when credits are used
+  useEffect(() => {
+    // When refreshOnCredit changes to true, fetch queued assets
+    if (refreshOnCredit) {
+      console.log('Credits used, fetching queued assets');
+      fetchQueuedAssets();
+    }
+  }, [refreshOnCredit]);
+  
   // Auto-refresh logic for queued items
   useEffect(() => {
     // Only proceed if autoRefreshQueued is true
@@ -976,6 +1035,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   if (loading) {
     return <LoadingAnimation size="medium" message="Loading your assets..." fullScreen={false} />;
   }
+
+  // Function to fetch queued assets will be handled by the autoRefreshQueued logic instead of refs
 
   // Create a descriptive title for asset types
   const getAssetTypeTitle = (type: string | undefined): string => {
