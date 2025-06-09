@@ -104,7 +104,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
   const [showFilters, setShowFilters] = useState(false);
 
-  const limit = 20;
+  const limit = 10;
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
@@ -835,10 +835,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const openModalForAsset = (index: number, fullScreen = false) => {
     if (index >= 0 && index < filteredAndSortedActivities.length) {
       const activity = filteredAndSortedActivities[index];
-      const url =
-        activity.AssetType === 'vid'
-          ? activity.CreatedAssetUrl
-          : activity.CreatedAssetUrl;
+      // Always use CreatedAssetUrl for all asset types
+      const url = activity.CreatedAssetUrl;
       setCurrentModalIndex(index);
       setModalMediaUrl(url);
       setEditingImageUrl(url); // Store the current image URL for editing
@@ -849,10 +847,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Original function for backward compatibility - opens the modal by URL
   const openModal = (url: string, fullScreen = false) => {
-    // Find the index of the asset with this URL
+    // Find the index of the asset with this URL (only match on CreatedAssetUrl)
     const index = filteredAndSortedActivities.findIndex(
-      (activity) =>
-        activity.CreatedAssetUrl === url || activity.AssetSource === url
+      (activity) => activity.CreatedAssetUrl === url
     );
 
     if (index !== -1) {
@@ -870,10 +867,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleNextInModal = () => {
     if (currentModalIndex < filteredAndSortedActivities.length - 1) {
       const nextActivity = filteredAndSortedActivities[currentModalIndex + 1];
-      const url =
-        nextActivity.AssetType === 'vid'
-          ? nextActivity.CreatedAssetUrl
-          : nextActivity.CreatedAssetUrl;
+      // Always use CreatedAssetUrl for all asset types
+      const url = nextActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex + 1);
       setModalMediaUrl(url);
       setEditingImageUrl(url); // Update image URL for editing
@@ -887,10 +882,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handlePreviousInModal = () => {
     if (currentModalIndex > 0) {
       const prevActivity = filteredAndSortedActivities[currentModalIndex - 1];
-      const url =
-        prevActivity.AssetType === 'vid'
-          ? prevActivity.CreatedAssetUrl
-          : prevActivity.CreatedAssetUrl;
+      // Always use CreatedAssetUrl for all asset types
+      const url = prevActivity.CreatedAssetUrl;
       setCurrentModalIndex(currentModalIndex - 1);
       setModalMediaUrl(url);
       setEditingImageUrl(url); // Update image URL for editing
@@ -905,10 +898,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleJumpToFirstImage = () => {
     if (filteredAndSortedActivities.length > 0) {
       const firstActivity = filteredAndSortedActivities[0];
-      const url =
-        firstActivity.AssetType === 'vid'
-          ? firstActivity.CreatedAssetUrl
-          : firstActivity.CreatedAssetUrl;
+      // Always use CreatedAssetUrl for all asset types
+      const url = firstActivity.CreatedAssetUrl;
       setCurrentModalIndex(0);
       setModalMediaUrl(url);
       setEditingImageUrl(url); // Update image URL for editing
@@ -924,10 +915,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     if (filteredAndSortedActivities.length > 0) {
       const lastIndex = filteredAndSortedActivities.length - 1;
       const lastActivity = filteredAndSortedActivities[lastIndex];
-      const url =
-        lastActivity.AssetType === 'vid'
-          ? lastActivity.CreatedAssetUrl
-          : lastActivity.CreatedAssetUrl;
+      // Always use CreatedAssetUrl for all asset types
+      const url = lastActivity.CreatedAssetUrl;
       setCurrentModalIndex(lastIndex);
       setModalMediaUrl(url);
       setEditingImageUrl(url); // Update image URL for editing
@@ -1475,8 +1464,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           <div
             key={index}
             className={`relative rounded-lg overflow-hidden transition-transform duration-200 ${onSelectAsset ? 'cursor-pointer' : ''} ${
-              selectedAssetUrl === activity.CreatedAssetUrl ||
-              selectedAssetUrl === activity.AssetSource
+              // Only check CreatedAssetUrl for selection
+              selectedAssetUrl === activity.CreatedAssetUrl
                 ? 'ring-2 ring-primary scale-[0.98]'
                 : 'hover:scale-[0.98]'
             }`}
@@ -1484,15 +1473,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               if (onSelectAsset) {
                 // If in selection mode, make the whole card clickable
                 e.preventDefault();
-                const urlToSelect =
-                  activity.AssetType === 'vid'
-                    ? activity.AssetSource || activity.CreatedAssetUrl
-                    : activity.CreatedAssetUrl;
+                // Always use CreatedAssetUrl for selection regardless of asset type
+                const urlToSelect = activity.CreatedAssetUrl;
 
-                // Check if this asset is already selected
+                // Check if this asset is already selected (only check CreatedAssetUrl)
                 const isAlreadySelected =
-                  selectedAssetUrl === activity.CreatedAssetUrl ||
-                  selectedAssetUrl === activity.AssetSource;
+                  selectedAssetUrl === activity.CreatedAssetUrl;
 
                 if (isAlreadySelected) {
                   setSelectedAssetUrl(undefined);
@@ -1549,8 +1535,10 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               ) : (
                 <img
                   src={
+                    // For thumbnails, we still need to use AssetSource for videos since it contains the thumbnail
+                    // But for actual display in modal, we'll use CreatedAssetUrl
                     activity.AssetType === 'vid'
-                      ? activity.AssetSource
+                      ? activity.AssetSource // Use AssetSource for video thumbnails only
                       : activity.AssetType === 'img'
                         ? activity.CreatedAssetUrl
                         : activity.AssetType === 'upl'
@@ -1658,12 +1646,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleCopy(
-                      activity.AssetType === 'vid'
-                        ? activity.AssetSource
-                        : activity.CreatedAssetUrl,
-                      'Image URL copied!'
-                    );
+                    // Always copy the CreatedAssetUrl regardless of asset type
+                    handleCopy(activity.CreatedAssetUrl, 'Asset URL copied!');
                   }}
                   className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                   title="Copy URL"
@@ -1674,10 +1658,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    // Always use CreatedAssetUrl for downloading
                     handleDownload(
-                      activity.AssetType === 'vid'
-                        ? activity.CreatedAssetUrl
-                        : activity.CreatedAssetUrl,
+                      activity.CreatedAssetUrl,
                       activity.AssetType
                     );
                   }}
