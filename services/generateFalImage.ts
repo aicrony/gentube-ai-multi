@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const apiEndpoint = process.env.FLUX_API_ENDPOINT as string;
 const falApiWebhook = process.env.FAL_IMAGE_API_WEBHOOK as string;
+const defaultSafetyTolerance = process.env.DEFAULT_SAFETY_TOLERANCE as string;
 let result: any = null;
 const callback = {
   webhook: falApiWebhook,
@@ -45,7 +46,7 @@ export default async function generateFalImage(
       result = await fal.queue.submit(apiEndpoint, {
         input: {
           prompt: imagePrompt,
-          safety_tolerance: 2,
+          safety_tolerance: defaultSafetyTolerance,
           output_format: 'png',
           aspect_ratio: '16:9'
         },
