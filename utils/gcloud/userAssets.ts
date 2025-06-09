@@ -30,7 +30,8 @@ export async function getUserAssets(
   userIp: string | string[],
   limit: number,
   offset: number,
-  assetType?: string | string[] | undefined
+  assetType?: string | string[] | undefined,
+  searchPrompt?: string | null
 ): Promise<UserActivity[] | null> {
   // We need to fetch enough assets to fill exactly the limit, even after filtering
   const batchSize = limit * 2; // Fetch twice the needed amount per query
@@ -46,6 +47,16 @@ export async function getUserAssets(
   
   // Log the exact pagination parameters
   console.log(`Fetching assets - limit: ${limit}, offset: ${offset}, batch size: ${batchSize}`);
+  
+  // If we have a searchPrompt, we'll need a special approach
+  const hasSearchPrompt = searchPrompt && searchPrompt.trim().length > 0;
+  
+  // For search prompts, we might need a larger batch to find enough matching results
+  if (hasSearchPrompt) {
+    console.log(`Searching for prompt containing: "${searchPrompt}" - using larger batch size`);
+    // Use a larger batch size for searching to ensure we get enough matches
+    // This will be filtered down after the query
+  }
   
   // Function to create a query with the provided offset
   const createQuery = (queryOffset: number) => {
@@ -92,6 +103,12 @@ export async function getUserAssets(
       }
     }
     
+    // If we're searching by prompt, we need to retrieve more records
+    // since we'll be filtering them client-side
+    if (hasSearchPrompt) {
+      return query.limit(1000).offset(0); // Get a larger batch for text search
+    }
+    
     return query;
   };
   
@@ -99,9 +116,33 @@ export async function getUserAssets(
   const query = createQuery(offset);
   const [results] = await datastore.runQuery(query);
   
-  // Don't filter out 'processed' assets anymore - they should no longer be created
-  // Keep this comment for documentation purposes
-  allFilteredResults = [...results];
+  // Process search results if we have a search term
+  if (hasSearchPrompt && searchPrompt) {
+    console.log(`Filtering results for prompt search: "${searchPrompt}"`); 
+    const searchTermLower = searchPrompt.toLowerCase();
+    
+    // Filter results that match the search term in the prompt
+    allFilteredResults = results.filter(item => 
+      item.Prompt && item.Prompt.toLowerCase().includes(searchTermLower)
+    );
+    
+    // Apply pagination manually after filtering by search term
+    // This ensures we return the right page of results that match the search
+    const startIndex = offset;
+    const endIndex = offset + limit;
+    allFilteredResults = allFilteredResults.slice(startIndex, endIndex);
+    
+    // Set hasMore based on total filtered results matching the search term
+    hasMore = results.filter(item => 
+      item.Prompt && item.Prompt.toLowerCase().includes(searchTermLower)
+    ).length > (offset + limit);
+    
+    console.log(`Found ${allFilteredResults.length} results matching search: "${searchPrompt}"`); 
+  } else {
+    // Standard processing without search term
+    // Don't filter out 'processed' assets anymore - they should no longer be created
+    allFilteredResults = [...results];
+  }
   
   // Check if this batch returned the full amount requested
   // If so, there might be more results available

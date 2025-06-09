@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserAssets } from '@/utils/gcloud/userAssets';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get('userId');
@@ -8,6 +10,7 @@ export async function GET(request: NextRequest) {
   const limit = searchParams.get('limit') || '10';
   const offset = searchParams.get('offset') || '0';
   const assetType = searchParams.get('assetType');
+  const searchPrompt = searchParams.get('searchPrompt');
 
   console.log('USER-IP: ' + userIp);
   
@@ -25,7 +28,8 @@ export async function GET(request: NextRequest) {
         userIp,
         Number(limit),
         Number(offset),
-        assetType || undefined
+        assetType || undefined,
+        searchPrompt
       );
       
       // Check if we have more assets available from the hasMore flag on the first asset

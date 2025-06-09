@@ -59,6 +59,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [searchPage, setSearchPage] = useState(0);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [currentSearchTerm, setCurrentSearchTerm] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const [expandedPrompts, setExpandedPrompts] = useState<{
     [key: number]: boolean;
@@ -101,7 +104,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
   const [showFilters, setShowFilters] = useState(false);
 
-  const limit = 10;
+  const limit = 20;
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
@@ -286,44 +289,46 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Function to fetch only queued assets and add them to the top of the list
   const fetchQueuedAssets = async () => {
     if (!userId && !userIp) return;
-    
+
     try {
       // Add a timestamp to prevent caching
       const timestamp = new Date().getTime();
-      
+
       // Specifically query for queued assets
       const response = await fetch(
         `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=50&offset=0&assetType=que&_t=${timestamp}`
       );
-      
+
       if (!response.ok) {
         console.log('Error fetching queued assets.');
         throw new Error('Failed to fetch queued assets');
       }
-      
+
       const data = await response.json();
-      
+
       if (data.assets && data.assets.length > 0) {
-        console.log(`Found ${data.assets.length} queued assets`); 
-        
+        console.log(`Found ${data.assets.length} queued assets`);
+
         // Process the assets to ensure gallery status is properly reflected
         const queuedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
           isInGallery: asset.SubscriptionTier === 3
         }));
-        
+
         // Get existing asset IDs to prevent duplicates
-        const existingIds = activities.map(asset => asset.id);
-        
+        const existingIds = activities.map((asset) => asset.id);
+
         // Filter out any existing assets
         const newQueuedAssets = queuedAssets.filter(
-          asset => asset.id && !existingIds.includes(asset.id)
+          (asset) => asset.id && !existingIds.includes(asset.id)
         );
-        
+
         if (newQueuedAssets.length > 0) {
-          console.log(`Adding ${newQueuedAssets.length} new queued assets to the top of the list`);
+          console.log(
+            `Adding ${newQueuedAssets.length} new queued assets to the top of the list`
+          );
           // Add new queued assets to the beginning of the list
-          setActivities(prev => [...newQueuedAssets, ...prev]);
+          setActivities((prev) => [...newQueuedAssets, ...prev]);
         }
       }
     } catch (error) {
@@ -339,7 +344,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       fetchQueuedAssets();
     }
   }, [refreshOnCredit]);
-  
+
   // Auto-refresh logic for queued items
   useEffect(() => {
     // Only proceed if autoRefreshQueued is true
@@ -1033,7 +1038,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
 
   if (loading) {
-    return <LoadingAnimation size="medium" message="Loading your assets..." fullScreen={false} />;
+    return (
+      <LoadingAnimation
+        size="medium"
+        message="Loading your assets..."
+        fullScreen={false}
+      />
+    );
   }
 
   // Function to fetch queued assets will be handled by the autoRefreshQueued logic instead of refs
@@ -1080,7 +1091,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const assetTypeTitle = getAssetTypeTitle(assetType);
-
 
   // Handle filter changes
   const handleFilterChange = (filterName: string, value: any) => {
@@ -1168,14 +1178,146 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                   className="p-1.5 pl-7 rounded border w-full text-sm"
                   style={{ borderColor: 'var(--border-color)' }}
                 />
-                {searchTerm && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <FaTimesCircle className="text-xs" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => {
+                      if (searchTerm.trim()) {
+                        // Show loading state
+                        setLoading(true);
+                        // Save current filter state
+                        const currentFilters = { ...filters };
+                        const currentPage = page;
+
+                        // Reset activities and pagination for search
+                        setActivities([]);
+                        setSearchPage(0);
+                        setIsSearchMode(true);
+                        setCurrentSearchTerm(searchTerm.trim());
+
+                        // Search the entire datastore for matching prompts
+                        const timestamp = new Date().getTime();
+                        fetch(
+                          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${searchPage * limit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(searchTerm.trim())}&_t=${timestamp}`
+                        )
+                          .then((response) => {
+                            if (!response.ok) {
+                              throw new Error('Failed to search prompts');
+                            }
+                            return response.json();
+                          })
+                          .then((data) => {
+                            // Show results notification
+                            const notification = document.createElement('div');
+                            notification.textContent =
+                              data.assets.length > 0
+                                ? `Found ${data.assets.length} assets matching "${searchTerm}"`
+                                : `No assets found matching "${searchTerm}"`;
+                            notification.style.position = 'fixed';
+                            notification.style.bottom = '20px';
+                            notification.style.right = '20px';
+                            notification.style.padding = '10px 15px';
+                            notification.style.backgroundColor =
+                              'rgba(0, 0, 0, 0.7)';
+                            notification.style.color = 'white';
+                            notification.style.borderRadius = '4px';
+                            notification.style.zIndex = '1000';
+                            document.body.appendChild(notification);
+
+                            // Process assets from the response
+                            const processedAssets = data.assets.map(
+                              (asset: UserActivity) => ({
+                                ...asset,
+                                isInGallery: asset.SubscriptionTier === 3
+                              })
+                            );
+
+                            // Update the display with search results
+                            setActivities(processedAssets);
+                            setHasMore(data.hasMore);
+                            setSearchPage(0);
+
+                            // Add a button to clear search results and return to normal view
+                            const clearButton =
+                              document.createElement('button');
+                            clearButton.textContent = 'Clear Search';
+                            clearButton.style.position = 'fixed';
+                            clearButton.style.bottom = '60px';
+                            clearButton.style.right = '20px';
+                            clearButton.style.padding = '8px 12px';
+                            clearButton.style.backgroundColor =
+                              'rgba(0, 0, 0, 0.7)';
+                            clearButton.style.color = 'white';
+                            clearButton.style.borderRadius = '4px';
+                            clearButton.style.border = 'none';
+                            clearButton.style.cursor = 'pointer';
+                            clearButton.style.zIndex = '1000';
+                            clearButton.onclick = () => {
+                              // Clear search term
+                              setSearchTerm('');
+                              // Restore original filters
+                              setFilters(currentFilters);
+                              setPage(currentPage);
+                              setIsSearchMode(false);
+                              setCurrentSearchTerm('');
+                              // Fetch the original results
+                              fetchUserActivities(userId, userIp);
+                              // Remove the button and notification
+                              document.body.removeChild(clearButton);
+                              document.body.removeChild(notification);
+                            };
+                            document.body.appendChild(clearButton);
+
+                            // Remove notification after 10 seconds, but keep clear button
+                            setTimeout(() => {
+                              if (document.body.contains(notification)) {
+                                document.body.removeChild(notification);
+                              }
+                            }, 10000);
+                          })
+                          .catch((error) => {
+                            console.error('Error searching prompts:', error);
+                            // Show error notification
+                            const notification = document.createElement('div');
+                            notification.textContent =
+                              'Error searching prompts. Please try again.';
+                            notification.style.position = 'fixed';
+                            notification.style.bottom = '20px';
+                            notification.style.right = '20px';
+                            notification.style.padding = '10px 15px';
+                            notification.style.backgroundColor =
+                              'rgba(255, 0, 0, 0.7)';
+                            notification.style.color = 'white';
+                            notification.style.borderRadius = '4px';
+                            notification.style.zIndex = '1000';
+                            document.body.appendChild(notification);
+
+                            // Remove after 3 seconds
+                            setTimeout(() => {
+                              document.body.removeChild(notification);
+                            }, 3000);
+
+                            // Restore original view
+                            fetchUserActivities(userId, userIp);
+                          })
+                          .finally(() => {
+                            setLoading(false);
+                          });
+                      }
+                    }}
+                    className="text-gray-400 hover:text-gray-600 ml-1 bg-gray-100 rounded-full p-1"
+                    title="Search prompts"
                   >
-                    <FaTimesCircle className="text-xs" />
+                    <FaSearch className="text-xs" />
                   </button>
-                )}
+                </div>
               </div>
             </div>
 
@@ -1316,7 +1458,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       {filteredAndSortedActivities.length === 0 && (
         <p>
           {activities.length === 0
-            ? `No assets found. You may need to ${userId ? '' : <a href="/signin">sign in</a> + 'to'} see your assets.`
+            ? `No assets found. You may need to ${
+                userId ? (
+                  <button onClick={handleRefresh}>
+                    {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
+                  </button>
+                ) : (
+                  <a href="/signin">sign in</a> + 'to'
+                )
+              } see your assets.`
             : 'No assets match your current filters. Try changing or clearing the filters.'}
         </p>
       )}
@@ -1393,7 +1543,6 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
             {/* Image Thumbnail */}
             <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden relative">
-              
               {activity.AssetType === 'vid' &&
               activity.AssetSource === 'none' ? (
                 <FaPlay className="w-12 h-12 text-gray-400" />
@@ -1588,8 +1737,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           </div>
         ))}
       </div>
-      {/* Show load more button only if the API indicates there are more assets */}
-      {activities.length > 0 && hasMore && (
+      {/* Show load more button for regular browsing */}
+      {activities.length > 0 && hasMore && !isSearchMode && (
         <button
           onClick={() => {
             setPage((prev) => prev + 1);
@@ -1605,9 +1754,69 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
               <span>Loading more...</span>
             </>
-          ) : 'Load More'}
+          ) : (
+            'Load More'
+          )}
         </button>
       )}
+      {/* Show load more button for search results */}
+      {activities.length > 0 && hasMore && isSearchMode && (
+        <button
+          onClick={() => {
+            setSearchPage((prev) => prev + 1);
+            // When clicking load more for search, fetch next page of search results
+            const timestamp = new Date().getTime();
+            setLoading(true);
+            fetch(
+              `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${(searchPage + 1) * limit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(currentSearchTerm)}&_t=${timestamp}`
+            )
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Failed to fetch more search results');
+                }
+                return response.json();
+              })
+              .then((data) => {
+                // Process assets from the response
+                const processedAssets = data.assets.map(
+                  (asset: UserActivity) => ({
+                    ...asset,
+                    isInGallery: asset.SubscriptionTier === 3
+                  })
+                );
+
+                // Check for duplicates before adding new assets
+                const existingIds = activities.map((asset) => asset.id);
+                const uniqueNewAssets = processedAssets.filter(
+                  (asset) => asset.id && !existingIds.includes(asset.id)
+                );
+
+                // Only append unique assets
+                setActivities((prev) => [...prev, ...uniqueNewAssets]);
+                setHasMore(data.hasMore);
+              })
+              .catch((error) => {
+                console.error('Error loading more search results:', error);
+              })
+              .finally(() => {
+                setLoading(false);
+              });
+          }}
+          className="mt-4 px-4 py-2 rounded border flex items-center justify-center"
+          style={{ borderColor: 'var(--border-color)' }}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
+              <span>Loading more search results...</span>
+            </>
+          ) : (
+            'Load More Search Results'
+          )}
+        </button>
+      )}
+
       {isModalOpen && filteredAndSortedActivities.length > 0 && (
         <Modal
           mediaUrl={modalMediaUrl}
