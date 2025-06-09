@@ -104,7 +104,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // newest first by default
   const [showFilters, setShowFilters] = useState(false);
 
-  const limit = 10;
+  const limit = 15;
   const searchDisplayLimit = limit;
   const searchFetchLimit = limit + 1; // Fetch one extra item to check if there are more
   const promptLength = 100;
@@ -476,6 +476,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const handleRefresh = () => {
     setLoading(true);
     setPage(0);
+    // Reset all filters, search mode and search term
+    setIsSearchMode(false);
+    setCurrentSearchTerm('');
+    setSearchTerm('');
+    setFilters({
+      assetType: '',
+      inGallery: false,
+      minHearts: 0
+    });
+    setSortDirection('desc'); // Reset to newest first
+    // Fetch activities with reset filters
     fetchUserActivities(userId, userIp);
     // Reset refresh count for auto-refresh timing to start over
     setRefreshCount(0);
@@ -1229,13 +1240,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                                 isInGallery: asset.SubscriptionTier === 3
                               })
                             );
-                            
+
                             // Check if we received the extra item (indicates more results)
-                            const hasMoreResults = processedAssets.length > searchDisplayLimit;
-                            
+                            const hasMoreResults =
+                              processedAssets.length > searchDisplayLimit;
+
                             // Only display up to searchDisplayLimit items
                             if (hasMoreResults) {
-                              processedAssets = processedAssets.slice(0, searchDisplayLimit);
+                              processedAssets = processedAssets.slice(
+                                0,
+                                searchDisplayLimit
+                              );
                             }
 
                             // Update the display with search results
@@ -1777,13 +1792,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     isInGallery: asset.SubscriptionTier === 3
                   })
                 );
-                
+
                 // Check if we received the extra item (indicates more results)
-                const hasMoreResults = processedAssets.length > searchDisplayLimit;
-                
+                const hasMoreResults =
+                  processedAssets.length > searchDisplayLimit;
+
                 // Only display up to searchDisplayLimit items
                 if (hasMoreResults) {
-                  processedAssets = processedAssets.slice(0, searchDisplayLimit);
+                  processedAssets = processedAssets.slice(
+                    0,
+                    searchDisplayLimit
+                  );
                 }
 
                 // Check for duplicates before adding new assets

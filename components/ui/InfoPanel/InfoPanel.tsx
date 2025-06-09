@@ -12,7 +12,8 @@ import {
   FaHeart,
   FaTrophy,
   FaExternalLinkAlt,
-  FaEdit
+  FaEdit,
+  FaSearch
 } from 'react-icons/fa';
 // Don't import useUserId to avoid hook issues - we'll get userId from props or context differently
 
@@ -140,6 +141,19 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     //     'Create and share slideshows from asset groups - customize timing, direction, and looping',
     //   clickable: true
     // },
+    {
+      icon: <FaSearch className="text-blue-500" />,
+      title: 'Asset Search & Display Upgrade',
+      description: (
+        <>
+          Search button{' '}
+          <FaSearch className="inline-block align-middle mx-0.5" /> added to
+          search field for keyword searching on all assets. Improved asset
+          visibility.
+        </>
+      ),
+      clickable: true
+    },
     {
       icon: <FaImage className="text-purple-500" />,
       title: 'Image Editing',
@@ -273,9 +287,12 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                             }`}
                           >
                             {feature.title}
-                            {feature.clickable && (
-                              <FaExternalLinkAlt className="inline ml-1 w-3 h-3 opacity-60" />
-                            )}
+                            {
+                              feature.clickable
+                              // && (
+                              // <FaExternalLinkAlt className="inline ml-1 w-3 h-3 opacity-60" />
+                              // )
+                            }
                           </h4>
                           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
                             {feature.description}
