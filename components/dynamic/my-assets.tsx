@@ -105,6 +105,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [showFilters, setShowFilters] = useState(false);
 
   const limit = 10;
+  const searchDisplayLimit = limit;
+  const searchFetchLimit = limit + 1; // Fetch one extra item to check if there are more
   const promptLength = 100;
 
   const fetchUserActivities = async (userId: string, userIp: string) => {
@@ -1194,7 +1196,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                         // Search the entire datastore for matching prompts
                         const timestamp = new Date().getTime();
                         fetch(
-                          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${searchPage * limit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(searchTerm.trim())}&_t=${timestamp}`
+                          `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${searchFetchLimit}&offset=${searchPage * searchDisplayLimit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(searchTerm.trim())}&_t=${timestamp}`
                         )
                           .then((response) => {
                             if (!response.ok) {
@@ -1221,16 +1223,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                             document.body.appendChild(notification);
 
                             // Process assets from the response
-                            const processedAssets = data.assets.map(
+                            let processedAssets = data.assets.map(
                               (asset: UserActivity) => ({
                                 ...asset,
                                 isInGallery: asset.SubscriptionTier === 3
                               })
                             );
+                            
+                            // Check if we received the extra item (indicates more results)
+                            const hasMoreResults = processedAssets.length > searchDisplayLimit;
+                            
+                            // Only display up to searchDisplayLimit items
+                            if (hasMoreResults) {
+                              processedAssets = processedAssets.slice(0, searchDisplayLimit);
+                            }
 
                             // Update the display with search results
                             setActivities(processedAssets);
-                            setHasMore(data.hasMore);
+                            setHasMore(hasMoreResults || data.hasMore);
                             setSearchPage(0);
 
                             // Add a button to clear search results and return to normal view
@@ -1742,7 +1752,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           )}
         </button>
       )}
-      {/* Show load more button for search results */}
+      {/* Show load more button for search results - only if we have results and there are more */}
       {activities.length > 0 && hasMore && isSearchMode && (
         <button
           onClick={() => {
@@ -1751,7 +1761,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             const timestamp = new Date().getTime();
             setLoading(true);
             fetch(
-              `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${limit}&offset=${(searchPage + 1) * limit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(currentSearchTerm)}&_t=${timestamp}`
+              `/api/getUserAssets?userId=${userId ? userId : 'none'}&userIp=${userIp ? userIp : 'none'}&limit=${searchFetchLimit}&offset=${(searchPage + 1) * searchDisplayLimit}&assetType=${filters.assetType || ''}&searchPrompt=${encodeURIComponent(currentSearchTerm)}&_t=${timestamp}`
             )
               .then((response) => {
                 if (!response.ok) {
@@ -1761,12 +1771,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               })
               .then((data) => {
                 // Process assets from the response
-                const processedAssets = data.assets.map(
+                let processedAssets = data.assets.map(
                   (asset: UserActivity) => ({
                     ...asset,
                     isInGallery: asset.SubscriptionTier === 3
                   })
                 );
+                
+                // Check if we received the extra item (indicates more results)
+                const hasMoreResults = processedAssets.length > searchDisplayLimit;
+                
+                // Only display up to searchDisplayLimit items
+                if (hasMoreResults) {
+                  processedAssets = processedAssets.slice(0, searchDisplayLimit);
+                }
 
                 // Check for duplicates before adding new assets
                 const existingIds = activities.map((asset) => asset.id);
@@ -1776,7 +1794,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
                 // Only append unique assets
                 setActivities((prev) => [...prev, ...uniqueNewAssets]);
-                setHasMore(data.hasMore);
+                setHasMore(hasMoreResults || data.hasMore);
               })
               .catch((error) => {
                 console.error('Error loading more search results:', error);
