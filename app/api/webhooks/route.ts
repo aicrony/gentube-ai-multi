@@ -20,6 +20,7 @@ const relevantEvents = new Set([
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'invoice.paid', // Add this event
   'payment_intent.created',
   'payment_intent.succeeded',
   'charge.succeeded'
@@ -77,12 +78,6 @@ export async function POST(req: Request) {
               checkoutSession.customer as string,
               true
             );
-            await addCustomerCredit(
-              subscriptionId as string,
-              checkoutSession.customer as string,
-              checkoutSession.amount_total as number,
-              checkoutSession.currency as string
-            );
           }
           if (checkoutSession.mode === 'payment') {
             const paymentIntent = checkoutSession.payment_intent;
@@ -95,6 +90,20 @@ export async function POST(req: Request) {
               checkoutSession.customer as string,
               checkoutSession.amount_total as number,
               checkoutSession.currency as string
+            );
+          }
+          break;
+        case 'invoice.paid':
+          const invoice = event.data.object as Stripe.Invoice;
+
+          // Only process if this invoice is for a subscription
+          if (invoice.subscription && invoice.status === 'paid') {
+            // Credit for subscriptions
+            await addCustomerCredit(
+              invoice.id, // Use invoice ID as the unique identifier
+              invoice.customer as string,
+              invoice.amount_paid,
+              invoice.currency
             );
           }
           break;
