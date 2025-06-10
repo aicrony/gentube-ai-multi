@@ -77,6 +77,12 @@ export async function POST(req: Request) {
               checkoutSession.customer as string,
               true
             );
+            await addCustomerCredit(
+              subscriptionId as string,
+              checkoutSession.customer as string,
+              checkoutSession.amount_total as number,
+              checkoutSession.currency as string
+            );
           }
           if (checkoutSession.mode === 'payment') {
             const paymentIntent = checkoutSession.payment_intent;
