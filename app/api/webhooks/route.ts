@@ -88,16 +88,30 @@ export async function POST(req: Request) {
           }
           if (checkoutSession.mode === 'payment') {
             const paymentIntent = checkoutSession.payment_intent;
-            // creditId: string,
-            //   customerId: string,
-            //   amount: number,
-            //   currency: string
-            await addCustomerCredit(
-              paymentIntent as string,
-              checkoutSession.customer as string,
-              checkoutSession.amount_total as number,
-              checkoutSession.currency as string
-            );
+            console.log(`Processing checkout session payment: ${checkoutSession.id} with payment intent ${paymentIntent}`);
+            
+            try {
+              // Add credits based on checkout session information
+              await addCustomerCredit(
+                paymentIntent as string,
+                checkoutSession.customer as string,
+                checkoutSession.amount_total as number,
+                checkoutSession.currency as string
+              );
+              
+              // Mark this payment intent as handled by checkout to avoid duplicate credits
+              if (paymentIntent) {
+                await stripe.paymentIntents.update(paymentIntent as string, {
+                  metadata: { handled_by_checkout: 'true' }
+                });
+                console.log(`Marked payment intent ${paymentIntent} as handled by checkout`);
+              }
+              
+              console.log(`Successfully added credits for checkout session ${checkoutSession.id}`);
+            } catch (error) {
+              console.error(`Failed to add credits for checkout session: ${error}`);
+              throw error; // Re-throw to trigger the error handling below
+            }
           }
           break;
         case 'invoice.paid':
@@ -131,11 +145,56 @@ export async function POST(req: Request) {
             );
           }
           break;
-        case 'payment_intent.created':
         case 'payment_intent.succeeded':
-        case 'charge.succeeded':
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          
+          // Check if this payment intent is already associated with a checkout session
+          // to avoid duplicate credits
+          if (!paymentIntent.metadata?.handled_by_checkout) {
+            console.log(
+              `Processing direct payment intent: ${paymentIntent.id}, amount: ${paymentIntent.amount}, currency: ${paymentIntent.currency}`
+            );
+            
+            try {
+              // Make sure we have a customer to credit
+              if (paymentIntent.customer) {
+                await addCustomerCredit(
+                  paymentIntent.id,
+                  paymentIntent.customer as string,
+                  paymentIntent.amount,
+                  paymentIntent.currency
+                );
+                console.log(
+                  `Successfully added credits for payment intent ${paymentIntent.id} to customer ${paymentIntent.customer}`
+                );
+              } else {
+                console.warn(
+                  `Payment intent ${paymentIntent.id} has no customer associated with it, cannot assign credits`
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Failed to add credits for payment intent: ${error}`
+              );
+              throw error; // Re-throw to trigger the error handling below
+            }
+          } else {
+            console.log(
+              `Skipping payment intent ${paymentIntent.id} - already handled by checkout session`
+            );
+          }
+          break;
+        case 'payment_intent.created':
+          // Just log for monitoring purposes
           console.log(
-            `Received event ${event.type} but no specific handler defined`
+            `Payment intent created: ${(event.data.object as Stripe.PaymentIntent).id}`
+          );
+          break;
+        case 'charge.succeeded':
+          // Charges are usually handled via payment_intent.succeeded or checkout.session.completed
+          // but we log them for monitoring purposes
+          console.log(
+            `Charge succeeded: ${(event.data.object as Stripe.Charge).id} for payment intent ${(event.data.object as Stripe.Charge).payment_intent}`
           );
           break;
         default:
