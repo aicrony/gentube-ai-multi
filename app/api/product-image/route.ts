@@ -21,30 +21,35 @@ export async function POST(request: NextRequest) {
       placement_type,
       manual_placement_selection
     } = body;
-    
+
     // Require both userId and userIp
     if (!userId || userId === 'none') {
       return NextResponse.json(
-        { 
+        {
           error: true,
           result: 'User ID is required. Please sign in for free credits.'
-        }, 
+        },
         { status: 430 } // Custom status code for sign-in required
       );
     }
-    
+
     if (!userIp || userIp === 'unknown') {
       return NextResponse.json(
         {
           error: true,
           result: 'User IP is required'
-        }, 
+        },
         { status: 400 }
       );
     }
 
     // Validate required fields
-    if (!product_image_url || !background_image_url || !prompt || !scene_description) {
+    if (
+      !product_image_url ||
+      !background_image_url ||
+      !prompt ||
+      !scene_description
+    ) {
       return NextResponse.json(
         {
           error: true,

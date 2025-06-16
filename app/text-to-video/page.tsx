@@ -19,7 +19,7 @@ export default function TextToVideoPage() {
   const handleUserCreditsUpdate = (credits: number | null) => {
     setUserCredits(credits);
   };
-  
+
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -62,7 +62,12 @@ export default function TextToVideoPage() {
                   <Button variant="slim">URL to Video</Button>
                 </Link>
                 <Link href="/text-to-video">
-                  <Button variant="slim" className="bg-blue-500 text-white hover:bg-blue-600">Video Gen</Button>
+                  <Button
+                    variant="slim"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
+                  >
+                    Video Gen
+                  </Button>
                 </Link>
                 <Link href="/upload-to-video">
                   <Button variant="slim">Upload Image</Button>
@@ -78,7 +83,7 @@ export default function TextToVideoPage() {
                   </Button>
                 </Link>
               </nav>
-              
+
               <div className="my-assets-container">
                 <div className="flex justify-between items-center mb-4">
                   <h1 className="text-xl font-bold">Video Generation</h1>

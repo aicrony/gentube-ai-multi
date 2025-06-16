@@ -22,11 +22,15 @@ export const postToPinterest = async ({
   link,
   accessToken,
   boardId
-}: PinterestPostParams): Promise<{ success: boolean; pinId?: string; error?: string }> => {
+}: PinterestPostParams): Promise<{
+  success: boolean;
+  pinId?: string;
+  error?: string;
+}> => {
   try {
     // Pinterest API v5 endpoint
     const url = 'https://api.pinterest.com/v5/pins';
-    
+
     // Prepare pin data
     const pinData = {
       board_id: boardId,
@@ -39,20 +43,23 @@ export const postToPinterest = async ({
       alt_text: title, // For accessibility
       link: link // Optional link when clicked
     };
-    
+
     const response = await axios.post(url, pinData, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       }
     });
-    
+
     return {
       success: true,
       pinId: response.data.id
     };
   } catch (error: any) {
-    console.error('Pinterest API error:', error.response?.data || error.message);
+    console.error(
+      'Pinterest API error:',
+      error.response?.data || error.message
+    );
     return {
       success: false,
       error: error.response?.data?.message || 'Failed to post to Pinterest'

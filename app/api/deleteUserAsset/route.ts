@@ -19,7 +19,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!userId || !assetType || (!assetUrl && !entityId)) {
       return NextResponse.json(
-        { error: 'Missing required fields: need userId, assetType, and either assetUrl or entityId' },
+        {
+          error:
+            'Missing required fields: need userId, assetType, and either assetUrl or entityId'
+        },
         { status: 400 }
       );
     }
@@ -41,7 +44,7 @@ export async function DELETE(request: NextRequest) {
       const error = JSON.parse(JSON.stringify(assetUrl)).error
         ? JSON.parse(JSON.stringify(assetUrl)).error
         : null;
-      
+
       // Only attempt to delete from storage if it's a physical asset (not a queued item)
       if (assetType !== 'que' && assetType !== 'err' && bucketName !== 'none') {
         const bucket = storage.bucket(bucketName);
@@ -63,7 +66,7 @@ export async function DELETE(request: NextRequest) {
       if (assetUrl && typeof assetUrl !== 'string') {
         assetUrl = JSON.stringify(assetUrl);
       }
-      
+
       // Prefer entity ID for deletion if available, fall back to assetUrl
       if (entityId) {
         await deleteUserActivity(userId, undefined, entityId);
@@ -72,7 +75,7 @@ export async function DELETE(request: NextRequest) {
         await deleteUserActivity(userId, assetUrl);
         console.log('DELETE deleteUserActivity by url:', assetUrl);
       }
-      
+
       return NextResponse.json({ message: 'Asset deleted successfully' });
     } catch (error) {
       console.log('Error deleting user activity:', error);

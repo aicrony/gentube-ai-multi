@@ -19,7 +19,7 @@ export async function getUserCreatorName(
   }
 
   console.log('Getting creator name for userId:', userId);
-  
+
   const query = datastore
     .createQuery(namespace, kind)
     .filter('UserId', '=', userId)
@@ -29,7 +29,7 @@ export async function getUserCreatorName(
     const [users] = await datastore.runQuery(query);
     const creatorName = users.length > 0 ? users[0].CreatorName : null;
     console.log('getUserCreatorName response:', creatorName);
-    
+
     return creatorName;
   } catch (error) {
     console.error('Error fetching creator name:', error);

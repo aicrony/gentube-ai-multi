@@ -449,7 +449,7 @@ const Modal: React.FC<ModalProps> = ({
         {showImageEditPane && !isVideo && (
           <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-80">
             <h3 className="text-lg font-bold mb-3">Edit Image</h3>
-            
+
             <div className="mb-4">
               <label className="block mb-2 text-sm">Edit Instructions</label>
               <textarea
@@ -470,14 +470,14 @@ const Modal: React.FC<ModalProps> = ({
               >
                 Cancel
               </button>
-              
+
               <button
                 onClick={async () => {
                   if (!editPrompt.trim()) {
                     setEditError('Please enter edit instructions');
                     return;
                   }
-                  
+
                   if (onSubmitImageEdit) {
                     setIsSubmittingEdit(true);
                     setEditError('');
@@ -506,20 +506,23 @@ const Modal: React.FC<ModalProps> = ({
                 )}
               </button>
             </div>
-            
+
             {editError && (
               <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded">
                 {editError}
               </div>
             )}
-            
+
             <div className="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
-              <p>This will create a new edited version of your image. The original image will not be modified.</p>
+              <p>
+                This will create a new edited version of your image. The
+                original image will not be modified.
+              </p>
               <p className="mt-1">Image editing costs 10 credits.</p>
             </div>
           </div>
         )}
-        
+
         {/* Slideshow settings panel */}
         {showSettings && (
           <div className="absolute top-14 right-2 bg-gray-800 bg-opacity-90 p-4 rounded-lg text-white z-10 shadow-lg transition-all w-64">

@@ -13,8 +13,8 @@ textarea.root {
   width: 100%;
 }
 
-textarea.root[id="prompt"],
-textarea.root[id="imageUrl"] {
+textarea.root[id='prompt'],
+textarea.root[id='imageUrl'] {
   min-height: 40px; /* Similar to regular input height */
   line-height: 1.5;
   padding-top: 8px;

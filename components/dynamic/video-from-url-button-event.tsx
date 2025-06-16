@@ -155,7 +155,7 @@ export function VideoFromUrlDynamicButton({
             setTimeout(() => {
               setMessage('');
             }, 30000);
-            
+
             // Notify parent component about queued video
             if (onVideoGenerated) {
               onVideoGenerated('InQueue');

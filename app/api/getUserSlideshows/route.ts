@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     // Get user ID from query params
     const userId = req.nextUrl.searchParams.get('userId');
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID is required' },
@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
       slideshows: result.slideshows,
       baseUrl: `${req.nextUrl.origin}/slideshow/`
     });
-
   } catch (error) {
     return apiErrorHandler(error, 'Error retrieving user slideshows');
   }

@@ -93,7 +93,9 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
     );
 
     if (!finalPrompt.trim()) {
-      setErrorMessage('Please enter a description or select styles/effects/emotions');
+      setErrorMessage(
+        'Please enter a description or select styles/effects/emotions'
+      );
       return;
     }
 
@@ -113,7 +115,7 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
       });
 
       setIsSubmitting(false);
-      
+
       // Use centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
         return; // Error was handled, exit the function

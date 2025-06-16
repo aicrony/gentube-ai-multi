@@ -13,14 +13,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     const success = await updateUserName(userId, name);
-    
+
     if (success) {
       return NextResponse.json({ success: true });
     } else {

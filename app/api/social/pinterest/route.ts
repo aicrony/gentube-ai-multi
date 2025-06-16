@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToPinterest } from '@/services/socialMedia/pinterestService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +27,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!imageUrl) {
       return NextResponse.json(
-        { error: 'Bad Request', message: 'Image URL is required for Pinterest pins' },
+        {
+          error: 'Bad Request',
+          message: 'Image URL is required for Pinterest pins'
+        },
         { status: 400 }
       );
     }
@@ -36,10 +39,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const accessToken = process.env.PINTEREST_ACCESS_TOKEN;
     // If boardId is not provided, use a default one (user's should select one in UI)
     const defaultBoardId = process.env.PINTEREST_DEFAULT_BOARD_ID;
-    
+
     if (!accessToken) {
       return NextResponse.json(
-        { error: 'Configuration Error', message: 'Pinterest API token not configured' },
+        {
+          error: 'Configuration Error',
+          message: 'Pinterest API token not configured'
+        },
         { status: 500 }
       );
     }

@@ -790,10 +790,16 @@ const ImageGallery: React.FC = () => {
       setIsRefreshingGallery(false);
     }
   };
-  
+
   // If initial loading, show loading animation
   if (isInitialLoading) {
-    return <LoadingAnimation size="large" message="Loading gallery assets..." fullScreen={false} />;
+    return (
+      <LoadingAnimation
+        size="large"
+        message="Loading gallery assets..."
+        fullScreen={false}
+      />
+    );
   }
 
   return (
@@ -812,7 +818,9 @@ const ImageGallery: React.FC = () => {
               <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
               Refreshing...
             </span>
-          ) : 'Refresh Gallery'}
+          ) : (
+            'Refresh Gallery'
+          )}
         </button>
         <span className="text-xs text-gray-500 ml-2">
           (Refresh to see your added assets)
@@ -851,10 +859,10 @@ const ImageGallery: React.FC = () => {
 
       {/* Loading indicator */}
       {regenerateInProgress && (
-        <LoadingAnimation 
-          size="medium" 
+        <LoadingAnimation
+          size="medium"
           message="Processing your request..."
-          fullScreen={true} 
+          fullScreen={true}
         />
       )}
 

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     const isUnique = await isNameUnique(name, userId);
-    
+
     return NextResponse.json({ isUnique });
   } catch (error) {
     console.error('Error checking name uniqueness:', error);

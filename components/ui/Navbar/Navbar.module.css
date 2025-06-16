@@ -24,8 +24,12 @@
 }
 
 .signOutButton:hover {
-  color: var(--background-color); /* This will use your background color for text */
-  background-color: var(--primary-color); /* This will use your primary color for the background */
+  color: var(
+    --background-color
+  ); /* This will use your background color for text */
+  background-color: var(
+    --primary-color
+  ); /* This will use your primary color for the background */
 }
 
 .infoButton {

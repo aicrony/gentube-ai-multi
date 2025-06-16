@@ -86,26 +86,30 @@ export default async function generateFalImageEdit(
 
       // Make callback include the completed response
       callback.response = completedResult;
-      
+
       // NOTE: We're no longer trying to update the datastore here
       // Instead, we're letting processUserImageEditRequest.ts handle the data saving
       // since it has the correct context for when to save the data
-      
+
       return callback;
     } else {
       // If we don't get expected result structure, handle as an error
-      const requestId = result.requestId || 
-                      `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-      
+      const requestId =
+        result.requestId ||
+        `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
       // Create an error result - we're not going to use queues anymore
       const errorResult = {
         status: 'ERROR',
         request_id: requestId,
         error: 'Invalid response format from image edit API'
       };
-      
-      console.error('Failed to get proper response from image edit API:', result);
-      
+
+      console.error(
+        'Failed to get proper response from image edit API:',
+        result
+      );
+
       // NOTE: We're no longer trying to update the datastore here
       // The processUserImageEditRequest.ts will handle setting the correct status
 
@@ -114,20 +118,23 @@ export default async function generateFalImageEdit(
     }
   } catch (error) {
     console.error('An error occurred while editing the image:', error);
-    
+
     // Create a unique request ID for this error
     const errorRequestId = `error-${Date.now()}`;
-    
+
     // Create an error result to return
     const errorResult = {
       status: 'ERROR',
       request_id: errorRequestId,
-      error: error instanceof Error ? error.message : 'Unknown error during image edit'
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Unknown error during image edit'
     };
-    
+
     // We won't try to update the datastore here since we likely don't have a valid requestId
     // from the initial creation step that we could use to find the record
-    
+
     // Create a new callback object since the original one may be undefined in this context
     return {
       webhook: falApiWebhook,

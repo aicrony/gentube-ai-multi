@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await toggleAssetLike(userId, assetId, action);
-    
+
     return NextResponse.json({
       success: true,
       likesCount: result.likesCount,

@@ -13,14 +13,14 @@ export async function GET(request: NextRequest) {
   const searchPrompt = searchParams.get('searchPrompt');
 
   console.log('USER-IP: ' + userIp);
-  
+
   if (!userId || !userIp) {
     return NextResponse.json(
       { error: 'Missing required parameters' },
       { status: 400 }
     );
   }
-  
+
   if (userIp !== 'unknown') {
     try {
       const assets = await getUserAssets(
@@ -31,17 +31,19 @@ export async function GET(request: NextRequest) {
         assetType || undefined,
         searchPrompt
       );
-      
+
       // Check if we have more assets available from the hasMore flag on the first asset
       const hasMore = assets && assets.length > 0 ? assets[0].hasMore : false;
-      
+
       // Remove the hasMore flag from each asset before returning (it was only for internal use)
-      const cleanAssets = assets ? assets.map(asset => {
-        const { hasMore, ...cleanAsset } = asset;
-        return cleanAsset;
-      }) : [];
-      
-      return NextResponse.json({ 
+      const cleanAssets = assets
+        ? assets.map((asset) => {
+            const { hasMore, ...cleanAsset } = asset;
+            return cleanAsset;
+          })
+        : [];
+
+      return NextResponse.json({
         assets: cleanAssets,
         hasMore: hasMore
       });

@@ -18,10 +18,14 @@ export const postToInstagram = async ({
   imageUrl,
   accessToken,
   instagramAccountId
-}: InstagramPostParams): Promise<{ success: boolean; postId?: string; error?: string }> => {
+}: InstagramPostParams): Promise<{
+  success: boolean;
+  postId?: string;
+  error?: string;
+}> => {
   try {
     const apiVersion = 'v17.0';
-    
+
     // Step 1: Create a media container (Instagram API requires a two-step process)
     const containerUrl = `https://graph.facebook.com/${apiVersion}/${instagramAccountId}/media`;
     const containerResponse = await axios.post(containerUrl, {
@@ -29,25 +33,29 @@ export const postToInstagram = async ({
       caption: caption,
       access_token: accessToken
     });
-    
+
     const creationId = containerResponse.data.id;
-    
+
     // Step 2: Publish the media container
     const publishUrl = `https://graph.facebook.com/${apiVersion}/${instagramAccountId}/media_publish`;
     const publishResponse = await axios.post(publishUrl, {
       creation_id: creationId,
       access_token: accessToken
     });
-    
+
     return {
       success: true,
       postId: publishResponse.data.id
     };
   } catch (error: any) {
-    console.error('Instagram API error:', error.response?.data || error.message);
+    console.error(
+      'Instagram API error:',
+      error.response?.data || error.message
+    );
     return {
       success: false,
-      error: error.response?.data?.error?.message || 'Failed to post to Instagram'
+      error:
+        error.response?.data?.error?.message || 'Failed to post to Instagram'
     };
   }
 };

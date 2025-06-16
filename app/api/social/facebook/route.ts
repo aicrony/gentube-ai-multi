@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToFacebook } from '@/services/socialMedia/facebookService';
-import { getServerSession } from "@/utils/auth/session";
+import { getServerSession } from '@/utils/auth/session';
 import { getSocialToken } from '@/utils/gcloud/socialTokens';
 
 export const dynamic = 'force-dynamic';
@@ -29,10 +29,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Get user's Facebook token from the database
     const token = await getSocialToken(userId, 'facebook');
-    
+
     if (!token) {
       return NextResponse.json(
-        { error: 'Authentication Error', message: 'Facebook account not connected' },
+        {
+          error: 'Authentication Error',
+          message: 'Facebook account not connected'
+        },
         { status: 401 }
       );
     }
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message,
       imageUrl,
       accessToken: token.accessToken,
-      pageId: pageId || token.platformUserId  // Use page ID if provided, otherwise use user ID
+      pageId: pageId || token.platformUserId // Use page ID if provided, otherwise use user ID
     });
 
     if (!result.success) {

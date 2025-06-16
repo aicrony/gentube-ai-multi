@@ -5,40 +5,40 @@ export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id');
     const userIp = request.headers.get('x-forwarded-for') || 'unknown';
-    
+
     // Parse the request body
     const body = await request.json();
     console.log('userId: ', userId);
     console.log('userIp: ', userIp);
     console.log('prompt: ', body.prompt);
-    
+
     // Validate prompt length - Google Cloud Datastore has limits
     const MAX_PROMPT_LENGTH = 1500; // Setting a reasonable limit
     const prompt = body.prompt ? body.prompt : '';
-    
+
     if (prompt.length > MAX_PROMPT_LENGTH) {
       return NextResponse.json(
-        { 
+        {
           error: `Prompt is too long. Maximum length is ${MAX_PROMPT_LENGTH} characters.`,
           promptLength: prompt.length
-        }, 
+        },
         { status: 400 }
       );
     }
-    
+
     console.log('Prompt OK');
 
     // Require both userId and userIp
     if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required. Please sign in for free credits.' }, 
+        { error: 'User ID is required. Please sign in for free credits.' },
         { status: 430 } // Custom status code for sign-in required
       );
     }
-    
+
     if (!userIp || userIp === 'unknown') {
       return NextResponse.json(
-        { error: 'User IP is required' }, 
+        { error: 'User IP is required' },
         { status: 400 }
       );
     }
@@ -48,15 +48,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(userResponse);
   } catch (error) {
     console.error('Error processing image request:', error);
-    
+
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message }, 
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
       return NextResponse.json(
-        { error: 'An unknown error occurred' }, 
+        { error: 'An unknown error occurred' },
         { status: 500 }
       );
     }

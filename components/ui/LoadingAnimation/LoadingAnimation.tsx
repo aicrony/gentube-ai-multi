@@ -36,13 +36,22 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
 
   return (
     <div className={containerClasses}>
-      <div className={`${fullScreen || overlay ? 'bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg' : ''} text-center`}>
-        <div 
+      <div
+        className={`${fullScreen || overlay ? 'bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg' : ''} text-center`}
+      >
+        <div
           className={`animate-spin rounded-full ${sizeClasses[size]} border-t-transparent border-primary mx-auto mb-4`}
-          style={{ borderTopColor: 'transparent', borderRightColor: 'var(--primary-color)', borderBottomColor: 'var(--primary-color)', borderLeftColor: 'var(--primary-color)' }}
+          style={{
+            borderTopColor: 'transparent',
+            borderRightColor: 'var(--primary-color)',
+            borderBottomColor: 'var(--primary-color)',
+            borderLeftColor: 'var(--primary-color)'
+          }}
         ></div>
         {message && (
-          <p className={`${textSizeClasses[size]} font-semibold ${fullScreen || overlay ? 'text-gray-800 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+          <p
+            className={`${textSizeClasses[size]} font-semibold ${fullScreen || overlay ? 'text-gray-800 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}
+          >
             {message}
           </p>
         )}

@@ -8,12 +8,7 @@ export const dynamic = 'force-dynamic';
 const PINTEREST_AUTH_URL = 'https://www.pinterest.com/oauth/';
 
 // Scopes needed for posting
-const SCOPES = [
-  'boards:read',
-  'pins:read',
-  'pins:write',
-  'user_accounts:read'
-];
+const SCOPES = ['boards:read', 'pins:read', 'pins:write', 'user_accounts:read'];
 
 // Start OAuth flow
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -23,25 +18,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!session) {
       return NextResponse.redirect(new URL('/signin', request.url));
     }
-    
+
     const userId = session.user.id;
-    
+
     // Get app credentials
     const appId = process.env.PINTEREST_APP_ID;
     const redirectUri = `${process.env.OAUTH_REDIRECT_URI}/pinterest`;
-    
+
     if (!appId || !redirectUri) {
       throw new Error('Pinterest OAuth credentials not configured');
     }
-    
+
     // Generate random state to prevent CSRF
     const state = Math.random().toString(36).substring(2);
-    
+
     // Store state in cookie to verify on callback
     const response = NextResponse.redirect(
       `${PINTEREST_AUTH_URL}?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${SCOPES.join(',')}&state=${state}`
     );
-    
+
     // Set secure cookies with state and userId
     response.cookies.set({
       name: 'pinterest_oauth_state',
@@ -51,7 +46,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       maxAge: 60 * 10, // 10 minutes
       path: '/'
     });
-    
+
     response.cookies.set({
       name: 'oauth_user_id',
       value: userId,
@@ -60,7 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       maxAge: 60 * 10, // 10 minutes
       path: '/'
     });
-    
+
     return response;
   } catch (error: any) {
     console.error('Error initiating Pinterest OAuth:', error);

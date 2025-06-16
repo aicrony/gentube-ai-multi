@@ -60,11 +60,7 @@ export async function POST(request: NextRequest) {
           await transaction.rollback();
         }
       }
-    } else if (
-      body.request_id &&
-      body.status === 'OK' &&
-      body.error === null
-    ) {
+    } else if (body.request_id && body.status === 'OK' && body.error === null) {
       console.log('Request ID:', body.request_id);
       console.log('Status:', body.status);
       console.log('Incoming Payload: ', JSON.stringify(body.payload));
@@ -75,7 +71,7 @@ export async function POST(request: NextRequest) {
 
       // Get the URL of the generated/edited image
       const imageUrl = body.payload.images[0].url;
-      
+
       // Use the standard process for all image updates
       const userQueueRecord = await getLatestActivityByRequestId(
         body.request_id
@@ -109,7 +105,10 @@ export async function POST(request: NextRequest) {
               data: userActivity
             });
             await transaction.commit();
-            console.log('UserActivity updated successfully with URL:', imageUrl);
+            console.log(
+              'UserActivity updated successfully with URL:',
+              imageUrl
+            );
           } else {
             console.error('UserActivity not found');
             await transaction.rollback();

@@ -24,48 +24,55 @@ export async function isNameUnique(
     if (!name) {
       return false;
     }
-    
-    console.log(`Checking if name "${name}" is unique for user ${currentUserId}`);
-    
+
+    console.log(
+      `Checking if name "${name}" is unique for user ${currentUserId}`
+    );
+
     // Create a query to find users with this name - first check Name field
     const nameQuery = datastore
       .createQuery(NAMESPACE, USER_CREDITS_KIND)
       .filter('Name', '=', name);
-      
+
     const [nameResults] = await datastore.runQuery(nameQuery);
-    
+
     // Also check CreatorName field for compatibility with older records
     const creatorNameQuery = datastore
       .createQuery(NAMESPACE, USER_CREDITS_KIND)
       .filter('CreatorName', '=', name);
-      
+
     const [creatorNameResults] = await datastore.runQuery(creatorNameQuery);
-    
+
     // Combine results
     const results = [...nameResults, ...creatorNameResults];
-    
+
     // Filter out any duplicates (same user ID might appear in both queries)
     const uniqueUserIds = new Set();
-    const uniqueResults = results.filter(result => {
+    const uniqueResults = results.filter((result) => {
       if (uniqueUserIds.has(result.UserId)) {
         return false;
       }
       uniqueUserIds.add(result.UserId);
       return true;
     });
-    
+
     // If no results, the name is unique
     if (uniqueResults.length === 0) {
       console.log(`Name "${name}" is unique (no matches found)`);
       return true;
     }
-    
+
     // If the only user with this name is the current user, it's still valid
-    if (uniqueResults.length === 1 && uniqueResults[0].UserId === currentUserId) {
-      console.log(`Name "${name}" belongs to the current user ${currentUserId}`);
+    if (
+      uniqueResults.length === 1 &&
+      uniqueResults[0].UserId === currentUserId
+    ) {
+      console.log(
+        `Name "${name}" belongs to the current user ${currentUserId}`
+      );
       return true;
     }
-    
+
     // Found another user with this name
     console.log(`Name "${name}" is already used by another user`);
     return false;

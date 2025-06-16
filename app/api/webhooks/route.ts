@@ -62,12 +62,19 @@ export async function POST(req: Request) {
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
           const subscription = event.data.object as Stripe.Subscription;
+          console.log(
+            `Processing ${event.type} event for subscription ${subscription.id}`
+          );
+
+          // Handle subscription state change
           await manageSubscriptionStatusChange(
             subscription.id,
-
             subscription.customer as string,
             event.type === 'customer.subscription.created'
           );
+
+          // Note: We don't add credits here directly as we rely on the invoice.paid event
+          // for both new subscriptions and renewals to avoid duplicate credit assignments
           break;
         case 'checkout.session.completed':
           const checkoutSession = event.data.object as Stripe.Checkout.Session;
@@ -98,20 +105,42 @@ export async function POST(req: Request) {
 
           // Only process if this invoice is for a subscription
           if (invoice.subscription && invoice.status === 'paid') {
+            console.log(
+              `Processing subscription invoice payment: ${invoice.id} for subscription ${invoice.subscription}`
+            );
             // Credit for subscriptions
-            await addCustomerCredit(
-              invoice.id, // Use invoice ID as the unique identifier
-              invoice.customer as string,
-              invoice.amount_paid,
-              invoice.currency
+            try {
+              await addCustomerCredit(
+                invoice.id, // Use invoice ID as the unique identifier
+                invoice.customer as string,
+                invoice.amount_paid,
+                invoice.currency
+              );
+              console.log(
+                `Successfully added ${invoice.amount_paid} credits for customer ${invoice.customer}`
+              );
+            } catch (error) {
+              console.error(
+                `Failed to add credits for subscription payment: ${error}`
+              );
+              throw error; // Re-throw to trigger the error handling below
+            }
+          } else {
+            console.log(
+              `Skipping invoice ${invoice.id} - not a paid subscription invoice`
             );
           }
           break;
         case 'payment_intent.created':
         case 'payment_intent.succeeded':
         case 'charge.succeeded':
+          console.log(
+            `Received event ${event.type} but no specific handler defined`
+          );
+          break;
         default:
-          throw new Error('Unhandled relevant event!');
+          console.warn(`Unhandled relevant event: ${event.type}`);
+          break;
       }
     } catch (error) {
       console.log(error);

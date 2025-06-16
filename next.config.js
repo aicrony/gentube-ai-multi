@@ -8,9 +8,9 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, must-revalidate',
-          },
-        ],
+            value: 'public, max-age=86400, must-revalidate'
+          }
+        ]
       },
       {
         // Add cache control headers for video files
@@ -18,16 +18,16 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, must-revalidate',
-          },
-        ],
-      },
+            value: 'public, max-age=86400, must-revalidate'
+          }
+        ]
+      }
     ];
   },
   // Enable image optimization
   images: {
     domains: ['storage.googleapis.com'],
-    minimumCacheTTL: 86400, // 24 hours
+    minimumCacheTTL: 86400 // 24 hours
   },
   async rewrites() {
     return [

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addAssetToGallery, removeAssetFromGallery } from '@/utils/gcloud/galleryManager';
+import {
+  addAssetToGallery,
+  removeAssetFromGallery
+} from '@/utils/gcloud/galleryManager';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +30,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Gallery toggle request: ${action} asset ${assetId} by user ${userId}`);
-    
+    console.log(
+      `Gallery toggle request: ${action} asset ${assetId} by user ${userId}`
+    );
+
     let result;
     try {
       if (action === 'add') {
@@ -39,21 +44,22 @@ export async function POST(request: NextRequest) {
     } catch (functionError: any) {
       console.error('Gallery toggle function error:', functionError);
       return NextResponse.json(
-        { 
-          error: 'Gallery operation failed', 
+        {
+          error: 'Gallery operation failed',
           details: functionError?.message || 'Unknown gallery operation error'
         },
         { status: 500 }
       );
     }
-    
+
     if (!result) {
       return NextResponse.json(
-        { 
+        {
           error: 'Failed to update gallery status',
           action: action,
           assetId: assetId,
-          details: 'Operation failed - entity may not exist or user may not have permission'
+          details:
+            'Operation failed - entity may not exist or user may not have permission'
         },
         { status: 400 }
       );
@@ -63,16 +69,17 @@ export async function POST(request: NextRequest) {
       success: true,
       action: action,
       assetId: assetId,
-      message: action === 'add' 
-        ? 'Asset successfully added to gallery' 
-        : 'Asset successfully removed from gallery'
+      message:
+        action === 'add'
+          ? 'Asset successfully added to gallery'
+          : 'Asset successfully removed from gallery'
     });
   } catch (error: any) {
     console.error('Failed to toggle gallery status:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to toggle gallery status',
-        details: error?.message || 'Unknown error' 
+        details: error?.message || 'Unknown error'
       },
       { status: 500 }
     );

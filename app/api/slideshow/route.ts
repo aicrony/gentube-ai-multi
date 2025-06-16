@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
       slideshowId: result.slideshowId,
       shareUrl: `${req.nextUrl.origin}/slideshow/${result.slideshowId}`
     });
-
   } catch (error) {
     return apiErrorHandler(error, 'Error creating slideshow');
   }
@@ -57,7 +56,7 @@ export async function GET(req: NextRequest) {
   try {
     // Get slideshow ID from query parameters
     const slideshowId = req.nextUrl.searchParams.get('id');
-    
+
     if (!slideshowId) {
       return NextResponse.json(
         { error: 'Slideshow ID is required' },
@@ -80,7 +79,6 @@ export async function GET(req: NextRequest) {
       success: true,
       slideshow: result.slideshow
     });
-
   } catch (error) {
     return apiErrorHandler(error, 'Error retrieving slideshow');
   }

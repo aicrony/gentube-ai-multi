@@ -16,9 +16,9 @@ indexes:
         direction: desc
   - kind: UserActivity
     properties:
-    - name: SubscriptionTier
-    - name: DateTime
-      direction: desc
+      - name: SubscriptionTier
+      - name: DateTime
+        direction: desc
 
   - kind: UserActivity
     properties:
@@ -47,7 +47,6 @@ indexes:
     properties:
       - name: userId
       - name: groupId
-
 
   - kind: AssetGroupMembership
     properties:
@@ -81,7 +80,7 @@ indexes:
       - name: assetId
       - name: userId
 
-#   Feedback feature index
+  #   Feedback feature index
   - kind: Feedback
     properties:
       - name: createdAt

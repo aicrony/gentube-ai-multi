@@ -19,7 +19,12 @@ export async function processUserImageEditRequest(
   userIp: string | string[],
   editPrompt: string,
   imageUrl: string
-): Promise<{ result: string; credits: number; error: boolean; statusCode: number }> {
+): Promise<{
+  result: string;
+  credits: number;
+  error: boolean;
+  statusCode: number;
+}> {
   const localizedIpAddress = localIpConfig(userIp);
   const normalizedIpAddress = normalizeIp(localIpConfig(userIp));
   let userResponse = {
@@ -84,7 +89,7 @@ export async function processUserImageEditRequest(
   // Initialize these variables at the top level of the function
   let isCompletedImmediately = false;
   let completedImageUrl = '';
-  
+
   try {
     let creditCost = 10; // Image editing costs more than regular image generation
 
@@ -96,25 +101,28 @@ export async function processUserImageEditRequest(
       // Variables already initialized above
 
       // Call the image edit service using Kontext API
-      imageResult = (await generateFalImageEdit(
-        imageUrl,
-        editPrompt
-      )) as any;
+      imageResult = (await generateFalImageEdit(imageUrl, editPrompt)) as any;
 
       // Check response from the image edit service
       if (imageResult) {
         console.log('Image edit result:', imageResult);
-        
+
         // Get the request ID from the response
         if (imageResult.response && imageResult.response.request_id) {
           requestId = imageResult.response.request_id;
           console.log('Using request ID for image edit:', requestId);
-          
+
           // Check if we have a completed result already
-          if (imageResult.response.status === 'COMPLETED' && imageResult.response.url) {
+          if (
+            imageResult.response.status === 'COMPLETED' &&
+            imageResult.response.url
+          ) {
             isCompletedImmediately = true;
             completedImageUrl = imageResult.response.url;
-            console.log('Received completed image immediately:', completedImageUrl);
+            console.log(
+              'Received completed image immediately:',
+              completedImageUrl
+            );
           }
         } else {
           // Fallback if no request ID is provided
@@ -153,7 +161,7 @@ export async function processUserImageEditRequest(
     console.log('Image Edit Data saved: ', activityResponse);
 
     userResponse.error = false;
-    
+
     // Return different result based on whether we got a completed image immediately
     if (isCompletedImmediately && completedImageUrl) {
       userResponse.result = completedImageUrl; // Return the image URL directly
@@ -162,7 +170,7 @@ export async function processUserImageEditRequest(
       userResponse.result = 'InQueue';
       console.log('Image edit request queued for processing');
     }
-    
+
     return userResponse;
   } catch (error) {
     if (error instanceof Error) {

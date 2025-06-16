@@ -26,12 +26,12 @@ export default function UploadToVideoPage() {
   const handleUserCreditsUpdate = (credits: number | null) => {
     setUserCredits(credits);
   };
-  
+
   const handleVideoGenerated = (result: string) => {
     setVideoGenerated(true);
     setShowQueuedAssets(true);
   };
-  
+
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -77,7 +77,12 @@ export default function UploadToVideoPage() {
                   <Button variant="slim">Video Gen</Button>
                 </Link>
                 <Link href="/upload-to-video">
-                  <Button variant="slim" className="bg-blue-500 text-white hover:bg-blue-600">Upload Image</Button>
+                  <Button
+                    variant="slim"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
+                  >
+                    Upload Image
+                  </Button>
                 </Link>
                 {userId && userId !== 'none' && isLocalhost && (
                   <Link href="/admin">
@@ -112,12 +117,14 @@ export default function UploadToVideoPage() {
                   />
                 </div>
               )}
-              
+
               {/* Show assets with auto-refresh when video is generated/queued */}
               {showQueuedAssets && (
                 <div className="mt-8 border-t pt-8">
                   <h2 className="text-2xl font-bold mb-4">Your Assets</h2>
-                  <p className="mb-4">Your video is being generated and will appear below shortly.</p>
+                  <p className="mb-4">
+                    Your video is being generated and will appear below shortly.
+                  </p>
                   <MyAssets autoRefreshQueued={true} />
                 </div>
               )}

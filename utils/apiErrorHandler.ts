@@ -27,7 +27,7 @@ export async function handleApiError(
   } = options;
 
   let errorMessage = 'An error occurred.';
-  
+
   try {
     // Only try to parse JSON if the content type is application/json
     if (response.headers.get('content-type')?.includes('application/json')) {
@@ -44,35 +44,35 @@ export async function handleApiError(
       if (setErrorMessage) {
         setErrorMessage(errorMessage || 'Please sign in for free credits.');
       }
-      
+
       // Redirect to sign in page after a short delay with new user prompt
       setTimeout(() => {
         window.location.href = `${redirectPath}?new_user_prompt=true`;
       }, redirectDelay);
       break;
-      
+
     case 429: // Rate limiting
       if (setErrorMessage) {
-        setErrorMessage(errorMessage || 'Request limit exceeded. Please try again later.');
+        setErrorMessage(
+          errorMessage || 'Request limit exceeded. Please try again later.'
+        );
       }
       break;
-      
+
     case 401: // Unauthorized
       if (setErrorMessage) {
         setErrorMessage(errorMessage || 'Authentication required.');
       }
-      
+
       // Only redirect if it's a general 401, not our custom 430
       setTimeout(() => {
         window.location.href = `${redirectPath}?new_user_prompt=true`;
       }, redirectDelay);
       break;
-      
+
     default:
       if (setErrorMessage) {
-        setErrorMessage(
-          errorMessage || 'Request failed. Please try again.'
-        );
+        setErrorMessage(errorMessage || 'Request failed. Please try again.');
       }
       break;
   }
@@ -95,7 +95,7 @@ export function showSignInRequiredError(
   if (setErrorMessage) {
     setErrorMessage('Please sign in for free credits.');
   }
-  
+
   setTimeout(() => {
     window.location.href = '/signin?new_user_prompt=true';
   }, 1500);

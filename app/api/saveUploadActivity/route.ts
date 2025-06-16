@@ -11,18 +11,18 @@ export async function POST(request: NextRequest) {
     // Get userId from headers instead of body for security
     const userId = request.headers.get('x-user-id');
     const userIp = request.headers.get('x-forwarded-for') || 'unknown';
-    
+
     // Require both userId and userIp
     if (!userId || userId === 'none') {
       return NextResponse.json(
-        { error: 'User ID is required. Please sign in for free credits.' }, 
+        { error: 'User ID is required. Please sign in for free credits.' },
         { status: 430 } // Custom status code for sign-in required
       );
     }
-    
+
     if (!userIp || userIp === 'unknown') {
       return NextResponse.json(
-        { error: 'User IP is required' }, 
+        { error: 'User IP is required' },
         { status: 400 }
       );
     }
@@ -52,11 +52,10 @@ export async function POST(request: NextRequest) {
       UserIp: userIp
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       url: imageUrl
     });
-
   } catch (error) {
     console.error('Error saving upload activity:', error);
     return NextResponse.json(

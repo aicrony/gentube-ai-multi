@@ -18,11 +18,17 @@ export const postToLinkedIn = async ({
   imageUrl,
   accessToken,
   organizationId
-}: LinkedInPostParams): Promise<{ success: boolean; postId?: string; error?: string }> => {
+}: LinkedInPostParams): Promise<{
+  success: boolean;
+  postId?: string;
+  error?: string;
+}> => {
   try {
     // LinkedIn API endpoints
     const baseUrl = 'https://api.linkedin.com/v2';
-    const authorId = organizationId ? `urn:li:organization:${organizationId}` : 'urn:li:person:{person_id}';
+    const authorId = organizationId
+      ? `urn:li:organization:${organizationId}`
+      : 'urn:li:person:{person_id}';
 
     // Prepare the base post content
     const postContent: {
@@ -37,11 +43,11 @@ export const postToLinkedIn = async ({
             description: { text: string };
             media: string;
           }>;
-        }
+        };
       };
       visibility: {
         'com.linkedin.ugc.MemberNetworkVisibility': string;
-      }
+      };
     } = {
       author: authorId,
       lifecycleState: 'PUBLISHED',
@@ -67,56 +73,61 @@ export const postToLinkedIn = async ({
           registerUploadRequest: {
             recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
             owner: authorId,
-            serviceRelationships: [{
-              relationshipType: 'OWNER',
-              identifier: 'urn:li:userGeneratedContent'
-            }]
+            serviceRelationships: [
+              {
+                relationshipType: 'OWNER',
+                identifier: 'urn:li:userGeneratedContent'
+              }
+            ]
           }
         },
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           }
         }
       );
 
-      const uploadUrl = registerResponse.data.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl;
+      const uploadUrl =
+        registerResponse.data.value.uploadMechanism[
+          'com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'
+        ].uploadUrl;
       const asset = registerResponse.data.value.asset;
 
       // Step 2: Upload the image
       // In a real implementation, you would fetch the image and upload it as binary data
       await axios.put(uploadUrl, imageUrl, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'image/jpeg'
         }
       });
 
       // Add the image to the post content
-      postContent.specificContent['com.linkedin.ugc.ShareContent'].shareMediaCategory = 'IMAGE';
+      postContent.specificContent[
+        'com.linkedin.ugc.ShareContent'
+      ].shareMediaCategory = 'IMAGE';
       // Initialize media array if it doesn't exist
-      postContent.specificContent['com.linkedin.ugc.ShareContent'].media = [{
-        status: 'READY',
-        description: {
-          text: text.substring(0, 200) // LinkedIn has a character limit for media descriptions
-        },
-        media: asset
-      }];
+      postContent.specificContent['com.linkedin.ugc.ShareContent'].media = [
+        {
+          status: 'READY',
+          description: {
+            text: text.substring(0, 200) // LinkedIn has a character limit for media descriptions
+          },
+          media: asset
+        }
+      ];
     }
 
     // Step 3: Create the post
-    const postResponse = await axios.post(
-      `${baseUrl}/ugcPosts`,
-      postContent,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'X-Restli-Protocol-Version': '2.0.0'
-        }
+    const postResponse = await axios.post(`${baseUrl}/ugcPosts`, postContent, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Restli-Protocol-Version': '2.0.0'
       }
-    );
+    });
 
     return {
       success: true,
