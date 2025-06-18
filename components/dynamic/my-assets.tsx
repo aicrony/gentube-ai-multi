@@ -1471,17 +1471,21 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       {filteredAndSortedActivities.length === 0 && (
         <p>
-          {activities.length === 0
-            ? `No assets found. You may need to ${
+          {activities.length === 0 ? (
+            <>
+              No assets found. You may need to {
                 userId ? (
                   <button onClick={handleRefresh}>
                     {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
                   </button>
                 ) : (
-                  <a href="/signin">sign in</a> + 'to'
+                  <><a href="/signin">sign in</a> to</>
                 )
-              } see your assets.`
-            : 'No assets match your current filters. Try changing or clearing the filters.'}
+              } see your assets.
+            </>
+          ) : (
+            'No assets match your current filters. Try changing or clearing the filters.'
+          )}
         </p>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
