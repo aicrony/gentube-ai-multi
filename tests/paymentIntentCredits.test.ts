@@ -50,7 +50,8 @@ describe('Payment Intent Credit Handling', () => {
           amount: 1900,
           currency: 'usd',
           customer: 'cus_123456',
-          metadata: {}
+          metadata: {},
+          invoice: null // Explicitly set invoice to null to match our new condition
         }
       }
     };
@@ -175,7 +176,8 @@ describe('Payment Intent Credit Handling', () => {
           payment_intent: 'pi_123456',
           customer: 'cus_123456',
           amount_total: 1900,
-          currency: 'usd'
+          currency: 'usd',
+          payment_status: 'paid' // Add this field to match new requirement
         }
       }
     };

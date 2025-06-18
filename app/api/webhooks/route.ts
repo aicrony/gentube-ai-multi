@@ -88,29 +88,34 @@ export async function POST(req: Request) {
           }
           if (checkoutSession.mode === 'payment') {
             const paymentIntent = checkoutSession.payment_intent;
-            console.log(`Processing checkout session payment: ${checkoutSession.id} with payment intent ${paymentIntent}`);
-            
-            try {
-              // Add credits based on checkout session information
-              await addCustomerCredit(
-                paymentIntent as string,
-                checkoutSession.customer as string,
-                checkoutSession.amount_total as number,
-                checkoutSession.currency as string
-              );
+            // Verify the payment status is paid
+            if (checkoutSession.payment_status === 'paid') {
+              console.log(`Processing checkout session payment: ${checkoutSession.id} with payment intent ${paymentIntent}`);
               
-              // Mark this payment intent as handled by checkout to avoid duplicate credits
-              if (paymentIntent) {
-                await stripe.paymentIntents.update(paymentIntent as string, {
-                  metadata: { handled_by_checkout: 'true' }
-                });
-                console.log(`Marked payment intent ${paymentIntent} as handled by checkout`);
+              try {
+                // Add credits based on checkout session information
+                await addCustomerCredit(
+                  paymentIntent as string,
+                  checkoutSession.customer as string,
+                  checkoutSession.amount_total as number,
+                  checkoutSession.currency as string
+                );
+                
+                // Mark this payment intent as handled by checkout to avoid duplicate credits
+                if (paymentIntent) {
+                  await stripe.paymentIntents.update(paymentIntent as string, {
+                    metadata: { handled_by_checkout: 'true' }
+                  });
+                  console.log(`Marked payment intent ${paymentIntent} as handled by checkout`);
+                }
+                
+                console.log(`Successfully added credits for checkout session ${checkoutSession.id}`);
+              } catch (error) {
+                console.error(`Failed to add credits for checkout session: ${error}`);
+                throw error; // Re-throw to trigger the error handling below
               }
-              
-              console.log(`Successfully added credits for checkout session ${checkoutSession.id}`);
-            } catch (error) {
-              console.error(`Failed to add credits for checkout session: ${error}`);
-              throw error; // Re-throw to trigger the error handling below
+            } else {
+              console.log(`Skipping checkout session ${checkoutSession.id} - payment status is not 'paid' (status: ${checkoutSession.payment_status})`);
             }
           }
           break;
@@ -147,6 +152,14 @@ export async function POST(req: Request) {
           break;
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          
+          // Skip if this payment intent is for an invoice/subscription
+          if (paymentIntent.invoice) {
+            console.log(
+              `Skipping payment intent ${paymentIntent.id} - associated with invoice ${paymentIntent.invoice} which will be handled by invoice.paid event`
+            );
+            break;
+          }
           
           // Check if this payment intent is already associated with a checkout session
           // to avoid duplicate credits
