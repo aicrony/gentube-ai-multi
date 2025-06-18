@@ -1,4 +1,4 @@
-'use client';
+// This component is used by a client component but doesn't need to be a client component itself
 import React, { useEffect, useState } from 'react';
 import {
   FaFacebook,

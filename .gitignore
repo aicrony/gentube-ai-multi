@@ -47,3 +47,4 @@ certificates
 # debugging endpoints
 /app/api/debugDatastore/
 /app/api/testFindAsset/
+/json/stripe-test-objects.json
