@@ -76,29 +76,41 @@ export async function POST(req: Request) {
           // For new subscriptions, fetch the latest invoice and process credits if needed
           if (event.type === 'customer.subscription.created') {
             try {
-              console.log(`Fetching latest invoice for subscription ${subscription.id}`);
-              const latestInvoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-              
+              console.log(
+                `Fetching latest invoice for subscription ${subscription.id}`
+              );
+              const latestInvoice = await stripe.invoices.retrieve(
+                subscription.latest_invoice as string
+              );
+
               if (latestInvoice.status === 'paid') {
-                console.log(`Processing subscription invoice payment manually: ${latestInvoice.id} for subscription ${subscription.id}`);
-                
+                console.log(
+                  `Processing subscription invoice payment manually: ${latestInvoice.id} for subscription ${subscription.id}`
+                );
+
                 await addCustomerCredit(
                   latestInvoice.id,
                   subscription.customer as string,
                   latestInvoice.amount_paid,
                   latestInvoice.currency
                 );
-                
-                console.log(`Successfully added ${latestInvoice.amount_paid} credits for customer ${subscription.customer} from subscription creation`);
+
+                console.log(
+                  `Successfully added credits for customer ${subscription.customer} from subscription creation. Paid ${latestInvoice.amount_paid}.`
+                );
               } else {
-                console.log(`Latest invoice ${latestInvoice.id} for subscription ${subscription.id} is not paid (status: ${latestInvoice.status})`);
+                console.log(
+                  `Latest invoice ${latestInvoice.id} for subscription ${subscription.id} is not paid (status: ${latestInvoice.status})`
+                );
               }
             } catch (error) {
-              console.error(`Failed to process latest invoice for new subscription ${subscription.id}: ${error}`);
+              console.error(
+                `Failed to process latest invoice for new subscription ${subscription.id}: ${error}`
+              );
               // Don't throw here - we've already updated the subscription status
             }
           }
-          
+
           // We still rely on the invoice.paid event for renewals to avoid duplicate credit assignments
           break;
         case 'checkout.session.completed':
@@ -115,8 +127,10 @@ export async function POST(req: Request) {
             const paymentIntent = checkoutSession.payment_intent;
             // Verify the payment status is paid
             if (checkoutSession.payment_status === 'paid') {
-              console.log(`Processing checkout session payment: ${checkoutSession.id} with payment intent ${paymentIntent}`);
-              
+              console.log(
+                `Processing checkout session payment: ${checkoutSession.id} with payment intent ${paymentIntent}`
+              );
+
               try {
                 // Add credits based on checkout session information
                 await addCustomerCredit(
@@ -125,22 +139,30 @@ export async function POST(req: Request) {
                   checkoutSession.amount_total as number,
                   checkoutSession.currency as string
                 );
-                
+
                 // Mark this payment intent as handled by checkout to avoid duplicate credits
                 if (paymentIntent) {
                   await stripe.paymentIntents.update(paymentIntent as string, {
                     metadata: { handled_by_checkout: 'true' }
                   });
-                  console.log(`Marked payment intent ${paymentIntent} as handled by checkout`);
+                  console.log(
+                    `Marked payment intent ${paymentIntent} as handled by checkout`
+                  );
                 }
-                
-                console.log(`Successfully added credits for checkout session ${checkoutSession.id}`);
+
+                console.log(
+                  `Successfully added credits for checkout session ${checkoutSession.id}`
+                );
               } catch (error) {
-                console.error(`Failed to add credits for checkout session: ${error}`);
+                console.error(
+                  `Failed to add credits for checkout session: ${error}`
+                );
                 throw error; // Re-throw to trigger the error handling below
               }
             } else {
-              console.log(`Skipping checkout session ${checkoutSession.id} - payment status is not 'paid' (status: ${checkoutSession.payment_status})`);
+              console.log(
+                `Skipping checkout session ${checkoutSession.id} - payment status is not 'paid' (status: ${checkoutSession.payment_status})`
+              );
             }
           }
           break;
@@ -161,7 +183,7 @@ export async function POST(req: Request) {
                 invoice.currency
               );
               console.log(
-                `Successfully added ${invoice.amount_paid} credits for customer ${invoice.customer}`
+                `Successfully added credits for customer ${invoice.customer}. Paid ${invoice.amount_paid}.`
               );
             } catch (error) {
               console.error(
@@ -177,7 +199,7 @@ export async function POST(req: Request) {
           break;
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          
+
           // Skip if this payment intent is for an invoice/subscription
           if (paymentIntent.invoice) {
             console.log(
@@ -185,14 +207,14 @@ export async function POST(req: Request) {
             );
             break;
           }
-          
+
           // Check if this payment intent is already associated with a checkout session
           // to avoid duplicate credits
           if (!paymentIntent.metadata?.handled_by_checkout) {
             console.log(
               `Processing direct payment intent: ${paymentIntent.id}, amount: ${paymentIntent.amount}, currency: ${paymentIntent.currency}`
             );
-            
+
             try {
               // Make sure we have a customer to credit
               if (paymentIntent.customer) {
