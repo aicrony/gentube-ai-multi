@@ -73,8 +73,33 @@ export async function POST(req: Request) {
             event.type === 'customer.subscription.created'
           );
 
-          // Note: We don't add credits here directly as we rely on the invoice.paid event
-          // for both new subscriptions and renewals to avoid duplicate credit assignments
+          // For new subscriptions, fetch the latest invoice and process credits if needed
+          if (event.type === 'customer.subscription.created') {
+            try {
+              console.log(`Fetching latest invoice for subscription ${subscription.id}`);
+              const latestInvoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
+              
+              if (latestInvoice.status === 'paid') {
+                console.log(`Processing subscription invoice payment manually: ${latestInvoice.id} for subscription ${subscription.id}`);
+                
+                await addCustomerCredit(
+                  latestInvoice.id,
+                  subscription.customer as string,
+                  latestInvoice.amount_paid,
+                  latestInvoice.currency
+                );
+                
+                console.log(`Successfully added ${latestInvoice.amount_paid} credits for customer ${subscription.customer} from subscription creation`);
+              } else {
+                console.log(`Latest invoice ${latestInvoice.id} for subscription ${subscription.id} is not paid (status: ${latestInvoice.status})`);
+              }
+            } catch (error) {
+              console.error(`Failed to process latest invoice for new subscription ${subscription.id}: ${error}`);
+              // Don't throw here - we've already updated the subscription status
+            }
+          }
+          
+          // We still rely on the invoice.paid event for renewals to avoid duplicate credit assignments
           break;
         case 'checkout.session.completed':
           const checkoutSession = event.data.object as Stripe.Checkout.Session;
