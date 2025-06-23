@@ -52,7 +52,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const router = useRouter();
 
   // State for contest end
-  const contestEndDate = new Date('2025-06-20T23:59:59');
+  const contestEndDate = new Date('2025-06-30T00:00:00');
   const [isContestEnded, setIsContestEnded] = useState(false);
   const [winningAssets, setWinningAssets] = useState<GalleryItem[]>([]);
   const [maxLikesCount, setMaxLikesCount] = useState(0);
@@ -512,7 +512,8 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
             opacity: 1;
           }
           100% {
-            transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--r, 0deg));
+            transform: translate(var(--tx, 0px), var(--ty, 0px))
+              rotate(var(--r, 0deg));
             opacity: 0;
           }
         }
@@ -715,7 +716,11 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       </div>
 
       {/* Refresh button - only show during active contest */}
-      {!(isContestEnded || forceEndedForTesting || new Date() > contestEndDate) && (
+      {!(
+        isContestEnded ||
+        forceEndedForTesting ||
+        new Date() > contestEndDate
+      ) && (
         <div className="text-center mb-4">
           <button
             onClick={handleRefresh}
