@@ -10,6 +10,7 @@ const datastore = new Datastore({
 });
 
 const USER_ACTIVITY_KIND = 'UserActivity';
+const ASSET_LIKES_KIND = 'AssetLikes';
 const NAMESPACE = 'GenTube';
 
 interface UserActivity {
@@ -324,4 +325,111 @@ export async function getGalleryAssets(
       SubscriptionTier: activity.SubscriptionTier || 3 // Default to 3 for gallery assets
     };
   });
+}
+
+export async function getTopGalleryAssets(
+  limit: number = 10
+): Promise<UserActivity[] | null> {
+  try {
+    // Step 1: Query all gallery assets (SubscriptionTier = 3)
+    const galleryQuery = datastore
+      .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
+      .filter('SubscriptionTier', '=', 3);
+    
+    const [galleryAssets] = await datastore.runQuery(galleryQuery);
+    console.log(`Found ${galleryAssets.length} total gallery assets`);
+    
+    // Step 2: Get all the asset IDs from the gallery assets
+    const assetIds = galleryAssets.map((asset: any) => 
+      asset[datastore.KEY].name || asset[datastore.KEY].id
+    );
+    
+    // Step 3: Query the likes for all these assets
+    const likesQueries = assetIds.map(assetId => {
+      const assetLikesKey = datastore.key({
+        namespace: NAMESPACE,
+        path: [ASSET_LIKES_KIND, assetId]
+      });
+      return datastore.get(assetLikesKey);
+    });
+    
+    // Execute all queries in parallel
+    const likesResults = await Promise.all(likesQueries);
+    
+    // Step 4: Combine gallery assets with their like counts
+    const assetsWithLikes = galleryAssets.map((asset: any, index: number) => {
+      const assetId = asset[datastore.KEY].name || asset[datastore.KEY].id;
+      const [likesEntity] = likesResults[index];
+      const likesCount = likesEntity ? (likesEntity.totalLikes || 0) : 0;
+      
+      return {
+        asset,
+        assetId,
+        likesCount
+      };
+    });
+    
+    // Step 5: Sort by likes count (most hearts first) and take top 'limit'
+    const topAssets = assetsWithLikes
+      .sort((a, b) => b.likesCount - a.likesCount)
+      .slice(0, limit)
+      .map(({ asset }) => asset);
+    
+    console.log(`Returning top ${topAssets.length} assets by heart count`);
+    
+    // Step 6: Get creator names for the top assets
+    const userIds = topAssets
+      .map((activity: any) => activity.UserId)
+      .filter((userId: string | undefined) => userId && userId !== 'none');
+    
+    console.log('Top assets user IDs extracted:', userIds);
+    
+    // Fetch creator names for all user IDs
+    let creatorNames: { [key: string]: string } = {};
+    try {
+      // Dynamically import to avoid circular dependency
+      const { getCreatorNames } = await import('./getUserCreator');
+      if (userIds.length > 0) {
+        // Unique user IDs to avoid duplicates
+        const uniqueUserIds = [...new Set(userIds)];
+        console.log('Fetching creator names for unique user IDs:', uniqueUserIds);
+        creatorNames = await getCreatorNames(uniqueUserIds);
+        console.log('Creator names fetched:', creatorNames);
+      }
+    } catch (error) {
+      console.error('Error fetching creator names:', error);
+    }
+    
+    // Step 7: Format and return the results
+    return topAssets.map((activity: any) => {
+      // Provide fallbacks for missing data
+      let prompt = activity.Prompt;
+      if (!prompt && activity.description) {
+        prompt = activity.description;
+      } else if (!prompt) {
+        prompt = '';
+      }
+      
+      // Get creator name if available
+      let creatorName: string | null = null;
+      if (activity.UserId && creatorNames[activity.UserId]) {
+        creatorName = creatorNames[activity.UserId];
+      }
+      
+      return {
+        id: activity[datastore.KEY].name || activity[datastore.KEY].id,
+        CreatedAssetUrl: activity.CreatedAssetUrl || '',
+        Prompt: prompt,
+        AssetSource: activity.AssetSource || '',
+        AssetType: activity.AssetType || 'unknown',
+        DateTime: activity.DateTime,
+        UserId: activity.UserId || null,
+        CreatorName: creatorName,
+        SubscriptionTier: activity.SubscriptionTier || 3
+      };
+    });
+  } catch (error) {
+    console.error('Error getting top gallery assets:', error);
+    return null;
+  }
 }

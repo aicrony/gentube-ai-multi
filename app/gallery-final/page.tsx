@@ -2,7 +2,10 @@
 
 import GalleryFinal from '@/functions/GalleryFinal';
 
-export default function Gallery() {
+export default function GalleryFinalPage() {
+  // Set to true to force contest ended state for testing
+  const forceEndedForTesting = true;
+  
   return (
     <section>
       <div className="max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
@@ -15,7 +18,7 @@ export default function Gallery() {
           </p>
         </div>
         <div className="mt-8 sm:mt-6">
-          <GalleryFinal />
+          <GalleryFinal forceEndedForTesting={forceEndedForTesting} />
         </div>
       </div>
     </section>
