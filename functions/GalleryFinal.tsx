@@ -512,7 +512,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
             opacity: 1;
           }
           100% {
-            transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+            transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--r, 0deg));
             opacity: 0;
           }
         }
