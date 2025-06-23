@@ -588,7 +588,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
                   // Shapes: 0 = square, 1 = circle, 2 = triangle
                   const shape = Math.floor(Math.random() * 3);
 
-                  let style: React.CSSProperties = {
+                  let style = {
                     '--tx': `${(Math.random() - 0.5) * 300}px`,
                     '--ty': `${(Math.random() - 0.5) * 300}px`,
                     '--r': `${Math.random() * 1080}deg`,
@@ -596,7 +596,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
                     width: `${size}rem`,
                     height: `${size}rem`,
                     animationDelay: `${Math.random() * 0.3}s`
-                  };
+                  } as React.CSSProperties;
 
                   // Add specific styles for different shapes
                   if (shape === 1) {
