@@ -3,8 +3,8 @@
 import GalleryFinal from '@/functions/GalleryFinal';
 
 export default function GalleryFinalPage() {
-  // Set to true to force contest ended state for testing
-  const forceEndedForTesting = true;
+  // Set to false to use actual contest end date logic
+  const forceEndedForTesting = false;
   
   return (
     <section>

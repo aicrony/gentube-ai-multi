@@ -15,7 +15,7 @@ export default function Gallery() {
           </p>
         </div>
         <div className="mt-8 sm:mt-6">
-          <GalleryFinal forceEndedForTesting={true} />
+          <GalleryFinal forceEndedForTesting={false} />
         </div>
       </div>
     </section>

@@ -63,50 +63,47 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
     setConfettiKey(Date.now());
   };
 
+  // Use refs to track state across renders
+  const dataFetchedOnce = useRef(false);
+
   // Fetch top gallery assets on component mount
   useEffect(() => {
-    // Immediately fetch assets and trigger a refresh to ensure we have the latest data
-    const fetchInitialData = async () => {
-      await fetchTopAssets();
+    // Only fetch data once on initial mount
+    if (!dataFetchedOnce.current) {
+      const fetchInitialData = async () => {
+        console.log('Initial data fetch on component mount');
+        dataFetchedOnce.current = true;
+        await fetchTopAssets();
+      };
 
-      // Force a refresh right after to ensure data and winners are fully loaded
-      console.log(
-        'Performing immediate follow-up refresh to ensure data is loaded'
-      );
-      await handleRefresh();
-    };
-
-    fetchInitialData();
-
-    // Additional safety refresh with more delay as a backup
-    const initialLoadTimeout = setTimeout(() => {
-      console.log('Performing backup refresh to ensure data is loaded');
-      handleRefresh();
-    }, 2000);
+      fetchInitialData();
+    }
 
     // Check if contest has ended
     const now = new Date();
     const hasEnded = forceEndedForTesting || now > contestEndDate;
-    console.log('Contest end date check:', {
+    setIsContestEnded(hasEnded);
+    console.log('Contest status check:', {
       now: now.toISOString(),
       contestEndDate: contestEndDate.toISOString(),
       hasEnded,
       forceEndedForTesting
     });
-    setIsContestEnded(hasEnded);
 
-    // Set up auto-refresh every 60 seconds if not in contest ended mode
-    const refreshInterval = setInterval(() => {
-      if (!hasEnded) {
-        console.log('Auto-refreshing gallery assets');
+    // Set up auto-refresh every 60 seconds ONLY if contest is still active
+    let refreshInterval: NodeJS.Timeout | null = null;
+    if (!hasEnded) {
+      refreshInterval = setInterval(() => {
+        console.log('Auto-refreshing gallery assets (60s interval)');
         fetchTopAssets();
-      }
-    }, 60000); // 60 seconds
+      }, 60000); // 60 seconds
+    }
 
-    // Clean up interval and timeout on component unmount
+    // Clean up interval on component unmount
     return () => {
-      clearInterval(refreshInterval);
-      clearTimeout(initialLoadTimeout);
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
     };
   }, [forceEndedForTesting]);
 
@@ -164,10 +161,20 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       );
       setAssets(data);
 
+      // Always re-check contest end status for accurate winner determination
+      const now = new Date();
+      const hasEnded = forceEndedForTesting || now > contestEndDate;
+
+      // Update the contest ended state if needed
+      if (hasEnded !== isContestEnded) {
+        console.log('Updating contest ended state to:', hasEnded);
+        setIsContestEnded(hasEnded);
+      }
+
       // If contest has ended, find the winning asset(s)
       console.log(
-        'Checking for winners - isContestEnded:',
-        isContestEnded,
+        'Checking for winners - hasEnded:',
+        hasEnded,
         'forceEndedForTesting:',
         forceEndedForTesting,
         'data.length:',
@@ -197,7 +204,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
             setMaxLikesCount(0);
           }
         }
-      } else if (isContestEnded && data.length > 0) {
+      } else if (hasEnded && data.length > 0) {
         // First we need to get the likes count for all assets
         const likesPromises = data.map(async (asset: GalleryItem) => {
           if (!asset.id) return { asset, likesCount: 0 };
@@ -240,18 +247,9 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
 
   // Handle refreshing the gallery
   const handleRefresh = async () => {
-    console.log('handleRefresh called - refreshing gallery data');
+    console.log('Manual refresh requested by user');
     setIsRefreshing(true);
     await fetchTopAssets();
-
-    // Force checking for contest ended state
-    const now = new Date();
-    const hasEnded = forceEndedForTesting || now > contestEndDate;
-    if (hasEnded && winningAssets.length === 0) {
-      console.log('Contest ended but no winners - forcing refresh');
-      await fetchTopAssets(); // Try one more time
-    }
-
     setIsRefreshing(false);
   };
 
@@ -259,8 +257,13 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const handleToggleLike = async (asset: GalleryItem) => {
     if (!asset.id) return;
 
+    // Always check current contest status before allowing votes
+    const now = new Date();
+    const hasEnded =
+      forceEndedForTesting || now > contestEndDate || isContestEnded;
+
     // If contest has ended, don't allow new votes
-    if (isContestEnded) {
+    if (hasEnded) {
       console.log('Voting has ended! The contest is complete.');
       alert('Voting has ended! The contest is complete.');
       return;
@@ -448,23 +451,31 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
     }
   };
 
-  // Add an effect to detect when we have assets but no winners in contest-ended mode
+  // Track if we've already tried a retry for winners
+  const hasTriedWinnerRetry = useRef(false);
+
+  // Only try one retry for contest-ended mode if needed
   useEffect(() => {
+    // Re-check contest end status every time this effect runs
+    const now = new Date();
+    const hasEnded = forceEndedForTesting || now > contestEndDate;
+
     if (
-      (isContestEnded || forceEndedForTesting) &&
+      (hasEnded || isContestEnded) &&
       assets.length > 0 &&
-      winningAssets.length === 0
+      winningAssets.length === 0 &&
+      !hasTriedWinnerRetry.current
     ) {
-      console.log(
-        'Contest ended but no winners determined yet. Forcing refresh...'
-      );
-      handleRefresh();
+      console.log('Contest ended but no winners yet - trying one final fetch');
+      hasTriedWinnerRetry.current = true;
+      fetchTopAssets();
     }
   }, [
     isContestEnded,
     forceEndedForTesting,
     assets.length,
-    winningAssets.length
+    winningAssets.length,
+    contestEndDate
   ]);
 
   // Show loading animation while fetching assets
@@ -575,9 +586,11 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
         GenTube.ai Contest Gallery
       </h1>
 
-      {/* Contest Status Message */}
+      {/* Contest Status Message - evaluate contest end directly to ensure consistency */}
       <div className="text-center mb-6">
-        {isContestEnded ? (
+        {isContestEnded ||
+        forceEndedForTesting ||
+        new Date() > contestEndDate ? (
           <div className="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg max-w-3xl mx-auto relative overflow-hidden">
             {/* One-time confetti explosion animation */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -701,30 +714,34 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
         )}
       </div>
 
-      {/* Refresh button */}
-      <div className="text-center mb-4">
-        <button
-          onClick={handleRefresh}
-          className="text-sm text-blue-500 hover:text-blue-700 underline"
-          disabled={isRefreshing}
-        >
-          {isRefreshing ? (
-            <span className="flex items-center justify-center">
-              <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
-              Refreshing...
-            </span>
-          ) : (
-            'Refresh Gallery'
-          )}
-        </button>
-        <span className="text-xs text-gray-500 ml-2">
-          (Showing top 10 assets by hearts)
-        </span>
-      </div>
+      {/* Refresh button - only show during active contest */}
+      {!(isContestEnded || forceEndedForTesting || new Date() > contestEndDate) && (
+        <div className="text-center mb-4">
+          <button
+            onClick={handleRefresh}
+            className="text-sm text-blue-500 hover:text-blue-700 underline"
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <span className="flex items-center justify-center">
+                <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-primary rounded-full mr-2"></div>
+                Refreshing...
+              </span>
+            ) : (
+              'Refresh Gallery'
+            )}
+          </button>
+          <span className="text-xs text-gray-500 ml-2">
+            (Showing top 10 assets by hearts)
+          </span>
+        </div>
+      )}
 
-      {/* Asset Grid */}
+      {/* Asset Grid - evaluate contest end directly to ensure consistency */}
       {assets.length > 0 ? (
-        isContestEnded ? (
+        isContestEnded ||
+        forceEndedForTesting ||
+        new Date() > contestEndDate ? (
           /* Contest ended display - show only winning assets */
           <div
             className={`flex ${winningAssets.length > 1 ? 'flex-row flex-wrap justify-center' : 'justify-center'} gap-4 max-w-6xl mx-auto px-4`}
