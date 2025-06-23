@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { FaHeart, FaShare, FaExternalLinkAlt, FaCrown, FaTrophy, FaMedal, FaAward } from 'react-icons/fa';
+import {
+  FaHeart,
+  FaShare,
+  FaExternalLinkAlt,
+  FaCrown,
+  FaTrophy,
+  FaMedal,
+  FaAward
+} from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
 import { useRouter } from 'next/navigation';
 import Modal from '@/components/ui/Modal';
@@ -26,7 +34,9 @@ interface GalleryFinalProps {
   forceEndedForTesting?: boolean;
 }
 
-const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = false }) => {
+const GalleryFinal: React.FC<GalleryFinalProps> = ({
+  forceEndedForTesting = false
+}) => {
   const [assets, setAssets] = useState<GalleryItem[]>([]);
   const [assetLikes, setAssetLikes] = useState<{
     [key: string]: AssetLikeInfo;
@@ -42,29 +52,49 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
   const router = useRouter();
 
   // State for contest end
-  const contestEndDate = new Date(
-    process.env.CONTEST_END_DATE || '2025-06-20T23:59:59'
-  );
+  const contestEndDate = new Date('2025-06-20T23:59:59');
   const [isContestEnded, setIsContestEnded] = useState(false);
   const [winningAssets, setWinningAssets] = useState<GalleryItem[]>([]);
   const [maxLikesCount, setMaxLikesCount] = useState(0);
+  const [confettiKey, setConfettiKey] = useState(Date.now()); // Key for confetti animation reset
+
+  // Regenerate confetti effect when manually clicked
+  const resetConfetti = () => {
+    setConfettiKey(Date.now());
+  };
 
   // Fetch top gallery assets on component mount
   useEffect(() => {
-    // Immediately fetch assets
-    fetchTopAssets();
+    // Immediately fetch assets and trigger a refresh to ensure we have the latest data
+    const fetchInitialData = async () => {
+      await fetchTopAssets();
+
+      // Force a refresh right after to ensure data and winners are fully loaded
+      console.log(
+        'Performing immediate follow-up refresh to ensure data is loaded'
+      );
+      await handleRefresh();
+    };
+
+    fetchInitialData();
+
+    // Additional safety refresh with more delay as a backup
+    const initialLoadTimeout = setTimeout(() => {
+      console.log('Performing backup refresh to ensure data is loaded');
+      handleRefresh();
+    }, 2000);
 
     // Check if contest has ended
     const now = new Date();
     const hasEnded = forceEndedForTesting || now > contestEndDate;
-    console.log('Contest end date check:', { 
-      now: now.toISOString(), 
-      contestEndDate: contestEndDate.toISOString(), 
+    console.log('Contest end date check:', {
+      now: now.toISOString(),
+      contestEndDate: contestEndDate.toISOString(),
       hasEnded,
       forceEndedForTesting
     });
     setIsContestEnded(hasEnded);
-    
+
     // Set up auto-refresh every 60 seconds if not in contest ended mode
     const refreshInterval = setInterval(() => {
       if (!hasEnded) {
@@ -72,9 +102,12 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
         fetchTopAssets();
       }
     }, 60000); // 60 seconds
-    
-    // Clean up interval on component unmount
-    return () => clearInterval(refreshInterval);
+
+    // Clean up interval and timeout on component unmount
+    return () => {
+      clearInterval(refreshInterval);
+      clearTimeout(initialLoadTimeout);
+    };
   }, [forceEndedForTesting]);
 
   // Fetch asset likes for all assets
@@ -114,6 +147,9 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
 
   // Fetch top gallery assets
   const fetchTopAssets = async () => {
+    console.log(
+      'fetchTopAssets called - loading assets and determining winners'
+    );
     setIsLoading(true);
     try {
       const response = await fetch('/api/getTopGalleryAssets');
@@ -122,22 +158,46 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
       }
 
       const data = await response.json();
+      console.log(
+        'Received assets data:',
+        data.length > 0 ? `${data.length} assets` : 'no assets'
+      );
       setAssets(data);
 
       // If contest has ended, find the winning asset(s)
-      console.log('fetchTopAssets - isContestEnded:', isContestEnded, 'data.length:', data.length);
-      
+      console.log(
+        'Checking for winners - isContestEnded:',
+        isContestEnded,
+        'forceEndedForTesting:',
+        forceEndedForTesting,
+        'data.length:',
+        data.length
+      );
+
       // Always create sample winning assets for testing when contest is ended
       if (forceEndedForTesting) {
         console.log('FORCING TEST WINNERS with data:', data);
         // Create dummy winners for testing if we have data
         if (data.length > 0) {
-          // Use first asset as a winner for testing
-          setWinningAssets([data[0]]);
-          setMaxLikesCount(999);
+          // Use first asset as a winner for testing but get actual like count
+          const testWinner = data[0];
+          setWinningAssets([testWinner]);
+
+          // Fetch actual likes count for the test winner
+          if (testWinner.id) {
+            const likeResponse = await fetch(
+              `/api/getAssetLikes?assetId=${testWinner.id}`
+            );
+            const likeInfo = await likeResponse.json();
+            setMaxLikesCount(likeInfo.likesCount || 0);
+            console.log(
+              `Using actual like count for test winner: ${likeInfo.likesCount || 0}`
+            );
+          } else {
+            setMaxLikesCount(0);
+          }
         }
-      }
-      else if (isContestEnded && data.length > 0) {
+      } else if (isContestEnded && data.length > 0) {
         // First we need to get the likes count for all assets
         const likesPromises = data.map(async (asset: GalleryItem) => {
           if (!asset.id) return { asset, likesCount: 0 };
@@ -156,7 +216,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
         const assetsWithLikes = await Promise.all(likesPromises);
 
         // Find the maximum likes count
-        const likesValues = assetsWithLikes.map(item => item.likesCount);
+        const likesValues = assetsWithLikes.map((item) => item.likesCount);
         console.log('Like values for all assets:', likesValues);
         const maxLikes = Math.max(...likesValues);
         setMaxLikesCount(maxLikes);
@@ -180,8 +240,18 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
 
   // Handle refreshing the gallery
   const handleRefresh = async () => {
+    console.log('handleRefresh called - refreshing gallery data');
     setIsRefreshing(true);
     await fetchTopAssets();
+
+    // Force checking for contest ended state
+    const now = new Date();
+    const hasEnded = forceEndedForTesting || now > contestEndDate;
+    if (hasEnded && winningAssets.length === 0) {
+      console.log('Contest ended but no winners - forcing refresh');
+      await fetchTopAssets(); // Try one more time
+    }
+
     setIsRefreshing(false);
   };
 
@@ -378,96 +448,129 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
     }
   };
 
+  // Add an effect to detect when we have assets but no winners in contest-ended mode
+  useEffect(() => {
+    if (
+      (isContestEnded || forceEndedForTesting) &&
+      assets.length > 0 &&
+      winningAssets.length === 0
+    ) {
+      console.log(
+        'Contest ended but no winners determined yet. Forcing refresh...'
+      );
+      handleRefresh();
+    }
+  }, [
+    isContestEnded,
+    forceEndedForTesting,
+    assets.length,
+    winningAssets.length
+  ]);
+
   // Show loading animation while fetching assets
   if (isLoading) {
     return (
       <LoadingAnimation
         size="large"
-        message="Loading top gallery assets..."
+        message={
+          isContestEnded || forceEndedForTesting
+            ? 'And the winner is...'
+            : 'Loading top gallery assets...'
+        }
         fullScreen={false}
       />
     );
   }
 
-  console.log('Rendering GalleryFinal with:', { 
-    isContestEnded, 
+  console.log('Rendering GalleryFinal with:', {
+    isContestEnded,
     winningAssetsCount: winningAssets.length,
     assetsCount: assets.length
   });
-      
+
   return (
     <div>
       {/* Add confetti animation styles */}
       <style jsx global>{`
-        @keyframes confetti-fall {
+        @keyframes confetti-explosion {
           0% {
-            transform: translateY(-100px) rotate(0deg);
+            transform: translate(0, 0) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
             opacity: 1;
           }
           100% {
-            transform: translateY(calc(100vh + 100px)) rotate(720deg);
+            transform: translate(var(--tx), var(--ty)) rotate(var(--r));
             opacity: 0;
           }
         }
-        
-        @keyframes confetti-sway {
-          0% {
-            transform: translateX(-5px);
-          }
-          50% {
-            transform: translateX(5px);
-          }
-          100% {
-            transform: translateX(-5px);
-          }
-        }
-        
+
         .confetti-container {
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          overflow: visible;
           z-index: 0;
         }
-        
+
         .confetti {
           position: absolute;
-          top: -10px;
-          animation: confetti-fall 10s linear infinite, confetti-sway 3s ease-in-out infinite;
+          left: 0;
+          top: 0;
+          transform: translate(-50%, -50%);
+          animation: confetti-explosion 2.5s ease-out forwards;
           z-index: 1;
         }
-        
+
         @keyframes fadeIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
+
         .animate-fadeIn {
           animation: fadeIn 1s ease-out forwards;
         }
-        
+
         .animate-pulse {
           animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
         }
-        
+
         .animate-bounce {
           animation: bounce 2s infinite;
         }
-        
+
         @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
         }
       `}</style>
-      
+
       <h1 className="text-center text-2xl font-bold pt-5 mb-4">
         GenTube.ai Contest Gallery
       </h1>
@@ -476,40 +579,60 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
       <div className="text-center mb-6">
         {isContestEnded ? (
           <div className="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg max-w-3xl mx-auto relative overflow-hidden">
-            {/* Animated celebration confetti overlay */}
+            {/* One-time confetti explosion animation */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="confetti-container">
-                {Array.from({ length: 50 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="confetti"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 5}s`,
-                      backgroundColor: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                      width: `${Math.random() * 0.5 + 0.4}rem`,
-                      height: `${Math.random() * 0.5 + 0.4}rem`,
-                    }}
-                  />
-                ))}
+              <div key={confettiKey} className="confetti-container">
+                {Array.from({ length: 150 }).map((_, i) => {
+                  const hue = Math.random() * 360;
+                  const size = Math.random() * 0.8 + 0.2;
+                  // Shapes: 0 = square, 1 = circle, 2 = triangle
+                  const shape = Math.floor(Math.random() * 3);
+
+                  let style: React.CSSProperties = {
+                    '--tx': `${(Math.random() - 0.5) * 300}px`,
+                    '--ty': `${(Math.random() - 0.5) * 300}px`,
+                    '--r': `${Math.random() * 1080}deg`,
+                    backgroundColor: `hsl(${hue}, 100%, 50%)`,
+                    width: `${size}rem`,
+                    height: `${size}rem`,
+                    animationDelay: `${Math.random() * 0.3}s`
+                  };
+
+                  // Add specific styles for different shapes
+                  if (shape === 1) {
+                    style.borderRadius = '50%'; // Circle
+                  } else if (shape === 2) {
+                    style.backgroundColor = 'transparent';
+                    style.borderBottom = `${size}rem solid hsl(${hue}, 100%, 50%)`;
+                    style.borderLeft = `${size / 2}rem solid transparent`;
+                    style.borderRight = `${size / 2}rem solid transparent`;
+                    style.height = 0;
+                  }
+
+                  return <div key={i} className="confetti" style={style} />;
+                })}
               </div>
             </div>
-            
+
             <div className="flex justify-center mb-4">
               <FaTrophy className="text-yellow-500 text-5xl animate-bounce" />
             </div>
-            
-            <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative">
+
+            <h2
+              className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative cursor-pointer"
+              onClick={resetConfetti} // Reset confetti animation on click
+              title="Click for more confetti!"
+            >
               <span className="relative inline-block">
                 Contest Ended!
                 <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"></span>
               </span>
             </h2>
-            
+
             <p className="mb-4 text-lg">
               Thank you to everyone who participated in our creative contest.
             </p>
-            
+
             {winningAssets.length > 0 && (
               <div className="animate-fadeIn">
                 {winningAssets.length === 1 ? (
@@ -524,10 +647,12 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
                       <span className="text-blue-600 dark:text-blue-300 font-bold px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full">
                         {winningAssets[0].CreatorName || 'Anonymous'}
                       </span>{' '}
-                      for winning with {' '}
+                      for winning with{' '}
                       <span className="inline-flex items-center font-bold">
-                        {maxLikesCount} <FaHeart className="ml-1 text-red-500" />
-                      </span>!
+                        {maxLikesCount}{' '}
+                        <FaHeart className="ml-1 text-red-500" />
+                      </span>
+                      !
                     </p>
                   </div>
                 ) : (
@@ -538,11 +663,13 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
                       <FaMedal className="text-yellow-500 text-2xl ml-2" />
                     </div>
                     <p className="font-medium mb-2 text-lg">
-                      {winningAssets.length}-way tie! Congratulations
-                      to all winners with {' '}
+                      {winningAssets.length}-way tie! Congratulations to all
+                      winners with{' '}
                       <span className="inline-flex items-center font-bold">
-                        {maxLikesCount} <FaHeart className="ml-1 text-red-500" />
-                      </span>!
+                        {maxLikesCount}{' '}
+                        <FaHeart className="ml-1 text-red-500" />
+                      </span>
+                      !
                     </p>
                     <div className="flex flex-wrap justify-center gap-2 mt-3">
                       {winningAssets.map((asset, idx) => (
@@ -609,20 +736,26 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
               >
                 {/* Winner badge with glow effect */}
                 <div className="absolute top-2 left-2 z-10">
-                  <div className="bg-yellow-500 text-white font-bold rounded-full px-3 py-1 text-sm shadow-lg animate-pulse" 
-                       style={{ 
-                         boxShadow: '0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.6), 0 0 45px rgba(234, 179, 8, 0.4)' 
-                       }}>
+                  <div
+                    className="bg-yellow-500 text-white font-bold rounded-full px-3 py-1 text-sm shadow-lg animate-pulse"
+                    style={{
+                      boxShadow:
+                        '0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.6), 0 0 45px rgba(234, 179, 8, 0.4)'
+                    }}
+                  >
                     {winningAssets.length > 1 ? 'Co-Winner!' : 'Winner!'}
                   </div>
                 </div>
 
                 {/* Hearts count badge with highlight */}
                 <div className="absolute top-2 right-2 z-10">
-                  <div className="flex items-center bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full px-3 py-1 text-sm shadow-lg animate-pulse" 
-                       style={{ 
-                         boxShadow: '0 0 10px rgba(239, 68, 68, 0.7), 0 0 20px rgba(239, 68, 68, 0.4)' 
-                       }}>
+                  <div
+                    className="flex items-center bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full px-3 py-1 text-sm shadow-lg animate-pulse"
+                    style={{
+                      boxShadow:
+                        '0 0 10px rgba(239, 68, 68, 0.7), 0 0 20px rgba(239, 68, 68, 0.4)'
+                    }}
+                  >
                     <span className="mr-1 font-bold">{maxLikesCount}</span>
                     <FaHeart className="text-white" />
                   </div>
@@ -649,7 +782,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
                       By: {asset.CreatorName || 'Anonymous'}
                     </p>
                   </div>
-                  
+
                   {/* Prompt with decorative border */}
                   <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 border-blue-500">
                     <p className="font-medium text-sm mb-1">Winning Prompt:</p>
@@ -657,7 +790,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
                       "{asset.Prompt}"
                     </p>
                   </div>
-                  
+
                   {/* Action buttons with gradient */}
                   <div className="flex justify-center mt-5 gap-4">
                     <button
@@ -667,7 +800,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({ forceEndedForTesting = fals
                     >
                       <FaExternalLinkAlt />
                     </button>
-                    
+
                     <button
                       onClick={() => handleShareUrl(asset)}
                       className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full p-3 focus:outline-none transition-all shadow-lg transform hover:scale-105"
