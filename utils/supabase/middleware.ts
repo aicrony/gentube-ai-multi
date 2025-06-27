@@ -62,19 +62,73 @@ export const createClient = (request: NextRequest) => {
 
 export const updateSession = async (request: NextRequest) => {
   try {
-    // This `try/catch` block is only here for the interactive tutorial.
-    // Feel free to remove once you have Supabase connected.
     const { supabase, response } = createClient(request);
+    const pathname = request.nextUrl.pathname;
 
-    // This will refresh session if expired - required for Server Components
-    // https://supabase.com/docs/guides/auth/server-side/nextjs
-    await supabase.auth.getUser();
+    // Check for special paths that should bypass session validation
+    const publicPaths = ['/signin', '/signup', '/', '/gallery'];
+    
+    // Skip validation for public pages, API routes, and static assets
+    const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path + '/'));
+    const isStaticPath = pathname.startsWith('/_next/') || pathname.match(/\.(?:svg|png|jpg|jpeg|gif|webp)$/);
+    
+    try {
+      // Try to get the user - this will refresh the session if valid but expired
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      // If there's an error with the session or no user found, sign them out
+      // But only if this isn't a public path or static asset
+      if ((error || !user) && !isPublicPath && !isStaticPath) {
+        // Don't redirect public routes, API routes or static assets
+        const publicPaths = [
+          '/session-expired',
+          '/signin',
+          '/signup',
+          '/gallery',
+          '/about',
+          '/pricing',
+          '/terms',
+          '/privacy',
+          '/contact',
+          '/faq',
+          '/blog',
+          '/direct-signin',
+          '/direct-home',
+          '/clear-session',
+          '/signin/complete-signout',
+          '/'
+        ];
+        
+        // Check for root path (with or without query parameters) and other public paths
+        const isPublicPathMatch = 
+          pathname === '/' ||
+          publicPaths.some(path => 
+            pathname === path || pathname.startsWith(path + '/')
+          );
+        
+        if (!pathname.startsWith('/api/') && 
+            !pathname.startsWith('/_next/') &&
+            !isPublicPathMatch) {
+          // Create a simple redirect to our dedicated session-expired page
+          const redirectUrl = new URL('/session-expired', request.url);
+          
+          // Preserve the current URL to redirect back after signing in
+          if (pathname !== '/' && !pathname.includes('/signin') && !pathname.includes('/signup')) {
+            redirectUrl.searchParams.set('returnTo', pathname);
+          }
+          
+          return NextResponse.redirect(redirectUrl);
+        }
+      }
+    } catch (sessionError) {
+      console.error('Session refresh error:', sessionError);
+      // Continue with response even if session validation fails
+    }
 
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!
-    // This is likely because you have not set up environment variables.
-    // Check out http://localhost:3000 for Next Steps.
+    console.error('Supabase client creation error:', e);
     return NextResponse.next({
       request: {
         headers: request.headers

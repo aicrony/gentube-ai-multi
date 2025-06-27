@@ -1,3 +1,6 @@
+// Add this line to prevent caching this page
+export const dynamic = 'force-dynamic';
+
 import Logo from '@/components/icons/Logo';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
@@ -22,7 +25,7 @@ export default async function SignIn({
   searchParams
 }: {
   params: { id: string };
-  searchParams: { disable_button: boolean; new_user_prompt?: string };
+  searchParams: { disable_button: boolean; new_user_prompt?: string; message?: string };
 }) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
@@ -51,13 +54,43 @@ export default async function SignIn({
     return redirect(redirectUrl);
   }
 
-  // Check if the user is already logged in and redirect to the account page if so
+  // Check if there's a session expiration message to prevent infinite redirects
+  const hasSessionExpiredMessage = searchParams?.message === 'session_expired';
+  
+  // Create Supabase client
   const supabase = createClient();
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  
+  let user = null;
+  
+  // If there's a session expiration message, we need to immediately clear all auth cookies
+  if (hasSessionExpiredMessage) {
+    // Clear supabase cookies manually
+    const cookieStore = cookies();
+    const authCookies = ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token'];
+    
+    for (const name of authCookies) {
+      cookieStore.delete(name);
+    }
+    
+    // Try to force sign out
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  } else {
+    // Only check auth status if we're not handling an expired session
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      // If we can't get the user, assume no user is logged in
+      user = null;
+    }
+  }
+  
+  // Handle normal auth redirects
   if (user && viewProp !== 'update_password') {
     return redirect('/');
   } else if (!user && viewProp === 'update_password') {
@@ -87,6 +120,20 @@ export default async function SignIn({
               >
                 sign up for your Free Credits
               </a>
+            </p>
+          </div>
+        )}
+        
+        {searchParams.message === 'session_expired' && (
+          <div
+            className="mb-1 p-2 rounded-md border border-orange-500 text-center"
+            style={{
+              backgroundColor: 'var(--error-bg)',
+              color: 'var(--error-text)'
+            }}
+          >
+            <p className="font-medium">
+              Your session has expired. Please sign in again.
             </p>
           </div>
         )}

@@ -53,13 +53,10 @@ module.exports = {
       }
     ];
   },
-  api: {
-    // Configure the body parser for API routes
-    bodyParser: {
-      sizeLimit: '12mb'
-    },
-    // Enable response compression
-    responseLimit: false
+  // API configuration moved to server options in Next.js 14+
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    bodySizeLimit: '12mb'
   },
   experimental: {
     serverComponentsExternalPackages: [
