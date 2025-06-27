@@ -8,7 +8,7 @@ export default function SessionExpiredPage() {
 
   // Aggressive cookie clearing function
   const clearAllCookies = () => {
-    document.cookie.split(';').forEach(cookie => {
+    document.cookie.split(';').forEach((cookie) => {
       const [name] = cookie.trim().split('=');
       if (name) {
         // Set the cookie to expire
@@ -22,27 +22,27 @@ export default function SessionExpiredPage() {
   useEffect(() => {
     const clearSession = async () => {
       if (isClearing) return;
-      
+
       setIsClearing(true);
       setStatus('Clearing session cookies...');
-      
+
       try {
         // First, clear all cookies aggressively
         clearAllCookies();
-        
+
         // Then try the API method
         setStatus('Calling clear session API...');
         await fetch('/api/session/clear')
-          .then(res => res.json())
-          .catch(err => console.error('API call failed:', err));
+          .then((res) => res.json())
+          .catch((err) => console.error('API call failed:', err));
 
-        setStatus('Session cleared');
+        setStatus('Session cleanup needed...');
       } catch (error) {
         console.error('Error clearing session:', error);
         setStatus('Error clearing session, try clicking a button below');
       }
     };
-    
+
     clearSession();
   }, [isClearing]);
 
@@ -55,17 +55,24 @@ export default function SessionExpiredPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">Session Expired</h1>
           <p className="mt-2 text-gray-600">
-            Your session has expired or is invalid. Please sign in again to continue.
+            Your session has expired or is invalid. Please sign in again to
+            continue.
           </p>
           <p className="mt-2 text-sm text-gray-500">{status}</p>
         </div>
-        
+
         <div className="mt-6 space-y-4">
-          <a href="/signin/complete-signout" className="block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none text-center">
-            Sign In
+          <a
+            href="/signin/complete-signout"
+            className="block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none text-center"
+          >
+            Clean-up Session
           </a>
-          
-          <a href="/" className="block w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 focus:outline-none text-center">
+
+          <a
+            href="/"
+            className="block w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 focus:outline-none text-center"
+          >
             Return to Home
           </a>
         </div>
