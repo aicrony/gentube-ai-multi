@@ -60,7 +60,8 @@ export default async function SignIn({
   // Create Supabase client
   const supabase = createClient();
   
-  let user = null;
+  // Initialize user variable
+  let user: any = null;
   
   // If there's a session expiration message, we need to immediately clear all auth cookies
   if (hasSessionExpiredMessage) {
