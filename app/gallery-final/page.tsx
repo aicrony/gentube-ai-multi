@@ -5,7 +5,7 @@ import GalleryFinal from '@/functions/GalleryFinal';
 export default function GalleryFinalPage() {
   // Set to false to use actual contest end date logic
   const forceEndedForTesting = false;
-  
+
   return (
     <section>
       <div className="max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">

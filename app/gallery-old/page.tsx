@@ -11,7 +11,8 @@ export default function GalleryOld() {
             GenTube.ai Gallery (Old Version)
           </h1>
           <p className="max-w-2xl m-auto mt-5 text-xl text-center sm:text-center sm:text-2xl">
-            This is the original gallery view. Check out our new contest gallery at /gallery!
+            This is the original gallery view. Check out our new contest gallery
+            at /gallery!
           </p>
         </div>
         <div className="mt-4 sm:mt-1">

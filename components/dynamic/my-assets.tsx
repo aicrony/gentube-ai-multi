@@ -1473,15 +1473,17 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         <p>
           {activities.length === 0 ? (
             <>
-              No assets found. You may need to {
-                userId ? (
-                  <button onClick={handleRefresh}>
-                    {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
-                  </button>
-                ) : (
-                  <><a href="/signin">sign in</a> to</>
-                )
-              } see your assets.
+              No assets found. You may need to{' '}
+              {userId ? (
+                <button onClick={handleRefresh}>
+                  {isAutoRefreshing ? 'Refresh Now' : 'Refresh Assets'}
+                </button>
+              ) : (
+                <>
+                  <a href="/signin">sign in</a>
+                </>
+              )}{' '}
+              to see your assets.
             </>
           ) : (
             'No assets match your current filters. Try changing or clearing the filters.'

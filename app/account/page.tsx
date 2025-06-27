@@ -38,7 +38,7 @@ export default async function Account() {
         <CreditsForm userId={user.id} />
         {/*<CustomerPortalForm subscription={subscription} />*/}
         <NameForm userName={userDetails?.full_name ?? ''} />
-        <EmailForm userEmail={user.email} />
+        <EmailForm userEmail={user.email} userId={user.id} />
       </div>
     </section>
   );

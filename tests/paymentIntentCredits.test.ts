@@ -201,12 +201,9 @@ describe('Payment Intent Credit Handling', () => {
     );
 
     // Verify payment intent was marked as handled
-    expect(stripe.paymentIntents.update).toHaveBeenCalledWith(
-      'pi_123456',
-      {
-        metadata: { handled_by_checkout: 'true' }
-      }
-    );
+    expect(stripe.paymentIntents.update).toHaveBeenCalledWith('pi_123456', {
+      metadata: { handled_by_checkout: 'true' }
+    });
   });
 
   test('checkout.session.completed for subscription does not add credits directly', async () => {
@@ -244,7 +241,9 @@ describe('Payment Intent Credit Handling', () => {
     await POST(mockRequest);
 
     // Verify manageSubscriptionStatusChange was called
-    const { manageSubscriptionStatusChange } = require('@/utils/supabase/admin');
+    const {
+      manageSubscriptionStatusChange
+    } = require('@/utils/supabase/admin');
     expect(manageSubscriptionStatusChange).toHaveBeenCalledWith(
       'sub_123456',
       'cus_123456',
