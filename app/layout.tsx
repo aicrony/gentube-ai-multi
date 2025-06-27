@@ -13,6 +13,7 @@ import { createClient } from '@/utils/supabase/server';
 import { UserIdProvider } from '@/context/UserIdContext';
 import { UserIpProvider } from '@/context/UserIpContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import SessionRefresh from '@/components/ui/SessionRefresh';
 
 const title = 'Gentube AI Image and Video Generator';
 const description = 'Generate images and videos with artificial intelligence.';
@@ -75,17 +76,19 @@ export default async function RootLayout({
         <UserIdProvider userId={userId}>
           <UserIpProvider>
             <ThemeProvider>
-              <Navbar className="navbar" />
-              <main
-                id="skip"
-                className="min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)] pt-6"
-              >
-                {children}
-              </main>
-              <Footer />
-              <Suspense>
-                <Toaster />
-              </Suspense>
+              <SessionRefresh>
+                <Navbar className="navbar" />
+                <main
+                  id="skip"
+                  className="min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)] pt-6"
+                >
+                  {children}
+                </main>
+                <Footer />
+                <Suspense>
+                  <Toaster />
+                </Suspense>
+              </SessionRefresh>
             </ThemeProvider>
           </UserIpProvider>
         </UserIdProvider>
