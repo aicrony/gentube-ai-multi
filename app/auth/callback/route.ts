@@ -17,10 +17,15 @@ export async function GET(request: NextRequest) {
     // TODO: Email address confirmations are turned off in Supabase, so we need to send a success message regardless of true confirmation
     if (error) {
       return NextResponse.redirect(
+        // getErrorRedirect(
+        //   `${requestUrl.origin}/signin`,
+        //   error.name,
+        //   "Sorry, we weren't able to log you in. Please try again."
+        // )
         getErrorRedirect(
           `${requestUrl.origin}/signin`,
           error.name,
-          "Sorry, we weren't able to log you in. Please try again."
+          'Please try to login now.'
         )
       );
     }
