@@ -7,8 +7,8 @@ export async function middleware(request: NextRequest) {
 
   // Comment out the following function to enable Preview apps in Vercel
   if (
-    request.nextUrl.hostname.endsWith('.vercel.app')
-    // || request.nextUrl.hostname === 'test.gentube.ai'
+    request.nextUrl.hostname.endsWith('.vercel.app') ||
+    request.nextUrl.hostname === 'test.gentube.ai'
   ) {
     return NextResponse.redirect(mainUrl);
   }
@@ -30,20 +30,19 @@ export async function middleware(request: NextRequest) {
   // Skip session validation completely for key paths
   if (
     // Session management paths
-    pathname.startsWith('/session-expired') || 
-    pathname.startsWith('/clear-session') || 
+    pathname.startsWith('/session-expired') ||
+    pathname.startsWith('/clear-session') ||
     pathname.startsWith('/direct-signin') ||
     pathname.startsWith('/direct-home') ||
     pathname.startsWith('/signin/complete-signout') ||
     pathname.startsWith('/auth/callback') ||
-    
     // API paths
     pathname.startsWith('/api/session/clear') ||
     pathname.startsWith('/api/session/force-clear') ||
     pathname.startsWith('/api/test-session') ||
-    
     // Public pages
-    pathname === '/' || pathname.startsWith('/?') ||
+    pathname === '/' ||
+    pathname.startsWith('/?') ||
     pathname.startsWith('/signin') ||
     pathname.startsWith('/signup') ||
     pathname.startsWith('/gallery') ||
