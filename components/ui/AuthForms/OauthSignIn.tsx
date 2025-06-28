@@ -3,9 +3,7 @@
 import Button from '@/components/ui/Button';
 import { signInWithOAuth } from '@/utils/auth-helpers/client';
 import { type Provider } from '@supabase/supabase-js';
-import { Mail } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 type OAuthProviders = {
   name: Provider;
@@ -14,17 +12,8 @@ type OAuthProviders = {
 };
 
 export default function OauthSignIn() {
-  const searchParams = useSearchParams();
-  const [shouldShowGoogle, setShouldShowGoogle] = useState(false);
-  
-  // Check if the google parameter is present in the URL
-  useEffect(() => {
-    const googleParam = searchParams?.get('google');
-    setShouldShowGoogle(googleParam === 'true');
-  }, [searchParams]);
-  
-  // Only include Google provider if the URL parameter is present
-  const oAuthProviders: OAuthProviders[] = shouldShowGoogle ? [
+  // Always show Google provider now that testing is complete
+  const oAuthProviders: OAuthProviders[] = [
     {
       name: 'google',
       displayName: 'Google',
@@ -37,7 +26,7 @@ export default function OauthSignIn() {
         </svg>
       )
     }
-  ] : [];
+  ];
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,10 +36,7 @@ export default function OauthSignIn() {
     setIsSubmitting(false);
   };
 
-  // If no providers are available, don't render anything
-  if (oAuthProviders.length === 0) {
-    return null;
-  }
+  // We always have at least one provider now
   
   return (
     <div className="mt-8">
