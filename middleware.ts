@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/signin/complete-signout') ||
     pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/auth/reset_password') ||
+    pathname.startsWith('/verify') ||
     // API paths
     pathname.startsWith('/api/session/clear') ||
     pathname.startsWith('/api/session/force-clear') ||
