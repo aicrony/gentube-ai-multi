@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/direct-signin') ||
     pathname.startsWith('/direct-home') ||
     pathname.startsWith('/signin/complete-signout') ||
+    pathname.startsWith('/auth/callback') ||
     
     // API paths
     pathname.startsWith('/api/session/clear') ||

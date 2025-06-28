@@ -96,7 +96,8 @@ export const updateSession = async (request: NextRequest) => {
           '/direct-home',
           '/clear-session',
           '/signin/complete-signout',
-          '/'
+          '/',
+          '/auth/callback'
         ];
         
         // Check for root path (with or without query parameters) and other public paths
