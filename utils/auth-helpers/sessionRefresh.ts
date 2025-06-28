@@ -29,7 +29,8 @@ export function useSessionRefresh(refreshInterval = 60000) {
           '/direct-home',
           '/clear-session',
           '/signin/complete-signout',
-          '/auth/callback'
+          '/auth/callback',
+          '/auth/reset_password'
         ];
         
         // Check if current path is in the public paths list
