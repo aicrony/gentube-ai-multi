@@ -178,6 +178,8 @@ export default async function SignIn({
           {viewProp !== 'update_password' &&
             viewProp !== 'signup' &&
             allowOauth && (
+              // The OauthSignIn component will check for the google=true parameter
+              // and only render the Google button if it's present
               <>
                 <Separator text="Third-party sign-in" />
                 <OauthSignIn />
