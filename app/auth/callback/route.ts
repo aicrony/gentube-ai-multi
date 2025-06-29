@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
         //   error.name,
         //   "Sorry, we weren't able to log you in. Please try again."
         // )
-        getErrorRedirect(
-          `${requestUrl.origin}/signin`,
-          error.name,
-          'Please try to login now.'
+        getStatusRedirect(
+          `${requestUrl.origin}/gallery`,
+          'Success!',
+          'Please sign in.'
         )
       );
     }
