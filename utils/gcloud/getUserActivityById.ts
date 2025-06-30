@@ -48,12 +48,15 @@ export async function getUserActivityById(id: string): Promise<UserActivity | nu
     if (entity.UserId) {
       try {
         // Dynamically import to avoid circular dependency
-        const { getCreatorName } = await import('./getUserCreator');
-        creatorName = await getCreatorName(entity.UserId);
+        const { getUserCreator } = await import('./getUserCreator');
+        creatorName = await getUserCreator(entity.UserId);
       } catch (error) {
         console.error('Error fetching creator name:', error);
       }
     }
+    
+    // If no creator name was found, use 'Anonymous'
+    creatorName = creatorName || 'Anonymous';
 
     // Map the entity to the UserActivity interface
     const activity: UserActivity = {
@@ -64,7 +67,7 @@ export async function getUserActivityById(id: string): Promise<UserActivity | nu
       AssetType: entity.AssetType || 'unknown',
       DateTime: entity.DateTime,
       UserId: entity.UserId || null,
-      CreatorName: creatorName,
+      CreatorName: creatorName || 'Anonymous',
       SubscriptionTier: entity.SubscriptionTier || 0
     };
 
