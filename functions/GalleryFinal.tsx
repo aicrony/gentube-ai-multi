@@ -66,6 +66,22 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const dataFetchedOnce = useRef(false);
   const singleAssetFetched = useRef(false);
 
+  // Reset state when URL params change
+  useEffect(() => {
+    // When assetId is null (regular gallery view), reset state if needed
+    if (!assetId && singleAssetFetched.current) {
+      console.log('Returning to main gallery view, resetting state');
+      singleAssetFetched.current = false;
+      setSingleAsset(null);
+      
+      // Force re-fetch of data if returning to main gallery
+      if (!dataFetchedOnce.current || !assets.length) {
+        dataFetchedOnce.current = false;
+        fetchTopAssets();
+      }
+    }
+  }, [assetId]);
+
   // Fetch single asset by ID if provided in URL
   useEffect(() => {
     if (assetId && !singleAssetFetched.current) {
