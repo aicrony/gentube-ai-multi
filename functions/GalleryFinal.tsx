@@ -11,9 +11,10 @@ import {
   FaAward
 } from 'react-icons/fa';
 import { useUserId } from '@/context/UserIdContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Modal from '@/components/ui/Modal';
 import LoadingAnimation from '@/components/ui/LoadingAnimation';
+import { isContestWinner } from '@/utils/contestWinners';
 
 interface GalleryItem {
   id?: string;
@@ -44,32 +45,74 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const [isLiking, setIsLiking] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [singleAsset, setSingleAsset] = useState<GalleryItem | null>(null);
+  const [isAssetLoading, setIsAssetLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentModalIndex, setCurrentModalIndex] = useState(0);
   const [modalMediaUrl, setModalMediaUrl] = useState('');
   const [isFullScreenModal, setIsFullScreenModal] = useState(false);
   const userId = useUserId();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const assetId = searchParams?.get('id');
 
   // State for contest end
   const contestEndDate = new Date('2025-06-30T00:00:00');
   const [isContestEnded, setIsContestEnded] = useState(false);
   const [winningAssets, setWinningAssets] = useState<GalleryItem[]>([]);
   const [maxLikesCount, setMaxLikesCount] = useState(0);
-  const [confettiKey, setConfettiKey] = useState(Date.now()); // Key for confetti animation reset
-
-  // Regenerate confetti effect when manually clicked
-  const resetConfetti = () => {
-    setConfettiKey(Date.now());
-  };
 
   // Use refs to track state across renders
   const dataFetchedOnce = useRef(false);
+  const singleAssetFetched = useRef(false);
+
+  // Fetch single asset by ID if provided in URL
+  useEffect(() => {
+    if (assetId && !singleAssetFetched.current) {
+      const fetchSingleAsset = async () => {
+        console.log(`Fetching single asset with ID: ${assetId}`);
+        singleAssetFetched.current = true;
+        setIsAssetLoading(true);
+        try {
+          const response = await fetch(
+            `/api/getUserActivityById?id=${assetId}`
+          );
+          if (!response.ok) {
+            throw new Error('Failed to fetch asset');
+          }
+          const asset = await response.json();
+          console.log('Received single asset:', asset);
+          setSingleAsset(asset);
+
+          // If this is a contest winner, force the contest ended mode
+          if (isContestWinner(assetId)) {
+            console.log('This asset is a contest winner');
+            setIsContestEnded(true);
+            setWinningAssets([asset]);
+            // Get likes count for this asset
+            if (asset.id) {
+              const likeResponse = await fetch(
+                `/api/getAssetLikes?assetId=${asset.id}`
+              );
+              const likeInfo = await likeResponse.json();
+              setMaxLikesCount(likeInfo.likesCount || 0);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching single asset:', error);
+        } finally {
+          setIsAssetLoading(false);
+        }
+      };
+
+      fetchSingleAsset();
+    }
+  }, [assetId]);
 
   // Fetch top gallery assets on component mount
   useEffect(() => {
-    // Only fetch data once on initial mount
-    if (!dataFetchedOnce.current) {
+    // Only fetch data once on initial mount if not viewing a single asset
+    if (!dataFetchedOnce.current && !assetId) {
       const fetchInitialData = async () => {
         console.log('Initial data fetch on component mount');
         dataFetchedOnce.current = true;
@@ -77,6 +120,10 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       };
 
       fetchInitialData();
+    } else if (assetId) {
+      // If we're showing a single asset by ID, mark the data as fetched
+      // to prevent unnecessary gallery loading
+      dataFetchedOnce.current = true;
     }
 
     // Check if contest has ended
@@ -90,13 +137,13 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       forceEndedForTesting
     });
 
-    // Set up auto-refresh every 60 seconds ONLY if contest is still active
+    // Set up auto-refresh every 10 minutes ONLY if contest is still active
     let refreshInterval: NodeJS.Timeout | null = null;
     if (!hasEnded) {
       refreshInterval = setInterval(() => {
-        console.log('Auto-refreshing gallery assets (60s interval)');
+        console.log('Auto-refreshing gallery assets (10 min interval)');
         fetchTopAssets();
-      }, 60000); // 60 seconds
+      }, 600000); // 10 minutes
     }
 
     // Clean up interval on component unmount
@@ -479,12 +526,12 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   ]);
 
   // Show loading animation while fetching assets
-  if (isLoading) {
+  if ((isLoading && !singleAsset) || (isAssetLoading && !singleAsset)) {
     return (
       <LoadingAnimation
         size="large"
         message={
-          isContestEnded || forceEndedForTesting
+          (isContestEnded || forceEndedForTesting) && !singleAsset
             ? 'And the winner is...'
             : 'Loading top gallery assets...'
         }
@@ -496,136 +543,81 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   console.log('Rendering GalleryFinal with:', {
     isContestEnded,
     winningAssetsCount: winningAssets.length,
-    assetsCount: assets.length
+    assetsCount: assets.length,
+    singleAssetId: assetId,
+    hasSingleAsset: !!singleAsset
   });
+
+  // Determine what content to show
+  const showSingleAsset = !!singleAsset;
+  const showWinners =
+    isContestEnded || forceEndedForTesting || new Date() > contestEndDate;
+  const showRegularGallery =
+    !showSingleAsset && !showWinners && assets.length > 0;
 
   return (
     <div>
       {/* Add confetti animation styles */}
-      <style jsx global>{`
-        @keyframes confetti-explosion {
-          0% {
-            transform: translate(0, 0) rotate(0deg);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          100% {
-            transform: translate(var(--tx, 0px), var(--ty, 0px))
-              rotate(var(--r, 0deg));
-            opacity: 0;
-          }
-        }
 
-        .confetti-container {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-          overflow: visible;
-          z-index: 0;
-        }
-
-        .confetti {
-          position: absolute;
-          left: 0;
-          top: 0;
-          transform: translate(-50%, -50%);
-          animation: confetti-explosion 2.5s ease-out forwards;
-          z-index: 1;
-        }
-
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 1s ease-out forwards;
-        }
-
-        .animate-pulse {
-          animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        .animate-bounce {
-          animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-      `}</style>
-
-      <h1 className="text-center text-2xl font-bold pt-5 mb-4">
-        GenTube.ai Contest Gallery
-      </h1>
+      {!showSingleAsset && (
+        <h1 className="text-center text-2xl font-bold pt-5 mb-4">
+          GenTube.ai Contest Gallery
+        </h1>
+      )}
 
       {/* Contest Status Message - evaluate contest end directly to ensure consistency */}
       <div className="text-center mb-6">
-        {isContestEnded ||
-        forceEndedForTesting ||
-        new Date() > contestEndDate ? (
+        {/* Show single asset view if we have a specific asset to display */}
+        {showSingleAsset ? (
           <div className="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg max-w-3xl mx-auto relative overflow-hidden">
-            {/* One-time confetti explosion animation */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div key={confettiKey} className="confetti-container">
-                {Array.from({ length: 150 }).map((_, i) => {
-                  const hue = Math.random() * 360;
-                  const size = Math.random() * 0.8 + 0.2;
-                  // Shapes: 0 = square, 1 = circle, 2 = triangle
-                  const shape = Math.floor(Math.random() * 3);
-
-                  let style = {
-                    '--tx': `${(Math.random() - 0.5) * 300}px`,
-                    '--ty': `${(Math.random() - 0.5) * 300}px`,
-                    '--r': `${Math.random() * 1080}deg`,
-                    backgroundColor: `hsl(${hue}, 100%, 50%)`,
-                    width: `${size}rem`,
-                    height: `${size}rem`,
-                    animationDelay: `${Math.random() * 0.3}s`
-                  } as React.CSSProperties;
-
-                  // Add specific styles for different shapes
-                  if (shape === 1) {
-                    style.borderRadius = '50%'; // Circle
-                  } else if (shape === 2) {
-                    style.backgroundColor = 'transparent';
-                    style.borderBottom = `${size}rem solid hsl(${hue}, 100%, 50%)`;
-                    style.borderLeft = `${size / 2}rem solid transparent`;
-                    style.borderRight = `${size / 2}rem solid transparent`;
-                    style.height = 0;
-                  }
-
-                  return <div key={i} className="confetti" style={style} />;
-                })}
+            {isContestWinner(assetId as string) && (
+              <div className="flex justify-center mb-4">
+                <FaTrophy className="text-yellow-500 text-5xl animate-bounce" />
               </div>
+            )}
+
+            {isContestWinner(assetId as string) && (
+              <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative">
+                {`${isContestWinner(assetId as string)?.month} ${isContestWinner(assetId as string)?.year} Contest Winner!`}
+              </h2>
+            )}
+
+            {isContestWinner(assetId as string) && (
+              <p className="mb-4 text-lg">
+                {isContestWinner(assetId as string)?.message}
+              </p>
+            )}
+
+            <div className="py-3 px-4 bg-white/30 dark:bg-black/30 rounded-lg shadow-inner">
+              <div className="aspect-video bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center overflow-hidden shadow-inner mb-4">
+                <img
+                  src={singleAsset?.CreatedAssetUrl}
+                  alt={`Asset by ${singleAsset?.CreatorName || 'Anonymous'}`}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              <div className="flex justify-center items-center mb-2">
+                <h3 className="text-xl font-bold">
+                  By: {singleAsset?.CreatorName || 'Anonymous'}
+                </h3>
+              </div>
+
+              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 border-blue-500">
+                <p className="font-medium text-sm mb-1">Prompt:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 italic">
+                  "{singleAsset?.Prompt}"
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : isContestEnded ||
+          forceEndedForTesting ||
+          new Date() > contestEndDate ? (
+          <div className="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg max-w-3xl mx-auto relative overflow-hidden">
+            {/* Static celebration emojis */}
+            <div className="text-center mb-6 text-3xl">
+              🎉 🏆 🎊 🥇 ⭐ 🎯 🎖️ 🌟 🏅
             </div>
 
             <div className="flex justify-center mb-4">
@@ -633,9 +625,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
             </div>
 
             <h2
-              className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative cursor-pointer"
-              onClick={resetConfetti} // Reset confetti animation on click
-              title="Click for more confetti!"
+              className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative"
             >
               <span className="relative inline-block">
                 Contest Ended!
@@ -645,6 +635,13 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
 
             <p className="mb-4 text-lg">
               Thank you to everyone who participated in our creative contest.
+            </p>
+            <p className="mb-4 text-lg">
+              Our next contest topic will be, "Anime."
+            </p>
+            <p className="mb-4 text-lg">
+              <a href={'/'}>Start prompting now</a> to get ahead of the
+              competition and win 500 credits in July!
             </p>
 
             {winningAssets.length > 0 && (
@@ -743,7 +740,8 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       )}
 
       {/* Asset Grid - evaluate contest end directly to ensure consistency */}
-      {assets.length > 0 ? (
+      {/* Only show the gallery grid if we're not viewing a single asset */}
+      {!showSingleAsset && assets.length > 0 && !assetId ? (
         isContestEnded ||
         forceEndedForTesting ||
         new Date() > contestEndDate ? (
@@ -952,9 +950,13 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
           </div>
         )
       ) : (
-        <div className="text-center py-10">
-          <p className="text-gray-500">No gallery assets found.</p>
-        </div>
+        !showSingleAsset &&
+        !assetId &&
+        !isLoading && (
+          <div className="text-center py-10">
+            <p className="text-gray-500">No gallery assets found.</p>
+          </div>
+        )
       )}
 
       {/* Modal for viewing assets */}

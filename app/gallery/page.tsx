@@ -1,8 +1,10 @@
 'use client';
 
 import GalleryFinal from '@/functions/GalleryFinal';
+import { useSearchParams } from 'next/navigation';
 
 export default function Gallery() {
+  // The GalleryFinal component will handle the ID parameter internally
   return (
     <section>
       <div className="max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
