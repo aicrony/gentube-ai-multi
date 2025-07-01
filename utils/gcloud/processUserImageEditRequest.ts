@@ -12,7 +12,7 @@ const datastore = new Datastore({
 
 const kind = 'UserCredits';
 const namespace = 'GenTube';
-const defaultCredits = process.env.FREE_CREDITS_VALUE;
+const defaultCredits = process.env.NEXT_PUBLIC_FREE_CREDITS_VALUE;
 
 export async function processUserImageEditRequest(
   userId: string | string[] | undefined,
@@ -57,7 +57,10 @@ export async function processUserImageEditRequest(
     console.log('getUserCredits response: ', userResponse.credits);
   } catch (error) {
     console.log('Error fetching user data: ', error);
-    userResponse.credits = parseInt(process.env.FREE_CREDITS_VALUE || '0', 10);
+    userResponse.credits = parseInt(
+      process.env.NEXT_PUBLIC_FREE_CREDITS_VALUE || '0',
+      10
+    );
   }
 
   console.log(
@@ -135,7 +138,10 @@ export async function processUserImageEditRequest(
 
     // We should never reach this code if credits are insufficient
     // But as an extra safety check, only deduct credits if sufficient
-    if (userResponse.credits !== undefined && userResponse.credits >= creditCost) {
+    if (
+      userResponse.credits !== undefined &&
+      userResponse.credits >= creditCost
+    ) {
       userResponse.credits -= creditCost;
     } else {
       // This is a safety fallback - we should have already returned with an error

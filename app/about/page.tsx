@@ -286,7 +286,9 @@ function AboutPageContent() {
               }}
             >
               <h3 className="text-2xl font-bold mb-4">Free Trial</h3>
-              <p className="text-4xl font-bold mb-6">50 Credits</p>
+              <p className="text-4xl font-bold mb-6">
+                {process.env.NEXT_PUBLIC_FREE_CREDITS_VALUE || '29'} Credits
+              </p>
               <ul className="text-left space-y-2 mb-8">
                 <li>✓ One-time offer for new users</li>
                 <li>✓ Create multiple images</li>
