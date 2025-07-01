@@ -73,7 +73,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
       console.log('Returning to main gallery view, resetting state');
       singleAssetFetched.current = false;
       setSingleAsset(null);
-      
+
       // Force re-fetch of data if returning to main gallery
       if (!dataFetchedOnce.current || !assets.length) {
         dataFetchedOnce.current = false;
@@ -640,17 +640,8 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
               <FaTrophy className="text-yellow-500 text-5xl animate-bounce" />
             </div>
 
-            <h2
-              className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-4 relative"
-            >
-              <span className="relative inline-block">
-                Contest Ended!
-                <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"></span>
-              </span>
-            </h2>
-
             <p className="mb-4 text-lg">
-              Thank you to everyone who participated in our creative contest.
+              Thank you to everyone who participated in our creative contest!
             </p>
             <p className="mb-4 text-lg">
               Our next contest topic will be, "Anime."
