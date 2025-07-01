@@ -50,6 +50,7 @@ interface ModalProps {
   showReorderMode?: boolean;
   setShowReorderMode?: (show: boolean) => void;
   onSubmitImageEdit?: (prompt: string) => Promise<void>;
+  userCredits?: number | null;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -83,7 +84,8 @@ const Modal: React.FC<ModalProps> = ({
   showGalleryInfoPane = false,
   showReorderMode = false,
   setShowReorderMode = () => {},
-  onSubmitImageEdit
+  onSubmitImageEdit,
+  userCredits = null
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
@@ -477,6 +479,13 @@ const Modal: React.FC<ModalProps> = ({
                     setEditError('Please enter edit instructions');
                     return;
                   }
+                  
+                  // Check if user has enough credits (10) before submitting
+                  console.log('User credits in Modal:', userCredits);
+                  if (userCredits !== null && userCredits < 10) {
+                    setEditError('Limit Exceeded - Please proceed to the <a href="/pricing" class="text-blue-400 hover:text-blue-300 underline">Pricing page</a> for more credits.');
+                    return;
+                  }
 
                   if (onSubmitImageEdit) {
                     setIsSubmittingEdit(true);
@@ -508,8 +517,7 @@ const Modal: React.FC<ModalProps> = ({
             </div>
 
             {editError && (
-              <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded">
-                {editError}
+              <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded" dangerouslySetInnerHTML={{ __html: editError }}>
               </div>
             )}
 

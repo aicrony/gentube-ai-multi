@@ -79,6 +79,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const [editPrompt, setEditPrompt] = useState('');
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
   const [editError, setEditError] = useState('');
+  const [userCredits, setUserCredits] = useState<number | null>(null);
   const [autoRefreshTimer, setAutoRefreshTimer] =
     useState<NodeJS.Timeout | null>(null);
   const [autoRefreshStartTime, setAutoRefreshStartTime] = useState<
@@ -238,6 +239,12 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
     return result;
   }, [activities, filters, searchTerm, sortDirection, assetLikes]);
+
+  // Fetch user's credits when component loads
+  useEffect(() => {
+    fetchUserCredits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, userIp]);
 
   // Fetch likes for all displayed assets
   useEffect(() => {
@@ -746,8 +753,29 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   // Enhanced modal open function that takes index and activity reference
+  // Fetch user credits function (reusable)
+  const fetchUserCredits = async () => {
+    if (!userId) return;
+    
+    try {
+      const response = await fetch(`/api/getUserCredits?userId=${userId}&userIp=${userIp || 'none'}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserCredits(data.credits);
+        console.log('User credits fetched:', data.credits);
+      }
+    } catch (error) {
+      console.error('Error fetching user credits:', error);
+    }
+  };
+
   // Toggle the image edit pane in the modal
   const toggleImageEditPane = () => {
+    // If opening the edit pane, fetch latest credit balance
+    if (!showImageEditPane) {
+      fetchUserCredits();
+    }
+    
     setShowImageEditPane(!showImageEditPane);
     if (showImageEditPane) {
       // Clear the edit state when closing the pane
@@ -786,8 +814,57 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         if (result.error) {
           if (result.result === 'LimitExceeded') {
             setEditError(
-              'You need more credits to edit images. Please purchase credits on the pricing page.'
+              'You need at least 10 credits to edit images. <a href="/pricing" class="text-blue-400 hover:text-blue-300 underline">Purchase credits</a> to continue.'
             );
+            // Close the edit pane to show the notification in the same place as success messages
+            setShowImageEditPane(false);
+            
+            // Show a visible notification about insufficient credits
+            const messageDiv = document.createElement('div');
+            messageDiv.innerHTML = '<strong>Insufficient Credits</strong><br />You need at least 10 credits to edit images.';
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.bottom = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.padding = '10px 15px';
+            messageDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+            messageDiv.style.color = 'white';
+            messageDiv.style.borderRadius = '4px';
+            messageDiv.style.zIndex = '1000';
+            messageDiv.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transition = 'opacity 0.3s ease-in-out';
+            
+            // Create a button for purchasing credits
+            const button = document.createElement('button');
+            button.textContent = 'Purchase Credits';
+            button.style.marginTop = '8px';
+            button.style.padding = '5px 10px';
+            button.style.backgroundColor = '#3498db';
+            button.style.border = 'none';
+            button.style.borderRadius = '3px';
+            button.style.color = 'white';
+            button.style.cursor = 'pointer';
+            button.style.display = 'block';
+            button.style.width = '100%';
+            button.addEventListener('click', () => {
+              window.location.href = '/pricing';
+            });
+            
+            messageDiv.appendChild(button);
+            document.body.appendChild(messageDiv);
+            
+            // Fade in
+            setTimeout(() => {
+              messageDiv.style.opacity = '1';
+            }, 10);
+            
+            // Fade out and remove after 8 seconds
+            setTimeout(() => {
+              messageDiv.style.opacity = '0';
+              setTimeout(() => {
+                document.body.removeChild(messageDiv);
+              }, 300);
+            }, 8000);
           } else {
             setEditError(result.error);
           }
@@ -846,6 +923,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   };
 
   const openModalForAsset = (index: number, fullScreen = false) => {
+    // Fetch the latest user credits when opening the modal
+    fetchUserCredits();
+    
     if (index >= 0 && index < filteredAndSortedActivities.length) {
       const activity = filteredAndSortedActivities[index];
       // Always use CreatedAssetUrl for all asset types
@@ -860,6 +940,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   // Original function for backward compatibility - opens the modal by URL
   const openModal = (url: string, fullScreen = false) => {
+    // Fetch the latest user credits when opening the modal
+    fetchUserCredits();
+    
     // Find the index of the asset with this URL (only match on CreatedAssetUrl)
     const index = filteredAndSortedActivities.findIndex(
       (activity) => activity.CreatedAssetUrl === url
@@ -1889,6 +1972,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onToggleImageEditPane={toggleImageEditPane}
           showImageEditPane={showImageEditPane}
           onSubmitImageEdit={handleSubmitImageEdit}
+          userCredits={userCredits}
         />
       )}
     </div>

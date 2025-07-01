@@ -72,7 +72,8 @@ export async function processUserImageEditRequest(
 
   console.log('Check credit count: ', userResponse.credits);
 
-  if (userResponse.credits && userResponse.credits <= 0) {
+  // Check if user has enough credits for image editing (costs 10 credits)
+  if (userResponse.credits === undefined || userResponse.credits < 10) {
     userResponse.result = 'LimitExceeded';
   }
 
@@ -132,10 +133,16 @@ export async function processUserImageEditRequest(
       }
     }
 
-    // Update user credits
-    userResponse.credits && userResponse.credits > 0
-      ? (userResponse.credits -= creditCost)
-      : 0;
+    // We should never reach this code if credits are insufficient
+    // But as an extra safety check, only deduct credits if sufficient
+    if (userResponse.credits !== undefined && userResponse.credits >= creditCost) {
+      userResponse.credits -= creditCost;
+    } else {
+      // This is a safety fallback - we should have already returned with an error
+      userResponse.result = 'LimitExceeded';
+      userResponse.error = true;
+      return userResponse;
+    }
     console.log('UPDATED User Credits: ', userResponse.credits);
     await updateUserCredits(
       userId,

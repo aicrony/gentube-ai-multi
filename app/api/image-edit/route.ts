@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'Credit limit exceeded. You need credits to edit images. Please purchase credits on the pricing page.',
+              'Credit limit exceeded. You need at least 10 credits to edit images. Please purchase credits on the pricing page.',
             result: 'LimitExceeded',
             credits: userResponse.credits
           },
