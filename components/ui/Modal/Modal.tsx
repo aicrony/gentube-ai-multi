@@ -483,7 +483,7 @@ const Modal: React.FC<ModalProps> = ({
                   // Check if user has enough credits (10) before submitting
                   console.log('User credits in Modal:', userCredits);
                   if (userCredits !== null && userCredits < 10) {
-                    setEditError('Limit Exceeded - Please proceed to the <a href="/pricing" class="text-blue-400 hover:text-blue-300 underline">Pricing page</a> for more credits.');
+                    setEditError('limit-exceeded');
                     return;
                   }
 
@@ -517,7 +517,18 @@ const Modal: React.FC<ModalProps> = ({
             </div>
 
             {editError && (
-              <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded" dangerouslySetInnerHTML={{ __html: editError }}>
+              <div className="mt-3 text-xs text-red-400 bg-red-900 bg-opacity-30 p-2 rounded">
+                {editError === 'limit-exceeded' ? (
+                  <>
+                    Limit Exceeded - Please proceed to the{' '}
+                    <a href="/pricing" className="text-blue-400 hover:text-blue-300 underline">
+                      Pricing page
+                    </a>{' '}
+                    for more credits.
+                  </>
+                ) : (
+                  editError
+                )}
               </div>
             )}
 
