@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 
+// Mark this route as dynamic since it uses cookies and request.url
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     // Get URL parameters
@@ -31,3 +34,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(redirect, request.url));
   }
 }
+
+// Explicitly specify that this route should not be statically generated
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;

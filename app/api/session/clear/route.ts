@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 
+// Mark this route as dynamic since it uses cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // Clear all auth cookies server-side
@@ -22,3 +25,7 @@ export async function GET() {
     return NextResponse.json({ success: false, error: 'Failed to clear session' }, { status: 500 });
   }
 }
+
+// Explicitly specify that this route should not be statically generated
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
