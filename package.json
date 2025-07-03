@@ -21,7 +21,9 @@
     "supabase:generate-seed": "npx supabase db dump --data-only -f supabase/seed.sql",
     "supabase:push": "npx supabase db push",
     "supabase:pull": "npx supabase db pull",
-    "test": "npx jest ."
+    "test": "npx jest .",
+    "test:credit-system": "npx jest tests/verify-implementation.test.ts tests/simple-credit.test.ts",
+    "test:coverage": "npx jest --coverage"
   },
   "dependencies": {
     "@fal-ai/client": "^1.2.1",

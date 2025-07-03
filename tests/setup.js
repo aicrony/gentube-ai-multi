@@ -9,5 +9,9 @@ process.env.STRIPE_SECRET_KEY = 'sk_test_123456789';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_123456789';
 process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000';
 
+// Credit system test variables
+process.env.NEXT_PUBLIC_FREE_CREDITS_VALUE = '100';
+process.env.TEST_MODE = 'true';
+
 // This will ensure tests are safe to run in any environment
 console.log('Test environment setup complete - using mock services only');
