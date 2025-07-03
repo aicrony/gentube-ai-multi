@@ -79,7 +79,7 @@ export async function processUserImageEditRequest(
   const creditCost = 10; // Image editing costs more than regular image generation
   
   // Check if user has enough credits for image editing (costs 10 credits)
-  if (userResponse.credits === undefined || userResponse.credits < creditCost) {
+  if (userResponse.credits === undefined || userResponse.credits <= 0 || userResponse.credits < creditCost) {
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
     return userResponse;
@@ -156,7 +156,7 @@ export async function processUserImageEditRequest(
       id: undefined,
       AssetSource: imageUrl, // Store the original image URL as the source
       AssetType: isCompletedImmediately ? 'img' : 'que', // Use 'img' if completed, otherwise 'que'
-      CountedAssetPreviousState: creditCost,
+      CountedAssetPreviousState: previousCredits,
       CountedAssetState: userResponse.credits,
       CreatedAssetUrl: isCompletedImmediately ? completedImageUrl : requestId, // Use the image URL if completed
       DateTime: new Date().toISOString(),

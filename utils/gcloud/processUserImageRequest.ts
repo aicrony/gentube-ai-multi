@@ -94,7 +94,7 @@ export async function processUserImageRequest(
   const creditCost = 6;
   
   // Check if user has enough credits BEFORE making any API calls
-  if (userResponse.credits < creditCost) {
+  if (userResponse.credits <= 0 || userResponse.credits < creditCost) {
     console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
@@ -148,7 +148,7 @@ export async function processUserImageRequest(
       id: undefined,
       AssetSource: '',
       AssetType: 'que',
-      CountedAssetPreviousState: creditCost,
+      CountedAssetPreviousState: previousCredits,
       CountedAssetState: userResponse.credits,
       CreatedAssetUrl: requestId,
       DateTime: new Date().toISOString(),

@@ -115,7 +115,7 @@ export async function processUserVideoRequest(
   }
 
   // Check if user has enough credits for this specific operation
-  if (userResponse.credits < creditCost) {
+  if (userResponse.credits <= 0 || userResponse.credits < creditCost) {
     console.log(
       `Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`
     );
@@ -250,7 +250,7 @@ export async function processUserVideoRequest(
       id: undefined,
       AssetSource: imageUrl,
       AssetType: 'que',
-      CountedAssetPreviousState: creditCost,
+      CountedAssetPreviousState: previousCredits,
       CountedAssetState: userResponse.credits,
       CreatedAssetUrl: requestId, // Should be populated at this point
       DateTime: new Date().toISOString(),

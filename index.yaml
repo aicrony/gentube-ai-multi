@@ -80,8 +80,15 @@ indexes:
       - name: assetId
       - name: userId
 
-  #   Feedback feature index
-  - kind: Feedback
+#  #   Feedback feature index
+#  - kind: Feedback
+#    properties:
+#      - name: createdAt
+#        direction: desc
+
+  - kind: UserActivity
     properties:
-      - name: createdAt
+      - name: CountedAssetPreviousState
+      - name: CountedAssetState
+      - name: UserIp
         direction: desc
