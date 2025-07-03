@@ -16,9 +16,10 @@ const addCustomerCreditToGcloud = async (uuid: string, amount: number) => {
   const purchasedCredits = getCreditsValue(amount);
 
   // Check if the customer exists in the UserCredits kind
+  // Use consistent key format matching the format in lookupKey in processUserImageRequest.ts
   const userCreditsKey = datastore.key({
     namespace: NAMESPACE,
-    path: [USER_CREDITS_KIND, uuid]
+    path: [USER_CREDITS_KIND, `${[USER_CREDITS_KIND, uuid]}`]
   });
 
   const [userCreditsEntity] = await datastore.get(userCreditsKey);

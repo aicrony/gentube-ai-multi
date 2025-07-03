@@ -224,15 +224,46 @@ export async function aggregateUserCredits(
   if (userId == undefined) {
     return;
   } else if (userId && userId.length > 0) {
+    console.log('Aggregating credits for user:', userId);
+    
+    // First try to get the user by direct key lookup with consistent key format
+    const key = datastore.key({
+      namespace,
+      path: [kind, `${[kind, userId]}`]
+    });
+    
+    try {
+      const [userEntity] = await datastore.get(key);
+      if (userEntity) {
+        console.log('Found user by key lookup:', userId);
+        const currentCredits = userEntity.Credits || 0;
+        const newCredits = currentCredits + credits;
+        await updateUserCredits(userId, '-', newCredits);
+        return;
+      }
+    } catch (error) {
+      console.log('Error in key lookup, falling back to query:', error);
+    }
+    
+    // Fallback to query-based lookup
     const query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
       .limit(1);
     const [existingCredits] = await datastore.runQuery(query);
-    const currentCredits =
-      existingCredits.length > 0 ? existingCredits[0].Credits : 0;
-    const newCredits = currentCredits + credits;
-    await updateUserCredits(userId, '-', newCredits);
+    
+    if (existingCredits.length > 0) {
+      console.log('Found user by query:', userId);
+      const currentCredits = existingCredits[0].Credits || 0;
+      const newCredits = currentCredits + credits;
+      await updateUserCredits(userId, '-', newCredits);
+    } else {
+      console.log('User not found, creating new credits record:', userId);
+      // If no record exists, create a new one with the purchased credits
+      await newUserCredits(userId);
+      // Then update with the additional credits
+      await updateUserCredits(userId, '-', credits);
+    }
   }
 }
 
@@ -241,12 +272,14 @@ export async function newUserCredits(
 ): Promise<void> {
   if (userId == undefined) {
     return;
-  } else if (userId && userId.length == 36) {
-    const keyValue = [kind, userId];
-    console.log('KeyValue: ', keyValue);
+  } else if (userId) {
+    // Remove length validation to support all auth providers including Google
+    console.log('Creating credits for new user:', userId);
+    
+    // Use consistent key format matching the format in lookupKey (line 44)
     const key = datastore.key({
       namespace,
-      path: [kind, `${keyValue}`]
+      path: [kind, `${[kind, userId]}`]
     });
 
     const entity = {
