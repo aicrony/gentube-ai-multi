@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processUserImageEditRequest } from '@/utils/gcloud/processUserImageEditRequest';
 import { localIpConfig } from '@/utils/ipUtils';
+import { checkRateLimit } from '@/utils/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,6 +58,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Image URL is required' },
         { status: 400 }
+      );
+    }
+    
+    // Check rate limit and duplicate requests
+    const rateLimitCheck = checkRateLimit(userId, 'image-edit');
+    if (!rateLimitCheck.allowed) {
+      console.log(`Rate limit exceeded for user ${userId}: ${rateLimitCheck.reason}`);
+      return NextResponse.json(
+        { 
+          error: rateLimitCheck.reason || 'Rate limit exceeded',
+          result: 'RateLimitExceeded'
+        },
+        { status: 429 } // Too Many Requests
       );
     }
 

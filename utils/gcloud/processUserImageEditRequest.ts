@@ -75,18 +75,32 @@ export async function processUserImageEditRequest(
 
   console.log('Check credit count: ', userResponse.credits);
 
+  // Define credit cost at the beginning
+  const creditCost = 10; // Image editing costs more than regular image generation
+  
   // Check if user has enough credits for image editing (costs 10 credits)
-  if (userResponse.credits === undefined || userResponse.credits < 10) {
+  if (userResponse.credits === undefined || userResponse.credits < creditCost) {
     userResponse.result = 'LimitExceeded';
+    userResponse.error = true;
+    return userResponse;
   }
 
   if (userResponse.result == 'CreateAccount') {
     userResponse.error = true;
     return userResponse;
-  } else if (userResponse.result == 'LimitExceeded') {
-    userResponse.error = true;
-    return userResponse;
   }
+  
+  // Deduct credits BEFORE making the API call
+  const previousCredits = userResponse.credits;
+  userResponse.credits -= creditCost;
+  console.log('Deducting credits at beginning of request. Previous:', previousCredits, 'New:', userResponse.credits);
+  
+  // Update user credits in database IMMEDIATELY
+  await updateUserCredits(
+    userId,
+    normalizeIp(localIpConfig(userIp)),
+    userResponse.credits
+  );
 
   let imageResult;
   let requestId;
@@ -95,8 +109,6 @@ export async function processUserImageEditRequest(
   let completedImageUrl = '';
 
   try {
-    let creditCost = 10; // Image editing costs more than regular image generation
-
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       userResponse.result =
@@ -135,26 +147,9 @@ export async function processUserImageEditRequest(
         }
       }
     }
-
-    // We should never reach this code if credits are insufficient
-    // But as an extra safety check, only deduct credits if sufficient
-    if (
-      userResponse.credits !== undefined &&
-      userResponse.credits >= creditCost
-    ) {
-      userResponse.credits -= creditCost;
-    } else {
-      // This is a safety fallback - we should have already returned with an error
-      userResponse.result = 'LimitExceeded';
-      userResponse.error = true;
-      return userResponse;
-    }
-    console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(
-      userId,
-      normalizeIp(localIpConfig(userIp)),
-      userResponse.credits
-    );
+    
+    // Credits have already been deducted and updated at the beginning
+    console.log('Credits were already deducted at the beginning of the request: ', userResponse.credits);
 
     // Data save - if we have a completed result, save it directly
     const activityResponse = await saveUserActivity({

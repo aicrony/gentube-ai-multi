@@ -90,10 +90,33 @@ export async function processUserImageRequest(
     return userResponse;
   }
 
+  // Define credit cost at the beginning
+  const creditCost = 6;
+  
+  // Check if user has enough credits BEFORE making any API calls
+  if (userResponse.credits < creditCost) {
+    console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
+    userResponse.result = 'LimitExceeded';
+    userResponse.error = true;
+    userResponse.statusCode = 429; // Too Many Requests
+    return userResponse;
+  }
+  
+  // Deduct credits BEFORE making the API call
+  const previousCredits = userResponse.credits;
+  userResponse.credits -= creditCost;
+  console.log('Deducting credits at beginning of request. Previous:', previousCredits, 'New:', userResponse.credits);
+  
+  // Update user credits in database IMMEDIATELY
+  await updateUserCredits(
+    userId,
+    normalizeIp(localIpConfig(userIp)),
+    userResponse.credits
+  );
+  
   let imageResult;
   let requestId;
   try {
-    let creditCost = 100;
     let result: string | ImageApiResult;
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -116,24 +139,9 @@ export async function processUserImageRequest(
       // userResponse.result =
       //   imageResult && imageResult.url ? imageResult.url : '';
     }
-    creditCost = 6;
-    // console.log('****** IMAGE RESULT: ********');
-    // console.log(JSON.stringify(userResponse.result));
-    // if (userResponse.result === '') {
-    //   userResponse.error = true;
-    //   userResponse.result = 'Error. Please refine your prompt.';
-    // }
-
-    // Update user credits
-    userResponse.credits && userResponse.credits > 0
-      ? (userResponse.credits -= creditCost)
-      : 0;
-    console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(
-      userId,
-      normalizeIp(localIpConfig(userIp)),
-      userResponse.credits
-    );
+    
+    // Credits have already been deducted and updated at the beginning
+    console.log('Credits were already deducted at the beginning of the request');
 
     // Data save
     const activityResponse = await saveUserActivity({

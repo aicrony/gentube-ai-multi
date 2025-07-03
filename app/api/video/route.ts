@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processUserVideoRequest } from '@/utils/gcloud/processUserVideoRequest';
 import { localIpConfig } from '@/utils/ipUtils';
+import { checkRateLimit } from '@/utils/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +54,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check rate limit and duplicate requests
+    const rateLimitCheck = checkRateLimit(userId, 'video');
+    if (!rateLimitCheck.allowed) {
+      console.log(
+        `Rate limit exceeded for user ${userId}: ${rateLimitCheck.reason}`
+      );
+      return NextResponse.json(
+        {
+          error: rateLimitCheck.reason || 'Rate limit exceeded',
+          result: 'RateLimitExceeded'
+        },
+        { status: 429 } // Too Many Requests
+      );
+    }
+
     const userResponse = await processUserVideoRequest(
       userId,
       userIp,
@@ -73,7 +89,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'Credit limit exceeded. You need credits to generate videos. Please purchase credits on the pricing page.',
+              'Credit limit exceeded. You need 50 credits to generate videos. Please purchase credits on the pricing page.',
             result: 'LimitExceeded',
             credits: userResponse.credits
           },

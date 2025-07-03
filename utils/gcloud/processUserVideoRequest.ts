@@ -124,6 +124,18 @@ export async function processUserVideoRequest(
     userResponse.statusCode = 429; // Too Many Requests
     return userResponse;
   }
+  
+  // Deduct credits BEFORE making the API call
+  const previousCredits = userResponse.credits;
+  userResponse.credits -= creditCost;
+  console.log('Deducting credits at beginning of request. Previous:', previousCredits, 'New:', userResponse.credits);
+  
+  // Update user credits in database IMMEDIATELY
+  await updateUserCredits(
+    userId,
+    normalizeIp(localIpConfig(userIp)),
+    userResponse.credits
+  );
 
   let videoResult;
   let requestId;
@@ -223,25 +235,8 @@ export async function processUserVideoRequest(
       //   videoResult && videoResult.url ? videoResult.url : '';
     }
 
-    // We already calculated the credit cost above, so we don't need to do it again here
-
-    // console.log('****** IMAGE RESULT: ********');
-    // console.log(JSON.stringify(userResponse.result));
-    // if (userResponse.result === '') {
-    //   userResponse.error = true;
-    //   userResponse.result = 'Error. Please refine your prompt.';
-    // }
-
-    // Update user credits
-    userResponse.credits && userResponse.credits > 0
-      ? (userResponse.credits -= creditCost)
-      : 0;
-    console.log('UPDATED User Credits: ', userResponse.credits);
-    await updateUserCredits(
-      userId,
-      normalizeIp(localIpConfig(userIp)),
-      userResponse.credits
-    );
+    // Credits have already been deducted and updated at the beginning
+    console.log('Credits were already deducted at the beginning of the request');
 
     // Ensure we have a request ID
     if (!requestId || requestId.trim() === '') {
