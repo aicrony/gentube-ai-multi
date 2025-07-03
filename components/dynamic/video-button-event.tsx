@@ -92,6 +92,13 @@ export function VideoDynamicButton({
     setIsSubmitting(true); // Disable the button while the request is being handled
     console.log('Video Generation button clicked');
     setVideoData(null); // clear the videoData state
+    
+    // Validate that description is not empty or just whitespace
+    if (!videoDescription || !videoDescription.trim()) {
+      setErrorMessage('Please enter a description for your video.');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const response = await fetch('/api/video', {
         method: 'POST',

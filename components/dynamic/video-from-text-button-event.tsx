@@ -87,6 +87,13 @@ export const VideoFromTextDynamicButton: React.FC<
     setVideoData(null);
     setImageGalleryData(null); // Reset ImageGallery data
     setErrorMessage(null);
+    
+    // Validate that description is not empty or just whitespace
+    if (!videoDescription || !videoDescription.trim()) {
+      setErrorMessage('Please enter a description for your video.');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const response = await fetch('/api/video', {
         method: 'POST',

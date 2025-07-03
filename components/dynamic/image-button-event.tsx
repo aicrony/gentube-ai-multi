@@ -65,6 +65,13 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setErrorMessage(null); // clear any previous error message
     console.log('PASS userId:', userId);
     console.log('PASS userIp:', userIp);
+    
+    // Validate that prompt is not empty or just whitespace
+    if (!prompt || !prompt.trim()) {
+      setErrorMessage('Please enter a description for your image.');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const response = await fetch('/api/image', {
         method: 'POST',
