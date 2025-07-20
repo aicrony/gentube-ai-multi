@@ -28,12 +28,18 @@ export const metadata: Metadata = {
     description: description,
     images: [
       {
-        url: ogImageUrl,
+        url: 'https://storage.googleapis.com/gen-image-storage/og/gentube-ai-og.png',
         width: 1200,
         height: 630,
         alt: title
       }
     ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: title,
+    description: description,
+    images: ['https://storage.googleapis.com/gen-image-storage/og/gentube-ai-og.png']
   }
 };
 
