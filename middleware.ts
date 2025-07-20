@@ -54,7 +54,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/contact') ||
     pathname.startsWith('/faq') ||
-    pathname.startsWith('/blog')
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/info') ||
+    pathname.startsWith('/investors')
   ) {
     const response = NextResponse.next();
     // Still add CORS headers

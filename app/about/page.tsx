@@ -87,7 +87,10 @@ function AboutPageContent() {
                     playsInline
                     className="w-full h-full object-cover"
                   >
-                    <source src="/GenTubeIntro_SD_480p.mp4" type="video/mp4" />
+                    <source
+                      src="https://storage.googleapis.com/gen-video-storage/GenTubeIntro_SD_480p.mp4"
+                      type="video/mp4"
+                    />
                     Your browser does not support the video tag.
                   </video>
                 </div>

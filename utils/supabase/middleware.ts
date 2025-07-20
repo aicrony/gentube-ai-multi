@@ -92,6 +92,8 @@ export const updateSession = async (request: NextRequest) => {
           '/contact',
           '/faq',
           '/blog',
+          '/info',
+          '/investors',
           '/direct-signin',
           '/direct-home',
           '/clear-session',

@@ -3,11 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserCreditsProvider } from '@/context/UserCreditsContext';
+import StartPageWrapper from '@/app/StartPageWrapper';
 
-export default function InvestorsPage() {
+function InvestorsPageContent() {
   return (
-    <UserCreditsProvider>
       <div className="w-full min-h-screen flex flex-col gap-2">
         <main className="flex-1 items-center justify-center mt-16 pt-4">
           <div className="container max-w-5xl mx-auto px-4 py-8">
@@ -49,7 +48,10 @@ export default function InvestorsPage() {
                   playsInline
                   className="w-full h-full object-cover"
                 >
-                  <source src="/GenTubeIntro_SD_480p.mp4" type="video/mp4" />
+                  <source
+                    src="https://storage.googleapis.com/gen-video-storage/GenTubeIntro_SD_480p.mp4"
+                    type="video/mp4"
+                  />
                   Your browser does not support the video tag.
                 </video>
               </div>
@@ -227,6 +229,13 @@ export default function InvestorsPage() {
           </div>
         </main>
       </div>
-    </UserCreditsProvider>
+  );
+}
+
+export default function InvestorsPage() {
+  return (
+    <StartPageWrapper>
+      <InvestorsPageContent />
+    </StartPageWrapper>
   );
 }

@@ -25,6 +25,8 @@ export function useSessionRefresh(refreshInterval = 60000) {
           '/contact',
           '/faq',
           '/blog',
+          '/info',
+          '/investors',
           '/direct-signin',
           '/direct-home',
           '/clear-session',
