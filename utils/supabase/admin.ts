@@ -313,7 +313,9 @@ const addCustomerCredit = async (
     // If it's a unique constraint violation, it's a duplicate - just log and continue
     if (insertError.code && insertError.code === '23505') {
       // PostgreSQL unique violation code
-      console.log(`Credit for payment [${paymentId}] already exists, skipping`);
+      console.log(
+        `Credit for payment [${paymentIntent}] already exists, skipping`
+      );
       return;
     }
     throw new Error(`Credit insert failed: ${insertError.message}`);
