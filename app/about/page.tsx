@@ -39,7 +39,7 @@ function AboutPageContent() {
                 creation to help you find creative success.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/start">
+                <Link href={userId !== 'none' ? "/start" : "/signin?view=signup"}>
                   <Button variant="slim" className="btn-red">
                     Guide Me Now
                   </Button>
@@ -49,7 +49,7 @@ function AboutPageContent() {
                     See Pricing
                   </Button>
                 </Link>
-                <Link href="/start">
+                <Link href={userId !== 'none' ? "/start" : "/signin?view=signup"}>
                   <Button variant="slim" className="px-8 py-3 text-lg">
                     Try It Out
                   </Button>
@@ -366,7 +366,7 @@ function AboutPageContent() {
             Join thousands of creators using GenTube.ai to bring their ideas to
             life.
           </p>
-          <Link href="/start">
+          <Link href={userId !== 'none' ? "/start" : "/signin?view=signup"}>
             <Button
               variant="slim"
               className="px-8 py-3 text-lg"
