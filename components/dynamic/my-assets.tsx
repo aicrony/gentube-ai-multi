@@ -756,9 +756,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Fetch user credits function (reusable)
   const fetchUserCredits = async () => {
     if (!userId) return;
-    
+
     try {
-      const response = await fetch(`/api/getUserCredits?userId=${userId}&userIp=${userIp || 'none'}`);
+      const response = await fetch(
+        `/api/getUserCredits?userId=${userId}&userIp=${userIp || 'none'}`
+      );
       if (response.ok) {
         const data = await response.json();
         setUserCredits(data.credits);
@@ -775,7 +777,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     if (!showImageEditPane) {
       fetchUserCredits();
     }
-    
+
     setShowImageEditPane(!showImageEditPane);
     if (showImageEditPane) {
       // Clear the edit state when closing the pane
@@ -818,10 +820,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             );
             // Close the edit pane to show the notification in the same place as success messages
             setShowImageEditPane(false);
-            
+
             // Show a visible notification about insufficient credits
             const messageDiv = document.createElement('div');
-            messageDiv.innerHTML = '<strong>Insufficient Credits</strong><br />You need at least 10 credits to edit images.';
+            messageDiv.innerHTML =
+              '<strong>Insufficient Credits</strong><br />You need at least 10 credits to edit images.';
             messageDiv.style.position = 'fixed';
             messageDiv.style.bottom = '20px';
             messageDiv.style.right = '20px';
@@ -833,7 +836,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             messageDiv.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             messageDiv.style.opacity = '0';
             messageDiv.style.transition = 'opacity 0.3s ease-in-out';
-            
+
             // Create a button for purchasing credits
             const button = document.createElement('button');
             button.textContent = 'Purchase Credits';
@@ -849,15 +852,15 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             button.addEventListener('click', () => {
               window.location.href = '/pricing';
             });
-            
+
             messageDiv.appendChild(button);
             document.body.appendChild(messageDiv);
-            
+
             // Fade in
             setTimeout(() => {
               messageDiv.style.opacity = '1';
             }, 10);
-            
+
             // Fade out and remove after 8 seconds
             setTimeout(() => {
               messageDiv.style.opacity = '0';
@@ -925,7 +928,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const openModalForAsset = (index: number, fullScreen = false) => {
     // Fetch the latest user credits when opening the modal
     fetchUserCredits();
-    
+
     if (index >= 0 && index < filteredAndSortedActivities.length) {
       const activity = filteredAndSortedActivities[index];
       // Always use CreatedAssetUrl for all asset types
@@ -942,7 +945,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   const openModal = (url: string, fullScreen = false) => {
     // Fetch the latest user credits when opening the modal
     fetchUserCredits();
-    
+
     // Find the index of the asset with this URL (only match on CreatedAssetUrl)
     const index = filteredAndSortedActivities.findIndex(
       (activity) => activity.CreatedAssetUrl === url
@@ -1538,13 +1541,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-2">
-        <p>
-          <strong>*WIN:</strong> 500 Credits EVERY MONTH - Star your images and
-          get the most hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>
-          . Next winner: June 30, 2025.
-        </p>
-      </div>
+      {/*<div className="flex justify-between items-center mb-2">*/}
+      {/*  <p>*/}
+      {/*    <strong>*WIN:</strong> 500 Credits EVERY MONTH - Star your images and*/}
+      {/*    get the most hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>*/}
+      {/*    . Next winner: June 30, 2025.*/}
+      {/*  </p>*/}
+      {/*</div>*/}
       <div className="flex justify-between items-center mb-2">
         <p>
           <strong>*BUY MORE CREDITS:</strong> Keep the creative juices flowing!{' '}
