@@ -20,26 +20,31 @@ import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 
-export default async function SignIn({
-  params,
-  searchParams = {}
-}: {
-  params: { id: string };
-  searchParams?: {
+// Updated Props type to match Next.js 15+ PageProps interface requirements
+interface Props {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{
     disable_button?: boolean;
     new_user_prompt?: string;
     message?: string;
-  };
-}) {
+  }>;
+}
+
+export default async function SignIn({ params, searchParams }: Props) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
 
+  // Await the Promise params
+  const { id } = await params;
+  // Await the Promise searchParams or use empty object as default
+  const search = searchParams ? await searchParams : {};
+
   let viewProp: string;
 
-  // Remove redundant typeof check
-  if (viewTypes.includes(params.id)) {
-    viewProp = params.id;
+  // Check if the ID is a valid view type
+  if (viewTypes.includes(id)) {
+    viewProp = id;
   } else {
     // Await cookies() to get the actual cookie object
     const cookieStore = await cookies();
@@ -47,8 +52,8 @@ export default async function SignIn({
       cookieStore.get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
 
-    const queryString = searchParams
-      ? Object.entries(searchParams)
+    const queryString = Object.keys(search).length > 0
+      ? Object.entries(search)
           .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
           .join('&')
       : '';
@@ -60,8 +65,8 @@ export default async function SignIn({
     return redirect(redirectUrl);
   }
 
-  const hasSessionExpiredMessage = searchParams?.message === 'session_expired';
-  const supabase = createClient();
+  const hasSessionExpiredMessage = search.message === 'session_expired';
+  const supabase = await createClient();
   let user: any = null;
 
   if (hasSessionExpiredMessage) {
@@ -103,7 +108,7 @@ export default async function SignIn({
         <div className="mt-12 flex justify-center pb-2 ">
           <Logo width="90px" height="90px" />
         </div>
-        {searchParams?.new_user_prompt && (
+        {search.new_user_prompt && (
           <div
             className="mb-1 p-2 rounded-md border border-blue-500 text-center"
             style={{
@@ -124,7 +129,7 @@ export default async function SignIn({
           </div>
         )}
 
-        {searchParams?.message === 'session_expired' && (
+        {search.message === 'session_expired' && (
           <div
             className="mb-1 p-2 rounded-md border border-orange-500 text-center"
             style={{
@@ -158,14 +163,14 @@ export default async function SignIn({
             <EmailSignIn
               allowPassword={allowPassword}
               redirectMethod={redirectMethod}
-              disableButton={searchParams?.disable_button}
+              disableButton={search.disable_button}
             />
           )}
           {viewProp === 'forgot_password' && (
             <ForgotPassword
               allowEmail={allowEmail}
               redirectMethod={redirectMethod}
-              disableButton={searchParams?.disable_button}
+              disableButton={search.disable_button}
             />
           )}
           {viewProp === 'update_password' && (

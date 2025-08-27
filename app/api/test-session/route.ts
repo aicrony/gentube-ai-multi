@@ -15,8 +15,8 @@ export async function GET(request: Request) {
   const action = url.searchParams.get('action') || 'check';
   
   try {
-    const supabase = createClient();
-    const cookieStore = cookies();
+    const supabase = await createClient();
+    const cookieStore = await cookies();
 
     switch (action) {
       case 'check':
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         // Clear all auth cookies
         const authCookies = ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token'];
         for (const name of authCookies) {
-          cookieStore.delete(name);
+          cookieStore.delete?.(name); // Use optional chaining in case delete is not available
         }
         
         // Also sign out via Supabase

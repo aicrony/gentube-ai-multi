@@ -18,14 +18,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [theme, setTheme] = useState<ThemeType | null>(null);
 
   useEffect(() => {
-    // Initialize theme only on client side
-    const savedTheme = localStorage.getItem('theme') as ThemeType;
-    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
+    // Initialize theme only on client side, but respect the current data-theme attribute
+    const dataTheme = document.documentElement.getAttribute('data-theme') as ThemeType;
+    if (dataTheme && ['light', 'dark'].includes(dataTheme)) {
+      // This ensures we match what's already in the DOM to avoid flickering
+      setTheme(dataTheme);
     } else {
-      setTheme('light');
+      // Fallback to the usual logic if no data-theme attribute exists
+      const savedTheme = localStorage.getItem('theme') as ThemeType;
+      if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
+        setTheme(savedTheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      } else {
+        setTheme('light');
+      }
     }
   }, []);
 

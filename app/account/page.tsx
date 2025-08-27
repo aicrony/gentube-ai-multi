@@ -11,7 +11,7 @@ import {
 import CreditsForm from '@/components/ui/AccountForms/CreditsForm';
 
 export default async function Account() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const [user, userDetails, subscription] = await Promise.all([
     getUser(supabase),
     getUserDetails(supabase),

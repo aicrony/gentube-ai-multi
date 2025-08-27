@@ -18,6 +18,7 @@ interface NavlinksProps {
 export default function Navlinks({ user }: NavlinksProps) {
   const router = getRedirectMethod() === 'client' ? useRouter() : null;
   const userId = useUserId();
+  const pathname = usePathname();
 
   return (
     <div className="relative flex flex-row justify-between py-1 align-center md:py-6">
@@ -50,7 +51,7 @@ export default function Navlinks({ user }: NavlinksProps) {
                 <input
                   type="hidden"
                   name="pathName"
-                  value={usePathname() ?? ''}
+                  value={pathname ?? ''}
                 />
                 <button type="submit" className={s.signOutButton}>
                   <span>

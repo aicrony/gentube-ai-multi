@@ -12,15 +12,15 @@ export async function GET(request: Request) {
     const redirect = url.searchParams.get('redirect') || '/';
     
     // Clear all auth cookies server-side
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const authCookies = ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token'];
     
     for (const name of authCookies) {
-      cookieStore.delete(name);
+      cookieStore.delete?.(name); // Use optional chaining in case delete is not available
     }
     
     // Also sign out via Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     await supabase.auth.signOut();
     
     // Return a redirect response instead of JSON

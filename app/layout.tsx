@@ -48,7 +48,7 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   let userId: string = '';
   let userIp: string = '';
 
@@ -61,7 +61,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

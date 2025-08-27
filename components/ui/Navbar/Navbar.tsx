@@ -7,7 +7,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = async ({ className }) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user }

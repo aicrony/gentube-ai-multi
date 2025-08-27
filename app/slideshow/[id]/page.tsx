@@ -30,9 +30,23 @@ interface Asset {
   AssetType: string;
 }
 
-export default function SlideshowPage({ params }: { params: { id: string } }) {
+export default function SlideshowPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { id } = params;
+  const [id, setId] = useState<string>('');
+  
+  // Extract the id from params when component mounts
+  useEffect(() => {
+    const getParams = async () => {
+      try {
+        const { id } = await params;
+        setId(id);
+      } catch (error) {
+        console.error('Error getting params:', error);
+      }
+    };
+    
+    getParams();
+  }, [params]);
   const { theme } = useTheme();
 
   const [loading, setLoading] = useState(true);

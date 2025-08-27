@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const type = requestUrl.searchParams.get('type') || 'email';
 
   if (token) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     try {
       // Use verifyOtp for email verification
