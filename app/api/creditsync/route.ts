@@ -1,33 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    console.log('Request body:', body);
-    const { type, table, record, schema, old_record } = body;
-    console.log('Type:', type);
-    console.log('Table:', table);
-    console.log('Record:', record);
-    console.log('Schema:', schema);
-    console.log('Old Record:', old_record);
+    const data = await req.json();
 
-    if (record) {
-      const { id, amount, user_id, currency, created_at, credits_purchased } =
-        record;
-      console.log('Record ID:', id);
-      console.log('Amount:', amount);
-      console.log('User ID:', user_id);
-      console.log('Currency:', currency);
-      console.log('Created At:', created_at);
-      console.log('Credits Purchased:', credits_purchased);
+    // Check if record exists
+    if (!data.record) {
+      return NextResponse.json({ received: false }, { status: 200 });
+    }
+
+    // Extract necessary data
+    const { user_id, credits_purchased } = data.record;
+
+    try {
+      // Process credits update
       await aggregateUserCredits(user_id, '-', credits_purchased);
-      return NextResponse.json({ received: true });
-    } else {
-      return NextResponse.json({ received: false });
+      return NextResponse.json({ received: true }, { status: 200 });
+    } catch (error) {
+      console.error('Error updating user credits:', error);
+      // Make sure this explicitly returns a response
+      return NextResponse.json(
+        { error: 'Sync Webhook handler failed.' },
+        { status: 500 }
+      );
     }
   } catch (error) {
-    console.error('Sync Webhook handler failed.', error);
+    console.error('Error processing request:', error);
     return NextResponse.json(
       { error: 'Sync Webhook handler failed.' },
       { status: 500 }
