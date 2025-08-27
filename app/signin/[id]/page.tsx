@@ -22,7 +22,7 @@ import SignUp from '@/components/ui/AuthForms/Signup';
 
 export default async function SignIn({
   params,
-  searchParams
+  searchParams = {}
 }: {
   params: { id: string };
   searchParams?: {
