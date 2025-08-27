@@ -17,6 +17,9 @@ importers:
       '@google-cloud/storage':
         specifier: ^7.12.1
         version: 7.14.0
+      '@google/genai':
+        specifier: ^1.15.0
+        version: 1.15.0
       '@next/third-parties':
         specifier: ^15.0.2
         version: 15.1.3(next@15.3.3(@babel/core@7.26.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
@@ -408,6 +411,15 @@ packages:
   '@google-cloud/storage@7.14.0':
     resolution: {integrity: sha512-H41bPL2cMfSi4EEnFzKvg7XSb7T67ocSXrmF7MPjfgFB0L6CKGzfIYJheAZi1iqXjz6XaCT1OBf6HCG5vDBTOQ==}
     engines: {node: '>=14'}
+
+  '@google/genai@1.15.0':
+    resolution: {integrity: sha512-4CSW+hRTESWl3xVtde7pkQ3E+dDFhDq+m4ztmccRctZfx1gKy3v0M9STIMGk6Nq0s6O2uKMXupOZQ1JGorXVwQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      '@modelcontextprotocol/sdk': ^1.11.0
+    peerDependenciesMeta:
+      '@modelcontextprotocol/sdk':
+        optional: true
 
   '@grpc/grpc-js@1.12.5':
     resolution: {integrity: sha512-d3iiHxdpg5+ZcJ6jnDSOT8Z0O0VMVGy34jAnYLUX8yd36b1qn8f1TwOA/Lc7TsOh03IkPJ38eGI5qD2EjNkoEA==}
@@ -4224,6 +4236,16 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@google/genai@1.15.0':
+    dependencies:
+      google-auth-library: 9.15.0
+      ws: 8.18.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
 
   '@grpc/grpc-js@1.12.5':
     dependencies:

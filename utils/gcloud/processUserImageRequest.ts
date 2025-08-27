@@ -1,7 +1,7 @@
 import { Datastore } from '@google-cloud/datastore';
 import { google_app_creds } from '@/interfaces/googleCredentials';
 import { normalizeIp, localIpConfig } from '@/utils/ipUtils';
-import callImageApi from '@/services/generateFalImage';
+import callImageApi from '@/services/generateGeminiImage';
 import { saveUserActivity } from '@/utils/gcloud/saveUserActivity';
 require('dotenv').config();
 
@@ -92,28 +92,35 @@ export async function processUserImageRequest(
 
   // Define credit cost at the beginning
   const creditCost = 6;
-  
+
   // Check if user has enough credits BEFORE making any API calls
   if (userResponse.credits <= 0 || userResponse.credits < creditCost) {
-    console.log(`Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`);
+    console.log(
+      `Credit limit exceeded - User has ${userResponse.credits} credits but needs ${creditCost}`
+    );
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
     userResponse.statusCode = 429; // Too Many Requests
     return userResponse;
   }
-  
+
   // Deduct credits BEFORE making the API call
   const previousCredits = userResponse.credits;
   userResponse.credits -= creditCost;
-  console.log('Deducting credits at beginning of request. Previous:', previousCredits, 'New:', userResponse.credits);
-  
+  console.log(
+    'Deducting credits at beginning of request. Previous:',
+    previousCredits,
+    'New:',
+    userResponse.credits
+  );
+
   // Update user credits in database IMMEDIATELY
   await updateUserCredits(
     userId,
     normalizeIp(localIpConfig(userIp)),
     userResponse.credits
   );
-  
+
   let imageResult;
   let requestId;
   try {
@@ -139,9 +146,11 @@ export async function processUserImageRequest(
       // userResponse.result =
       //   imageResult && imageResult.url ? imageResult.url : '';
     }
-    
+
     // Credits have already been deducted and updated at the beginning
-    console.log('Credits were already deducted at the beginning of the request');
+    console.log(
+      'Credits were already deducted at the beginning of the request'
+    );
 
     // Data save
     const activityResponse = await saveUserActivity({
@@ -225,13 +234,13 @@ export async function aggregateUserCredits(
     return;
   } else if (userId && userId.length > 0) {
     console.log('Aggregating credits for user:', userId);
-    
+
     // First try to get the user by direct key lookup with consistent key format
     const key = datastore.key({
       namespace,
       path: [kind, `${[kind, userId]}`]
     });
-    
+
     try {
       const [userEntity] = await datastore.get(key);
       if (userEntity) {
@@ -244,14 +253,14 @@ export async function aggregateUserCredits(
     } catch (error) {
       console.log('Error in key lookup, falling back to query:', error);
     }
-    
+
     // Fallback to query-based lookup
     const query = datastore
       .createQuery(namespace, kind)
       .filter('UserId', '=', userId)
       .limit(1);
     const [existingCredits] = await datastore.runQuery(query);
-    
+
     if (existingCredits.length > 0) {
       console.log('Found user by query:', userId);
       const currentCredits = existingCredits[0].Credits || 0;
@@ -275,7 +284,7 @@ export async function newUserCredits(
   } else if (userId) {
     // Remove length validation to support all auth providers including Google
     console.log('Creating credits for new user:', userId);
-    
+
     // Use consistent key format matching the format in lookupKey (line 44)
     const key = datastore.key({
       namespace,
