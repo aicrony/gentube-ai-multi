@@ -137,7 +137,40 @@ export async function processUserImageRequest(
         if (imageResult.webhook) {
           const webhook = imageResult.webhook;
           console.log('Webhook: ', webhook);
-          requestId = imageResult.response.request_id;
+          
+          // Handle different types of responses based on status
+          if (imageResult.response && imageResult.response.status) {
+            if (imageResult.response.status === 'COMPLETED') {
+              // For completed images from Gemini
+              requestId = imageResult.response.output?.image || imageResult.response.response_url || '';
+              userResponse.result = requestId; // Set the result to the image URL
+              
+              // Data save for completed image
+              const activityResponse = await saveUserActivity({
+                id: undefined,
+                AssetSource: 'gemini',
+                AssetType: 'img', // Set to 'img' for completed images
+                CountedAssetPreviousState: previousCredits,
+                CountedAssetState: userResponse.credits,
+                CreatedAssetUrl: requestId, // Use the actual image URL
+                DateTime: new Date().toISOString(),
+                Prompt: imagePrompt ? imagePrompt : '',
+                SubscriptionTier: 0 /**/,
+                UserId: userId,
+                UserIp: localizedIpAddress
+              });
+              
+              console.log('Image Data saved (completed): ', activityResponse);
+              
+              userResponse.error = false;
+              return userResponse; // Return early with the image URL
+            } else {
+              // For queued images (IN_QUEUE status)
+              requestId = imageResult.response.request_id;
+            }
+          } else {
+            requestId = imageResult.response.request_id;
+          }
           // Continue here
         } else {
           requestId = '';
@@ -152,7 +185,7 @@ export async function processUserImageRequest(
       'Credits were already deducted at the beginning of the request'
     );
 
-    // Data save
+    // Data save for queued images
     const activityResponse = await saveUserActivity({
       id: undefined,
       AssetSource: '',
@@ -167,7 +200,7 @@ export async function processUserImageRequest(
       UserIp: localizedIpAddress
     });
 
-    console.log('Image Data saved: ', activityResponse);
+    console.log('Image Data saved (queued): ', activityResponse);
 
     userResponse.error = false;
     userResponse.result = 'InQueue';
