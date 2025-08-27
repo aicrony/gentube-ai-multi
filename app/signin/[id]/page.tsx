@@ -25,27 +25,33 @@ export default async function SignIn({
   searchParams
 }: {
   params: { id: string };
-  searchParams: { disable_button: boolean; new_user_prompt?: string; message?: string };
+  searchParams?: {
+    disable_button?: boolean;
+    new_user_prompt?: string;
+    message?: string;
+  };
 }) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
 
-  // Declare 'viewProp' and initialize with the default value
   let viewProp: string;
 
-  // Assign url id to 'viewProp' if it's a valid string and ViewTypes includes it
-  if (typeof params.id === 'string' && viewTypes.includes(params.id)) {
+  // Remove redundant typeof check
+  if (viewTypes.includes(params.id)) {
     viewProp = params.id;
   } else {
+    // Await cookies() to get the actual cookie object
+    const cookieStore = await cookies();
     const preferredSignInView =
-      cookies().get('preferredSignInView')?.value || null;
+      cookieStore.get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
 
-    // Preserve query parameters when redirecting
-    const queryString = Object.entries(searchParams)
-      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-      .join('&');
+    const queryString = searchParams
+      ? Object.entries(searchParams)
+          .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+          .join('&')
+      : '';
 
     const redirectUrl = queryString
       ? `/signin/${viewProp}?${queryString}`
@@ -54,43 +60,36 @@ export default async function SignIn({
     return redirect(redirectUrl);
   }
 
-  // Check if there's a session expiration message to prevent infinite redirects
   const hasSessionExpiredMessage = searchParams?.message === 'session_expired';
-  
-  // Create Supabase client
   const supabase = createClient();
-  
-  // Initialize user variable
   let user: any = null;
-  
-  // If there's a session expiration message, we need to immediately clear all auth cookies
+
   if (hasSessionExpiredMessage) {
-    // Clear supabase cookies manually
-    const cookieStore = cookies();
-    const authCookies = ['sb-access-token', 'sb-refresh-token', 'supabase-auth-token'];
-    
+    // Await cookies() to get the actual cookie object
+    const cookieStore = await cookies();
+    const authCookies = [
+      'sb-access-token',
+      'sb-refresh-token',
+      'supabase-auth-token'
+    ];
     for (const name of authCookies) {
-      cookieStore.delete(name);
+      cookieStore.delete?.(name); // Use optional chaining in case delete is not available
     }
-    
-    // Try to force sign out
     try {
       await supabase.auth.signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
   } else {
-    // Only check auth status if we're not handling an expired session
     try {
       const { data } = await supabase.auth.getUser();
       user = data.user;
     } catch (error) {
       console.error('Error getting user:', error);
-      // If we can't get the user, assume no user is logged in
       user = null;
     }
   }
-  
+
   // Handle normal auth redirects
   if (user && viewProp !== 'update_password') {
     return redirect('/');
@@ -104,7 +103,7 @@ export default async function SignIn({
         <div className="mt-12 flex justify-center pb-2 ">
           <Logo width="90px" height="90px" />
         </div>
-        {searchParams.new_user_prompt && (
+        {searchParams?.new_user_prompt && (
           <div
             className="mb-1 p-2 rounded-md border border-blue-500 text-center"
             style={{
@@ -124,8 +123,8 @@ export default async function SignIn({
             </p>
           </div>
         )}
-        
-        {searchParams.message === 'session_expired' && (
+
+        {searchParams?.message === 'session_expired' && (
           <div
             className="mb-1 p-2 rounded-md border border-orange-500 text-center"
             style={{
@@ -159,14 +158,14 @@ export default async function SignIn({
             <EmailSignIn
               allowPassword={allowPassword}
               redirectMethod={redirectMethod}
-              disableButton={searchParams.disable_button}
+              disableButton={searchParams?.disable_button}
             />
           )}
           {viewProp === 'forgot_password' && (
             <ForgotPassword
               allowEmail={allowEmail}
               redirectMethod={redirectMethod}
-              disableButton={searchParams.disable_button}
+              disableButton={searchParams?.disable_button}
             />
           )}
           {viewProp === 'update_password' && (
