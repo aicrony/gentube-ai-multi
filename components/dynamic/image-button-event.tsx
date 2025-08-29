@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,13 @@ import GenericModal from '@/components/ui/GenericModal';
 import ImageGallery from '@/functions/getGallery';
 import { VideoDynamicButton } from '@/components/dynamic/video-button-event';
 import { handleApiError } from '@/utils/apiErrorHandler';
+import {
+  imageCategories,
+  getCategories,
+  getStylesByCategory,
+  getStyleById,
+  ImageStyle
+} from '@/data/imageStyles';
 
 interface ImageDynamicButtonProps {
   userId: string;
@@ -31,8 +38,37 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null); // State for Modal Image URL
   const { userCreditsResponse, setUserCreditsResponse } = useUserCredits();
 
+  // New state variables for style selection
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedStyle, setSelectedStyle] = useState<string>('');
+  const [availableStyles, setAvailableStyles] = useState<ImageStyle[]>([]);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.target.value);
+  };
+
+  // Update available styles when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      const styles = getStylesByCategory(selectedCategory);
+      setAvailableStyles(styles);
+      // Reset selected style when category changes
+      setSelectedStyle('');
+    } else {
+      setAvailableStyles([]);
+    }
+  }, [selectedCategory]);
+
+  // Handle category selection
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  // Handle style selection
+  const handleStyleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedStyle(event.target.value);
   };
 
   const renderVideoButton = useCallback(() => {
@@ -65,12 +101,25 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setErrorMessage(null); // clear any previous error message
     console.log('PASS userId:', userId);
     console.log('PASS userIp:', userIp);
-    
+
     // Validate that prompt is not empty or just whitespace
     if (!prompt || !prompt.trim()) {
       setErrorMessage('Please enter a description for your image.');
       setIsSubmitting(false);
       return;
+    }
+
+    // Create the final prompt with the style if selected
+    let finalPrompt = prompt.trim();
+    if (selectedStyle) {
+      const style = getStyleById(selectedStyle);
+      if (style) {
+        // Remove trailing punctuation if it exists
+        finalPrompt = finalPrompt.replace(/[.!,;:?]$/, '');
+        // Add space and style suffix
+        finalPrompt = `${finalPrompt} ${style.promptSuffix}`;
+        console.log('Final prompt with style:', finalPrompt);
+      }
     }
     try {
       const response = await fetch('/api/image', {
@@ -80,7 +129,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           'x-user-id': userId,
           'x-forwarded-for': userIp
         },
-        body: JSON.stringify({ prompt: prompt })
+        body: JSON.stringify({ prompt: finalPrompt })
       });
 
       setIsSubmitting(false); // Response is received, enable the button
@@ -155,6 +204,55 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           value={prompt}
           onChange={handleInputChange}
         />
+
+        {/* Style Selection Dropdowns */}
+        <div className="flex flex-col md:flex-row gap-2 mt-2">
+          {/* Category Selection */}
+          <div className="flex-1">
+            <Label htmlFor="category-select" className="mb-1 block text-sm">
+              Image Category (optional)
+            </Label>
+            <select
+              id="category-select"
+              className="w-full min-h-[40px] rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+            >
+              <option value="">Select a category</option>
+              {getCategories().map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Style Selection - only shown if a category is selected */}
+          <div className="flex-1">
+            <Label htmlFor="style-select" className="mb-1 block text-sm">
+              Image Style (optional)
+            </Label>
+            <select
+              id="style-select"
+              className="w-full min-h-[40px] rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedStyle}
+              onChange={handleStyleChange}
+              disabled={!selectedCategory}
+            >
+              <option value="">
+                {selectedCategory
+                  ? 'Select a style'
+                  : 'Select a category first'}
+              </option>
+              {availableStyles.map((style) => (
+                <option key={style.id} value={style.id}>
+                  {style.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <Button
           variant="slim"
           type="submit"
