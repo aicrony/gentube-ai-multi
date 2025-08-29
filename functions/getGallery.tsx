@@ -265,7 +265,7 @@ const ImageGallery: React.FC = () => {
   };
 
   // Handle downloading the current media
-  const handleDownload = async (url: string, isVideo: boolean) => {
+  const handleDownload = async (url: string, isVideo: boolean, prompt?: string) => {
     try {
       // Show a small loading indicator
       const loadingToast = document.createElement('div');
@@ -282,7 +282,22 @@ const ImageGallery: React.FC = () => {
 
       // Determine file extension based on media type
       const fileExtension = isVideo ? '.mp4' : '.jpg';
-      const fileName = `gentube-download${fileExtension}`;
+      
+      // Generate a filename based on the prompt if available
+      let fileName = 'gentube-download';
+      if (prompt) {
+        // Take first 29 characters, remove invalid filename characters
+        const sanitizedPrompt = prompt.substring(0, 29)
+          .replace(/[\/?%*:|"<>]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        
+        if (sanitizedPrompt) {
+          fileName = sanitizedPrompt;
+        }
+      }
+      
+      fileName = `${fileName}${fileExtension}`;
       
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
@@ -684,7 +699,7 @@ const ImageGallery: React.FC = () => {
             <div className="flex items-center space-x-3">
               {/* Download button */}
               <button
-                onClick={() => handleDownload(url, isVideo)}
+                onClick={() => handleDownload(url, isVideo, mediaItem.Prompt)}
                 className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
                 title="Download"
               >
@@ -935,6 +950,7 @@ const ImageGallery: React.FC = () => {
           onPrevious={handlePreviousInModal}
           hasNext={currentIndex < media.length - 1}
           hasPrevious={currentIndex > 0}
+          prompt={media[currentIndex].Prompt}
           onLike={() => handleToggleLike(media[currentIndex])}
           isLiked={
             media[currentIndex].id

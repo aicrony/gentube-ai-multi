@@ -178,7 +178,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     }
   };
 
-  const handleDownload = async (url: string, assetType: string) => {
+  const handleDownload = async (url: string, assetType: string, prompt?: string) => {
     try {
       // Show a small loading indicator
       const loadingToast = document.createElement('div');
@@ -195,7 +195,22 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
       // For videos and images, determine file extension
       const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
-      const fileName = `asset${fileExtension}`;
+      
+      // Generate a filename based on the prompt if available
+      let fileName = 'asset';
+      if (prompt) {
+        // Take first 29 characters, remove invalid filename characters
+        const sanitizedPrompt = prompt.substring(0, 29)
+          .replace(/[\/?%*:|"<>]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        
+        if (sanitizedPrompt) {
+          fileName = sanitizedPrompt;
+        }
+      }
+      
+      fileName = `${fileName}${fileExtension}`;
       
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
@@ -415,7 +430,8 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                     activity.AssetType === 'vid'
                       ? activity.CreatedAssetUrl
                       : activity.CreatedAssetUrl,
-                    activity.AssetType
+                    activity.AssetType,
+                    activity.Prompt
                   )
                 }
                 className="icon-size"
@@ -468,7 +484,13 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           Load More
         </button>
       )}
-      {isModalOpen && <Modal mediaUrl={modalMediaUrl} onClose={closeModal} />}
+      {isModalOpen && (
+        <Modal 
+          mediaUrl={modalMediaUrl} 
+          onClose={closeModal} 
+          prompt={activities.find(a => a.CreatedAssetUrl === modalMediaUrl)?.Prompt}
+        />
+      )}
     </div>
   );
 };

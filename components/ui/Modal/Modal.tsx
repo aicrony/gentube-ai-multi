@@ -51,6 +51,8 @@ interface ModalProps {
   setShowReorderMode?: (show: boolean) => void;
   onSubmitImageEdit?: (prompt: string) => Promise<void>;
   userCredits?: number | null;
+  // Asset metadata
+  prompt?: string; // Added for filename generation during download
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -85,7 +87,9 @@ const Modal: React.FC<ModalProps> = ({
   showReorderMode = false,
   setShowReorderMode = () => {},
   onSubmitImageEdit,
-  userCredits = null
+  userCredits = null,
+  // Asset metadata
+  prompt = ''
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isSlideshow, setIsSlideshow] = useState(autoStartSlideshow);
@@ -310,7 +314,22 @@ const Modal: React.FC<ModalProps> = ({
       // Determine file extension based on media type
       const isVideo = mediaUrl.endsWith('.mp4');
       const fileExtension = isVideo ? '.mp4' : '.jpg';
-      const fileName = `gentube-download${fileExtension}`;
+      
+      // Generate a filename based on the prompt if available
+      let fileName = 'gentube-download';
+      if (prompt) {
+        // Take first 29 characters, remove invalid filename characters
+        const sanitizedPrompt = prompt.substring(0, 29)
+          .replace(/[\/?%*:|"<>]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        
+        if (sanitizedPrompt) {
+          fileName = sanitizedPrompt;
+        }
+      }
+      
+      fileName = `${fileName}${fileExtension}`;
 
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(mediaUrl)}`;

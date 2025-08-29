@@ -558,7 +558,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
-  const handleDownload = async (url: string, assetType: string) => {
+  const handleDownload = async (url: string, assetType: string, prompt?: string) => {
     try {
       // Show a small loading indicator
       const loadingToast = document.createElement('div');
@@ -573,9 +573,24 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       loadingToast.style.zIndex = '1000';
       document.body.appendChild(loadingToast);
 
-      // For videos and images, determine file extension
+      // Generate a filename based on the prompt if available
       const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
-      const fileName = `asset${fileExtension}`;
+      
+      // Sanitize the prompt to create a valid filename
+      let fileName = 'asset';
+      if (prompt) {
+        // Take first 29 characters, remove invalid filename characters
+        const sanitizedPrompt = prompt.substring(0, 29)
+          .replace(/[\/?%*:|"<>]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        
+        if (sanitizedPrompt) {
+          fileName = sanitizedPrompt;
+        }
+      }
+      
+      fileName = `${fileName}${fileExtension}`;
 
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
@@ -1829,7 +1844,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                     // Always use CreatedAssetUrl for downloading
                     handleDownload(
                       activity.CreatedAssetUrl,
-                      activity.AssetType
+                      activity.AssetType,
+                      activity.Prompt
                     );
                   }}
                   className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
@@ -2011,6 +2027,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
           }
           currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
+          prompt={filteredAndSortedActivities[currentModalIndex]?.Prompt}
           onShare={() =>
             handleShareUrl(filteredAndSortedActivities[currentModalIndex])
           }
