@@ -142,8 +142,13 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
             setMessage(
-              'Your image is being generated. The assets list below will refresh automatically.'
+              'Click the Refresh Assets button to see your image'
             );
+            
+            // Auto-clear the message after 30 seconds
+            setTimeout(() => {
+              setMessage('');
+            }, 30000);
           }
         }
 
@@ -201,8 +206,18 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
 
       <div className="my-assets-container">
         {message && (
-          <div className="mt-3">
-            <div className="text-green-600 font-semibold mb-3">{message}</div>
+          <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-md shadow-sm flex justify-between items-center">
+            <div className="flex items-center">
+              <span className="mr-2">🔄</span>
+              <h3 className="font-medium text-blue-800 dark:text-blue-200">{message}</h3>
+            </div>
+            <button 
+              onClick={() => setMessage('')} 
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              aria-label="Dismiss message"
+            >
+              ✕
+            </button>
           </div>
         )}
 

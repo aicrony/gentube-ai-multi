@@ -133,6 +133,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
       });
 
       setIsSubmitting(false); // Response is received, enable the button
+      setMessage('Click the Refresh Assets button to see your image');
 
       // Use the centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
@@ -161,7 +162,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           ); // set the url of the response
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
-            setMessage('Refresh your assets to see your image in queue.');
+            setMessage('Click the Refresh Assets button to see your image');
 
             // Auto-clear the message after 30 seconds
             setTimeout(() => {
@@ -277,9 +278,19 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         {/*    </div>*/}
         {/*  </>*/}
         {/*)}*/}
-        {userCreditsResponse !== null && (
-          <div className={'padding-top-4'}>
-            <h3>{message}</h3>
+        {userCreditsResponse !== null && message && (
+          <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-md shadow-sm flex justify-between items-center">
+            <div className="flex items-center">
+              <span className="mr-2">🔄</span>
+              <h3 className="font-medium text-blue-800 dark:text-blue-200">{message}</h3>
+            </div>
+            <button 
+              onClick={() => setMessage('')} 
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              aria-label="Dismiss message"
+            >
+              ✕
+            </button>
           </div>
         )}
         {imageData &&
