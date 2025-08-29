@@ -560,12 +560,38 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
   const handleDownload = async (url: string, assetType: string) => {
     try {
+      // Show a small loading indicator
+      const loadingToast = document.createElement('div');
+      loadingToast.textContent = 'Downloading asset...';
+      loadingToast.style.position = 'fixed';
+      loadingToast.style.bottom = '20px';
+      loadingToast.style.right = '20px';
+      loadingToast.style.padding = '10px 15px';
+      loadingToast.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      loadingToast.style.color = 'white';
+      loadingToast.style.borderRadius = '4px';
+      loadingToast.style.zIndex = '1000';
+      document.body.appendChild(loadingToast);
+
       // For videos and images, determine file extension
       const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
       const fileName = `asset${fileExtension}`;
 
-      // Fetch the file as a blob
-      const response = await fetch(url);
+      // Use our API endpoint as a proxy to avoid CORS issues
+      const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
+      console.log('Downloading via proxy:', proxyUrl);
+      
+      // Fetch the file through our proxy
+      const response = await fetch(proxyUrl);
+      
+      // Remove loading indicator
+      document.body.removeChild(loadingToast);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+      
       const blob = await response.blob();
 
       // Create an object URL for the blob
@@ -583,9 +609,34 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+      
+      // Show success message
+      const successToast = document.createElement('div');
+      successToast.textContent = 'Download complete!';
+      successToast.style.position = 'fixed';
+      successToast.style.bottom = '20px';
+      successToast.style.right = '20px';
+      successToast.style.padding = '10px 15px';
+      successToast.style.backgroundColor = 'rgba(46, 125, 50, 0.9)';
+      successToast.style.color = 'white';
+      successToast.style.borderRadius = '4px';
+      successToast.style.zIndex = '1000';
+      successToast.style.opacity = '1';
+      successToast.style.transition = 'opacity 0.3s ease-in-out';
+      document.body.appendChild(successToast);
+      
+      // Fade out after 3 seconds
+      setTimeout(() => {
+        successToast.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(successToast)) {
+            document.body.removeChild(successToast);
+          }
+        }, 300);
+      }, 3000);
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert('Failed to download the asset');
+      alert(`Failed to download the media: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
