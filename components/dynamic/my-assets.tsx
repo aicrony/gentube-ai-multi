@@ -767,7 +767,8 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             if (item.id === assetId) {
               return {
                 ...item,
-                SubscriptionTier: isInGallery ? 0 : 4
+                SubscriptionTier: isInGallery ? 0 : 4,
+                isInGallery: !isInGallery // Also update the isInGallery flag for immediate UI update
               };
             }
             return item;
@@ -2040,7 +2041,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           onToggleGallery={() => {
             const activity = filteredAndSortedActivities[currentModalIndex];
             if (activity && activity.id) {
+              // Call handleToggleGallery and update the current modal activity
               handleToggleGallery(activity);
+              
+              // Close and reopen the modal after a short delay to reflect changes
+              setTimeout(() => {
+                openModalForAsset(currentModalIndex);
+              }, 300);
             }
           }}
           isInGallery={
