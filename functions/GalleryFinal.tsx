@@ -56,8 +56,8 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const searchParams = useSearchParams();
   const assetId = searchParams?.get('id');
 
-  // State for contest end
-  const contestEndDate = new Date('2025-06-30T00:00:00');
+  // State for the contest end
+  const contestEndDate = new Date('2025-09-30T00:00:00');
   const [isContestEnded, setIsContestEnded] = useState(false);
   const [winningAssets, setWinningAssets] = useState<GalleryItem[]>([]);
   const [maxLikesCount, setMaxLikesCount] = useState(0);
@@ -711,8 +711,15 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
               Contest In Progress!
             </h2>
             <p>
+              Contest ends on{' '}
+              {contestEndDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+              . <br />
               Vote for your favorite creations by clicking the heart icon.
-              Contest ends on June 30, 2025.
             </p>
             <p className="font-medium mt-2">The winner gets 500 Credits!</p>
           </div>
