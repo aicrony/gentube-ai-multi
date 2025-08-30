@@ -17,7 +17,7 @@ export const toggleOnGallery = async (userId: string, assetUrl: string) => {
   console.log('UPDATE activities:', activities);
 
   const updatedActivities = activities.map((activity) => {
-    activity.SubscriptionTier = 3;
+    activity.SubscriptionTier = 4;
     return {
       key: activity[datastore.KEY],
       data: activity

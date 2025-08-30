@@ -57,6 +57,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
   const assetId = searchParams?.get('id');
 
   // State for the contest end
+  // TODO (CONTEST) Step 1 for a new contest is to set the new date
   const contestEndDate = new Date('2025-09-30T00:00:00');
   const [isContestEnded, setIsContestEnded] = useState(false);
   const [winningAssets, setWinningAssets] = useState<GalleryItem[]>([]);
@@ -710,6 +711,9 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
             <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-200 mb-2">
               Contest In Progress!
             </h2>
+            {/*TODO (CONTEST) Step 4 is to set the theme and description*/}
+            <h4>"Creativity Theme"</h4>
+            <p>RULES: Any creative image is permitted.</p>
             <p>
               Contest ends on{' '}
               {contestEndDate.toLocaleDateString('en-US', {
@@ -722,6 +726,9 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
               Vote for your favorite creations by clicking the heart icon.
             </p>
             <p className="font-medium mt-2">The winner gets 500 Credits!</p>
+            <p>
+              <a href={'/'}>Start Generating Now to WIN!</a>
+            </p>
           </div>
         )}
       </div>
@@ -747,8 +754,10 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
               'Refresh Gallery'
             )}
           </button>
+          {/*TODO (CONTEST): Step 7 Display when list is reduced*/}
           <span className="text-xs text-gray-500 ml-2">
-            (Showing top 10 assets by hearts)
+            (Refreshes every 10 minutes)
+            {/*  (Showing top 10 assets by hearts)*/}
           </span>
         </div>
       )}

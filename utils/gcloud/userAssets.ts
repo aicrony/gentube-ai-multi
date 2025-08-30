@@ -327,14 +327,16 @@ export async function getGalleryAssets(
   });
 }
 
+// TODO (CONTEST) Step 6 set the limit here
 export async function getTopGalleryAssets(
-  limit: number = 10
+  limit: number = 100
 ): Promise<UserActivity[] | null> {
   try {
-    // Step 1: Query all gallery assets (SubscriptionTier = 3)
+    // Step 1: Query all gallery assets (SubscriptionTier = 4)
+    // TODO (CONTEST) Step 3 is to set the SubscriptionTier to the new number in the gallery query
     const galleryQuery = datastore
       .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-      .filter('SubscriptionTier', '=', 3);
+      .filter('SubscriptionTier', '=', 4);
 
     const [galleryAssets] = await datastore.runQuery(galleryQuery);
     console.log(`Found ${galleryAssets.length} total gallery assets`);

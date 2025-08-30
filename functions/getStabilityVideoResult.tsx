@@ -6,10 +6,6 @@ async function uploadVideoToGCS(
   videoData: Buffer,
   fileName: string
 ): Promise<string> {
-  // TODO: Storage for GCP, which requires higher security - https://cloud.google.com/run/docs/configuring/services/environment-variables
-  // const storage = new Storage({ keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS });
-
-  // Storage for Vercel
   const storage = new Storage({
     credentials: google_app_creds
   });

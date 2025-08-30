@@ -266,7 +266,7 @@ export async function addAssetToGallery(
     }
 
     // Set the subscription tier to 3 to mark it as gallery-visible
-    asset.SubscriptionTier = 3;
+    asset.SubscriptionTier = 4;
 
     // Update timestamp - use the field that already exists in the object
     if (asset.LastUpdated) {
@@ -342,7 +342,7 @@ export async function removeAssetFromGallery(
       //return false;
     }
 
-    // Only proceed if the asset is currently in the gallery (SubscriptionTier = 3)
+    // Only proceed if the asset is currently in the gallery (SubscriptionTier = 4)
     if (asset.SubscriptionTier !== 3) {
       console.error('Asset is not in the gallery');
       return true; // Return true because the end state is what was requested

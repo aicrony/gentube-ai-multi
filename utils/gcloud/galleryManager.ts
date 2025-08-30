@@ -155,7 +155,8 @@ export async function addAssetToGallery(
     }
 
     // Set the subscription tier to 3 to mark it as gallery-visible
-    asset.SubscriptionTier = 3;
+    // TODO (CONTEST) Step 2 to a new contest is to increment the SubscriptionTier (find and replace all for below var)
+    asset.SubscriptionTier = 4;
 
     // Update the timestamp fields
     if (asset.DateTime) {

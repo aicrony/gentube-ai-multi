@@ -11,7 +11,8 @@ import {
   FaPause,
   FaCog,
   FaCopy,
-  FaEdit
+  FaEdit,
+  FaStar
 } from 'react-icons/fa';
 
 interface ModalProps {
@@ -26,6 +27,9 @@ interface ModalProps {
   isLiked?: boolean;
   likesCount?: number;
   showLikeButton?: boolean;
+  onToggleGallery?: () => void;
+  isInGallery?: boolean;
+  showGalleryButton?: boolean;
   currentItemId?: string;
   onShare?: () => void;
   showShareButton?: boolean;
@@ -67,6 +71,9 @@ const Modal: React.FC<ModalProps> = ({
   isLiked = false,
   likesCount = 0,
   showLikeButton = false,
+  onToggleGallery,
+  isInGallery = false,
+  showGalleryButton = false,
   currentItemId,
   onShare,
   showShareButton = false,
@@ -481,6 +488,20 @@ const Modal: React.FC<ModalProps> = ({
                 <span className="mr-1 text-xs font-medium">{likesCount}</span>
               )}
               <FaHeart />
+            </button>
+          )}
+
+          {/* Gallery Star button - only shown if the feature is enabled */}
+          {showGalleryButton && onToggleGallery && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onToggleGallery) onToggleGallery();
+              }}
+              className={`bg-gray-800 bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 ${isInGallery ? 'text-yellow-500' : 'text-white'} focus:outline-none transition-all shadow-md`}
+              title={isInGallery ? 'Remove from Gallery' : 'Add to Gallery'}
+            >
+              <FaStar />
             </button>
           )}
 

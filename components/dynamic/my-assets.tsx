@@ -558,7 +558,11 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     }
   };
 
-  const handleDownload = async (url: string, assetType: string, prompt?: string) => {
+  const handleDownload = async (
+    url: string,
+    assetType: string,
+    prompt?: string
+  ) => {
     try {
       // Show a small loading indicator
       const loadingToast = document.createElement('div');
@@ -575,38 +579,41 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       // Generate a filename based on the prompt if available
       const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
-      
+
       // Sanitize the prompt to create a valid filename
       let fileName = 'asset';
       if (prompt) {
         // Take first 29 characters, remove invalid filename characters
-        const sanitizedPrompt = prompt.substring(0, 29)
+        const sanitizedPrompt = prompt
+          .substring(0, 29)
           .replace(/[\/?%*:|"<>]/g, '')
           .trim()
           .replace(/\s+/g, '-');
-        
+
         if (sanitizedPrompt) {
           fileName = sanitizedPrompt;
         }
       }
-      
+
       fileName = `${fileName}${fileExtension}`;
 
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
       console.log('Downloading via proxy:', proxyUrl);
-      
+
       // Fetch the file through our proxy
       const response = await fetch(proxyUrl);
-      
+
       // Remove loading indicator
       document.body.removeChild(loadingToast);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.error || `Error ${response.status}: ${response.statusText}`
+        );
       }
-      
+
       const blob = await response.blob();
 
       // Create an object URL for the blob
@@ -624,7 +631,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-      
+
       // Show success message
       const successToast = document.createElement('div');
       successToast.textContent = 'Download complete!';
@@ -639,7 +646,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       successToast.style.opacity = '1';
       successToast.style.transition = 'opacity 0.3s ease-in-out';
       document.body.appendChild(successToast);
-      
+
       // Fade out after 3 seconds
       setTimeout(() => {
         successToast.style.opacity = '0';
@@ -651,7 +658,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
       }, 3000);
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert(`Failed to download the media: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Failed to download the media: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   };
 
@@ -699,11 +708,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
   // Handle adding/removing an asset to/from the gallery
   const handleToggleGallery = async (
     activity: UserActivity,
-    event: React.MouseEvent
+    event?: React.MouseEvent | MouseEvent
   ) => {
-    // Prevent event propagation to avoid any parent handlers
-    event.preventDefault();
-    event.stopPropagation();
+    // Prevent event propagation to avoid any parent handlers if an event is provided
+    if (event) {
+      if (event.preventDefault) event.preventDefault();
+      if (event.stopPropagation) event.stopPropagation();
+    }
 
     if (!userId || !activity.id) {
       if (!userId) {
@@ -1607,13 +1618,13 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         </div>
       </div>
 
-      {/*<div className="flex justify-between items-center mb-2">*/}
-      {/*  <p>*/}
-      {/*    <strong>*WIN:</strong> 500 Credits EVERY MONTH - Star your images and*/}
-      {/*    get the most hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>*/}
-      {/*    . Next winner: June 30, 2025.*/}
-      {/*  </p>*/}
-      {/*</div>*/}
+      <div className="flex justify-between items-center mb-2">
+        <p>
+          <strong>*WIN:</strong> 500 Credits EVERY MONTH - Star your images and
+          get the most hearts in the <a href={'/gallery'}>GenTube.ai gallery</a>
+          . Next winner: September 30, 2025.
+        </p>
+      </div>
       <div className="flex justify-between items-center mb-2">
         <p>
           <strong>*BUY MORE CREDITS:</strong> Keep the creative juices flowing!{' '}
@@ -2024,6 +2035,20 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               : 0
           }
           showLikeButton={
+            filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
+          }
+          onToggleGallery={() => {
+            const activity = filteredAndSortedActivities[currentModalIndex];
+            if (activity && activity.id) {
+              handleToggleGallery(activity);
+            }
+          }}
+          isInGallery={
+            filteredAndSortedActivities[currentModalIndex]?.isInGallery ||
+            filteredAndSortedActivities[currentModalIndex]?.SubscriptionTier ===
+              3
+          }
+          showGalleryButton={
             filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'
           }
           currentItemId={filteredAndSortedActivities[currentModalIndex]?.id}
