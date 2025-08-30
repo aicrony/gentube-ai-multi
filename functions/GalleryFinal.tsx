@@ -754,9 +754,9 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
               'Refresh Gallery'
             )}
           </button>
-          {/*TODO (CONTEST): Step 7 Display when list is reduced*/}
+          {/*TODO (CONTEST) Step 7 Display when list is reduced*/}
           <span className="text-xs text-gray-500 ml-2">
-            (Refreshes every 10 minutes)
+            (Refresh to see your added assets)
             {/*  (Showing top 10 assets by hearts)*/}
           </span>
         </div>
@@ -769,6 +769,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
         forceEndedForTesting ||
         new Date() > contestEndDate ? (
           /* Contest ended display - show only winning assets */
+          // <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           <div
             className={`flex ${winningAssets.length > 1 ? 'flex-row flex-wrap justify-center' : 'justify-center'} gap-5 w-full px-2 mx-auto`}
           >
@@ -858,7 +859,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
           </div>
         ) : (
           /* Normal display during contest */
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mx-auto px-2 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mx-auto px-4 w-full">
             {assets.map((asset, index) => (
               <div
                 key={index}

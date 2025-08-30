@@ -51,7 +51,7 @@ const handleToggleOnGallery = async (
       setActivities((prevActivities: UserActivity[]) =>
         prevActivities.map((activity: UserActivity) =>
           activity.CreatedAssetUrl === assetUrl
-            ? { ...activity, SubscriptionTier: 3 }
+            ? { ...activity, SubscriptionTier: 4 }
             : activity
         )
       );
@@ -178,7 +178,11 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
     }
   };
 
-  const handleDownload = async (url: string, assetType: string, prompt?: string) => {
+  const handleDownload = async (
+    url: string,
+    assetType: string,
+    prompt?: string
+  ) => {
     try {
       // Show a small loading indicator
       const loadingToast = document.createElement('div');
@@ -195,38 +199,41 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
       // For videos and images, determine file extension
       const fileExtension = assetType === 'vid' ? '.mp4' : '.jpg';
-      
+
       // Generate a filename based on the prompt if available
       let fileName = 'asset';
       if (prompt) {
         // Take first 29 characters, remove invalid filename characters
-        const sanitizedPrompt = prompt.substring(0, 29)
+        const sanitizedPrompt = prompt
+          .substring(0, 29)
           .replace(/[\/?%*:|"<>]/g, '')
           .trim()
           .replace(/\s+/g, '-');
-        
+
         if (sanitizedPrompt) {
           fileName = sanitizedPrompt;
         }
       }
-      
+
       fileName = `${fileName}${fileExtension}`;
-      
+
       // Use our API endpoint as a proxy to avoid CORS issues
       const proxyUrl = `/api/downloadAsset?url=${encodeURIComponent(url)}`;
       console.log('Downloading via proxy:', proxyUrl);
-      
+
       // Fetch the file through our proxy
       const response = await fetch(proxyUrl);
-      
+
       // Remove loading indicator
       document.body.removeChild(loadingToast);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.error || `Error ${response.status}: ${response.statusText}`
+        );
       }
-      
+
       const blob = await response.blob();
 
       // Create an object URL for the blob
@@ -244,7 +251,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-      
+
       // Show success message
       const successToast = document.createElement('div');
       successToast.textContent = 'Download complete!';
@@ -259,7 +266,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       successToast.style.opacity = '1';
       successToast.style.transition = 'opacity 0.3s ease-in-out';
       document.body.appendChild(successToast);
-      
+
       // Fade out after 3 seconds
       setTimeout(() => {
         successToast.style.opacity = '0';
@@ -271,7 +278,9 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
       }, 3000);
     } catch (error) {
       console.error('Error downloading asset:', error);
-      alert(`Failed to download the asset: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Failed to download the asset: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   };
 
@@ -303,8 +312,8 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         <label className="switch">
           <input
             type="checkbox"
-            checked={subscriptionTier === 3}
-            onChange={() => setSubscriptionTier(subscriptionTier === 0 ? 3 : 0)}
+            checked={subscriptionTier === 4}
+            onChange={() => setSubscriptionTier(subscriptionTier === 0 ? 4 : 0)}
           />
           <span className="slider round"></span>
         </label>
@@ -315,7 +324,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           your assets.
         </p>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-4 w-full">
         {activities.map((activity, index) => (
           <div
             key={index}
@@ -342,7 +351,8 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
 
             {/* Image Thumbnail */}
             <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden relative">
-              {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
+              {activity.AssetType === 'vid' &&
+              activity.AssetSource === 'none' ? (
                 <FaPlay className="w-12 h-12 text-gray-400" />
               ) : (
                 <img
@@ -454,7 +464,7 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
                   >
                     <FaPlus className="text-xs" />
                   </button>
-                ) : activity.SubscriptionTier === 3 ? (
+                ) : activity.SubscriptionTier === 4 ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -487,15 +497,20 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
         ))}
       </div>
       {activities.length > 0 && hasMore && (
-        <button onClick={() => setPage((prev) => prev + 1)} className="mt-4 px-4 py-2 rounded border flex items-center justify-center">
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="mt-4 px-4 py-2 rounded border flex items-center justify-center"
+        >
           Load More
         </button>
       )}
       {isModalOpen && (
-        <Modal 
-          mediaUrl={modalMediaUrl} 
-          onClose={closeModal} 
-          prompt={activities.find(a => a.CreatedAssetUrl === modalMediaUrl)?.Prompt}
+        <Modal
+          mediaUrl={modalMediaUrl}
+          onClose={closeModal}
+          prompt={
+            activities.find((a) => a.CreatedAssetUrl === modalMediaUrl)?.Prompt
+          }
         />
       )}
     </div>

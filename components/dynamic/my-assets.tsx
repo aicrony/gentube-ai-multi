@@ -135,7 +135,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Process the assets to ensure gallery status is properly reflected
         const processedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
-          isInGallery: asset.SubscriptionTier === 3
+          isInGallery: asset.SubscriptionTier === 4
         }));
 
         // Log to help debug gallery status issues
@@ -205,7 +205,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
     // Apply gallery filter
     if (filters.inGallery) {
       result = result.filter(
-        (activity) => activity.isInGallery || activity.SubscriptionTier === 3
+        (activity) => activity.isInGallery || activity.SubscriptionTier === 4
       );
     }
 
@@ -321,7 +321,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
         // Process the assets to ensure gallery status is properly reflected
         const queuedAssets = data.assets.map((asset: UserActivity) => ({
           ...asset,
-          isInGallery: asset.SubscriptionTier === 3
+          isInGallery: asset.SubscriptionTier === 4
         }));
 
         // Get existing asset IDs to prevent duplicates
@@ -731,7 +731,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
 
       // Use either direct SubscriptionTier check or the isInGallery helper property
       const isInGallery =
-        activity.isInGallery || activity.SubscriptionTier === 3;
+        activity.isInGallery || activity.SubscriptionTier === 4;
       console.log(
         `Asset ${activity.id} - SubscriptionTier: ${activity.SubscriptionTier}, isInGallery: ${isInGallery}`
       );
@@ -767,7 +767,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             if (item.id === assetId) {
               return {
                 ...item,
-                SubscriptionTier: isInGallery ? 0 : 3
+                SubscriptionTier: isInGallery ? 0 : 4
               };
             }
             return item;
@@ -1400,7 +1400,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                             let processedAssets = data.assets.map(
                               (asset: UserActivity) => ({
                                 ...asset,
-                                isInGallery: asset.SubscriptionTier === 3
+                                isInGallery: asset.SubscriptionTier === 4
                               })
                             );
 
@@ -1705,7 +1705,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
               </div>
 
               {/* Gallery Status */}
-              {(activity.isInGallery || activity.SubscriptionTier === 3) && (
+              {(activity.isInGallery || activity.SubscriptionTier === 4) && (
                 <div className="bg-gray-800 bg-opacity-70 text-yellow-500 rounded-full px-2 py-0.5 text-xs flex items-center">
                   <FaStar className="mr-1" size={10} />
                   <span>Gallery</span>
@@ -1886,9 +1886,9 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                       e.stopPropagation();
                       handleToggleGallery(activity, e);
                     }}
-                    className={`bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 ${activity.isInGallery || activity.SubscriptionTier === 3 ? 'text-yellow-500' : 'text-white'} focus:outline-none transition-all shadow-md ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
+                    className={`bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 ${activity.isInGallery || activity.SubscriptionTier === 4 ? 'text-yellow-500' : 'text-white'} focus:outline-none transition-all shadow-md ${galleryActionAssetId === activity.id ? 'opacity-50' : ''}`}
                     title={
-                      activity.isInGallery || activity.SubscriptionTier === 3
+                      activity.isInGallery || activity.SubscriptionTier === 4
                         ? 'Remove from Gallery'
                         : 'Add to Gallery'
                     }
@@ -1959,7 +1959,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
                 let processedAssets = data.assets.map(
                   (asset: UserActivity) => ({
                     ...asset,
-                    isInGallery: asset.SubscriptionTier === 3
+                    isInGallery: asset.SubscriptionTier === 4
                   })
                 );
 
@@ -2046,7 +2046,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
           isInGallery={
             filteredAndSortedActivities[currentModalIndex]?.isInGallery ||
             filteredAndSortedActivities[currentModalIndex]?.SubscriptionTier ===
-              3
+              4
           }
           showGalleryButton={
             filteredAndSortedActivities[currentModalIndex]?.AssetType !== 'upl'

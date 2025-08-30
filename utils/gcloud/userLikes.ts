@@ -261,7 +261,7 @@ export async function addAssetToGallery(
     }
 
     // Store the user's original subscription tier if not already saved
-    if (!asset.UserSubscriptionTier && asset.SubscriptionTier !== 3) {
+    if (!asset.UserSubscriptionTier && asset.SubscriptionTier !== 4) {
       asset.UserSubscriptionTier = asset.SubscriptionTier || 0;
     }
 
@@ -343,7 +343,7 @@ export async function removeAssetFromGallery(
     }
 
     // Only proceed if the asset is currently in the gallery (SubscriptionTier = 4)
-    if (asset.SubscriptionTier !== 3) {
+    if (asset.SubscriptionTier !== 4) {
       console.error('Asset is not in the gallery');
       return true; // Return true because the end state is what was requested
     }

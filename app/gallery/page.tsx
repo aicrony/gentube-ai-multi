@@ -7,7 +7,7 @@ export default function Gallery() {
   // The GalleryFinal component will handle the ID parameter internally
   return (
     <section>
-      <div className="max-w-6xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
+      <div className="max-w-7xl px-4 mx-auto sm:py-12 sm:px-6 lg:px-8">
         <div className="sm:flex sm:flex-col sm:align-center">
           <h1 className="mt-20 text-4xl font-extrabold sm:text-center sm:text-6xl">
             GenTube.ai Contest Gallery

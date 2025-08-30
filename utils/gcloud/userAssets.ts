@@ -243,7 +243,7 @@ export async function getGalleryAssets(
 ): Promise<UserActivity[] | null> {
   let query = datastore
     .createQuery(NAMESPACE, USER_ACTIVITY_KIND)
-    .filter('SubscriptionTier', '=', 3)
+    .filter('SubscriptionTier', '=', 4)
     .limit(limit)
     .offset(offset)
     .order('DateTime', { descending: true });
@@ -322,7 +322,7 @@ export async function getGalleryAssets(
       DateTime: activity.DateTime,
       UserId: activity.UserId || null,
       CreatorName: creatorName,
-      SubscriptionTier: activity.SubscriptionTier || 3 // Default to 3 for gallery assets
+      SubscriptionTier: activity.SubscriptionTier || 4 // Default to 3 for gallery assets
     };
   });
 }
@@ -430,7 +430,7 @@ export async function getTopGalleryAssets(
         DateTime: activity.DateTime,
         UserId: activity.UserId || null,
         CreatorName: creatorName,
-        SubscriptionTier: activity.SubscriptionTier || 3
+        SubscriptionTier: activity.SubscriptionTier || 4
       };
     });
   } catch (error) {

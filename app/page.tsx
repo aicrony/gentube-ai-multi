@@ -115,7 +115,11 @@ export default function Home() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="imageUrl">
-                Describe an image to start your video.
+                Describe an image to start your video.{' '}
+                <a href={'/terms'} title={'View Terms of Use'}>
+                  By using our service, you automatically agree to our Terms of
+                  Use
+                </a>
               </Label>
             </div>
           </div>
