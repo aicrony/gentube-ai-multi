@@ -182,12 +182,14 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
               ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
               : dataResponse.result === 'CreateAccount'
                 ? 'Create an account for free credits.'
-                : dataResponse.result === ''
-                  ? 'Error. Please try again.'
-                  : dataResponse.result
+                : dataResponse.result === 'No image data was generated'
+                  ? 'An error occurred while generating the image. Please try a different prompt.'
+                  : dataResponse.result === ''
+                    ? 'Error. Please try again.'
+                    : dataResponse.result
           );
           setImageData(
-            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
+            'https://storage.googleapis.com/gentube-upload-image-storage/79575369-69b3-489c-bbaf-e315bd7a8002.png'
           );
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {

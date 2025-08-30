@@ -132,19 +132,19 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
               ? 'Credit limit exceeded. Purchase credits on the PRICING page.'
               : dataResponse.result === 'CreateAccount'
                 ? 'Create an account for free credits.'
-                : dataResponse.result === ''
-                  ? 'Error. Please try again.'
-                  : dataResponse.result
+                : dataResponse.result === 'No image data was generated'
+                  ? 'An error occurred while generating the image. Please try a different prompt.'
+                  : dataResponse.result === ''
+                    ? 'Error. Please try again.'
+                    : dataResponse.result
           );
           setImageData(
-            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
+            'https://storage.googleapis.com/gentube-upload-image-storage/79575369-69b3-489c-bbaf-e315bd7a8002.png'
           );
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
-            setMessage(
-              'Click the Refresh Assets button to see your image'
-            );
-            
+            setMessage('Click the Refresh Assets button to see your image');
+
             // Auto-clear the message after 30 seconds
             setTimeout(() => {
               setMessage('');
@@ -209,10 +209,12 @@ export const SocialMediaImageButton: React.FC<SocialMediaImageButtonProps> = ({
           <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-md shadow-sm flex justify-between items-center">
             <div className="flex items-center">
               <span className="mr-2">🔄</span>
-              <h3 className="font-medium text-blue-800 dark:text-blue-200">{message}</h3>
+              <h3 className="font-medium text-blue-800 dark:text-blue-200">
+                {message}
+              </h3>
             </div>
-            <button 
-              onClick={() => setMessage('')} 
+            <button
+              onClick={() => setMessage('')}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Dismiss message"
             >

@@ -134,20 +134,29 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
         body: JSON.stringify({ prompt: finalPrompt })
       });
 
-      setIsSubmitting(false); // Response is received, enable the button
-      setMessage('Click the Refresh Assets button to see your image');
-      setErrorMessage(null);
-
       // Use the centralized error handler
-      if (await handleApiError(response, { setErrorMessage })) {
-        return; // Error was handled, exit the function
-      }
+      // if (await handleApiError(response, { setErrorMessage })) {
+      //   setIsSubmitting(false); // Response is received, enable the button
+      //   setErrorMessage(null);
+      //   setErrorMessage('No image was generated. Please revise your prompt.');
+      //   return; // Error was handled, exit the function
+      // } else {
+      // Success
+      // setIsSubmitting(false); // Response is received, enable the button
+      // setMessage(
+      //   '2 Click the Refresh Assets button to see your image - ' +
+      //     JSON.stringify(response)
+      // );
+      // setErrorMessage(null);
+      // }
+
       let dataResponse: { result?: any; credits?: any; error?: boolean } = {};
       if (response.headers.get('content-type')?.includes('application/json')) {
         dataResponse = await response.json();
-        setIsSubmitting(false); // Response is received, enable the button
+        setIsSubmitting(false); // Response is received, disable the button
         console.log('Result:', dataResponse.result);
         console.log('UserCredits:', dataResponse.credits);
+
         if (dataResponse.error) {
           // Set response
           setErrorMessage(
@@ -161,7 +170,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           );
           // Sample Image
           setImageData(
-            'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png'
+            'https://storage.googleapis.com/gentube-upload-image-storage/79575369-69b3-489c-bbaf-e315bd7a8002.png'
           ); // set the url of the response
         } else if (!dataResponse.error) {
           if (dataResponse.result == 'InQueue') {
@@ -171,6 +180,8 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
             setTimeout(() => {
               setMessage('');
             }, 30000);
+          } else {
+            setMessage('Click the Refresh Assets button to see your image.');
           }
         }
 
@@ -303,12 +314,12 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           imageData.code !== 'ERR_NON_2XX_3XX_RESPONSE' && (
             <div className={'margin-top-8'}>
               <div>
-                <a href={imageData} target="_blank">
-                  Open Image <br /> {JSON.stringify(imageData.code)}
+                <a href="/pricing" target="_parent">
+                  <img src={imageData} alt="Generated Image" />
                 </a>
               </div>
-              <img src={imageData} alt="Generated Image" />
-              {renderVideoButton()}
+
+              {/*{renderVideoButton()}*/}
             </div>
           )}
         {imageData && imageData.code === 'ERR_NON_2XX_3XX_RESPONSE' && (

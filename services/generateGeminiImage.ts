@@ -3,7 +3,9 @@ import { uploadImageToGCSFromBase64 } from '@/utils/gcloud/uploadImage';
 require('dotenv').config();
 
 const geminiApiKey = process.env.GEMINI_API_KEY as string;
-const geminiImageModel = process.env.GEMINI_IMAGE_MODEL as string || 'gemini-2.5-flash-image-preview';
+const geminiImageModel =
+  (process.env.GEMINI_IMAGE_MODEL as string) ||
+  'gemini-2.5-flash-image-preview';
 
 // Define response types for TypeScript
 export interface GeminiImageResponse {
@@ -23,12 +25,13 @@ export interface GeminiImageResponse {
 export interface GeminiImageCallback {
   webhook: string;
   response: GeminiImageResponse | null;
+  error?: string | null;
 }
 
 /**
  * Generate an image using Gemini API and upload it to Google Cloud Storage
  * This function is designed to be a drop-in replacement for generateFalImage.ts
- * 
+ *
  * @param loop - Kept for API compatibility with generateFalImage, not actually used
  * @param imagePrompt - The text prompt for the image generation
  * @returns A callback object with webhook (for compatibility) and response properties
@@ -42,7 +45,8 @@ export default async function generateGeminiImage(
     let result: GeminiImageResponse | null = null;
     const callback: GeminiImageCallback = {
       webhook: process.env.FAL_IMAGE_API_WEBHOOK as string,
-      response: null
+      response: null,
+      error: null
     };
 
     // If we're in test mode, return a mock response
@@ -68,15 +72,15 @@ export default async function generateGeminiImage(
 
       // Initialize the Google Generative AI client
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-      
+
       console.log('Generating image with Gemini API:', imagePrompt);
-      
+
       // Generate the image using the models.generateContent method
       const response = await ai.models.generateContent({
         model: geminiImageModel,
         contents: imagePrompt
       });
-      
+
       // Extract the image data
       let imageData: string | null = null;
       if (response.candidates && response.candidates[0]?.content?.parts) {
@@ -87,20 +91,29 @@ export default async function generateGeminiImage(
           }
         }
       }
-      
+
       if (!imageData) {
-        throw new Error('No image data was generated');
+        throw new Error(
+          'No image. Please revise your prompt for clarity and safety.'
+        );
+        // const errorCallback2: GeminiImageCallback = {
+        //   response: null,
+        //   error: 'ERROR: Please revise your prompt and try again.',
+        //   webhook: ''
+        // };
+        // return errorCallback2;
       }
-      
+
       console.log('Image data received from Gemini API');
-      
+
       // Upload the image to Google Cloud Storage
       const imageUrl = await uploadImageToGCSFromBase64('default', imageData);
       console.log('Image uploaded to GCS:', imageUrl);
-      
+
       // Create a request ID from the image URL
-      const requestId = imageUrl.split('/').pop()?.split('.')[0] || `gemini-${Date.now()}`;
-      
+      const requestId =
+        imageUrl.split('/').pop()?.split('.')[0] || `gemini-${Date.now()}`;
+
       // Return in the same format as FAL for compatibility
       result = {
         status: 'COMPLETED',
@@ -121,6 +134,17 @@ export default async function generateGeminiImage(
     return callback;
   } catch (error) {
     console.error('An error occurred while generating the image:', error);
-    return undefined;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+
+    // Create a callback with error information
+    const errorCallback: GeminiImageCallback = {
+      response: null,
+      error: errorMessage,
+      webhook: ''
+    };
+
+    // Return the error information instead of undefined
+    return errorCallback;
   }
 }

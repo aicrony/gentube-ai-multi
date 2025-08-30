@@ -77,9 +77,13 @@ export async function processUserImageEditRequest(
 
   // Define credit cost at the beginning
   const creditCost = 10; // Image editing costs more than regular image generation
-  
+
   // Check if user has enough credits for image editing (costs 10 credits)
-  if (userResponse.credits === undefined || userResponse.credits <= 0 || userResponse.credits < creditCost) {
+  if (
+    userResponse.credits === undefined ||
+    userResponse.credits <= 0 ||
+    userResponse.credits < creditCost
+  ) {
     userResponse.result = 'LimitExceeded';
     userResponse.error = true;
     return userResponse;
@@ -89,12 +93,17 @@ export async function processUserImageEditRequest(
     userResponse.error = true;
     return userResponse;
   }
-  
+
   // Deduct credits BEFORE making the API call
   const previousCredits = userResponse.credits;
   userResponse.credits -= creditCost;
-  console.log('Deducting credits at beginning of request. Previous:', previousCredits, 'New:', userResponse.credits);
-  
+  console.log(
+    'Deducting credits at beginning of request. Previous:',
+    previousCredits,
+    'New:',
+    userResponse.credits
+  );
+
   // Update user credits in database IMMEDIATELY
   await updateUserCredits(
     userId,
@@ -112,7 +121,7 @@ export async function processUserImageEditRequest(
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       userResponse.result =
-        'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png';
+        'https://storage.googleapis.com/gentube-upload-image-storage/79575369-69b3-489c-bbaf-e315bd7a8002.png';
     } else {
       // Variables already initialized above
 
@@ -147,9 +156,12 @@ export async function processUserImageEditRequest(
         }
       }
     }
-    
+
     // Credits have already been deducted and updated at the beginning
-    console.log('Credits were already deducted at the beginning of the request: ', userResponse.credits);
+    console.log(
+      'Credits were already deducted at the beginning of the request: ',
+      userResponse.credits
+    );
 
     // Data save - if we have a completed result, save it directly
     const activityResponse = await saveUserActivity({

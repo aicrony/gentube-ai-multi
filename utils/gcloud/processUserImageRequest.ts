@@ -128,23 +128,39 @@ export async function processUserImageRequest(
     if (process.env.TEST_MODE && process.env.TEST_MODE === 'true') {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       userResponse.result =
-        'https://storage.googleapis.com/gen-image-storage/9f6c23a0-d623-4b5c-8cc8-3b35013576f3.png';
+        'https://storage.googleapis.com/gentube-upload-image-storage/79575369-69b3-489c-bbaf-e315bd7a8002.png';
     } else {
       imageResult = (await callImageApi('none', imagePrompt)) as any;
+
+      // Check if there was an error from the image generation service
+      if (imageResult && imageResult.error) {
+        console.log('Image generation error:', imageResult.error);
+        userResponse.result = imageResult.error;
+        userResponse.error = true;
+        return userResponse;
+      }
+
       // Check for queued webhook response and save it
       if (imageResult) {
         console.log(imageResult);
         if (imageResult.webhook) {
           const webhook = imageResult.webhook;
           console.log('Webhook: ', webhook);
-          
+
           // Handle different types of responses based on status
           if (imageResult.response && imageResult.response.status) {
+            console.log(
+              'imageResult.response.status: ' + imageResult.response.status
+            );
+
             if (imageResult.response.status === 'COMPLETED') {
               // For completed images from Gemini
-              requestId = imageResult.response.output?.image || imageResult.response.response_url || '';
+              requestId =
+                imageResult.response.output?.image ||
+                imageResult.response.response_url ||
+                '';
               userResponse.result = requestId; // Set the result to the image URL
-              
+
               // Data save for completed image
               const activityResponse = await saveUserActivity({
                 id: undefined,
@@ -159,9 +175,9 @@ export async function processUserImageRequest(
                 UserId: userId,
                 UserIp: localizedIpAddress
               });
-              
+
               console.log('Image Data saved (completed): ', activityResponse);
-              
+
               userResponse.error = false;
               return userResponse; // Return early with the image URL
             } else {
