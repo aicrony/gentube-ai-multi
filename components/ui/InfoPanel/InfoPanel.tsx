@@ -87,37 +87,23 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     setIsOpen(false); // Close the modal first
 
     switch (featureTitle) {
-      // case 'Asset Groups':
-      //   // Check if user is signed in before opening groups panel
-      //   if (userId) {
-      //     window.dispatchEvent(new CustomEvent('openGroupsPanel'));
-      //   } else {
-      //     // Redirect to sign in if not authenticated
-      //     window.location.href = '/signin';
-      //   }
-      //   break;
-      // case 'Group Slideshows':
-      //   // Try to start slideshow with demo image if no assets
-      //   window.dispatchEvent(
-      //     new CustomEvent('startDemoSlideshow', {
-      //       detail: { demoImage: '/panda-demo-image.png' }
-      //     })
-      //   );
-      //   break;
-      case 'Image Editing':
-        // Try to open image editing with demo image if no assets
-        // window.dispatchEvent(
-        //   new CustomEvent('openImageEdit', {
-        //     detail: { demoImage: '/panda-demo-image.png' }
-        //   })
-        // );
-        break;
-      case 'Gallery & Hearts':
+      case 'Enhanced Gallery Experience':
         // Navigate to the gallery page
         // window.location.href = '/gallery';
         break;
-      case 'Monthly Contest':
+      case 'New Image Generation Engine':
+        // Redirect to the image generation page
+        // window.location.href = '/create';
+        break;
+      case 'Preview Apps Support':
+        // No specific action for this informational item
+        break;
+      case 'Extended Contest Period':
         // Navigate to the gallery page (where the contest is held)
+        // window.location.href = '/gallery';
+        break;
+      case 'Improved Gallery Integration':
+        // Navigate to the gallery page
         // window.location.href = '/gallery';
         break;
       default:
@@ -126,29 +112,13 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
   };
 
   const latestFeatures = [
-    // {
-    //   icon: <FaFolder className="text-blue-500" />,
-    //   title: 'Asset Groups',
-    //   description: userId
-    //     ? 'Organize your assets into custom groups for better management'
-    //     : 'Organize your assets into custom groups for better management (requires sign in)',
-    //   clickable: true
-    // },
-    // {
-    //   icon: <FaPlay className="text-green-500" />,
-    //   title: 'Group Slideshows',
-    //   description:
-    //     'Create and share slideshows from asset groups - customize timing, direction, and looping',
-    //   clickable: true
-    // },
     {
-      icon: <FaSearch className="text-blue-500" />,
-      title: 'Asset Search & Display Upgrade',
+      icon: <FaFolder className="text-blue-500" />,
+      title: 'Enhanced Gallery Experience',
       description: (
         <>
-          Search button{' '}
-          <FaSearch className="inline-block align-middle mx-0.5" /> added to
-          search field for keyword searching on all assets. Improved asset
+          Improved gallery interface with optimized layout and responsive
+          design. New asset management features for better organization and
           visibility.
         </>
       ),
@@ -156,28 +126,28 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
     },
     {
       icon: <FaImage className="text-purple-500" />,
-      title: 'Image Editing',
+      title: 'New Image Generation Engine',
       description: (
         <>
-          Edit your images directly with AI-powered modifications. Generate an
-          image and click on it, then look for the{' '}
-          <FaEdit className="inline-block align-middle mx-0.5" /> edit icon.
+          Upgraded to Nano Banana (Gemini) for enhanced image generation
+          quality. Improved error handling and faster response times for all
+          your creative needs.
         </>
       ),
       clickable: true
     },
     {
-      icon: <FaStar className="text-yellow-500" />,
-      title: 'Gallery & Hearts',
+      icon: <FaTrophy className="text-orange-500" />,
+      title: 'Extended Contest Period',
       description:
-        'Star your asset to add it to the public gallery. Heart your asset to be first to love it.',
+        'WIN 500 Credits in our monthly contest! Contest period extended - next winner announcement: September 30, 2025.',
       clickable: true
     },
     {
-      icon: <FaTrophy className="text-orange-500" />,
-      title: 'Monthly Contest',
+      icon: <FaStar className="text-yellow-500" />,
+      title: 'Improved Gallery Integration',
       description:
-        'WIN 500 Credits EVERY MONTH for the most hearts in the GenTube.ai gallery. Next winner: June 30, 2025.',
+        'Enhanced gallery toggles with immediate UI feedback. Your gallery status changes are now reflected instantly across the app.',
       clickable: true
     }
   ];
@@ -256,7 +226,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ className = '', userId }) => {
                   {/* Release Date */}
                   <div className="text-center pb-2 border-b border-gray-200 dark:border-gray-600">
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Released: June 1, 2025
+                      Updated: August 30, 2025
                     </p>
                   </div>
 
