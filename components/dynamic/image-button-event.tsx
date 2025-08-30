@@ -99,6 +99,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     setIsSubmitting(true); // Disable the button while the request is being handled
     setImageData(null); // clear the imageData state
     setErrorMessage(null); // clear any previous error message
+    setMessage(null); // clear previous message
     console.log('PASS userId:', userId);
     console.log('PASS userIp:', userIp);
 
@@ -106,6 +107,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
     if (!prompt || !prompt.trim()) {
       setErrorMessage('Please enter a description for your image.');
       setIsSubmitting(false);
+      setErrorMessage(null);
       return;
     }
 
@@ -134,6 +136,7 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
 
       setIsSubmitting(false); // Response is received, enable the button
       setMessage('Click the Refresh Assets button to see your image');
+      setErrorMessage(null);
 
       // Use the centralized error handler
       if (await handleApiError(response, { setErrorMessage })) {
@@ -282,10 +285,12 @@ export const ImageDynamicButton: React.FC<ImageDynamicButtonProps> = ({
           <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-md shadow-sm flex justify-between items-center">
             <div className="flex items-center">
               <span className="mr-2">🔄</span>
-              <h3 className="font-medium text-blue-800 dark:text-blue-200">{message}</h3>
+              <h3 className="font-medium text-blue-800 dark:text-blue-200">
+                {message}
+              </h3>
             </div>
-            <button 
-              onClick={() => setMessage('')} 
+            <button
+              onClick={() => setMessage('')}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               aria-label="Dismiss message"
             >
