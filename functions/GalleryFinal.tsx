@@ -770,7 +770,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
         new Date() > contestEndDate ? (
           /* Contest ended display - show only winning assets */
           <div
-            className={`flex ${winningAssets.length > 1 ? 'flex-row flex-wrap justify-center' : 'justify-center'} gap-4 max-w-6xl mx-auto px-4`}
+            className={`flex ${winningAssets.length > 1 ? 'flex-row flex-wrap justify-center' : 'justify-center'} gap-5 w-full px-2 mx-auto`}
           >
             {winningAssets.map((asset, index) => (
               <div
@@ -858,7 +858,7 @@ const GalleryFinal: React.FC<GalleryFinalProps> = ({
           </div>
         ) : (
           /* Normal display during contest */
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mx-auto px-2 w-full">
             {assets.map((asset, index) => (
               <div
                 key={index}

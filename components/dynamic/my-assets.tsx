@@ -1799,7 +1799,7 @@ const MyAssets: React.FC<MyAssetsProps> = ({
             {/* Hover Overlay - Only visible on hover */}
             <div className="absolute inset-0 bg-black bg-opacity-0 opacity-0 hover:bg-opacity-70 hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-3">
               {/* Top section with prompt */}
-              <div className="overflow-auto max-h-[60%] scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-transparent text-white text-sm">
+              <div className="overflow-hidden max-h-[60%] text-white text-sm">
                 {activity.AssetType !== 'upl' && (
                   <div>
                     <p className="font-medium mb-1 flex items-center">

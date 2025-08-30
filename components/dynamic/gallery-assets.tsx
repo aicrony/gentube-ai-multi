@@ -315,172 +315,179 @@ const GalleryAssets: React.FC<MyAssetsProps> = ({ assetType }) => {
           your assets.
         </p>
       )}
-      {activities.map((activity, index) => (
-        <div key={index} className="border p-4 flex items-center">
-          <a
-            href={activity.CreatedAssetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-16 h-16 flex items-center justify-center bg-gray-200 mr-4"
-            onClick={(e) => {
-              e.preventDefault();
-              openModal(activity.CreatedAssetUrl);
-            }}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {activities.map((activity, index) => (
+          <div
+            key={index}
+            className="relative rounded-lg overflow-hidden transition-transform duration-200 hover:scale-[0.98]"
+            onClick={() => openModal(activity.CreatedAssetUrl)}
           >
-            {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
-              <FaPlay className="w-8 h-8 text-gray-500" />
-            ) : (
-              <img
-                src={
-                  activity.AssetType === 'vid'
-                    ? activity.AssetSource
-                    : activity.AssetType === 'img'
-                      ? activity.CreatedAssetUrl
-                      : activity.AssetType === 'upl'
-                        ? activity.CreatedAssetUrl
-                        : activity.AssetType === 'que'
-                          ? '/logo.png'
-                          : activity.AssetType === 'err'
-                            ? '/logo.png'
-                            : '/logo.png'
-                }
-                alt="Thumbnail"
-                className="w-16 h-16 object-cover"
-              />
-            )}
-          </a>
-          <div className="flex flex-wrap w-full max-w-full">
-            <div className="pr-2">
-              <p>
-                <strong>Type:</strong>{' '}
+            {/* Status Indicators shown on top of the image */}
+            <div className="absolute top-2 right-2 flex flex-col items-end space-y-1 z-10">
+              {/* Asset Type Badge */}
+              <div className="bg-gray-800 bg-opacity-70 text-white rounded-full px-2 py-0.5 text-xs">
                 {activity.AssetType === 'vid'
                   ? 'Video'
                   : activity.AssetType === 'img'
                     ? 'Image'
                     : activity.AssetType === 'upl'
                       ? 'Upload'
-                      : activity.AssetType === 'err'
-                        ? 'Error'
-                        : 'Unknown'}
-              </p>
-            </div>
-            {activity.AssetType !== 'upl' && (
-              <div className="flex flex-wrap w-full max-w-full">
-                <p>
-                  <strong>Prompt:</strong>
-                  {expandedPrompts[index] ||
-                  activity.Prompt.length <= promptLength
-                    ? activity.Prompt
-                    : `${activity.Prompt.substring(0, promptLength)}... `}
-                  {activity.Prompt.length > promptLength && (
-                    <button onClick={() => togglePrompt(index)}>
-                      {expandedPrompts[index] ? 'less' : 'more'}
-                    </button>
-                  )}
-                  <button
-                    onClick={() =>
-                      handleCopy(activity.Prompt, 'Prompt copied!')
-                    }
-                    className="icon-size-small ml-2"
-                    title="Copy Prompt"
-                  >
-                    <FaCopy />
-                  </button>
-                </p>
+                      : activity.AssetType === 'que'
+                        ? 'Queue'
+                        : activity.AssetType === 'err'
+                          ? 'Error'
+                          : activity.AssetType}
               </div>
-            )}
-          </div>
-          <div>
-            <div className="flex flex-col items-center space-y-2 sm:flex-row sm:items-start sm:space-y-0 sm:space-x-2 mt-2">
-              <button
-                onClick={() => openModal(activity.CreatedAssetUrl)}
-                className="icon-size"
-                title="Open"
-              >
-                <FaExternalLinkAlt />
-              </button>
-              <button
-                onClick={() =>
-                  handleCopy(
+            </div>
+
+            {/* Image Thumbnail */}
+            <div className="aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden relative">
+              {activity.AssetType === 'vid' && activity.AssetSource === 'none' ? (
+                <FaPlay className="w-12 h-12 text-gray-400" />
+              ) : (
+                <img
+                  src={
                     activity.AssetType === 'vid'
                       ? activity.AssetSource
-                      : activity.CreatedAssetUrl,
-                    'Image URL copied!'
-                  )
-                }
-                className="icon-size"
-                title="Copy Image URL"
-              >
-                <FaImage />
-              </button>
-              {activity.AssetType === 'vid' && (
-                <button
-                  onClick={() =>
-                    handleCopy(activity.CreatedAssetUrl, 'Video URL copied!')
+                      : activity.AssetType === 'img'
+                        ? activity.CreatedAssetUrl
+                        : activity.AssetType === 'upl'
+                          ? activity.CreatedAssetUrl
+                          : activity.AssetType === 'que'
+                            ? '/logo.png'
+                            : activity.AssetType === 'err'
+                              ? '/logo.png'
+                              : '/logo.png'
                   }
-                  className="icon-size"
-                  title="Copy Video URL"
-                >
-                  <FaVideo />
-                </button>
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover transition-transform duration-300"
+                />
               )}
-              <button
-                onClick={() =>
-                  handleDownload(
-                    activity.AssetType === 'vid'
-                      ? activity.CreatedAssetUrl
-                      : activity.CreatedAssetUrl,
-                    activity.AssetType,
-                    activity.Prompt
-                  )
-                }
-                className="icon-size"
-                title="Download Asset"
-              >
-                <FaDownload />
-              </button>
-              {activity.SubscriptionTier === 0 ? (
+            </div>
+
+            {/* Hover Overlay - Only visible on hover */}
+            <div className="absolute inset-0 bg-black bg-opacity-0 opacity-0 hover:bg-opacity-70 hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-3">
+              {/* Top section with prompt */}
+              <div className="overflow-hidden max-h-[60%] text-white text-sm">
+                {activity.AssetType !== 'upl' && (
+                  <div>
+                    <p className="font-medium mb-1 flex items-center">
+                      <span className="mr-1">Prompt:</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(activity.Prompt, 'Prompt copied!');
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Copy Full Prompt"
+                      >
+                        <FaCopy className="text-xs" />
+                      </button>
+                    </p>
+                    <p className="text-sm text-gray-200 break-words">
+                      {activity.Prompt.length > 100
+                        ? `${activity.Prompt.substring(0, 100)}...`
+                        : activity.Prompt}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom section with action buttons */}
+              <div className="flex flex-wrap justify-center gap-2 mt-2">
                 <button
-                  onClick={() =>
-                    handleToggleOnGallery(
-                      userId,
-                      activity.CreatedAssetUrl,
-                      setActivities
-                    )
-                  }
-                  className="icon-size"
-                  title="Add to Gallery"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openModal(activity.CreatedAssetUrl);
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Open in Full Screen"
                 >
-                  <FaPlus />
+                  <FaExternalLinkAlt className="text-xs" />
                 </button>
-              ) : activity.SubscriptionTier === 3 ? (
+
                 <button
-                  onClick={() =>
-                    handleToggleOffGallery(
-                      userId,
-                      activity.CreatedAssetUrl,
-                      setActivities
-                    )
-                  }
-                  className="icon-size"
-                  title="Remove from Gallery"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopy(
+                      activity.AssetType === 'vid'
+                        ? activity.AssetSource
+                        : activity.CreatedAssetUrl,
+                      'Asset URL copied!'
+                    );
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Copy URL"
                 >
-                  <FaMinus />
+                  <FaCopy className="text-xs" />
                 </button>
-              ) : null}
-              <button
-                onClick={() => handleDelete(activity)}
-                className="red icon-size"
-                title="Delete Asset"
-              >
-                <FaTrash />
-              </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(
+                      activity.AssetType === 'vid'
+                        ? activity.CreatedAssetUrl
+                        : activity.CreatedAssetUrl,
+                      activity.AssetType,
+                      activity.Prompt
+                    );
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Download Asset"
+                >
+                  <FaDownload className="text-xs" />
+                </button>
+
+                {activity.SubscriptionTier === 0 ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleOnGallery(
+                        userId,
+                        activity.CreatedAssetUrl,
+                        setActivities
+                      );
+                    }}
+                    className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                    title="Add to Gallery"
+                  >
+                    <FaPlus className="text-xs" />
+                  </button>
+                ) : activity.SubscriptionTier === 3 ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleOffGallery(
+                        userId,
+                        activity.CreatedAssetUrl,
+                        setActivities
+                      );
+                    }}
+                    className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 text-yellow-500 focus:outline-none transition-all shadow-md"
+                    title="Remove from Gallery"
+                  >
+                    <FaMinus className="text-xs" />
+                  </button>
+                ) : null}
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(activity);
+                  }}
+                  className="bg-gray-800 bg-opacity-80 hover:bg-opacity-100 hover:bg-red-700 rounded-full p-2 text-white focus:outline-none transition-all shadow-md"
+                  title="Delete Asset"
+                >
+                  <FaTrash className="text-xs" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
       {activities.length > 0 && hasMore && (
-        <button onClick={() => setPage((prev) => prev + 1)} className="mt-4">
+        <button onClick={() => setPage((prev) => prev + 1)} className="mt-4 px-4 py-2 rounded border flex items-center justify-center">
           Load More
         </button>
       )}

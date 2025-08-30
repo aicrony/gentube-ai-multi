@@ -109,7 +109,9 @@ export default function Home() {
         <>
           <div className="my-assets-container">
             <div className="flex justify-between items-center mb-4">
-              <h1 className="text-xl font-bold">Image Generation</h1>
+              <h1 className="text-xl font-bold">
+                Image Generation - New and improved!
+              </h1>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="imageUrl">
