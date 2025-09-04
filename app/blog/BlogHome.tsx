@@ -31,8 +31,11 @@ export default async function BlogHome() {
   const posts = await getBlogPosts();
 
   return (
-    <div className="blog-home-container mx-auto px-4 py-8 pt-16">
-      <h1 className="text-3xl font-bold mb-6">Blog</h1>
+    <div className="sm:flex sm:flex-col sm:align-center px-4 py-8 pt-16">
+      <h1 className="text-4xl font-extrabold sm:text-center sm:text-6xl pb-4 pt-8">
+        Gentube.ai Blog
+      </h1>
+      <p className="text-center pb-4">AI Tutorials, News, and Discussion</p>
       {posts.length === 0 ? (
         <p className="text-center py-10">No blog posts found.</p>
       ) : (
