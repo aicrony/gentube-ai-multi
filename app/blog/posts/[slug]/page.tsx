@@ -3,6 +3,25 @@ import fs from 'fs';
 import path from 'path';
 import { remark } from 'remark';
 import html from 'remark-html';
+import Image from 'next/image';
+
+// Hardcoded blog posts data (same as in BlogHome.tsx)
+const blogPosts = [
+  {
+    slug: '09032025-gentube-blog',
+    title: 'The Benefits of Using AI-Generated Images',
+    intro:
+      'AI-generated images are transforming the way individuals and businesses create visual content. Leveraging advanced machine learning models, these tools offer a range of advantages.',
+    image: '/blog/images/gentube-download1.jpg'
+  }
+  // Add more blog posts here if needed
+];
+
+// Function to get blog post image by slug
+function getBlogPostImage(slug: string): string | undefined {
+  const post = blogPosts.find((post) => post.slug === slug);
+  return post?.image;
+}
 
 // Check if blog post file exists and read it
 async function getBlogPost(slug: string) {
@@ -27,10 +46,14 @@ async function getBlogPost(slug: string) {
       .process(contentWithoutTitle);
     const contentHtml = processedContent.toString();
 
+    // Get image path for this post
+    const image = getBlogPostImage(slug);
+
     return {
       slug,
       title,
-      contentHtml
+      contentHtml,
+      image
     };
   } catch (error) {
     return null;
@@ -44,9 +67,19 @@ interface PageProps {
   };
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
-  const { slug } = params;
-  const post = await getBlogPost(slug);
+// This function correctly handles params for Next.js
+export async function generateMetadata(props: PageProps) {
+  // Access the slug directly from props.params to avoid destructuring
+  const post = await getBlogPost(props.params.slug);
+
+  return {
+    title: post?.title || 'Blog Post'
+  };
+}
+
+export default async function BlogPostPage(props: PageProps) {
+  // Access the slug directly from props.params to avoid destructuring
+  const post = await getBlogPost(props.params.slug);
 
   if (!post) {
     notFound();
@@ -55,6 +88,18 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <div className="blog-post-container max-w-4xl mx-auto px-4 py-8 pt-16">
       <article>
+        {post.image && (
+          <div className="mb-6">
+            <Image
+              src={post.image}
+              alt={post.title}
+              width={800}
+              height={400}
+              className="w-full h-64 object-cover rounded-lg"
+              priority
+            />
+          </div>
+        )}
         <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
         <div
           className="prose max-w-none"
