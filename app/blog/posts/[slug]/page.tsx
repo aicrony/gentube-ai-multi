@@ -5,6 +5,7 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 // Hardcoded blog posts data (same as in BlogHome.tsx)
 const blogPosts = [
@@ -103,7 +104,9 @@ export default async function BlogPostPage(props: PageProps) {
         )}
         <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
         <div className="prose max-w-none">
-          <ReactMarkdown>{post.contentHtml}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+            {post.contentHtml}
+          </ReactMarkdown>
         </div>
       </article>
     </div>
