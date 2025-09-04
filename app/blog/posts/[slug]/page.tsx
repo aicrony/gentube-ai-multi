@@ -11,13 +11,21 @@ async function getBlogPost(slug: string) {
   try {
     const fileContents = fs.readFileSync(filePath, 'utf8');
 
-    // Process markdown to HTML
-    const processedContent = await remark().use(html).process(fileContents);
-
-    const contentHtml = processedContent.toString();
-
     // Extract title from markdown (assuming first line is a # heading)
     const title = fileContents.split('\n')[0].replace('# ', '');
+
+    // Remove the title line from the markdown content
+    const contentWithoutTitle = fileContents
+      .split('\n')
+      .slice(1)
+      .join('\n')
+      .trim();
+
+    // Process markdown to HTML (without the title)
+    const processedContent = await remark()
+      .use(html)
+      .process(contentWithoutTitle);
+    const contentHtml = processedContent.toString();
 
     return {
       slug,
