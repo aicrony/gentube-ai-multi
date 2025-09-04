@@ -4,6 +4,7 @@ import path from 'path';
 import { remark } from 'remark';
 import html from 'remark-html';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
 
 // Hardcoded blog posts data (same as in BlogHome.tsx)
 const blogPosts = [
@@ -69,8 +70,8 @@ interface PageProps {
 
 // This function correctly handles params for Next.js
 export async function generateMetadata(props: PageProps) {
-  // Access the slug directly from props.params to avoid destructuring
-  const post = await getBlogPost(props.params.slug);
+  const params = await props.params;
+  const post = await getBlogPost(params.slug);
 
   return {
     title: post?.title || 'Blog Post'
@@ -78,8 +79,8 @@ export async function generateMetadata(props: PageProps) {
 }
 
 export default async function BlogPostPage(props: PageProps) {
-  // Access the slug directly from props.params to avoid destructuring
-  const post = await getBlogPost(props.params.slug);
+  const params = await props.params;
+  const post = await getBlogPost(params.slug);
 
   if (!post) {
     notFound();
@@ -101,10 +102,9 @@ export default async function BlogPostPage(props: PageProps) {
           </div>
         )}
         <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-        />
+        <div className="prose max-w-none">
+          <ReactMarkdown>{post.contentHtml}</ReactMarkdown>
+        </div>
       </article>
     </div>
   );
