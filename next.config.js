@@ -1,4 +1,13 @@
-module.exports = {
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+  options: {
+    // This is optional if you want to use remark/rehype plugins
+    remarkPlugins: [],
+    rehypePlugins: []
+  }
+});
+
+module.exports = withMDX({
   // Add caching headers for images and videos
   async headers() {
     return [
@@ -64,6 +73,9 @@ module.exports = {
       '@google-cloud/storage'
     ]
   },
+  // Configure pageExtensions to include md and mdx
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Don't resolve 'fs', 'child_process' and other node modules on the client
@@ -77,6 +89,7 @@ module.exports = {
         path: false
       };
     }
+
     return config;
   }
-};
+});

@@ -14,6 +14,7 @@ import FileInterpreter from '@/functions/FileInterpreter';
 import { UserCreditsProvider } from '@/context/UserCreditsContext';
 import GalleryAssets from '@/components/dynamic/gallery-assets';
 import { Label } from '@/components/ui/label';
+import BlogHome from './blog/BlogHome';
 
 export default function Home() {
   // Now we can safely use contexts since we have error handling at the layout level
@@ -103,6 +104,8 @@ export default function Home() {
           <GalleryAssets />
         </>
       );
+    } else if (pathname === '/blog') {
+      return <BlogHome />;
     } else {
       // Default home page (image generation)
       return (
