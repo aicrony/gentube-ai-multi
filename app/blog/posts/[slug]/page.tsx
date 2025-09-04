@@ -103,8 +103,27 @@ export default async function BlogPostPage(props: PageProps) {
           </div>
         )}
         <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
-        <div className="prose max-w-none">
-          <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+        <div className="prose max-w-none dark:prose-invert">
+          <ReactMarkdown
+            components={{
+              h1: ({ node, ...props }) => (
+                <h1
+                  className="text-3xl font-bold !text-gray-900 dark:!text-gray-100"
+                  {...props}
+                />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2
+                  className="text-2xl font-semibold !text-gray-900 dark:!text-gray-100"
+                  {...props}
+                />
+              ),
+              p: ({ node, ...props }) => (
+                <p className="mb-4 leading-relaxed" {...props} />
+              )
+            }}
+            rehypePlugins={[rehypeRaw]}
+          >
             {post.contentHtml}
           </ReactMarkdown>
         </div>

@@ -33,8 +33,44 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out'
-      }
+      },
+      colors: {
+        light: {
+          DEFAULT: '#000',
+          heading: '#1a202c',
+          body: '#4a5568'
+        },
+        dark: {
+          DEFAULT: '#fff',
+          heading: '#e2e8f0',
+          body: '#a0aec0'
+        }
+      },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            color: theme('colors.gray.800'),
+            h1: {
+              color: theme('colors.gray.900') + ' !important'
+            },
+            h2: {
+              color: theme('colors.gray.900') + ' !important'
+            }
+          }
+        },
+        dark: {
+          css: {
+            color: theme('colors.gray.200'),
+            h1: {
+              color: theme('colors.gray.100') + ' !important'
+            },
+            h2: {
+              color: theme('colors.gray.100') + ' !important'
+            }
+          }
+        }
+      })
     }
   },
-  plugins: [require('tailwindcss-animate')]
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]
 };
