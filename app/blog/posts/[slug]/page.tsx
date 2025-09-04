@@ -64,9 +64,9 @@ async function getBlogPost(slug: string) {
 
 // Define page props
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // This function correctly handles params for Next.js
