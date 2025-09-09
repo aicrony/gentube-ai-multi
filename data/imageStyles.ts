@@ -46,6 +46,7 @@ export const imageCategories: ImageCategory[] = [
       { id: 'iconset', label: 'Icon Set', promptSuffix: 'as an icon set' },
       { id: 'infographic', label: 'Infographic', promptSuffix: 'as an infographic' },
       { id: 'logo', label: 'Logo', promptSuffix: 'as a logo design' },
+      { id: 'magazinecover', label: 'Magazine Cover', promptSuffix: 'as a magazine cover' },
       { id: 'packaging', label: 'Packaging', promptSuffix: 'as packaging design' },
       { id: 'poster', label: 'Poster', promptSuffix: 'as a poster design' },
       { id: 'socialmedia', label: 'Social Media Post', promptSuffix: 'as a social media post' },
