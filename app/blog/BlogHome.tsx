@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import blogPostsData from '@/data/blogPosts.json';
 
 interface BlogPost {
   slug: string;
@@ -8,23 +9,11 @@ interface BlogPost {
   image: string;
 }
 
-// Hardcoded blog posts data
-const blogPosts: BlogPost[] = [
-  {
-    slug: '09032025-gentube-blog',
-    title: 'The Benefits of Using AI-Generated Images',
-    intro:
-      'AI-generated images are transforming the way individuals and businesses create visual content. Leveraging advanced machine learning models, these tools offer a range of advantages.',
-    image: '/blog/images/gentube-download1.jpg'
-  }
-  // Add more blog posts here if needed
-];
-
-// This function simulates getting blog posts without using fs
+// This function simulates getting blog posts from our JSON file
 async function getBlogPosts() {
   // In a real application, you might fetch this data from an API
   // or use a content management system
-  return blogPosts;
+  return blogPostsData.posts;
 }
 
 export default async function BlogHome() {
@@ -40,7 +29,7 @@ export default async function BlogHome() {
         <p className="text-center py-10">No blog posts found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
+          {posts.map((post: BlogPost) => (
             <div
               key={post.slug}
               className="blog-card border rounded-lg overflow-hidden shadow-md"

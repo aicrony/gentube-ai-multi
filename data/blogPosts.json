@@ -1,0 +1,17 @@
+{
+  "posts": [
+    {
+      "slug": "09032025-gentube-blog",
+      "title": "The Benefits of Using AI-Generated Images",
+      "intro": "AI-generated images are transforming the way individuals and businesses create visual content. Leveraging advanced machine learning models, these tools offer a range of advantages.",
+      "image": "/blog/images/gentube-download1.jpg"
+    },
+    {
+      "slug": "09122025-ai-democratizing-filmmaking",
+      "title": "How AI is Democratizing Filmmaking",
+      "intro": "Artificial intelligence is putting professional-grade video production capabilities into the hands of everyday creators, revolutionizing the filmmaking industry.",
+      "image": "/blog/images/teenager-creating-with-ai.jpg"
+    }
+  ]
+}
+

@@ -48,3 +48,16 @@ certificates
 /app/api/debugDatastore/
 /app/api/testFindAsset/
 /json/stripe-test-objects.json
+json/on-demand/stripe-test-payment__1)checkout.session.json
+json/on-demand/stripe-test-payment__2)payment_intent.created.json
+json/on-demand/stripe-test-payment__3)payment_intent.succeeded.json
+json/on-demand/stripe-test-payment__4)charge.succeeded.json
+json/on-demand/stripe-test-payment__5)checkout.session.completed.json
+json/subscription/stripe-test-subscription__1)checkout.session.json
+json/subscription/stripe-test-subscription__2)payment_intent.created.json
+json/subscription/stripe-test-subscription__3)invoice.created.json
+json/subscription/stripe-test-subscription__4)invoice.finalized.json
+json/subscription/stripe-test-subscription__5)charge.succeeded.json
+json/subscription/stripe-test-subscription__6)payment_intent.succeeded.json
+json/subscription/stripe-test-subscription__7)invoice.paid.json
+json/subscription/stripe-test-subscription__8)invoice.payment_succeeded.json

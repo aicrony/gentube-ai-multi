@@ -6,22 +6,11 @@ import html from 'remark-html';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-
-// Hardcoded blog posts data (same as in BlogHome.tsx)
-const blogPosts = [
-  {
-    slug: '09032025-gentube-blog',
-    title: 'The Benefits of Using AI-Generated Images',
-    intro:
-      'AI-generated images are transforming the way individuals and businesses create visual content. Leveraging advanced machine learning models, these tools offer a range of advantages.',
-    image: '/blog/images/gentube-download1.jpg'
-  }
-  // Add more blog posts here if needed
-];
+import blogPostsData from '@/data/blogPosts.json';
 
 // Function to get blog post image by slug
 function getBlogPostImage(slug: string): string | undefined {
-  const post = blogPosts.find((post) => post.slug === slug);
+  const post = blogPostsData.posts.find((post) => post.slug === slug);
   return post?.image;
 }
 
