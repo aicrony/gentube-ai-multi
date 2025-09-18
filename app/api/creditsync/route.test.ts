@@ -1,9 +1,7 @@
-// In app/api/creditsync/route.test.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { POST } from './route';
 import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 import { getSupabaseUserCreditsTimestamp } from '@/utils/gcloud/getSupabaseUserCreditsTimestamp';
-import { updateCreditsValidationTimestamp } from '@/utils/gcloud/updateCreditsValidationTimestamp';
 
 // Mock all dependencies
 jest.mock('@/utils/gcloud/processUserImageRequest', () => ({

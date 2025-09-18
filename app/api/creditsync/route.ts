@@ -7,16 +7,13 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     let creditsPaidLast24: any;
-    // Check if record exists
     if (!data.record) {
       return NextResponse.json({ received: false }, { status: 200 });
     }
 
-    // Extract necessary data
     const { user_id, credits_purchased } = data.record;
 
     try {
-      // Process credits update
       creditsPaidLast24 = await getSupabaseUserCreditsTimestamp(user_id);
       console.log(`creditsPaidLast24: ${creditsPaidLast24}`);
       if (!creditsPaidLast24) {
