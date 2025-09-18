@@ -2,10 +2,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { POST } from './route';
 import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
+import { getSupabaseUserCreditsTimestamp } from '@/utils/gcloud/getSupabaseUserCreditsTimestamp';
+import { updateCreditsValidationTimestamp } from '@/utils/gcloud/updateCreditsValidationTimestamp';
 
-// Mock dependencies
+// Mock all dependencies
 jest.mock('@/utils/gcloud/processUserImageRequest', () => ({
   aggregateUserCredits: jest.fn()
+}));
+
+jest.mock('@/utils/gcloud/getSupabaseUserCreditsTimestamp', () => ({
+  getSupabaseUserCreditsTimestamp: jest.fn()
+}));
+
+jest.mock('@/utils/gcloud/updateCreditsValidationTimestamp', () => ({
+  updateCreditsValidationTimestamp: jest.fn()
 }));
 
 jest.mock('next/server', () => ({
@@ -25,6 +35,11 @@ describe('creditsync API route', () => {
   });
 
   test('should handle aggregateUserCredits failures', async () => {
+    // Setup mock timestamp for successful credit check
+    (getSupabaseUserCreditsTimestamp as jest.Mock).mockResolvedValueOnce(
+      '2023-01-01T00:00:00Z'
+    );
+
     // Setup mock to throw an error
     (aggregateUserCredits as jest.Mock).mockRejectedValueOnce(
       new Error('Test error')
