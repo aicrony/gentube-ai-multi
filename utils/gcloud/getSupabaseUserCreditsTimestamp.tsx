@@ -6,14 +6,15 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Checks if the user has purchased credits within the last 24 hours
+ * Gets the timestamp of user's recent credit purchase within the last 24 hours
+ * @returns The created_at timestamp if exists, or null
  */
 export async function getSupabaseUserCreditsTimestamp(
   userId: string | string[] | undefined
-): Promise<boolean> {
+): Promise<string | null> {
   if (!userId || userId === 'none' || Array.isArray(userId)) {
     console.log('Invalid userId for Supabase credits check');
-    return false;
+    return null;
   }
 
   try {
@@ -27,26 +28,25 @@ export async function getSupabaseUserCreditsTimestamp(
       .select('user_id, created_at')
       .eq('user_id', userId)
       .gte('created_at', twentyFourHoursAgo.toISOString())
+      .is('validated', null)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error querying Supabase credits:', error);
-      return false;
+      return null;
     }
 
-    const hasRecentCredits = data && data.length > 0;
-
-    if (hasRecentCredits) {
+    if (data && data.length > 0) {
       console.log('Recent credit purchase found:');
       console.log('user_id:', data[0].user_id);
       console.log('created_at:', data[0].created_at);
+      return data[0].created_at;
     } else {
       console.log('No recent credit purchases found for user_id:', userId);
+      return null;
     }
-
-    return hasRecentCredits;
   } catch (err) {
     console.error('Exception in getSupabaseUserCreditsTimestamp:', err);
-    return false;
+    return null;
   }
 }

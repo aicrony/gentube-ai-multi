@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { aggregateUserCredits } from '@/utils/gcloud/processUserImageRequest';
 import { getSupabaseUserCreditsTimestamp } from '@/utils/gcloud/getSupabaseUserCreditsTimestamp';
+import { updateCreditsValidationTimestamp } from '@/utils/gcloud/updateCreditsValidationTimestamp';
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    let creditsPaidLast24: boolean;
+    let creditsPaidLast24: any;
     // Check if record exists
     if (!data.record) {
       return NextResponse.json({ received: false }, { status: 200 });
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
         );
       }
       await aggregateUserCredits(user_id, '-', credits_purchased);
+      await updateCreditsValidationTimestamp(user_id, creditsPaidLast24);
       return NextResponse.json({ received: true }, { status: 200 });
     } catch (error) {
       console.error('Error updating user credits:', error);
